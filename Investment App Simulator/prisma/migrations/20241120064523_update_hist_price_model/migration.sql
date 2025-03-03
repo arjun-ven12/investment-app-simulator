@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "HistPrice" ALTER COLUMN "open_price" DROP NOT NULL,
+ALTER COLUMN "high_price" DROP NOT NULL,
+ALTER COLUMN "low_price" DROP NOT NULL,
+ALTER COLUMN "volume" DROP NOT NULL;

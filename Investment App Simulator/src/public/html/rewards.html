@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/rewards.css">
+    <title>Referral</title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="#" onclick="window.location.reload();">Fintech</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="referral.html">Referral</a></li>
+            <li><a href="investment.html">Investment</a></li>
+            <li><a href="rewards.html">Rewards</a></li>
+            <li><a href="chatbot.html">Chatbot</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="goals.html">Financial Goals</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li class="nav-item">
+                <a id="logoutButton" class="nav-link" href="#">Logout</a>
+            </li>
+            <div class="navbar-toggle" id="navbar-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </ul>
+    </nav>
+
+    <h1>Gift Card Rewards</h1>
+
+    <!-- This will be populated dynamically by rewards.js -->
+    <div class="rewards-container"></div>
+
+    <script src="../js/reward.js"></script>
+</body>
+
+</html>

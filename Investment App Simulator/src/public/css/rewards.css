@@ -1,0 +1,362 @@
+/* Body and Container */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #000000; /* Dark background */
+    color: #FFFFFF; /* Light text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Navbar styling */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #141212;
+    padding: 10px 20px;
+    width: 100%;
+    color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-logo a {
+    margin-left: 1em;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.5em;
+}
+
+.navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.navbar-links li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: lighter;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.navbar-links li a:hover {
+    background-color: #00d9ff;
+}
+
+.navbar-toggle {
+    display: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #fff;
+}
+
+/* Responsive Navbar */
+@media (max-width: 768px) {
+    .navbar-links {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background-color: #333333;
+        flex-direction: column;
+        align-items: center;
+        display: none;
+    }
+
+    .navbar-links.active {
+        display: flex;
+    }
+
+    .navbar-toggle {
+        display: block;
+    }
+}
+
+
+/* Gift Card Rewards */
+h1 {
+    text-align: center;
+    color: gold;
+    margin-bottom: 30px;
+}
+
+.rewards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.gift-card {
+    background-color: #222;
+    border-radius: 12px;
+    padding: 20px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gift-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(255, 255, 255, 0.2);
+}
+
+.gift-card img {
+    width: 200px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.gift-card h2 {
+    color: gold;
+    margin-bottom: 10px;
+}
+
+.gift-card p {
+    margin-bottom: 15px;
+}
+
+.redeem-btn {
+    background-color: gold;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.redeem-btn:hover {
+    background-color: #ffd700;
+}
+
+.reward-history {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.reward-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    color: white;
+}
+
+.reward-table th, .reward-table td {
+    border-bottom: 1px solid #444;
+    padding: 10px;
+    text-align: left;
+}
+
+.reward-table th {
+    background: #333;
+}
+
+.resend-btn, .toggle-code-btn {
+    background-color: blue;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.resend-btn:hover, .toggle-code-btn:hover {
+    opacity: 0.8;
+}
+
+.gift-code {
+    font-weight: bold;
+    color: black;
+    background: #dcdcdc;
+    padding: 5px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.history-btn {
+    background-color: blue;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.toggle-code-btn {
+    background-color: blue;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.toggle-code-btn:hover {
+    background-color: #ffffff;
+    color: blue;
+}
+
+/* When active (Hide Code) */
+.toggle-code-btn.active {
+    background-color: rgb(0, 0, 0);
+    color: white;
+}
+
+.toggle-code-btn.active:hover {
+    background-color: #ffffff;
+    color: black;
+}
+
+.redeem-store-btn {
+    background-color: black;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.redeem-store-btn:hover {
+    background-color: #ffffff;
+    color: black;
+}
+
+.spin-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#spin-wheel {
+    font-size: 50px;
+    transition: transform 2s ease-out;
+}
+
+.spinning {
+    transform: rotate(1440deg);
+}
+
+#spin-button {
+    background-color: gold;
+    color: black;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#spin-button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+#spin-result {
+    font-size: 18px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Button for Viewing Grand Prize Winners */
+.winners-btn {
+    background-color: rgb(255, 0, 0);
+    color: rgb(255, 255, 255);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Grand Prize Winners Table Styling */
+.grand-prize-winners {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Styling for Grand Prize Winners Table */
+.winner-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    color: white;
+}
+
+.winner-table th, .winner-table td {
+    border-bottom: 1px solid #444;
+    padding: 10px;
+    text-align: left;
+}
+
+.winner-table th {
+    background: #333;
+}
+
+.table-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Responsive Layout for Reward History & Grand Prize Winners Tables */
+@media (min-width: 768px) {
+    .reward-history, .grand-prize-winners {
+        display: inline-block;
+        width: 48%;
+        vertical-align: top;
+    }
+
+}
+
+/* Button container to align both buttons */
+.button-container {
+    display: flex;
+    justify-content: center; 
+    gap: 15px; 
+    margin-top: 20px;
+}
+
+/* Adjust the buttons */
+.history-btn, .winners-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+}
+

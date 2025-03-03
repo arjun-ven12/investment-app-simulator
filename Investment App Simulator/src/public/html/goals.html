@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Financial Goals</title>
+    <link rel="stylesheet" href="../css/goals.css">
+    <script defer src="../js/goals.js"></script>
+    <style>
+      .navbar {
+        background-color: #121212;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+      }
+      .navbar-logo {
+        font-size: 22px;
+        font-weight: bold;
+        color: #ffffff;
+      }
+      .navbar-links {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+        margin: 0;
+        padding: 0;
+      }
+      .navbar-links a {
+        color: #b3b3b3;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 15px;
+        transition: color 0.3s ease;
+      }
+      .navbar-links a:hover {
+        color: #ffffff;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      #goal-form {
+        width: 50%;
+        max-width: 500px;
+      }
+      .portfolio-section {
+        width: 80%;
+        max-width: 1000px;
+        text-align: center;
+      }
+      .goal-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-logo">Fintech</div>
+      <ul class="navbar-links">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="referral.html">Referral</a></li>
+        <li><a href="investment.html">Investment</a></li>
+        <li><a href="rewards.html">Rewards</a></li>
+        <li><a href="chatbot.html">Chatbot</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="goals.html">Financial Goals</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li class="nav-item">
+          <a id="logoutButton" class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="container">
+      <h1>Financial Goals</h1>
+      <form id="goal-form">
+        <input type="text" id="goal-title" placeholder="Goal Title" required />
+        <input
+          type="number"
+          id="goal-amount"
+          placeholder="Target Amount"
+          required
+        />
+        <input type="date" id="goal-deadline" required />
+        <label for="goal-description">Description:</label>
+        <textarea id="goal-description" rows="3" required></textarea>
+        <button type="submit">Add Goal</button>
+      </form>
+      
+      <!-- Financial Goals Section -->
+      <div class="portfolio-section">
+        <h2>Current Financial Goals</h2>
+        <div id="goals-list" class="goal-container"></div>
+      </div>
+    </div>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const goalsList = document.getElementById("goals-list");
+        const userId = localStorage.getItem("userId");
+        if (!userId) return;
+
+        try {
+          const response = await fetch(`/api/goals?userId=${userId}`);
+          if (response.ok) {
+            const goals = await response.json();
+            goalsList.innerHTML = "";
+            goals.forEach((goal, index) => {
+              const div = document.createElement("div");
+              div.className = "goal-box";
+              div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
+              div.innerHTML = `
+                <p><strong>${goal.title}</strong></p>
+                <p>Amount: $${goal.amount}</p>
+                <p>Description: ${goal.description || "No description"}</p>
+                <p>Deadline: ${new Date(goal.deadline).toLocaleDateString()}</p>
+                <button class="goal-edit" onclick="window.location.href='goalEdit.html?id=${goal.id}'">Edit</button>
+                <button class="goal-delete" onclick="deleteGoal(${goal.id})">Delete</button>
+              `;
+              goalsList.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching goals:", error);
+        }
+      });
+
+      function deleteGoal(id) {
+        fetch(`/api/goals/${id}`, { method: "DELETE" })
+          .then(() => location.reload())
+          .catch(error => console.error("Error deleting goal:", error));
+      }
+    </script>
+    
+    <script src="../js/home.js"></script>
+  </body>
+</html>

@@ -1,0 +1,153 @@
+<!-- Updated home.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Homepage</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/investment.css" />
+    <link rel="stylesheet" href="../css/goals.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-logo">
+        <a href="#" onclick="window.location.reload();">Fintech</a>
+      </div>
+      <ul class="navbar-links">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="referral.html">Referral</a></li>
+        <li><a href="investment.html">Investment</a></li>
+        <li><a href="rewards.html">Rewards</a></li>
+        <li><a href="chatbot.html">Chatbot</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="goals.html">Financial Goals</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a id="logoutButton" class="nav-link" href="#">Logout</a></li>
+      </ul>
+      <div class="navbar-toggle" id="navbar-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </nav>
+    
+    <div class="content">
+      <h1 class="text-center">Welcome, <span id="username">User</span>!</h1>
+      
+      <!-- Wallet Section -->
+      <div class="portfolio-section">
+        <div class="trading-card2">
+          <h3>Your Wallet Balance</h3>
+          <p id="wallet" data-value="0" style="font-size: 2rem; font-weight: bold;">$0</p>
+          <button id="walletToggle" class="submit-button">
+            <i id="walletIcon" class="fas fa-eye-slash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Links Section -->
+      <div class="portfolio-section">
+        <div class="stock-grid">
+          <div class="stock-column">
+            <h4>Dashboard</h4>
+            <p>View the Current Financial News Article.</p>
+            <a href="dashboard.html" class="submit-button">Go to Dashboard</a>
+          </div>
+          <div class="stock-column">
+            <h4>Blog</h4>
+            <p>Join Like-Minded Individuals in a Community</p>
+            <a href="blog.html" class="submit-button">Go to Blog</a>
+          </div>
+          <div class="stock-column">
+            <h4>Referral</h4>
+            <p>Invite friends and earn rewards.</p>
+            <a href="referral.html" class="submit-button">Refer Now</a>
+          </div>
+          <div class="stock-column">
+            <h4>Investment</h4>
+            <p>Track your investments and portfolio performance.</p>
+            <a href="investment.html" class="submit-button">Invest Now</a>
+          </div>
+          <div class="stock-column">
+            <h4>Rewards</h4>
+            <p>Redeem Gift Card Rewards</p>
+            <a href="rewards.html" class="submit-button">Get Your Reward</a>
+          </div>
+          <div class="stock-column">
+            <h4>Chatbot</h4>
+            <p>Questions? Ask Chatbot Anything.</p>
+            <a href="chatbot.html" class="submit-button">Ask Chatbot</a>
+          </div>
+          <div class="stock-column">
+            <h4>Quiz</h4>
+            <p>Test your Financial Literacy Now.</p>
+            <a href="quiz.html" class="submit-button">Test Now</a>
+          </div>
+          <div class="stock-column">
+            <h4>Financial Goals</h4>
+            <p>Set Financial Goals to Achieve Success!</p>
+            <a href="goals.html" class="submit-button">Set Goals Now</a>
+          </div>
+          <div class="stock-column">
+            <h4>Profile</h4>
+            <p>Customize Your Personal Portfolio Now!</p>
+            <a href="profile.html" class="submit-button">Go to Profile</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Financial Goals Section -->
+      <div class="portfolio-section">
+        <h2>Current Financial Goals</h2>
+        <div id="goals-list" class="goal-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;"></div>
+      </div>
+    </div>
+    
+    <script src="../js/home.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const goalsList = document.getElementById("goals-list");
+        const userId = localStorage.getItem("userId");
+        if (!userId) return;
+
+        try {
+          const response = await fetch(`/api/goals?userId=${userId}`);
+          if (response.ok) {
+            const goals = await response.json();
+            goalsList.innerHTML = "";
+            goals.forEach((goal, index) => {
+              const div = document.createElement("div");
+              div.className = "goal-box";
+              div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
+              div.innerHTML = `
+                <p><strong>${goal.title}</strong></p>
+                <p>Amount: $${goal.amount}</p>
+                <p>Description: ${goal.description || "No description"}</p>
+                <p>Deadline: ${new Date(goal.deadline).toLocaleDateString()}</p>
+                <button class="goal-edit" onclick="window.location.href='goalEdit.html?id=${goal.id}'">Edit</button>
+                <button class="goal-delete" onclick="deleteGoal(${goal.id})">Delete</button>
+              `;
+              goalsList.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching goals:", error);
+        }
+      });
+
+      function deleteGoal(id) {
+        fetch(`/api/goals/${id}`, { method: "DELETE" })
+          .then(() => location.reload())
+          .catch(error => console.error("Error deleting goal:", error));
+      }
+    </script>
+  </body>
+</html>

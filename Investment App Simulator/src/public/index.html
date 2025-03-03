@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script>
+    </script>
+
+    <title>Project Management</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* General Body Styling */
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f4f7fc;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Navbar Styling */
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #333;
+        padding: 10px 20px;
+        color: #fff;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-logo a {
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 1.5em;
+      }
+
+      .navbar-links {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+      }
+
+      .navbar-links li a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: lighter;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+      }
+
+      .navbar-links li a:hover {
+        background-color: #111;
+      }
+
+      .navbar-toggle {
+        display: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #fff;
+      }
+
+      /* Responsive Navbar */
+      @media (max-width: 768px) {
+        .navbar-links {
+          position: absolute;
+          top: 60px;
+          left: 0;
+          width: 100%;
+          background-color: #333;
+          flex-direction: column;
+          align-items: center;
+          display: none;
+        }
+
+        .navbar-links.active {
+          display: flex;
+        }
+
+        .navbar-toggle {
+          display: block;
+        }
+      }
+
+      /* Table Styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-logo">
+        <a href="#" onclick="window.location.reload();">Fintech</a>
+      </div>
+      <ul class="navbar-links">
+        <li><a href="./index.html">Product Management</a></li>
+        <li><a href="./html/login.html">Login</a></li>
+        <li><a href="./html/register.html">Register!</a></li>
+      </ul>
+      <div class="navbar-toggle" id="navbar-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </nav>
+
+    <h1>Project Management</h1>
+
+    <!-- Form to add new task -->
+    <form id="taskForm">
+      <p>
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" name="taskName" required />
+      </p>
+      <p>
+        <label for="taskStatus">Status:</label>
+        <select id="taskStatus" name="taskStatus" required></select>
+      </p>
+      <p>
+        <label for="assignees">Assign To:</label>
+        <select id="assignees" name="assignees" multiple required></select>
+      </p>
+      <button type="submit">Add Task</button>
+    </form>
+
+    <h2>All Tasks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Assignees</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tasksTableBody">
+        <!-- Rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+
+    <!-- Template for task row -->
+    <template id="taskRowTemplate">
+      <tr>
+        <td class="task-id"></td>
+        <td class="task-name"></td>
+        <td class="task-status"></td>
+        <td>
+          <ul class="task-assignees"></ul>
+        </td>
+        <td>
+          <button class="delete-button">Delete</button>
+        </td>
+      </tr>
+    </template>
+
+    <template id="assigneeLiTemplate">
+      <li>
+        <span class="assigneeName"></span>
+        <button class="unassignButton">❌</button>
+      </li>
+    </template>
+
+    <script>
+      // Toggle mobile menu
+      document.getElementById("navbar-toggle").onclick = function () {
+        document.querySelector(".navbar-links").classList.toggle("active");
+      };
+    </script>
+
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

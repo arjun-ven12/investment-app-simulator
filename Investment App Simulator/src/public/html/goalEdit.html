@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Financial Goal</title>
+    <link rel="stylesheet" href="../css/goals.css">
+
+
+
+     <!-- Navbar -->
+    <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <a href="#" onclick="window.location.reload();">Fintech</a>
+    </div>
+    <ul class="navbar-links">
+      <li><a href="../html/home.html">Home</a></li>
+      <li><a href="../html/dashboard.html">Dashboard</a></li>
+      <li><a href="../html/referral.html">Referral</a></li>
+      <li><a href="../html/investment.html">Investment</a></li>
+      <li><a href="../html/rewards.html">Rewards</a></li>
+      <li><a href="../html/chatbot.html">Chatbot</a></li>
+      <li><a href="quiz.html">Quiz</a></li>
+      <li><a href="../html/goals.html">Financial Goals</a></li>
+      <li><a href="../html/profile.html">Profile</a></li>
+      <li class="nav-item">
+        <a id="logoutButton" class="nav-link" href="#">Logout</a>
+      </li>
+    </ul>
+    <div class="navbar-toggle" id="navbar-toggle">
+      <i class="fas fa-bars"></i>
+    </div>
+  </nav>
+
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Financial Goal</h1>
+        <form id="goal-form">
+            <label for="goal-title">Title:</label>
+            <input type="text" id="goal-title" required>
+        
+            <label for="goal-amount">Amount:</label>
+            <input type="number" id="goal-amount" required>
+        
+            <label for="goal-description">Description:</label>
+            <textarea id="goal-description"></textarea>
+        
+            <label for="goal-deadline">Deadline:</label>
+            <input type="date" id="goal-deadline">
+        
+            <button type="submit">Update Goal</button>
+        </form>
+        
+        <div id="goals-list"></div> <!-- ✅ Ensure this exists -->
+    </div>
+</body>
+<script defer src="../js/goalEdit.js"></script><!-- ✅ Ensure this is loaded at the bottom -->
+</html>

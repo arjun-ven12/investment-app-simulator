@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Fintech Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="../index.html">Fintech Chatbot</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="referral.html">Referral</a></li>
+            <li><a href="investment.html">Investment</a></li>
+            <li><a href="rewards.html">Rewards</a></li>
+            <li><a href="chatbot.html">Chatbot</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="goals.html">Financial Goals</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li class="nav-item">
+                <a id="logoutButton" class="nav-link" href="#">Logout</a>
+            </li>
+        </ul>
+        <div class="navbar-toggle" id="navbar-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="profile-container">
+        <h1>User Profile</h1>
+
+        <!-- Update Phone Number -->
+        <section class="profile-section">
+            <h2>Update Phone Number</h2>
+            <form id="phone-form" method="POST" action="/profile/update-phone">
+                <label for="phone">New Phone Number:</label>
+                <input type="tel" id="phone" name="phoneNumber" required>
+                <label for="password">Confirm Password:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Update Phone Number</button>
+            </form>
+        </section>
+
+        <!-- Delete Account -->
+        <section class="profile-section">
+            <h2>Delete Account</h2>
+            <p>Warning: This action cannot be undone.</p>
+            <form id="delete-account-form" method="POST" action="/profile/delete-account">
+                <label for="delete-password">Confirm Password:</label>
+                <input type="password" id="delete-password" name="password" required>
+                <button type="submit" id="delete-account" class="danger-button">Delete Account</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="../js/profile.js"></script>
+    <script src="../js/home.js"></script>
+</body>
+
+</html>

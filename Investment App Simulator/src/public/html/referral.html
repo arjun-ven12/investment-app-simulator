@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/referral.css">
+    <title>Referral</title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="#" onclick="window.location.reload();">Fintech</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="referral.html">Referral</a></li>
+            <li><a href="investment.html">Investment</a></li>
+            <li><a href="rewards.html">Rewards</a></li>
+            <li><a href="chatbot.html">Chatbot</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="goals.html">Financial Goals</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li class="nav-item">
+                <a id="logoutButton" class="nav-link" href="#">Logout</a>
+            </li>
+            <div class="navbar-toggle" id="navbar-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <h1>Refer Friends & Earn Credit</h1>
+
+        <!-- Credit Box -->
+        <div class="credit-box">
+            <h2>$100 Credit</h2>
+            <p>Introduce a friend to Fintech and you'll be credited $100 in your account.</p>
+            <p>Every extra referral earns you an extra $100 on top of the previous amount.</p>
+        </div>
+
+        <!-- Referral Link Sharing -->
+        <div class="referral-link">
+            <h3>Share my referral link with friends</h3>
+            <div class="link-container">
+                <input type="text" value="" id="referralLink" readonly>
+                <button onclick="copyReferralLink()" style="color: black;">Copy Link</button>
+            </div>
+            <div class="social-icons">
+                <button onclick="shareOnFacebook()"><i class="fab fa-facebook"></i> Facebook</button>
+                <button onclick="shareOnTwitter()"><i class="fab fa-twitter"></i> Twitter</button>
+                <button onclick="shareOnLinkedIn()"><i class="fab fa-linkedin"></i> LinkedIn</button>
+                <button onclick="shareOnEmail()"><i class="fas fa-envelope"></i> Gmail</button>
+                <button onclick="shareOnWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button onclick="shareOnTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
+            </div>
+        </div>
+
+        <!-- Received Referral Link Section -->
+        <div class="received-referral-link">
+            <h3>Key in the referral link you got from your friend here.</h3>
+            <div class="link-container">
+                <input type="text" id="receivedReferralLink">
+                <button id="enterReferralLinkButton" style="color: black;">Enter</button>
+            </div>
+        </div>
+
+        <!-- Referral Stats -->
+        <div class="stats-container">
+            <div class="stat-box">
+                <h4>21</h4>
+                <p>Referral Signups</p>
+            </div>
+            <div class="stat-box">
+                <h4>12</h4>
+                <p>Successful Referrals</p>
+            </div>
+            <div class="stat-box">
+                <h4>5</h4>
+                <p>Rewards Exchanged</p>
+            </div>
+            <div class="stat-box">
+                <h4>$120</h4>
+                <p>Credits Earned</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/referral.js"></script>
+    <script src="../js/home.js"></script>
+    <script>
+        // Toggle mobile menu
+        document.getElementById('navbar-toggle').onclick = function () {
+            document.querySelector('.navbar-links').classList.toggle('active');
+        };
+
+        // Function to copy referral link
+        function copyReferralLink() {
+            const referralLink = document.getElementById("referralLink");
+            referralLink.select();
+            referralLink.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand("copy");
+            alert("Referral link copied to clipboard!");
+        }
+
+    </script>
+</body>
+
+</html>

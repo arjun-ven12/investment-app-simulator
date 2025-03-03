@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/quiz.css">
+    <title>Fintech Educational Quiz</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="#" onclick="window.location.reload();">Fintech</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="referral.html">Referral</a></li>
+            <li><a href="investment.html">Investment</a></li>
+            <li><a href="rewards.html">Rewards</a></li>
+            <li><a href="chatbot.html">Chatbot</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="goals.html">Financial Goals</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li class="nav-item">
+                <a id="logoutButton" class="nav-link" href="#">Logout</a>
+            </li>
+        </ul>
+        <div class="navbar-toggle" id="navbar-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <h1>Fintech Educational Quiz</h1>
+            <div id="quiz">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="navigation">
+                    <button id="prev" style="display: none;">Previous</button>
+                    <button id="next">Next</button>
+                    <button id="submit" style="display: none;">Submit</button>
+                </div>
+                <button id="reset-quiz" style="display: none; margin-top: 20px;">Restart Quiz</button>
+            </div>
+            <div id="result" style="display: none;"></div>
+        </div>
+    </div>  
+
+    <script src="../js/quiz.js"></script>
+</body>
+</html>

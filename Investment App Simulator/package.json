@@ -1,0 +1,47 @@
+{
+    "dependencies": {
+        "@google/generative-ai": "^0.21.0",
+        "@prisma/adapter-pg": "^5.20.0",
+        "@prisma/client": "^6.3.1",
+        "axios": "^1.7.9",
+        "bcrypt": "^5.1.1",
+        "canvas": "^2.11.2",
+        "chart.js": "^4.4.6",
+        "colors": "^1.4.0",
+        "cur": "^1.0.3",
+        "dotenv": "^16.4.7",
+        "dotenv-cli": "^7.4.2",
+        "express": "^4.21.1",
+        "google-auth-library": "^9.15.0",
+        "http-errors": "^2.0.0",
+        "json2csv": "^6.0.0-alpha.2",
+        "jsonwebtoken": "^9.0.2",
+        "mysql2": "^3.11.4",
+        "nodemon": "^3.1.7",
+        "openai": "^4.73.1",
+        "pg": "^8.13.0",
+        "readline-sync": "^1.4.10"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.11.1",
+        "@playwright/test": "^1.47.2",
+        "@types/node": "^22.7.2",
+        "eslint": "^9.11.1",
+        "globals": "^15.9.0",
+        "prisma": "^6.3.1"
+    },
+    "prisma": {
+        "seed": "node prisma/seed.js"
+    },
+    "scripts": {
+        "postinstall": "npx prisma generate",
+        "migration:dev": "dotenv -e .env.development -- npx prisma migrate dev",
+        "migration:reset": "dotenv -e .env.development -- npx prisma migrate reset",
+        "start": "dotenv -e .env.development -- node ./src/server.js",
+        "chatbot": "node ./src/public/js/chatbot.js",
+        "test": "playwright test --config=configs/playwright.config.js",
+        "lint": "eslint -c configs/eslint.config.mjs ./src/*",
+        "test-trace": "npm test -- --reporter=html --trace on",
+        "dev": "nodemon index.js"
+    }
+}

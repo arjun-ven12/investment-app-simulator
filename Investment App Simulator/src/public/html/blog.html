@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Blog</title>
+  <link rel="stylesheet" href="../css/blog.css">
+  <script defer src="../js/blogs.js"></script>
+</head>
+<body>
+   <!-- Navbar -->
+   <nav class="navbar">
+    <div class="navbar-logo">
+        <a href="../index.html">Fintech Blog</a>
+    </div>
+    <ul class="navbar-links">
+
+        <li><a href="home.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="referral.html">Referral</a></li>
+        <li><a href="investment.html">Investment</a></li>
+        <li><a href="rewards.html">Rewards</a></li>
+        <li><a href="chatbot.html">Chatbot</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="goals.html">Financial Goals</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li class="nav-item">
+            <a id="logoutButton" class="nav-link" href="#">Logout</a>
+        </li>  
+    </ul>
+    <div class="navbar-toggle" id="navbar-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+</nav>
+
+  <div class="blog-wrapper">
+    <div class="new-post">
+      <h2>Create New Post</h2>
+      <form id="new-post-form">
+        <input type="text" id="post-title" placeholder="Post Title" required>
+        <textarea id="post-content" placeholder="Write your post here..." required></textarea>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+
+    <div id="posts-container"></div>
+  </div>
+</body>
+</html>
