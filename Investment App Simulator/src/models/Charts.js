@@ -791,7 +791,7 @@ exports.getMarketStatus = function getMarketStatus(exchange) {
 //////////////////////////////////////////////////
 
 
-  
+
 
 exports.getStockRecommendations = function getStockRecommendations(symbol) {
     if (!symbol) {
