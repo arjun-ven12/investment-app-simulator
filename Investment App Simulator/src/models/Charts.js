@@ -3,7 +3,7 @@ const prisma = require('./prismaClient');
 
 const fetch = require("node-fetch");
 const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
-
+ 
 
 const getISOWeekYear = (date) => {
     const d = new Date(date);
@@ -759,17 +759,7 @@ exports.getMarketStatus = function getMarketStatus(exchange) {
       return response.json();
     })
     .then((data) => {
-      // Map the response data to a more explicit object if needed.
-      // For example, the API returns data like:
-      // {
-      //   "exchange": "SGX",
-      //   "holiday": null,
-      //   "isOpen": false,
-      //   "session": "pre-market",
-      //   "timezone": "Singapore",
-      //   "t": 1697018041
-      // }
-      // You can transform this data if desired.
+
       return {
         exchange: data.exchange,      // e.g., "SGX"
         holiday: data.holiday,          // e.g., null (or a holiday name)
