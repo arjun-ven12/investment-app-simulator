@@ -1,17 +1,30 @@
 const dashboardModel = require('../models/Dashboard');
 
-module.exports.getNews = async function (req, res) {
-    return dashboardModel
-        .getAllNews()
-        .then(function (news) {
-            return res.status(200).json(news);
-        })
-        .catch(function (error) {
-            console.error(error);
-            return res.status(500).json({ error: error.message });
-        });
-}
+// module.exports.getNews = async function (req, res) {
+//     return dashboardModel
+//         .getAllNews()
+//         .then(function (news) {
+//             return res.status(200).json(news);
+//         })
+//         .catch(function (error) {
+//             console.error(error);
+//             return res.status(500).json({ error: error.message });
+//         });
+// }
 
+
+exports.getNews = function (req, res) {
+    // Get the category from the query, default to 'general' if not provided
+    const category = req.query.category || "general";
+  
+    dashboardModel
+      .getAllNews(category)
+      .then((news) => res.status(200).json(news))
+      .catch((error) => {
+        console.error("Error in getMarketNewsController:", error);
+        return res.status(500).json({ message: "Error fetching market news", error: error.message });
+      });
+  };
 // module.exports.updateNewsCategory = function (req, res) {
 //     const { id } = req.params;
 //     const { category } = req.body;

@@ -1,10 +1,43 @@
 const prisma = require('./prismaClient');
 
+const fetch = require("node-fetch");
+const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
 
 // Fetch all news articles
-module.exports.getAllNews = async function getAllNews() {
-    return prisma.news.findMany();
-}
+// module.exports.getAllNews = async function getAllNews() {
+//     return prisma.news.findMany();
+// }
+
+
+exports.getAllNews = function getAllNews(category = "general") {
+    if (!category) {
+      throw new Error("Category parameter is required");
+    }
+  
+    const url = `https://finnhub.io/api/v1/news?category=general&token=${FINNHUB_API_KEY}`;
+  
+    return fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Finnhub API error: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then((newsData) => {
+        return newsData.map((news) => ({
+          news_id: news.id, // Finnhub news ID
+          title: news.headline,
+          caption: news.summary.substring(0, 255), // Limit to 255 characters
+          content: news.summary, // Assuming full content isn't available
+          category: news.category || category, // Use API category or fallback to requested
+          tags: news.related ? news.related.split(",") : [] // Convert related to an array
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching market news:", error);
+        throw error;
+      });
+  };
 
 
 // Update the category of a specific news item
