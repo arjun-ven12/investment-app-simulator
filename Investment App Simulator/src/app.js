@@ -26,6 +26,7 @@ const userRouter = require("./routers/user.router");
 const rewardRouter = require("./routers/reward");
 const goalsRouter = require("./routers/Goals"); 
 const quizRouter = require("./routers/Quiz"); 
+const chatbotRouter = require("./routers/chatbot"); 
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use("/api", userRouter);
 app.use("/rewards", rewardRouter);
 app.use("/api/quiz", quizRouter);
 app.use("/api/goals", goalsRouter); 
+app.use("/api/chatbot", chatbotRouter); 
 
 // Handle unknown resources
 app.use((req, res, next) => {
