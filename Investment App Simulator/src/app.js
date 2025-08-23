@@ -18,11 +18,9 @@ const limitOrderRouter = require('./routers/limitOrder');
 const loginRegisterRouter = require('./routers/Login.register.router');
 const referralRouter = require('./routers/referral');
 const dashboardRouter = require('./routers/Dashboard');
-const blogRouter = require('./routers/Blog');
 const profileRouter = require('./routers/Profile');
 const userRoutes = require('./routers/user.router');
 const userRouter = require("./routers/user.router");
-const rewardRouter = require("./routers/reward");
 const goalsRouter = require("./routers/Goals"); 
 const quizRouter = require("./routers/Quiz"); 
 const chatbotRouter = require("./routers/chatbot"); 
@@ -67,13 +65,12 @@ app.use('/tradeOrder', tradeOrderRouter);
 
 app.use('/stats', referralRouter);
 app.use('/dashboard', dashboardRouter);
-app.use('/api/blog', blogRouter)
+
 // app.use('/api/chat', chatHandler);
 app.use('/profile', profileRouter);
 app.use('/api/user', userRoutes);
 // Register the router
 app.use("/api", userRouter);
-app.use("/rewards", rewardRouter);
 app.use("/api/quiz", quizRouter);
 app.use("/api/goals", goalsRouter); 
 app.use("/api/chatbot", chatbotRouter); 
