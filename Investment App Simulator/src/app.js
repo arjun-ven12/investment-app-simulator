@@ -23,6 +23,7 @@ const chatHandler = require('./routers/chat');
 const profileRouter = require('./routers/Profile');
 const userRoutes = require('./routers/user.router');
 const userRouter = require("./routers/user.router");
+const settingRouter = require("./routers/setting");
 
 const goalsRouter = require("./routers/Goals"); 
 
@@ -61,6 +62,7 @@ app.use('/charts', chartsRouter);
 app.use('/stocks', stockRouter);
 app.use('/limit', limitOrderRouter);
 app.use('/chartInvestment', chartsInvestmentRouter);
+app.use('/settings', settingRouter);
 
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);

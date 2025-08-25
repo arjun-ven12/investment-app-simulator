@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Fintech Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="#" onclick="window.location.reload();">Fintech</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">News</a></li>
+            <li><a href="referral.html">Referral</a></li>
+            <li><a href="investment.html">Investment</a></li>
+            <li><a href="chatbot.html">Chatbot</a></li>
+            <li><a href="goals.html">Goals</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li class="nav-item">
+                <a id="logoutButton" class="nav-link" href="#">Logout</a>
+            </li>
+        </ul>
+        <div class="navbar-toggle" id="navbar-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="settings-container">
+        <h1>Settings</h1>
+
+        <!-- Change Email -->
+        <section class="settings-section">
+            <h2>Change Email</h2>
+            <form id="change-email-form">
+                <label for="newEmail">New Email:</label>
+                <input type="email" id="newEmail" name="newEmail" required>
+                <label for="currentPasswordEmail">Confirm Password:</label>
+                <input type="password" id="currentPasswordEmail" name="password" required>
+                <button type="submit">Update Email</button>
+            </form>
+        </section>
+
+        <!-- Change Username -->
+        <section class="settings-section">
+            <h2>Change Username</h2>
+            <form id="change-username-form">
+                <label for="newUsername">New Username:</label>
+                <input type="text" id="newUsername" name="newUsername" required>
+                <label for="currentPasswordUsername">Confirm Password:</label>
+                <input type="password" id="currentPasswordUsername" name="password" required>
+                <button type="submit">Update Username</button>
+            </form>
+        </section>
+
+        <!-- Change Password -->
+        <section class="settings-section">
+            <h2>Change Password</h2>
+            <form id="change-password-form">
+                <label for="oldPassword">Old Password:</label>
+                <input type="password" id="oldPassword" name="oldPassword" required>
+                <label for="newPassword">New Password:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+                <button type="submit">Update Password</button>
+            </form>
+        </section>
+
+        <!-- Delete Account -->
+        <section class="settings-section">
+            <h2>Delete Account</h2>
+            <p>Warning: This action cannot be undone.</p>
+            <form id="delete-account-form">
+                <label for="deletePassword">Confirm Password:</label>
+                <input type="password" id="deletePassword" name="password" required>
+                <button type="submit" class="danger-button">Delete Account</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="../js/settings.js"></script>
+    <script src="../js/home.js"></script>
+</body>
+
+</html>
