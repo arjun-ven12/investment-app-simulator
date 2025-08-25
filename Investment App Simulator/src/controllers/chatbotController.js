@@ -1,6 +1,8 @@
 const openAIModel = require("../models/chatbot");
 
-// Generate AI Response
+//////////////////////////////////////////////////////
+// GENERATE AI RESPONSE
+//////////////////////////////////////////////////////
 module.exports.generateResponse = async (req, res) => {
   const { prompt, model, max_tokens } = req.body;
 

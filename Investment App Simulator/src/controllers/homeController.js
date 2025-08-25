@@ -1,10 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-/**
- * Get user information by username.
- * @param {string} username - The username of the user.
- */
+
+//////////////////////////////////////////////////////
+// GET USER INFO BY USERNAME
+//////////////////////////////////////////////////////
 module.exports.getUserInfo = async (username) => {
     try {
         const user = await prisma.user.findUnique({
@@ -26,11 +26,10 @@ module.exports.getUserInfo = async (username) => {
     }
 };
 
-/**
- * Register a new user.
- * @param {Object} userData - Object containing user data.
- * @returns {Object} - Created user data.
- */
+
+//////////////////////////////////////////////////////
+// REGISTER NEW USER
+//////////////////////////////////////////////////////
 module.exports.registerUser = async (userData) => {
     try {
         const { username, email, password } = userData;
@@ -66,12 +65,10 @@ module.exports.registerUser = async (userData) => {
     }
 };
 
-/**
- * Authenticate a user during login.
- * @param {string} username - Username of the user.
- * @param {string} password - Password of the user.
- * @returns {Object} - Authenticated user details and JWT token.
- */
+
+//////////////////////////////////////////////////////
+// AUTHENTICATE USER
+//////////////////////////////////////////////////////
 module.exports.authenticateUser = async (username, password) => {
     try {
         const user = await prisma.user.findUnique({

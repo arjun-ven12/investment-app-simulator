@@ -30,7 +30,7 @@ async function sendMessage() {
     toggleLoadingIndicator(loadingState);
 
     try {
-        const response = await fetch('/api/chat', {
+        const response = await fetch('/api/chatbot', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

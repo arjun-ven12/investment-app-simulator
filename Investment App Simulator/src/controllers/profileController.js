@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
+//////////////////////////////////////////////////////
+// PROFILE CONTROLLER
+//////////////////////////////////////////////////////
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -18,6 +21,10 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+//////////////////////////////////////////////////////
+// UPDATE PHONE NUMBER
+//////////////////////////////////////////////////////
 
 exports.updatePhoneNumber = async (req, res) => {
     try {
@@ -54,6 +61,10 @@ exports.updatePhoneNumber = async (req, res) => {
     }
 };
 
+
+//////////////////////////////////////////////////////
+// DELETE ACCOUNT   
+//////////////////////////////////////////////////////
 exports.deleteAccount = async (req, res) => {
     try {
      //   const userId = req.user.userId;
