@@ -1,6 +1,8 @@
 const referralModel = require('../models/referral');
 
-
+//////////////////////////////////////////////////////
+// GET REFERRAL STATS
+//////////////////////////////////////////////////////
 module.exports.getReferralStats = function (req, res) {
     const userId = parseInt(req.params.userId, 10);
 
@@ -24,7 +26,9 @@ module.exports.getReferralStats = function (req, res) {
         });
 };
 
-
+//////////////////////////////////////////////////////
+// UPDATE REFERRAL
+//////////////////////////////////////////////////////
 module.exports.updateReferral = async function (req, res) {
     const userId = parseInt(req.params.userId, 10);
     const referralLink = req.body.referralLink;
@@ -45,14 +49,16 @@ module.exports.updateReferral = async function (req, res) {
             'Referral link has already been used by this user': 409,
             'This user has reached the maximum limit of successful referrals!': 405,
         };
-        
+
 
         const statusCode = errorMapping[error.message] || 500;
         res.status(statusCode).json({ error: error.message });
     }
 };
 
-
+//////////////////////////////////////////////////////
+// CREATE REFERRAL
+//////////////////////////////////////////////////////
 module.exports.createReferral = function (req, res) {
     const userId = req.body.userId; // Fixed: Changed user_id to userId to match the request body format
     const referralLink = `https://www.fintech.com/referral/${Math.random().toString(36).substr(2, 9)}`; // Generate random referral link

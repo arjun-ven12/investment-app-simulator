@@ -82,70 +82,70 @@
 //     }
 // }
 
-const QuizModel = require("../models/Quiz");
-const jwt = require("jsonwebtoken");
-const prisma = require("../models/prismaClient");
+// const QuizModel = require("../models/Quiz");
+// const jwt = require("jsonwebtoken");
+// const prisma = require("../models/prismaClient");
 
-const quizModel = new QuizModel();
+// const quizModel = new QuizModel();
 
-module.exports = class QuizController {
-    async getQuestions(req, res) {
-        try {
-            console.log("📡 Received request for quiz questions...");
-            const questions = await quizModel.getAllQuizQuestions();
-            console.log("✅ Sending response:", questions);
-            res.json(questions);
-        } catch (error) {
-            console.error("❌ Error in getQuestions controller:", error);
-            res.status(500).json({ 
-                error: "Failed to fetch questions", 
-                details: error.message 
-            });
-        }
-    }
+// module.exports = class QuizController {
+//     async getQuestions(req, res) {
+//         try {
+//             console.log("📡 Received request for quiz questions...");
+//             const questions = await quizModel.getAllQuizQuestions();
+//             console.log("✅ Sending response:", questions);
+//             res.json(questions);
+//         } catch (error) {
+//             console.error("❌ Error in getQuestions controller:", error);
+//             res.status(500).json({ 
+//                 error: "Failed to fetch questions", 
+//                 details: error.message 
+//             });
+//         }
+//     }
     
 
-    async updateWallet(req, res) {
-        try {
-            const token = req.headers.authorization?.split(" ")[1];
-            if (!token) {
-                return res.status(401).json({ message: "Unauthorized: No token provided" });
-            }
+//     async updateWallet(req, res) {
+//         try {
+//             const token = req.headers.authorization?.split(" ")[1];
+//             if (!token) {
+//                 return res.status(401).json({ message: "Unauthorized: No token provided" });
+//             }
     
-            // Decode JWT token to extract user ID
-            const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-            if (!decoded || !decoded.id) {
-                return res.status(403).json({ message: "Invalid token" });
-            }
+//             // Decode JWT token to extract user ID
+//             const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+//             if (!decoded || !decoded.id) {
+//                 return res.status(403).json({ message: "Invalid token" });
+//             }
     
-            const userId = decoded.id;
-            const { amount } = req.body;
+//             const userId = decoded.id;
+//             const { amount } = req.body;
     
-            if (!amount || isNaN(amount) || amount <= 0) {
-                return res.status(400).json({ message: "Invalid amount" });
-            }
+//             if (!amount || isNaN(amount) || amount <= 0) {
+//                 return res.status(400).json({ message: "Invalid amount" });
+//             }
     
-            // Update user's wallet in the database
-            const updatedUser = await prisma.user.update({
-                where: { id: userId },
-                data: { wallet: { increment: amount } },
-            });
+//             // Update user's wallet in the database
+//             const updatedUser = await prisma.user.update({
+//                 where: { id: userId },
+//                 data: { wallet: { increment: amount } },
+//             });
     
-            res.status(200).json({
-                message: "✅ Wallet updated successfully!",
-                wallet: updatedUser.wallet,
-            });
-        } catch (error) {
-            console.error("❌ Error updating wallet:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    }
+//             res.status(200).json({
+//                 message: "✅ Wallet updated successfully!",
+//                 wallet: updatedUser.wallet,
+//             });
+//         } catch (error) {
+//             console.error("❌ Error updating wallet:", error);
+//             res.status(500).json({ message: "Internal server error" });
+//         }
+//     }
 
-    // Mock user token decoding since no userModel.js
-    getMockUserId(token) {
-        if (token === "test-token") {
-            return "mock-user-id"; // Mock user ID
-        }
-        return null;
-    }
-};
+//     // Mock user token decoding since no userModel.js
+//     getMockUserId(token) {
+//         if (token === "test-token") {
+//             return "mock-user-id"; // Mock user ID
+//         }
+//         return null;
+//     }
+// };

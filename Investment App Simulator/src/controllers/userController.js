@@ -1,339 +1,12 @@
-// const model = require("../models/user.model");
-
-
-// module.exports.CheckDuplicateEmail = (req, res, next) => {
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error(error);
-//             res.status(500).json(error);
-//             return;
-//         }
-
-//         if (results.length > 0) {
-//             res.status(409).json({
-//                 message: "Email is already in use"
-//             })
-//             return;
-//         }
-
-//         next();
-//     }
-//     const data = { email: req.body.email };
-
-//     model.CheckDuplicateEmail(data, callback);
-
-// }
-
-
-// module.exports.CreateNewUser = (req, res, next) => {
-//     if (req.body.username == undefined) {
-//         res.status(400).send("Error: username/email is missing");
-//         return;
-//     }
-
-//     const data = {
-//         user_id: req.params.user_id,
-//         username: req.body.username,
-//         email: req.body.email,
-//         password: req.body.password
-//     }
-
-
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error createNewUser:", error);
-//             res.status(500).json(error);
-//             return;
-//         }
-
-//         res.locals.insertId = results.insertId;
-
-//         next();
-
-
-//     }
-//     model.InsertSingleUser(data, callback);
-// };
-
-
-// module.exports.getCreatedId = (req, res, next) => {
-//     if (req.body.username == undefined) {
-//         res.status(400).send("Error: username/email is missing");
-//         return;
-//     }
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error(error);
-//             res.status(500).json(error);
-//             return;
-//         } else {
-//             res.status(201).json({
-//                 ...data
-//             });
-//         }
-//         return;
-//     }
-
-//     const data = {
-//         user_id: res.locals.insertId,
-//         username: req.body.username,
-//         email: req.body.email,
-//         password:req.body.password
-//     }
-
-//     model.SelectByUserId(data, callback);
-// }
-
-
-// module.exports.GetAllUser = (req, res, next) => {
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error GetAllUser:", error);
-//             res.status(500).json(error);
-//         }
-//         else res.status(200).json(results);
-//     }
-
-//     model.SelectAllUser(callback);
-// }
-
-
-// module.exports.GetUserById = (req, res, next) => {
-//     const data = {
-//         user_id: req.params.user_id,
-//         username: req.body.username,
-//         email: req.body.email
-//         // total_points: req.body.total_points
-//     }
-
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error GetUserById:", error);
-//             res.status(500).json(error);
-//         } else {
-//             if (results.length == 0) {
-//                 res.status(404).json({
-//                     message: "User not found"
-//                 });
-//             }
-//             else res.status(200).json(results[0]);
-//         }
-//     }
-
-//     model.SelectByUserId(data, callback);
-// }
-
-
-// module.exports.updateUserById = (req, res, next) => {
-//     if (req.body.username == undefined || req.body.email == undefined) {
-//         res.status(400).json({
-//             message: "Error: username or email or password is undefined"
-//         });
-//         return;
-//     }
-
-//     const data = {
-//         user_id: req.params.user_id,
-//         username: req.body.username,
-//         email: req.body.email,
-//     }
-
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error updateUserById:", error);
-//             res.status(500).json(error);
-//         } else {
-//             if (results.affectedRows == 0) {
-//                 res.status(404).json({
-//                     message: "User not found"
-//                 });
-//             }
-//             else {
-//                 const user = {
-//                     user_id: results.insertId,
-//                     username: req.body.username,
-//                     email: req.body.email
-//                 }
-//                 res.status(200).json({ ...user })
-//             }; // 204 No Content
-//         }
-//     }
-
-//     model.updateByUserId(data, callback);
-// }
-
-
-// module.exports.DeleteByUserId = (req, res, next) =>
-// {
-//     const data = {
-//         user_id: req.params.user_id
-//     }
-
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error deleteUserById:", error);
-//             res.status(500).json(error);
-//         } else {
-//             if(results.affectedRows == 0) 
-//             {
-//                 res.status(404).json({
-//                     message: "User not found"
-//                 });
-//             }
-//             else res.status(204).send(); // 204 No Content            
-//         }
-//     }
-
-//     model.DeleteByUserId(data, callback);
-// }
-
-
-// module.exports.checkDuplicatedEmailorName= (req, res, next) => {
-
-//     const data = {
-//         user_id: req.params.user_id,
-//         username: req.body.username,
-//         email: req.body.email,
-//         password: req.body.password
-//     }
-  
-//     const checkDuplicatedUsername = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error checking duplicated username:", error);
-//             return res.status(500).json(error);
-//         }
-  
-//         if (results.length > 0) {
-//             return res.status(409).send({
-//                 message: "Username or email already exists"
-//             });
-//         }
-  
-//         checkDuplicateEmail();
-//     };
-  
-//     const checkDuplicateEmail = () => {
-//         model.selectByEmail(data.email, (error, results, fields) => {
-//             if (error) {
-//                 console.error("Error checking duplicate email:", error);
-//                 return res.status(500).json(error);
-//             }
-  
-//             if (results.length > 0) {
-//                 return res.status(409).send({
-//                     message: "Username or email already exists"
-//                 });
-//             }
-  
-//             next()
-//         });
-//     };
-  
-  
-//     model.getUserIdByName(data.username, checkDuplicatedUsername);
-//   };
-  
-  
-//   module.exports.register = (req, res, next) => {
-//     if (!req.body.username || !req.body.email || !req.body.password) {
-//         res.status(400).send("Error: data is undefined");
-//         return;
-//     }
-  
-//     const data = {
-//         username: req.body.username,
-//         email: req.body.email,
-//         password: res.locals.hash
-//     }
-  
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error createNewUser:", error);
-//             res.status(500).json(error);
-//         } else {
-//             res.status(200).json({
-//                 message: `User ${data.username} created successfully.`,
-//                 user: data
-//             });
-  
-//             if (results && results.insertId) {
-//                 res.locals.userId = results.insertId;
-//             }
-  
-//             next()
-//         }
-//     }
-  
-//     model.InsertSingleUser(data, callback);
-//   }
-  
-  
-//   module.exports.login = (req, res, next) => {
-//     if (!req.body.username || !req.body.password) {
-//         res.status(401).json({
-//             message: "Missing data"
-//         });
-//         return;
-//     }
-
-//     const data = {
-//         username: req.body.username
-//     };
-
-//     model.selectUserByUsername(data, (error, results, fields) => {
-//         if (error) {
-//             console.error("SQL Error: ", error);
-//             res.status(500).json(error);
-//             return;
-//         }
-
-//         if (results.length === 0) {
-//             res.status(404).json({
-//                 message: "User not found"
-//             });
-//             return;
-//         }
-
-//         res.locals.hash = results[0].password;
-//         res.locals.userId = results[0].user_id;
-//         next();
-//     })
-// }
-
-// module.exports.getUserIdByUsername=(req,res,next)=>{
-//     const data = {
-//         username: req.body.username
-//     }
-    
-//     const callback = (error, results, fields) => {
-//         if (error) {
-//             console.error("Error readTaskById:", error);
-//             res.status(500).json(error);
-//         } else {
-//             if(results.length == 0) 
-//             {
-//                 res.status(404).json({
-//                     message: "404 Not Found"
-//                 });
-//             }
-//             else{
-//                 res.locals.userId = results[0].user_id;
-//                 next();
-//             }
-//         }
-//     }    
-//     model.getUserIdByName(data, callback);
-// }
-
-
-
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Check for duplicate email or username
+
+//////////////////////////////////////////////////////
+// CHECK DUPLICATE EMAIL OR USERNAME
+//////////////////////////////////////////////////////
 module.exports.checkDuplicatedEmailOrName = async (req, res, next) => {
     const { username, email } = req.body;
 
@@ -361,7 +34,9 @@ module.exports.checkDuplicatedEmailOrName = async (req, res, next) => {
     }
 };
 
-// Create a new user
+///////////////////////////////////////////////////////
+// REGISTER NEW USER
+//////////////////////////////////////////////////////
 module.exports.register = async (req, res, next) => {
     const { username, email } = req.body;
     const password = res.locals.hash; // Hashed password from bcryptMiddleware
@@ -383,7 +58,9 @@ module.exports.register = async (req, res, next) => {
     }
 };
 
-// Login user
+//////////////////////////////////////////////////////
+// USER LOGIN
+//////////////////////////////////////////////////////
 module.exports.loginUser = async (name) => {
     console.log('Fetching user with name:', name); // Debug log
     try {
@@ -403,7 +80,9 @@ module.exports.loginUser = async (name) => {
     }
 };
 
-// Check for duplicate email
+//////////////////////////////////////////////////////
+// CHECK DUPLICATE EMAIL
+//////////////////////////////////////////////////////
 module.exports.CheckDuplicateEmail = async (req, res, next) => {
     const { email } = req.body;
 
@@ -423,7 +102,10 @@ module.exports.CheckDuplicateEmail = async (req, res, next) => {
     }
 };
 
-// Get all users
+
+//////////////////////////////////////////////////////
+// GET ALL USERS
+//////////////////////////////////////////////////////
 module.exports.GetAllUser = async (req, res) => {
     try {
         const users = await prisma.user.findMany();
@@ -434,7 +116,9 @@ module.exports.GetAllUser = async (req, res) => {
     }
 };
 
-// Get user by ID
+//////////////////////////////////////////////////////
+// GET USER BY ID
+//////////////////////////////////////////////////////
 module.exports.GetUserById = async (req, res) => {
     const { user_id } = req.params;
 
@@ -454,7 +138,9 @@ module.exports.GetUserById = async (req, res) => {
     }
 };
 
-// Update user by ID
+//////////////////////////////////////////////////////
+// UPDATE USER BY ID
+//////////////////////////////////////////////////////
 module.exports.updateUserById = async (req, res) => {
     const { user_id } = req.params;
     const { username, email } = req.body;
@@ -476,7 +162,10 @@ module.exports.updateUserById = async (req, res) => {
     }
 };
 
-// Delete user by ID
+
+//////////////////////////////////////////////////////
+// DELETE USER BY ID
+//////////////////////////////////////////////////////
 module.exports.DeleteByUserId = async (req, res) => {
     const { user_id } = req.params;
 
@@ -491,6 +180,7 @@ module.exports.DeleteByUserId = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 module.exports.getUserDetailsByUsername = async (req, res) => {

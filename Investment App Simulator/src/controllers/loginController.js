@@ -1,5 +1,8 @@
 const userController = require('../controllers/userController');
 
+//////////////////////////////////////////////////////
+// USER LOGIN
+//////////////////////////////////////////////////////
 module.exports.loginUser = async (req, res) => {
     const { name, password } = req.body;
 

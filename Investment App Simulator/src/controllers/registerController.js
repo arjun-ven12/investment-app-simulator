@@ -2,6 +2,9 @@ const prisma = require('../prismaClient');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+//////////////////////////////////////////////////////
+// REGISTER NEW USER
+//////////////////////////////////////////////////////
 module.exports.registerUser = async (req, res) => {
   const { email, password, name } = req.body;
 

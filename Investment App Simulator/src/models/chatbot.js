@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: "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",
 });
 
 export const generateResponse = async (prompt, model = "gpt-4o-mini", max_tokens = 150) => {
