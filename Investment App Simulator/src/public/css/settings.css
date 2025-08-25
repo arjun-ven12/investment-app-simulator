@@ -1,0 +1,68 @@
+.settings-container {
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.settings-container h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+.settings-section {
+    background-color: #000000;
+    padding: 25px 20px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.settings-section h2 {
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.settings-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.settings-section input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.settings-section button {
+    padding: 12px 25px;
+    background-color: #2d89ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.settings-section button:hover {
+    background-color: #1366d6;
+}
+
+.settings-section .danger-button {
+    background-color: #ff4d4f;
+}
+
+.settings-section .danger-button:hover {
+    background-color: #d9363e;
+}
+
+.settings-section p {
+    margin-bottom: 10px;
+    color: #b00;
+    font-weight: 500;
+}
