@@ -8,31 +8,10 @@
 
 
 
-     <!-- Navbar -->
-    <!-- Navbar -->
-    <nav class="navbar">
-      <div class="navbar-logo">
-          <a href="#" onclick="window.location.reload();">Fintech</a>
-      </div>
-      <ul class="navbar-links">
-          <li><a href="home.html">Home</a></li>
-          <li><a href="dashboard.html">News</a></li>
-          <li><a href="referral.html">Referral</a></li>
-          <li><a href="investment.html">Investment</a></li>
-          <li><a href="chatbot.html">Chatbot</a></li>
-          <li><a href="goals.html">Goals</a></li>
-          <li><a href="setting.html">Settings</a></li>
-          <li class="nav-item">
-              <a id="logoutButton" class="nav-link" href="#">Logout</a>
-          </li>
-      </ul>
-      <div class="navbar-toggle" id="navbar-toggle">
-          <i class="fas fa-bars"></i>
-      </div>
-  </nav>
 
 </head>
 <body>
+    <div id="navbar-container"></div>
     <div class="container">
         <h1>Edit Financial Goal</h1>
         <form id="goal-form">
@@ -54,5 +33,7 @@
         <div id="goals-list"></div> <!-- ✅ Ensure this exists -->
     </div>
 </body>
-<script defer src="../js/goalEdit.js"></script><!-- ✅ Ensure this is loaded at the bottom -->
+<script defer src="../js/goalEdit.js"></script>
+<script src="../js/navbar.js"></script>
+<script src="../js/home.js"></script>
 </html>
