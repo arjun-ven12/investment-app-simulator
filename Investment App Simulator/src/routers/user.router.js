@@ -70,6 +70,14 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+          // REGEX FOR PASSWORD VALIDATION
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ 
+                message: "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character." 
+            });
+        }
+
         const existingUser = await prisma.user.findFirst({
             where: {
                 OR: [
