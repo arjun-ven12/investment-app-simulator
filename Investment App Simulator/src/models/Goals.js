@@ -1,5 +1,8 @@
 const prisma = require('../../prisma/prismaClient');
 
+///////////////////////////////////////////////////////
+// CREATE A NEW GOAL
+///////////////////////////////////////////////////////
 module.exports.createGoal = function createGoal(title, amount, deadline) {
   return prisma.goal
     .create({
@@ -14,7 +17,9 @@ module.exports.createGoal = function createGoal(title, amount, deadline) {
       return goal;
     });
 };
-
+//////////////////////////////////////////////////////
+// GET ALL GOALS
+//////////////////////////////////////////////////////
 module.exports.getAllGoals = function getAllGoals() {
   return prisma.goal
     .findMany()
@@ -24,6 +29,9 @@ module.exports.getAllGoals = function getAllGoals() {
     });
 };
 
+//////////////////////////////////////////////////////
+// UPDATE A GOAL
+//////////////////////////////////////////////////////
 module.exports.updateGoal = function updateGoal(id, data) {
   return prisma.goal
     .update({
@@ -36,6 +44,9 @@ module.exports.updateGoal = function updateGoal(id, data) {
     });
 };
 
+//////////////////////////////////////////////////////
+// DELETE A GOAL
+//////////////////////////////////////////////////////
 module.exports.deleteGoal = function deleteGoal(id) {
   return prisma.goal
     .delete({ where: { id: parseInt(id) } })
@@ -45,9 +56,10 @@ module.exports.deleteGoal = function deleteGoal(id) {
     });
 };
 
-// export to csv
-
-exports.getUserTrades = function getUserTrades(userId) {
+//////////////////////////////////////////////////////
+// GET USER TRADES CSV
+//////////////////////////////////////////////////////
+module.exports.getUserTrades = function getUserTrades(userId) {
   if (!userId || isNaN(userId)) {
     throw new Error("Invalid user ID");
   }

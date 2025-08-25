@@ -1,5 +1,8 @@
 const prisma = require('./prismaClient');
 
+//////////////////////////////////////////////////////
+// GET REFERRAL STATS
+//////////////////////////////////////////////////////
 module.exports.getReferralStats = function getReferralStats(userId) {
     if (!userId || typeof userId !== 'number') {
         throw new Error(`Invalid user ID: ${userId}`);
@@ -30,6 +33,9 @@ module.exports.getReferralStats = function getReferralStats(userId) {
         });
 };
 
+//////////////////////////////////////////////////////
+// UPDATE REFERRAL
+//////////////////////////////////////////////////////
 module.exports.updateReferral = async function updateReferral(userId, referralLink) {
     try {
         const referral = await prisma.referral.findUnique({
@@ -120,6 +126,9 @@ module.exports.updateReferral = async function updateReferral(userId, referralLi
     }
 };
 
+//////////////////////////////////////////////////////
+// CREATE REFERRAL
+//////////////////////////////////////////////////////
 module.exports.createReferral = function createReferral(userId, referralLink) {
     const parsedUserId = parseInt(userId, 10);
 

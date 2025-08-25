@@ -1,5 +1,8 @@
 const prisma = require('./prismaClient');
 
+//////////////////////////////////////////////////////
+// GET ALL PERSONS
+//////////////////////////////////////////////////////
 module.exports.getAllPersons = async function getAllPersons() {
   return prisma.person.findMany();
 };

@@ -75,38 +75,38 @@
 //     }
 // }
 
-const prisma = require("./prismaClient");
-const jwt = require("jsonwebtoken");
+// const prisma = require("./prismaClient");
+// const jwt = require("jsonwebtoken");
 
-// console.log("🔍 Prisma Client Loaded:", prisma); // Debugging log
+// // console.log("🔍 Prisma Client Loaded:", prisma); // Debugging log
 
-module.exports = class QuizModel {
-    async verifyToken(token) {
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            return { userId: decoded.userId };
-        } catch (error) {
-            return null;
-        }
-    }
+// module.exports = class QuizModel {
+//     async verifyToken(token) {
+//         try {
+//             const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//             return { userId: decoded.userId };
+//         } catch (error) {
+//             return null;
+//         }
+//     }
 
-    async updateWallet(userId, amount) {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: { wallet: { increment: amount } },
-        });
-    }
+//     async updateWallet(userId, amount) {
+//         return await prisma.user.update({
+//             where: { id: userId },
+//             data: { wallet: { increment: amount } },
+//         });
+//     }
 
-    async getAllQuizQuestions() {
-        try {
-            console.log("📡 Fetching quiz questions from database...");
-            const questions = await prisma.quizQuestion.findMany().catch(console.error);
-            console.log("✅ Fetched Questions:", questions);
-            return questions;
-        } catch (error) {
-            console.error("❌ Error fetching quiz questions:", error);
-            throw error;  // Rethrow error so the controller catches it
-        }
-    }
+//     async getAllQuizQuestions() {
+//         try {
+//             console.log("📡 Fetching quiz questions from database...");
+//             const questions = await prisma.quizQuestion.findMany().catch(console.error);
+//             console.log("✅ Fetched Questions:", questions);
+//             return questions;
+//         } catch (error) {
+//             console.error("❌ Error fetching quiz questions:", error);
+//             throw error;  // Rethrow error so the controller catches it
+//         }
+//     }
     
-};
+// };

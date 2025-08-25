@@ -3,12 +3,9 @@ const prisma = require('./prismaClient');
 const fetch = require("node-fetch");
 const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
 
-// Fetch all news articles
-// module.exports.getAllNews = async function getAllNews() {
-//     return prisma.news.findMany();
-// }
-
-
+//////////////////////////////////////////////////////
+// GET MARKET NEWS
+//////////////////////////////////////////////////////
 exports.getAllNews = function getAllNews(category = "general") {
     if (!category) {
       throw new Error("Category parameter is required");
@@ -40,13 +37,36 @@ exports.getAllNews = function getAllNews(category = "general") {
   };
 
 
-// Update the category of a specific news item
+//////////////////////////////////////////////////////
+// UPDATE NEWS CATEGORY
+//////////////////////////////////////////////////////
 module.exports.updateNewsCategory = async function updateNewsCategory(id, category) {
     return prisma.news.update({
         where: {news_id: parseInt(id, 10)},
         data: { category: category }
     });
 };
+
+
+
+//////////////////////////////////////////////////////
+// GET CATEGORY COUNTS
+//////////////////////////////////////////////////////
+module.exports.getCategoryCounts = async () => {
+    const categories = await prisma.news.groupBy({
+        by: ['category'],
+        _count: {
+            category: true,
+        },
+    });
+
+    const categoryCounts = {};
+    categories.forEach((cat) => {
+        categoryCounts[cat.category] = cat._count.category;
+    });
+    return categoryCounts;
+}
+
 
 // module.exports.updateNewsCategory = async (req, res) => {
 //     const { news_id } = req.params; // Expecting from URL (e.g., /dashboard/news/1)
@@ -69,20 +89,3 @@ module.exports.updateNewsCategory = async function updateNewsCategory(id, catego
 //         res.status(500).json({ error: 'Failed to update news category.' });
 //     }
 // };
-
-
-// Get the count of news articles in each category
-module.exports.getCategoryCounts = async () => {
-    const categories = await prisma.news.groupBy({
-        by: ['category'],
-        _count: {
-            category: true,
-        },
-    });
-
-    const categoryCounts = {};
-    categories.forEach((cat) => {
-        categoryCounts[cat.category] = cat._count.category;
-    });
-    return categoryCounts;
-}
