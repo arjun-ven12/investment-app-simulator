@@ -4,6 +4,9 @@ const openai = new OpenAI({
   apiKey: "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",
 });
 
+//////////////////////////////////////////////////////
+// GENERATE AI RESPONSE
+//////////////////////////////////////////////////////
 export const generateResponse = async (prompt, model = "gpt-4o-mini", max_tokens = 150) => {
   try {
     const completion = await openai.chat.completions.create({
