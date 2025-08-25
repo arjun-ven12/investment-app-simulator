@@ -182,7 +182,9 @@ module.exports.DeleteByUserId = async (req, res) => {
 };
 
 
-
+//////////////////////////////////////////////////////
+// GET USER DETAILS BY USERNAME
+//////////////////////////////////////////////////////
 module.exports.getUserDetailsByUsername = async (req, res) => {
     try {
       const { username } = req.query;
