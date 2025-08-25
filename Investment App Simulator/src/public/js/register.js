@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+
+    // Validate password strength
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert("Password must have at least 8 characters, including uppercase, lowercase, number, and special character.");
+      return;
+    }
+    
     const registrationData = {
       username: username,
       email: email,
