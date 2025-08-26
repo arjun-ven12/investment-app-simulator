@@ -83,3 +83,14 @@ module.exports.bookmarkNews = async function (userId, newsData) {
 
   return { success: true, bookmark };
 };
+
+module.exports.getUserBookmarks = async function(userId) {
+  if (!userId) throw new Error("userId is required");
+
+  const bookmarks = await prisma.bookmark.findMany({
+    where: { userId },
+    include: { news: true } // include news details
+  });
+
+  return bookmarks;
+};

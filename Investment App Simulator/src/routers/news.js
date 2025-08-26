@@ -10,5 +10,6 @@ router.get('/news', newsController.getNewsController);
 
 // Bookmark news (only inserts into DB if bookmarked)
 router.post('/news/bookmark', newsController.bookmarkNewsController);
+router.get('/news/bookmarks', jwtMiddleware.verifyToken, newsController.getUserBookmarksController);
 
 module.exports = router;

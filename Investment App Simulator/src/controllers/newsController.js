@@ -41,3 +41,20 @@ module.exports.bookmarkNewsController = async function(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+module.exports.getUserBookmarksController = async function(req, res) {
+    const userId = req.user.id; // Get userId from JWT middleware
+
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    try {
+        const bookmarks = await newsModel.getUserBookmarks(parseInt(userId));
+        return res.status(200).json({ success: true, bookmarks });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
