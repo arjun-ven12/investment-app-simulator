@@ -127,8 +127,8 @@ model Trade {
 }
 
 model News {
-  id          Int           @id @default(autoincrement())
-  apiId       String        @unique
+  id          Int           @id @default(autoincrement()) @map("news_id")
+  apiId       Int       @unique
   headline    String
   summary     String?
   url         String
