@@ -108,47 +108,61 @@
             });
         }
 
-        async function bookmarkNews(newsData, button) {
-            try {
-                button.disabled = true;
+     async function bookmarkNews(newsData, button) {
+    try {
+        button.disabled = true;
 
-                const payload = {
-                    userId: testUserId,
-                    newsData: {
-                        apiId: newsData.id,
-                        category: newsData.category,
-                        datetime: newsData.datetime,
-                        headline: newsData.headline,
-                        image: newsData.image,
-                        source: newsData.source,
-                        summary: newsData.summary,
-                        url: newsData.url
-                    }
-                };
-
-                const response = await fetch('/api/news/news/bookmark', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (!result.success) {
-                    alert(result.message || "Could not bookmark news");
-                    button.disabled = false;
-                    return;
-                }
-
-                alert("Bookmarked successfully!");
-            } catch (err) {
-                console.error(err);
-                alert(err.message);
-                button.disabled = false;
-            }
+        // Get token from localStorage/session or wherever you store it
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("You must be logged in to bookmark news.");
+            button.disabled = false;
+            return;
         }
+
+        // Decode token to get userId (if using JWT)
+        const payloadBase64 = token.split('.')[1];
+        const payload = JSON.parse(atob(payloadBase64));
+        const userId = payload.id; // adjust depending on your token payload
+
+        const payloadBody = {
+            userId: parseInt(userId),
+            newsData: {
+                apiId: newsData.id,
+                category: newsData.category,
+                datetime: newsData.datetime,
+                headline: newsData.headline,
+                image: newsData.image,
+                source: newsData.source,
+                summary: newsData.summary,
+                url: newsData.url
+            }
+        };
+
+        const response = await fetch('/api/news/news/bookmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payloadBody)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            alert(result.message || "Could not bookmark news");
+            button.disabled = false;
+            return;
+        }
+
+        alert("Bookmarked successfully!");
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
+        button.disabled = false;
+    }
+}
 
 
 

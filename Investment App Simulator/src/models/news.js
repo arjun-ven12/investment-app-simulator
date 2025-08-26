@@ -20,7 +20,7 @@ module.exports.getMarketNews = function getMarketNews(category, minId = 0) {
 };
 
 
-module.exports.bookmarkNews = async function(userId, newsData) {
+module.exports.bookmarkNews = async function (userId, newsData) {
   if (!newsData || !newsData.apiId || !newsData.url) {
     throw new Error("Invalid news data");
   }
@@ -50,15 +50,24 @@ module.exports.bookmarkNews = async function(userId, newsData) {
     });
   }
 
-  // 3️⃣ Check if bookmark already exists
   const existingBookmark = await prisma.bookmark.findUnique({
     where: {
       userId_newsId: {
-        userId,
+        userId: userId,   // current user only
         newsId: news.id
       }
     }
   });
+
+  if (existingBookmark) {
+    return { success: false, message: "You already bookmarked this news" };
+  }
+
+
+  if (existingBookmark) {
+    return { success: false, message: "You already bookmarked this news" };
+  }
+
 
   if (existingBookmark) {
     return { success: false, message: "Bookmark already exists" };
