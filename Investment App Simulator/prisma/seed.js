@@ -262,199 +262,199 @@ const referral = [
   },
 ];
 
-const news = [
-  {
-    news_id: 1,
-    image_url: "http://dummyimage.com/170x100.png/dddddd/000000",
-    title: "at feugiat non",
-    caption: "eu est congue elementum",
-    content:
-      "curae duis faucibus accumsan odio curabitur convallis duis consequat dui nec",
-    category: "hotAndTrending",
-    tags: ["Breaking", "Crypto"],
-  },
-  {
-    news_id: 2,
-    image_url: "http://dummyimage.com/223x100.png/ff4444/ffffff",
-    title: "nam tristique tortor eu",
-    caption:
-      "phasellus news_id sapien in sapien iaculis congue vivamus metus arcu",
-    content:
-      "integer non velit donec diam neque vestibulum eget vulputate ut ultrices vel augue vestibulum ante",
-    category: "bookmarks",
-    tags: ["Advice", "Biography"],
-  },
-  {
-    news_id: 3,
-    image_url: "http://dummyimage.com/217x100.png/5fa2dd/ffffff",
-    title: "ut erat curabitur gravnews_ida nisi",
-    caption: "facilisi cras non velit nec nisi vulputate nonummy",
-    content:
-      "morbi odio odio elementum eu interdum eu tincnews_idunt in leo maecenas",
-    category: "bookmarks",
-    tags: ["Local", "Advice"],
-  },
-  {
-    news_id: 4,
-    image_url: "http://dummyimage.com/241x100.png/dddddd/000000",
-    title: "eros vestibulum ac est lacinia",
-    caption: "ultrices posuere",
-    content:
-      "ut ultrices vel augue vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae donec pharetra magna",
-    category: "mostViewed",
-    tags: ["Biography", "Crypto"],
-  },
-  {
-    news_id: 5,
-    image_url: "http://dummyimage.com/131x100.png/cc0000/ffffff",
-    title: "justo lacinia eget",
-    caption: "sapien varius ut",
-    content: "pede malesuada in",
-    category: "featured",
-    tags: ["Breaking", "Local"],
-  },
-  {
-    news_id: 6,
-    image_url: "http://dummyimage.com/122x100.png/5fa2dd/ffffff",
-    title: "vivamus metus",
-    caption: "sapien placerat ante nulla justo aliquam quis turpis",
-    content:
-      "lacus morbi sem mauris laoreet ut rhoncus aliquet pulvinar sed nisl nunc rhoncus dui vel sem",
-    category: "bookmarks",
-    tags: ["Biography", "Crypto"],
-  },
-  {
-    news_id: 7,
-    image_url: "http://dummyimage.com/239x100.png/cc0000/ffffff",
-    title: "dapibus augue vel accumsan",
-    caption:
-      "condimentum curabitur in libero ut massa volutpat convallis morbi odio",
-    content: "luctus et ultrices posuere cubilia",
-    category: "important",
-    tags: ["Advice", "Breaking"],
-  },
-  {
-    news_id: 8,
-    image_url: "http://dummyimage.com/220x100.png/dddddd/000000",
-    title: "curabitur convallis duis consequat",
-    caption: "consectetuer",
-    content: "eu sapien cursus vestibulum proin eu",
-    category: "featured",
-    tags: ["Local", "Advice"],
-  },
-  {
-    news_id: 9,
-    image_url: "http://dummyimage.com/150x100.png/ff4444/ffffff",
-    title: "augue quam",
-    caption: "mi pede malesuada",
-    content: "iaculis congue",
-    category: "important",
-    tags: ["Crypto", "Breaking"],
-  },
-  {
-    news_id: 10,
-    image_url: "http://dummyimage.com/202x100.png/ff4444/ffffff",
-    title: "donec ut dolor morbi vel",
-    caption: "adipiscing lorem vitae mattis nibh ligula nec sem duis",
-    content: "leo odio condimentum id luctus nec molestie sed justo",
-    category: "featured",
-    tags: ["Biography", "Local"],
-  },
-  {
-    news_id: 11,
-    image_url: "http://dummyimage.com/203x100.png/ff4444/ffffff",
-    title: "vel est donec",
-    caption: "vestibulum proin eu mi nulla ac enim",
-    content: "libero",
-    category: "important",
-    tags: ["Breaking", "Biography"],
-  },
-  {
-    news_id: 12,
-    image_url: "http://dummyimage.com/241x100.png/cc0000/ffffff",
-    title: "id lobortis convallis tortor risus",
-    caption: "pellentesque at nulla suspendisse potenti cras in",
-    content: "nec nisi vulputate nonummy maecenas tincidunt lacus",
-    category: "mostViewed",
-    tags: ["Local", "Crypto"],
-  },
-  {
-    news_id: 13,
-    image_url: "http://dummyimage.com/136x100.png/5fa2dd/ffffff",
-    title: "tellus semper interdum",
-    caption: "turpis adipiscing lorem vitae mattis nibh ligula",
-    content: "nisi eu orci mauris",
-    category: "bookmarks",
-    tags: ["Advice", "Breaking"],
-  },
-  {
-    news_id: 14,
-    image_url: "http://dummyimage.com/242x100.png/dddddd/000000",
-    title: "etiam justo",
-    caption: "ante ipsum primis in faucibus orci",
-    content:
-      "orci nullam molestie nibh in lectus pellentesque at nulla suspendisse potenti cras in purus eu magna vulputate luctus cum sociis",
-    category: "hotAndTrending",
-    tags: ["Breaking", "Local"],
-  },
-  {
-    news_id: 15,
-    image_url: "http://dummyimage.com/203x100.png/cc0000/ffffff",
-    title: "consequat nulla nisl nunc",
-    caption: "vel augue vestibulum ante ipsum",
-    content: "libero nam dui",
-    category: "hotAndTrending",
-    tags: ["Crypto", "Biography"],
-  },
-  {
-    news_id: 16,
-    image_url: "http://dummyimage.com/202x100.png/5fa2dd/ffffff",
-    title: "mattis",
-    caption: "vestibulum proin eu mi nulla ac enim in tempor turpis",
-    content: "tincidunt lacus at velit",
-    category: "mostViewed",
-    tags: ["Advice", "Breaking"],
-  },
-  {
-    news_id: 17,
-    image_url: "http://dummyimage.com/167x100.png/ff4444/ffffff",
-    title: "sollicitudin",
-    caption: "purus eu magna vulputate luctus",
-    content:
-      "tincidunt nulla mollis molestie lorem quisque ut erat curabitur gravida nisi at nibh in hac habitasse platea dictumst",
-    category: "bookmarks",
-    tags: ["Crypto", "Local"],
-  },
-  {
-    news_id: 18,
-    image_url: "http://dummyimage.com/110x100.png/ff4444/ffffff",
-    title: "quam",
-    caption: "sapien arcu sed augue aliquam erat volutpat in",
-    content: "rutrum nulla tellus in sagittis",
-    category: "important",
-    tags: ["Biography", "Advice"],
-  },
-  {
-    news_id: 19,
-    image_url: "http://dummyimage.com/173x100.png/cc0000/ffffff",
-    title: "vel nulla eget",
-    caption: "porta volutpat quam pede lobortis",
-    content:
-      "orci luctus et ultrices posuere cubilia curae duis faucibus accumsan odio curabitur convallis duis consequat dui nec nisi",
-    category: "hotAndTrending",
-    tags: ["Breaking", "Crypto"],
-  },
-  {
-    news_id: 20,
-    image_url: "http://dummyimage.com/217x100.png/ff4444/ffffff",
-    title: "feugiat et eros",
-    caption: "curabitur in libero",
-    content:
-      "turpis integer aliquet massa id lobortis convallis tortor risus dapibus augue vel accumsan tellus nisi",
-    category: "mostViewed",
-    tags: ["Local", "Breaking"],
-  },
-];
+// const news = [
+//   {
+//     news_id: 1,
+//     image_url: "http://dummyimage.com/170x100.png/dddddd/000000",
+//     title: "at feugiat non",
+//     caption: "eu est congue elementum",
+//     content:
+//       "curae duis faucibus accumsan odio curabitur convallis duis consequat dui nec",
+//     category: "hotAndTrending",
+//     tags: ["Breaking", "Crypto"],
+//   },
+//   {
+//     news_id: 2,
+//     image_url: "http://dummyimage.com/223x100.png/ff4444/ffffff",
+//     title: "nam tristique tortor eu",
+//     caption:
+//       "phasellus news_id sapien in sapien iaculis congue vivamus metus arcu",
+//     content:
+//       "integer non velit donec diam neque vestibulum eget vulputate ut ultrices vel augue vestibulum ante",
+//     category: "bookmarks",
+//     tags: ["Advice", "Biography"],
+//   },
+//   {
+//     news_id: 3,
+//     image_url: "http://dummyimage.com/217x100.png/5fa2dd/ffffff",
+//     title: "ut erat curabitur gravnews_ida nisi",
+//     caption: "facilisi cras non velit nec nisi vulputate nonummy",
+//     content:
+//       "morbi odio odio elementum eu interdum eu tincnews_idunt in leo maecenas",
+//     category: "bookmarks",
+//     tags: ["Local", "Advice"],
+//   },
+//   {
+//     news_id: 4,
+//     image_url: "http://dummyimage.com/241x100.png/dddddd/000000",
+//     title: "eros vestibulum ac est lacinia",
+//     caption: "ultrices posuere",
+//     content:
+//       "ut ultrices vel augue vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae donec pharetra magna",
+//     category: "mostViewed",
+//     tags: ["Biography", "Crypto"],
+//   },
+//   {
+//     news_id: 5,
+//     image_url: "http://dummyimage.com/131x100.png/cc0000/ffffff",
+//     title: "justo lacinia eget",
+//     caption: "sapien varius ut",
+//     content: "pede malesuada in",
+//     category: "featured",
+//     tags: ["Breaking", "Local"],
+//   },
+//   {
+//     news_id: 6,
+//     image_url: "http://dummyimage.com/122x100.png/5fa2dd/ffffff",
+//     title: "vivamus metus",
+//     caption: "sapien placerat ante nulla justo aliquam quis turpis",
+//     content:
+//       "lacus morbi sem mauris laoreet ut rhoncus aliquet pulvinar sed nisl nunc rhoncus dui vel sem",
+//     category: "bookmarks",
+//     tags: ["Biography", "Crypto"],
+//   },
+//   {
+//     news_id: 7,
+//     image_url: "http://dummyimage.com/239x100.png/cc0000/ffffff",
+//     title: "dapibus augue vel accumsan",
+//     caption:
+//       "condimentum curabitur in libero ut massa volutpat convallis morbi odio",
+//     content: "luctus et ultrices posuere cubilia",
+//     category: "important",
+//     tags: ["Advice", "Breaking"],
+//   },
+//   {
+//     news_id: 8,
+//     image_url: "http://dummyimage.com/220x100.png/dddddd/000000",
+//     title: "curabitur convallis duis consequat",
+//     caption: "consectetuer",
+//     content: "eu sapien cursus vestibulum proin eu",
+//     category: "featured",
+//     tags: ["Local", "Advice"],
+//   },
+//   {
+//     news_id: 9,
+//     image_url: "http://dummyimage.com/150x100.png/ff4444/ffffff",
+//     title: "augue quam",
+//     caption: "mi pede malesuada",
+//     content: "iaculis congue",
+//     category: "important",
+//     tags: ["Crypto", "Breaking"],
+//   },
+//   {
+//     news_id: 10,
+//     image_url: "http://dummyimage.com/202x100.png/ff4444/ffffff",
+//     title: "donec ut dolor morbi vel",
+//     caption: "adipiscing lorem vitae mattis nibh ligula nec sem duis",
+//     content: "leo odio condimentum id luctus nec molestie sed justo",
+//     category: "featured",
+//     tags: ["Biography", "Local"],
+//   },
+//   {
+//     news_id: 11,
+//     image_url: "http://dummyimage.com/203x100.png/ff4444/ffffff",
+//     title: "vel est donec",
+//     caption: "vestibulum proin eu mi nulla ac enim",
+//     content: "libero",
+//     category: "important",
+//     tags: ["Breaking", "Biography"],
+//   },
+//   {
+//     news_id: 12,
+//     image_url: "http://dummyimage.com/241x100.png/cc0000/ffffff",
+//     title: "id lobortis convallis tortor risus",
+//     caption: "pellentesque at nulla suspendisse potenti cras in",
+//     content: "nec nisi vulputate nonummy maecenas tincidunt lacus",
+//     category: "mostViewed",
+//     tags: ["Local", "Crypto"],
+//   },
+//   {
+//     news_id: 13,
+//     image_url: "http://dummyimage.com/136x100.png/5fa2dd/ffffff",
+//     title: "tellus semper interdum",
+//     caption: "turpis adipiscing lorem vitae mattis nibh ligula",
+//     content: "nisi eu orci mauris",
+//     category: "bookmarks",
+//     tags: ["Advice", "Breaking"],
+//   },
+//   {
+//     news_id: 14,
+//     image_url: "http://dummyimage.com/242x100.png/dddddd/000000",
+//     title: "etiam justo",
+//     caption: "ante ipsum primis in faucibus orci",
+//     content:
+//       "orci nullam molestie nibh in lectus pellentesque at nulla suspendisse potenti cras in purus eu magna vulputate luctus cum sociis",
+//     category: "hotAndTrending",
+//     tags: ["Breaking", "Local"],
+//   },
+//   {
+//     news_id: 15,
+//     image_url: "http://dummyimage.com/203x100.png/cc0000/ffffff",
+//     title: "consequat nulla nisl nunc",
+//     caption: "vel augue vestibulum ante ipsum",
+//     content: "libero nam dui",
+//     category: "hotAndTrending",
+//     tags: ["Crypto", "Biography"],
+//   },
+//   {
+//     news_id: 16,
+//     image_url: "http://dummyimage.com/202x100.png/5fa2dd/ffffff",
+//     title: "mattis",
+//     caption: "vestibulum proin eu mi nulla ac enim in tempor turpis",
+//     content: "tincidunt lacus at velit",
+//     category: "mostViewed",
+//     tags: ["Advice", "Breaking"],
+//   },
+//   {
+//     news_id: 17,
+//     image_url: "http://dummyimage.com/167x100.png/ff4444/ffffff",
+//     title: "sollicitudin",
+//     caption: "purus eu magna vulputate luctus",
+//     content:
+//       "tincidunt nulla mollis molestie lorem quisque ut erat curabitur gravida nisi at nibh in hac habitasse platea dictumst",
+//     category: "bookmarks",
+//     tags: ["Crypto", "Local"],
+//   },
+//   {
+//     news_id: 18,
+//     image_url: "http://dummyimage.com/110x100.png/ff4444/ffffff",
+//     title: "quam",
+//     caption: "sapien arcu sed augue aliquam erat volutpat in",
+//     content: "rutrum nulla tellus in sagittis",
+//     category: "important",
+//     tags: ["Biography", "Advice"],
+//   },
+//   {
+//     news_id: 19,
+//     image_url: "http://dummyimage.com/173x100.png/cc0000/ffffff",
+//     title: "vel nulla eget",
+//     caption: "porta volutpat quam pede lobortis",
+//     content:
+//       "orci luctus et ultrices posuere cubilia curae duis faucibus accumsan odio curabitur convallis duis consequat dui nec nisi",
+//     category: "hotAndTrending",
+//     tags: ["Breaking", "Crypto"],
+//   },
+//   {
+//     news_id: 20,
+//     image_url: "http://dummyimage.com/217x100.png/ff4444/ffffff",
+//     title: "feugiat et eros",
+//     caption: "curabitur in libero",
+//     content:
+//       "turpis integer aliquet massa id lobortis convallis tortor risus dapibus augue vel accumsan tellus nisi",
+//     category: "mostViewed",
+//     tags: ["Local", "Breaking"],
+//   },
+// ];
 
 async function main() {
   // Seed Statuses
@@ -534,10 +534,10 @@ async function main() {
     skipDuplicates: true,
   });
 
-  const insertednews = await prisma.news.createMany({
-    data: news,
-    skipDuplicates: true,
-  });
+  // const insertednews = await prisma.news.createMany({
+  //   data: news,
+  //   skipDuplicates: true,
+  // });
 
   console.log("Seed data inserted successfully");
 }
