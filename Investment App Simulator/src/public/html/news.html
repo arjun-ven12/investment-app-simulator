@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .news-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .headline {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .source {
+            font-style: italic;
+            color: #555;
+        }
+
+        .bookmark-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .bookmark-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        #error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <h1>News Feed</h1>
+    <div id="error-message"></div>
+    <div id="news-container"></div>
+
+    <script>
+        const newsContainer = document.getElementById('news-container');
+        const errorMessage = document.getElementById('error-message');
+
+        // Temporary userId for testing
+        const testUserId = 6;
+
+        async function fetchNews() {
+            try {
+                const response = await fetch('/api/news/news?category=general');
+                if (!response.ok) throw new Error('Failed to fetch news');
+
+                const newsList = await response.json();
+                displayNews(newsList);
+            } catch (err) {
+                console.error(err);
+                errorMessage.textContent = err.message;
+            }
+        }
+
+        function displayNews(newsList) {
+            newsContainer.innerHTML = '';
+            newsList.forEach(news => {
+                const card = document.createElement('div');
+                card.className = 'news-card';
+
+                const headline = document.createElement('div');
+                headline.className = 'headline';
+                headline.textContent = news.headline;
+
+                const summary = document.createElement('div');
+                summary.textContent = news.summary || '';
+
+                const source = document.createElement('div');
+                source.className = 'source';
+                source.textContent = news.source || '';
+
+                const bookmarkBtn = document.createElement('button');
+                bookmarkBtn.className = 'bookmark-btn';
+                bookmarkBtn.textContent = 'Bookmark';
+                bookmarkBtn.onclick = () => bookmarkNews(news, bookmarkBtn);
+
+                card.appendChild(headline);
+                card.appendChild(summary);
+                card.appendChild(source);
+                card.appendChild(bookmarkBtn);
+
+                newsContainer.appendChild(card);
+            });
+        }
+
+        async function bookmarkNews(newsData, button) {
+            try {
+                button.disabled = true;
+
+                const payload = {
+                    userId: testUserId,
+                    newsData: {
+                        apiId: newsData.id,
+                        category: newsData.category,
+                        datetime: newsData.datetime,
+                        headline: newsData.headline,
+                        image: newsData.image,
+                        source: newsData.source,
+                        summary: newsData.summary,
+                        url: newsData.url
+                    }
+                };
+
+                const response = await fetch('/api/news/news/bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || "Could not bookmark news");
+                    button.disabled = false;
+                    return;
+                }
+
+                alert("Bookmarked successfully!");
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+                button.disabled = false;
+            }
+        }
+
+
+
+
+
+        // Load news on page load
+        fetchNews();
+    </script>
+    <script src="../js/navbar.js"></script>
+</body>
+
+</html>
