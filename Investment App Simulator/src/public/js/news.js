@@ -24,6 +24,7 @@ async function fetchNews() {
     }
 }
 
+
 function displayNews(newsList) {
     newsContainer.innerHTML = '';
     newsList.forEach(news => {
@@ -50,15 +51,23 @@ function displayNews(newsList) {
         source.className = 'source';
         source.textContent = news.source || '';
 
+        const readMore = document.createElement('a');
+        readMore.href = news.url;
+        readMore.target = "_blank";
+        readMore.textContent = "Read more";
+        readMore.style.paddingBottom = "15px"; // <-- Add space
+
         const bookmarkBtn = document.createElement('button');
         bookmarkBtn.className = 'bookmark-btn';
         bookmarkBtn.textContent = 'Bookmark';
         bookmarkBtn.onclick = () => bookmarkNews(news, bookmarkBtn);
 
-        card.append(headline, summary, source, bookmarkBtn);
+        card.append(headline, summary, source, readMore, bookmarkBtn);
         newsContainer.appendChild(card);
     });
 }
+
+
 
 function displayBookmarks(bookmarks) {
     bookmarkContainer.innerHTML = '';
