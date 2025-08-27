@@ -94,3 +94,27 @@ module.exports.getUserBookmarks = async function(userId) {
 
   return bookmarks;
 };
+
+// Delete a bookmark by ID + user check
+module.exports.deleteUserBookmark = async function deleteUserBookmark(bookmarkId, userId) {
+  // Check ownership
+  const bookmark = await prisma.bookmark.findUnique({
+    where: { id: bookmarkId },
+  });
+
+  if (!bookmark) {
+    throw new Error("Bookmark not found");
+  }
+
+  if (bookmark.userId !== userId) {
+    throw new Error("Not authorized to remove this bookmark");
+  }
+
+  // Delete
+  await prisma.bookmark.delete({
+    where: { id: bookmarkId },
+  });
+
+  return { message: "Bookmark removed successfully" };
+}
+

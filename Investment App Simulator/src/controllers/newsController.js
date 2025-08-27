@@ -58,3 +58,27 @@ module.exports.getUserBookmarksController = async function(req, res) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
+module.exports.removeBookmarkController = async function (req, res) {
+  const bookmarkId = parseInt(req.params.id);
+  const userId = req.user.id; // comes from jwtMiddleware
+
+  if (!bookmarkId) {
+    return res.status(400).json({ success: false, message: "Bookmark ID is required" });
+  }
+
+  try {
+    const result = await newsModel.deleteUserBookmark(bookmarkId, userId);
+    return res.status(200).json({ success: true, message: result.message });
+  } catch (error) {
+    if (error.message === "Bookmark not found") {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    if (error.message === "Not authorized to remove this bookmark") {
+      return res.status(403).json({ success: false, message: error.message });
+    }
+    console.error("Error removing bookmark:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
