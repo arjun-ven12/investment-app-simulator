@@ -101,10 +101,17 @@ function displayBookmarks(bookmarks) {
         readMore.target = "_blank";
         readMore.textContent = "Read more";
 
-        card.append(headline, summary, source, datetime, readMore);
+        // 🆕 Remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Remove ❌';
+        removeBtn.onclick = () => removeBookmark(bookmark.id);
+
+        card.append(headline, summary, source, datetime, readMore, removeBtn);
         bookmarkContainer.appendChild(card);
     });
 }
+
 
 
 async function fetchBookmarks() {
@@ -190,6 +197,36 @@ async function bookmarkNews(newsData, button) {
         console.error(err);
         alert(err.message);
         button.disabled = false;
+    }
+}
+
+async function removeBookmark(bookmarkId) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("You must be logged in to remove a bookmark.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/news/news/bookmark/${bookmarkId}`, {
+            method: 'DELETE',
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            alert(result.message || "Failed to remove bookmark");
+            return;
+        }
+
+        alert("Bookmark removed!");
+        fetchBookmarks(); // refresh list
+    } catch (err) {
+        console.error("Error removing bookmark:", err);
+        alert(err.message);
     }
 }
 

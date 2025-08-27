@@ -84,3 +84,19 @@ h1, h2 {
     color: red;
     margin-bottom: 10px;
 }
+
+
+.remove-btn {
+    margin-top: 8px;
+    background: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.remove-btn:hover {
+    background: #e60000;
+}
