@@ -1,7 +1,9 @@
 const newsModel = require('../models/news');
 
 const { Parser } = require('json2csv');
-
+//////////////////////////////////////////////////////
+// GET NEWS CONTROLLER
+//////////////////////////////////////////////////////
 module.exports.getNewsController = function (req, res) {
     const { category, minId } = req.query;
 
@@ -20,7 +22,9 @@ module.exports.getNewsController = function (req, res) {
         });
 };
 
-
+//////////////////////////////////////////////////////
+// CREATE BOOKMARKS
+//////////////////////////////////////////////////////
 module.exports.bookmarkNewsController = async function(req, res) {
   const { userId, newsData } = req.body;
 
@@ -42,7 +46,9 @@ module.exports.bookmarkNewsController = async function(req, res) {
   }
 };
 
-
+//////////////////////////////////////////////////////
+// GET BOOKMARKS
+//////////////////////////////////////////////////////
 module.exports.getUserBookmarksController = async function(req, res) {
     const userId = req.user.id; // Get userId from JWT middleware
 
@@ -59,7 +65,9 @@ module.exports.getUserBookmarksController = async function(req, res) {
     }
 };
 
-
+//////////////////////////////////////////////////////
+// DELETE BOOKMARKS
+//////////////////////////////////////////////////////
 module.exports.removeBookmarkController = async function (req, res) {
   const bookmarkId = parseInt(req.params.id);
   const userId = req.user.id; // comes from jwtMiddleware

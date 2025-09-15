@@ -13,4 +13,5 @@ router.post('/news/bookmark', newsController.bookmarkNewsController);
 router.get('/news/bookmarks', jwtMiddleware.verifyToken, newsController.getUserBookmarksController);
 router.delete('/news/bookmark/:id', jwtMiddleware.verifyToken, newsController.removeBookmarkController);
 
+
 module.exports = router;

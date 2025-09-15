@@ -4,6 +4,10 @@ const prisma = require('./prismaClient');
 const fetch = require("node-fetch");
 const FINNHUB_API_KEY = "d2mgubhr01qog443m5m0d2mgubhr01qog443m5mg";
 
+
+//////////////////////////////////////////////////////
+// GET MARKET NEWS
+//////////////////////////////////////////////////////
 module.exports.getMarketNews = function getMarketNews(category, minId = 0) {
   if (!category) {
     return Promise.reject(new Error("Category is required"));
@@ -19,7 +23,9 @@ module.exports.getMarketNews = function getMarketNews(category, minId = 0) {
     });
 };
 
-
+//////////////////////////////////////////////////////
+// CREATE NEWS BOOKMARK 
+//////////////////////////////////////////////////////
 module.exports.bookmarkNews = async function (userId, newsData) {
   if (!newsData || !newsData.apiId || !newsData.url) {
     throw new Error("Invalid news data");
@@ -84,6 +90,9 @@ module.exports.bookmarkNews = async function (userId, newsData) {
   return { success: true, bookmark };
 };
 
+//////////////////////////////////////////////////////
+// GET USER'S BOOKMARKS
+//////////////////////////////////////////////////////
 module.exports.getUserBookmarks = async function(userId) {
   if (!userId) throw new Error("userId is required");
 
@@ -95,6 +104,9 @@ module.exports.getUserBookmarks = async function(userId) {
   return bookmarks;
 };
 
+//////////////////////////////////////////////////////
+// DELETE USER'S BOOKMARKS
+//////////////////////////////////////////////////////
 // Delete a bookmark by ID + user check
 module.exports.deleteUserBookmark = async function deleteUserBookmark(bookmarkId, userId) {
   // Check ownership

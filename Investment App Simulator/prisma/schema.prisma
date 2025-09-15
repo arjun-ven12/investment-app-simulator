@@ -128,13 +128,14 @@ model Trade {
 
 model News {
   id          Int           @id @default(autoincrement()) @map("news_id")
-  apiId       Int       @unique
+  apiId       Int           @unique
   headline    String
   summary     String?
   url         String
   source      String?
   datetime    DateTime?
   bookmarks   Bookmark[]
+  NewsComment NewsComment[]
 }
 
 model Bookmark {
@@ -146,7 +147,6 @@ model Bookmark {
 
   @@unique([userId, newsId]) // Prevent duplicate bookmarks
 }
-
 
 model BlogPost {
   id         Int      @id @default(autoincrement())
@@ -197,7 +197,8 @@ model User {
   referralUsages   ReferralUsage[]
   trading          Trade[]
   referredBy       Referral?       @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
-  bookmarks    Bookmark[]
+  bookmarks        Bookmark[]
+  NewsComment      NewsComment[]
 }
 
 model Referral {
@@ -242,6 +243,21 @@ model FavoriteApi {
   userId Int
   symbol String
   User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NewsComment {
+  id        Int      @id @default(autoincrement())
+  newsId    Int
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+  @@index([userId])
 }
 
 model Goal {
