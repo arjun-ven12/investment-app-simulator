@@ -22,5 +22,6 @@ router.get('/news/like/:newsId', newsController.getNewsLikesController);
 router.get('/news/likes', jwtMiddleware.verifyToken, newsController.getUserLikesController);
 
 router.get('/categories', newsController.getCategoriesController);
+router.get('/news/likes/summary', jwtMiddleware.verifyToken, newsController.getNewsLikesSummaryController);
 
 module.exports = router;

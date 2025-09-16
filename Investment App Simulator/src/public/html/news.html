@@ -14,10 +14,11 @@
     <div id="navbar-container"></div>
 
     <h1>News Feed</h1>
-    <select id="category-filter">
-      <option value="">All Categories</option>
-    </select>
-
+<div class="category-wrapper">
+  <select id="category-filter">
+    <option value="" selected disabled>-- Select Category --</option>
+  </select>
+</div>
     <div class="layout">
       <!-- Main News Section -->
       <main class="news-section">
@@ -30,7 +31,6 @@
       <aside class="bookmark-section">
         <h2>Your Bookmarks</h2>
         <div id="bookmark-container" class="cards-container"></div>
-      </aside>
     </div>
 
     <script src="../js/news.js"></script>

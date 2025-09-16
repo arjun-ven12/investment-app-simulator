@@ -163,3 +163,16 @@ module.exports.getCategoriesController = async function (req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+module.exports.getNewsLikesSummaryController = async function(req, res) {
+  const userId = req.user?.id; // optional
+
+  try {
+    const newsLikes = await newsModel.getNewsLikesSummary(userId ? parseInt(userId) : null);
+    return res.status(200).json({ success: true, newsLikes });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -256,3 +256,43 @@ module.exports.getCategories = async function () {
     orderBy: { name: 'asc' }
   });
 };
+
+
+async function fetchNewsLikesSummary() {
+    const token = localStorage.getItem("token");
+
+    try {
+        const res = await fetch('/api/news/likes/summary', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.message || "Failed to fetch news likes");
+
+        console.log(data.newsLikes); // each item has { id, headline, totalLikes, likedByUser }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+module.exports.getNewsLikesSummary = async function(userId = null) {
+  const newsList = await prisma.news.findMany({
+    include: {
+      NewsLike: true,  // include all likes
+    },
+  });
+
+  return newsList.map(news => {
+    const likedByUser = userId
+      ? news.NewsLike.some(like => like.userId === userId)
+      : false;
+
+    return {
+      id: news.id,
+      apiId: news.apiId,
+      headline: news.headline,
+      totalLikes: news.NewsLike.length,
+      likedByUser,
+    };
+  });
+};

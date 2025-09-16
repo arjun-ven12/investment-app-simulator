@@ -36,9 +36,9 @@ async function fetchNews(category) {
 }
 
 
-
 function displayNews(newsList) {
     newsContainer.innerHTML = '';
+
     newsList.forEach(news => {
         const card = document.createElement('div');
         card.className = 'news-card';
@@ -67,26 +67,55 @@ function displayNews(newsList) {
         readMore.href = news.url;
         readMore.target = "_blank";
         readMore.textContent = "Read more";
-        readMore.style.paddingBottom = "15px"; // <-- Add space
 
         const bookmarkBtn = document.createElement('button');
         bookmarkBtn.className = 'bookmark-btn';
         bookmarkBtn.textContent = 'Bookmark';
         bookmarkBtn.onclick = () => bookmarkNews(news, bookmarkBtn);
 
+        bookmarkBtn.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bookmark" viewBox="0 0 16 16">
+  <path d="M2 2v13l6-5 6 5V2H2z"/>
+</svg>
+`;
+        // Like button + count
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
         likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-        likeBtn.onclick = () => toggleLike(news, likeBtn);
 
         const likeCountSpan = document.createElement('span');
         likeCountSpan.className = 'like-count';
-        likeCountSpan.textContent = ` ${news.totalLikes || 0} likes`;
+        likeCountSpan.textContent = ` ${formatLikes(news.totalLikes || 0)}`;
 
+
+        // Toggle like handler
         likeBtn.onclick = async () => {
-            const result = await toggleLike(news, likeBtn);
-            if (result) {
-                likeCountSpan.textContent = ` ${result.totalLikes} likes`;
+            // Optimistically update UI first
+            const currentlyLiked = news.liked;
+            news.liked = !currentlyLiked;
+            news.totalLikes = currentlyLiked ? news.totalLikes - 1 : news.totalLikes + 1;
+
+            likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
+            likeCountSpan.textContent = ` ${news.totalLikes} likes`;
+
+            try {
+                const result = await toggleLike(news, likeBtn);
+
+                // If server fails, rollback
+                if (!result) {
+                    news.liked = currentlyLiked;
+                    news.totalLikes = currentlyLiked ? news.totalLikes + 1 : news.totalLikes - 1;
+                    likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
+                    likeCountSpan.textContent = ` ${news.totalLikes} likes`;
+                } else {
+                    // Ensure totalLikes matches server response
+                    news.totalLikes = result.totalLikes;
+                    news.liked = result.liked;
+                    likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
+                    likeCountSpan.textContent = ` ${formatLikes(result.totalLikes)}`;
+                }
+            } catch (err) {
+                console.error(err);
             }
         };
 
@@ -94,6 +123,7 @@ function displayNews(newsList) {
         newsContainer.appendChild(card);
     });
 }
+
 
 async function fetchUserLikes() {
     const token = localStorage.getItem("token");
@@ -327,54 +357,54 @@ async function toggleLike(newsData, button) {
 }
 
 async function populateCategoryFilter() {
-  try {
-    const res = await fetch('/api/news/categories');
-    const data = await res.json();
+    try {
+        const res = await fetch('/api/news/categories');
+        const data = await res.json();
 
-    if (data.success) {
-      const select = document.getElementById('category-filter');
-      select.innerHTML = `<option value="">-- Select Category --</option>`; // reset
+        if (data.success) {
+            const select = document.getElementById('category-filter');
+            select.innerHTML = `<option value="">-- Select Category --</option>`; // reset
 
-      data.categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.name;
-        option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
-        select.appendChild(option);
-      });
+            data.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+                select.appendChild(option);
+            });
 
-      // 🆕 add change event: fetch news when category changes
-      select.addEventListener('change', (e) => {
-        if (e.target.value) {
-          fetchNewsByCategory(e.target.value);
+            // 🆕 add change event: fetch news when category changes
+            select.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    fetchNewsByCategory(e.target.value);
+                }
+            });
         }
-      });
+    } catch (err) {
+        console.error("Failed to load categories", err);
     }
-  } catch (err) {
-    console.error("Failed to load categories", err);
-  }
 }
 
 async function fetchNewsByCategory(category) {
-  const token = localStorage.getItem("token");
-  try {
-    const response = await fetch(`/api/news/news?category=${category}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
+    const token = localStorage.getItem("token");
+    try {
+        const response = await fetch(`/api/news/news?category=${category}`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
-    if (!response.ok) throw new Error('Failed to fetch news');
+        if (!response.ok) throw new Error('Failed to fetch news');
 
-    const result = await response.json();
-    if (!result.success) throw new Error(result.message || 'Failed to fetch news');
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || 'Failed to fetch news');
 
-    displayNews(result.news);
-  } catch (err) {
-    console.error(err);
-    errorMessage.textContent = err.message;
-  }
+        displayNews(result.news);
+    } catch (err) {
+        console.error(err);
+        errorMessage.textContent = err.message;
+    }
 }
 
 document.getElementById('category-filter').addEventListener('change', (e) => {
@@ -384,6 +414,27 @@ document.getElementById('category-filter').addEventListener('change', (e) => {
     }
 });
 
+async function fetchNewsLikesSummary() {
+    const token = localStorage.getItem("token");
+
+    try {
+        const res = await fetch('/api/news/likes/summary', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.message || "Failed to fetch news likes");
+
+        console.log(data.newsLikes); // each item has { id, headline, totalLikes, likedByUser }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// helper function to format likes text
+function formatLikes(count) {
+    return `${count} like${count === 1 ? '' : 's'}`;
+}
 
 document.addEventListener("DOMContentLoaded", populateCategoryFilter);
 
