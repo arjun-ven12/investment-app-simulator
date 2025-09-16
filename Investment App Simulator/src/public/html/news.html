@@ -9,17 +9,33 @@
 </head>
 
 <body>
-    <div id="navbar-container"></div>
+<body>
+  <div id="navbar-container"></div>
 
-    <h1>News Feed</h1>
-     <h2>Your Bookmarks</h2>
-    <div id="bookmark-container" class="cards-container"></div>
+  <h1>News Feed</h1>
 
-    <h2>Latest News</h2>
-    <div id="error-message"></div>
-    <div id="news-container" class="cards-container"></div>
+  <div class="layout">
+    <!-- Main News Section -->
+    <main class="news-section">
+      <h2>Latest News</h2>
+      <div id="error-message"></div>
+      <div id="news-container" class="cards-container"></div>
+    </main>
 
-   
+    <!-- Sidebar for Bookmarks -->
+    <aside class="bookmark-section">
+      <h2>Your Bookmarks</h2>
+      <div id="bookmark-container" class="cards-container"></div>
+    </aside>
+  </div>
+
+  <script src="../js/news.js"></script>
+  <script src="../js/navbar.js"></script>
+</body>
+
+
+
+
 
     <script src="../js/news.js"></script>
     <script src="../js/navbar.js"></script>
