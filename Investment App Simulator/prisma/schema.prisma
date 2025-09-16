@@ -9,35 +9,35 @@ datasource db {
 }
 
 model Task {
-  id       Int              @id @default(autoincrement())
-  name     String
-  statusId Int
-  status   Status           @relation(fields: [statusId], references: [id])
-  persons  TaskAssignment[]
+id       Int              @id @default(autoincrement())
+name     String
+statusId Int
+status   Status           @relation(fields: [statusId], references: [id])
+persons  TaskAssignment[]
 }
 
 model Status {
-  id    Int    @id @default(autoincrement())
-  text  String @unique
-  tasks Task[]
+id    Int    @id @default(autoincrement())
+text  String @unique
+tasks Task[]
 }
 
 model Person {
-  id     Int              @id @default(autoincrement())
-  email  String           @unique
-  name   String
-  avatar String?
-  tasks  TaskAssignment[]
+id     Int              @id @default(autoincrement())
+email  String           @unique
+name   String
+avatar String?
+tasks  TaskAssignment[]
 }
 
 model TaskAssignment {
-  taskId     Int
-  personId   Int
-  assignedAt DateTime @default(now())
-  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+taskId     Int
+personId   Int
+assignedAt DateTime @default(now())
+person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-  @@id([taskId, personId], name: "assignmentId")
+@@id([taskId, personId], name: "assignmentId")
 }
 
 model Company {
@@ -136,6 +136,7 @@ model News {
   datetime    DateTime?
   bookmarks   Bookmark[]
   NewsComment NewsComment[]
+  NewsLike    NewsLike[]
 }
 
 model Bookmark {
@@ -199,6 +200,7 @@ model User {
   referredBy       Referral?       @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
   bookmarks        Bookmark[]
   NewsComment      NewsComment[]
+  NewsLike         NewsLike[]
 }
 
 model Referral {
@@ -298,4 +300,18 @@ model Reward {
   cost              Int
   probability       Decimal    @db.Decimal(5, 3)
   redeemedBy        RedeemBy[]
+}
+
+model NewsLike {
+  id        Int      @id @default(autoincrement())
+  newsId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, userId]) // prevent duplicate likes
+  @@index([newsId])
+  @@index([userId])
 }
