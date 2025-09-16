@@ -21,4 +21,6 @@ router.delete('/news/like/:newsId', jwtMiddleware.verifyToken, newsController.un
 router.get('/news/like/:newsId', newsController.getNewsLikesController);
 router.get('/news/likes', jwtMiddleware.verifyToken, newsController.getUserLikesController);
 
+router.get('/categories', newsController.getCategoriesController);
+
 module.exports = router;

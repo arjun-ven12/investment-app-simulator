@@ -152,3 +152,14 @@ module.exports.getUserLikesController = async function(req, res) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
+module.exports.getCategoriesController = async function (req, res) {
+  try {
+    const categories = await newsModel.getCategories();
+    return res.status(200).json({ success: true, categories });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

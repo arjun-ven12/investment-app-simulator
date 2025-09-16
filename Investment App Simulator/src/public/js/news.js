@@ -11,10 +11,10 @@ function getUserIdFromToken() {
     return payload.id;
 }
 
-async function fetchNews() {
+async function fetchNews(category) {
     const token = localStorage.getItem("token");
     try {
-        const response = await fetch('/api/news/news?category=general', {
+        const response = await fetch(`/api/news/news?category=${category}`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -34,6 +34,7 @@ async function fetchNews() {
         errorMessage.textContent = err.message;
     }
 }
+
 
 
 function displayNews(newsList) {
@@ -324,6 +325,67 @@ async function toggleLike(newsData, button) {
         button.disabled = false;
     }
 }
+
+async function populateCategoryFilter() {
+  try {
+    const res = await fetch('/api/news/categories');
+    const data = await res.json();
+
+    if (data.success) {
+      const select = document.getElementById('category-filter');
+      select.innerHTML = `<option value="">-- Select Category --</option>`; // reset
+
+      data.categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.name;
+        option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+        select.appendChild(option);
+      });
+
+      // 🆕 add change event: fetch news when category changes
+      select.addEventListener('change', (e) => {
+        if (e.target.value) {
+          fetchNewsByCategory(e.target.value);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Failed to load categories", err);
+  }
+}
+
+async function fetchNewsByCategory(category) {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`/api/news/news?category=${category}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch news');
+
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message || 'Failed to fetch news');
+
+    displayNews(result.news);
+  } catch (err) {
+    console.error(err);
+    errorMessage.textContent = err.message;
+  }
+}
+
+document.getElementById('category-filter').addEventListener('change', (e) => {
+    const selectedCategory = e.target.value;
+    if (selectedCategory) {
+        fetchNews(selectedCategory);
+    }
+});
+
+
+document.addEventListener("DOMContentLoaded", populateCategoryFilter);
 
 
 // Load news and bookmarks on page load

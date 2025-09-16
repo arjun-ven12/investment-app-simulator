@@ -23,40 +23,43 @@ module.exports.getMarketNews = function getMarketNews(category, minId = 0) {
     });
 };
 
-module.exports.getMarketNewsWithUserLikes = async function(userId, category) {
-    if (!userId) throw new Error("userId required");
+module.exports.getMarketNewsWithUserLikes = async function (userId, category) {
+  if (!userId) throw new Error("userId required");
 
-    const apiNews = await this.getMarketNews(category);
+  const apiNews = await this.getMarketNews(category);
 
-    const newsWithLikes = await Promise.all(apiNews.map(async newsItem => {
-        let dbNews = await prisma.news.findUnique({
-            where: { apiId: Number(newsItem.id) }
-        });
+  const newsWithLikes = await Promise.all(apiNews.map(async newsItem => {
+    let dbNews = await prisma.news.findUnique({
+      where: { apiId: Number(newsItem.id) }
+    });
 
-        if (!dbNews) {
-            dbNews = await prisma.news.create({
-                data: {
-                    apiId: Number(newsItem.id),
-                    headline: newsItem.headline,
-                    url: newsItem.url,
-                    summary: newsItem.summary,
-                    source: newsItem.source,
-                    datetime: newsItem.datetime ? new Date(newsItem.datetime * 1000) : null
-                }
-            });
+    if (!dbNews) {
+      dbNews = await prisma.news.create({
+        data: {
+          apiId: Number(newsItem.id),
+          headline: newsItem.headline,
+          url: newsItem.url,
+          summary: newsItem.summary,
+          source: newsItem.source,
+          datetime: newsItem.datetime ? new Date(newsItem.datetime * 1000) : null,
+          category: {
+            connect: { name: "forex" }  // ✅ connect to existing NewsCategory
+          }
         }
+      });
+    }
 
-        const like = await prisma.newsLike.findFirst({
-            where: { userId, newsId: dbNews.id }
-        });
+    const like = await prisma.newsLike.findFirst({
+      where: { userId, newsId: dbNews.id }
+    });
 
-          const totalLikes = await prisma.newsLike.count({
-            where: { newsId: dbNews.id }
-        });
-        return { ...newsItem, liked: !!like, totalLikes };
-    }));
+    const totalLikes = await prisma.newsLike.count({
+      where: { newsId: dbNews.id }
+    });
+    return { ...newsItem, liked: !!like, totalLikes };
+  }));
 
-    return newsWithLikes;
+  return newsWithLikes;
 };
 //////////////////////////////////////////////////////
 // CREATE NEWS BOOKMARK 
@@ -86,7 +89,10 @@ module.exports.bookmarkNews = async function (userId, newsData) {
         url: newsData.url,
         summary: newsData.summary,
         source: newsData.source,
-        datetime: datetime
+        datetime: datetime,
+        category: {
+          connect: { name: "forex" }  // ✅ connect to existing NewsCategory
+        }
       }
     });
   }
@@ -169,7 +175,7 @@ module.exports.deleteUserBookmark = async function deleteUserBookmark(bookmarkId
 //////////////////////////////////////////////////////
 // CREATE NEWS LIKE
 //////////////////////////////////////////////////////
-module.exports.toggleLikeNews = async function(userId, newsData) {
+module.exports.toggleLikeNews = async function (userId, newsData) {
   if (!userId || !newsData || !newsData.apiId) {
     throw new Error("userId and newsData.apiId are required");
   }
@@ -187,7 +193,10 @@ module.exports.toggleLikeNews = async function(userId, newsData) {
         url: newsData.url,
         summary: newsData.summary,
         source: newsData.source,
-        datetime: datetime
+        datetime: datetime,
+        category: {
+          connect: { name: "forex" }  // ✅ connect to existing NewsCategory
+        }
       }
     });
   }
@@ -239,4 +248,11 @@ module.exports.removeLike = async function (userId, newsLikeId) {
   });
 
   return { message: "Like removed successfully" };
+};
+
+
+module.exports.getCategories = async function () {
+  return await prisma.newsCategory.findMany({
+    orderBy: { name: 'asc' }
+  });
 };
