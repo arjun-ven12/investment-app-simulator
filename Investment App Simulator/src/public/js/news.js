@@ -12,12 +12,23 @@ function getUserIdFromToken() {
 }
 
 async function fetchNews() {
+    const token = localStorage.getItem("token");
     try {
-        const response = await fetch('/api/news/news?category=general');
+        const response = await fetch('/api/news/news?category=general', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
         if (!response.ok) throw new Error('Failed to fetch news');
 
-        const newsList = await response.json();
-        displayNews(newsList);
+        const result = await response.json();
+
+        if (!result.success) throw new Error(result.message || 'Failed to fetch news');
+
+        displayNews(result.news); // <-- use result.news
     } catch (err) {
         console.error(err);
         errorMessage.textContent = err.message;
@@ -62,12 +73,38 @@ function displayNews(newsList) {
         bookmarkBtn.textContent = 'Bookmark';
         bookmarkBtn.onclick = () => bookmarkNews(news, bookmarkBtn);
 
-        card.append(headline, summary, source, readMore, bookmarkBtn);
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'like-btn';
+        likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
+        likeBtn.onclick = () => toggleLike(news, likeBtn);
+
+        const likeCountSpan = document.createElement('span');
+        likeCountSpan.className = 'like-count';
+        likeCountSpan.textContent = ` ${news.totalLikes || 0} likes`;
+
+        likeBtn.onclick = async () => {
+            const result = await toggleLike(news, likeBtn);
+            if (result) {
+                likeCountSpan.textContent = ` ${result.totalLikes} likes`;
+            }
+        };
+
+        card.append(headline, summary, source, readMore, bookmarkBtn, likeBtn, likeCountSpan);
         newsContainer.appendChild(card);
     });
 }
 
+async function fetchUserLikes() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
+    const response = await fetch('/api/news/news/likes', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const result = await response.json();
+    // display user-liked news in a separate section
+}
 
 function displayBookmarks(bookmarks) {
     bookmarkContainer.innerHTML = '';
@@ -130,9 +167,9 @@ async function fetchBookmarks() {
     try {
         const response = await fetch('/api/news/news/bookmarks', {
             method: 'GET',
-            headers: { 
+            headers: {
                 "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json" 
+                "Content-Type": "application/json"
             },
         });
 
@@ -238,6 +275,56 @@ async function removeBookmark(bookmarkId) {
         alert(err.message);
     }
 }
+
+async function toggleLike(newsData, button) {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+        alert("You must be logged in to like news.");
+        return null;
+    }
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch('/api/news/news/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({
+                userId: parseInt(userId),
+                newsData: {
+                    apiId: newsData.id,
+                    headline: newsData.headline,
+                    summary: newsData.summary,
+                    url: newsData.url,
+                    source: newsData.source,
+                    image: newsData.image,
+                    datetime: newsData.datetime,
+                    category: newsData.category
+                }
+            }),
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            alert(result.message || 'Failed to toggle like');
+            return null;
+        }
+
+        // Update button UI
+        button.textContent = result.liked ? '❤️ Liked' : '🤍 Like';
+        return result; // <-- return result including totalLikes
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
+        return null;
+    } finally {
+        button.disabled = false;
+    }
+}
+
 
 // Load news and bookmarks on page load
 fetchNews();

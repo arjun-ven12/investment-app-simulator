@@ -151,3 +151,26 @@ a:hover {
   text-align: center;
   margin-top: 10px;
 }
+
+
+/* Like Button */
+.like-btn {
+    align-self: flex-start;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-left: 5px;
+}
+
+.like-btn:hover {
+    background-color: #ffcccc;
+}
+
+.like-btn:disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
+}

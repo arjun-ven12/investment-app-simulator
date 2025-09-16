@@ -23,6 +23,41 @@ module.exports.getMarketNews = function getMarketNews(category, minId = 0) {
     });
 };
 
+module.exports.getMarketNewsWithUserLikes = async function(userId, category) {
+    if (!userId) throw new Error("userId required");
+
+    const apiNews = await this.getMarketNews(category);
+
+    const newsWithLikes = await Promise.all(apiNews.map(async newsItem => {
+        let dbNews = await prisma.news.findUnique({
+            where: { apiId: Number(newsItem.id) }
+        });
+
+        if (!dbNews) {
+            dbNews = await prisma.news.create({
+                data: {
+                    apiId: Number(newsItem.id),
+                    headline: newsItem.headline,
+                    url: newsItem.url,
+                    summary: newsItem.summary,
+                    source: newsItem.source,
+                    datetime: newsItem.datetime ? new Date(newsItem.datetime * 1000) : null
+                }
+            });
+        }
+
+        const like = await prisma.newsLike.findFirst({
+            where: { userId, newsId: dbNews.id }
+        });
+
+          const totalLikes = await prisma.newsLike.count({
+            where: { newsId: dbNews.id }
+        });
+        return { ...newsItem, liked: !!like, totalLikes };
+    }));
+
+    return newsWithLikes;
+};
 //////////////////////////////////////////////////////
 // CREATE NEWS BOOKMARK 
 //////////////////////////////////////////////////////
@@ -93,7 +128,7 @@ module.exports.bookmarkNews = async function (userId, newsData) {
 //////////////////////////////////////////////////////
 // GET USER'S BOOKMARKS
 //////////////////////////////////////////////////////
-module.exports.getUserBookmarks = async function(userId) {
+module.exports.getUserBookmarks = async function (userId) {
   if (!userId) throw new Error("userId is required");
 
   const bookmarks = await prisma.bookmark.findMany({
@@ -130,3 +165,78 @@ module.exports.deleteUserBookmark = async function deleteUserBookmark(bookmarkId
   return { message: "Bookmark removed successfully" };
 }
 
+
+//////////////////////////////////////////////////////
+// CREATE NEWS LIKE
+//////////////////////////////////////////////////////
+module.exports.toggleLikeNews = async function(userId, newsData) {
+  if (!userId || !newsData || !newsData.apiId) {
+    throw new Error("userId and newsData.apiId are required");
+  }
+
+  let news = await prisma.news.findUnique({
+    where: { apiId: Number(newsData.apiId) }
+  });
+
+  if (!news) {
+    const datetime = newsData.datetime ? new Date(newsData.datetime * 1000) : null;
+    news = await prisma.news.create({
+      data: {
+        apiId: Number(newsData.apiId),
+        headline: newsData.headline,
+        url: newsData.url,
+        summary: newsData.summary,
+        source: newsData.source,
+        datetime: datetime
+      }
+    });
+  }
+
+  const existingLike = await prisma.newsLike.findFirst({
+    where: { userId, newsId: news.id }
+  });
+
+  if (existingLike) {
+    await prisma.newsLike.delete({ where: { id: existingLike.id } });
+    const totalLikes = await prisma.newsLike.count({ where: { newsId: news.id } });
+    return { success: true, liked: false, message: "News unliked successfully", totalLikes };
+  }
+
+  await prisma.newsLike.create({ data: { userId, newsId: news.id } });
+  const totalLikes = await prisma.newsLike.count({ where: { newsId: news.id } });
+  return { success: true, liked: true, message: "News liked successfully", totalLikes };
+};
+
+
+
+//////////////////////////////////////////////////////
+// GET USER'S LIKES
+//////////////////////////////////////////////////////
+module.exports.getUserLikes = async function (userId) {
+  if (!userId) throw new Error("userId is required");
+
+  const likes = await prisma.newsLike.findMany({
+    where: { userId },
+    include: { news: true }
+  });
+
+  return likes;
+};
+
+//////////////////////////////////////////////////////
+// REMOVE LIKE
+//////////////////////////////////////////////////////
+module.exports.removeLike = async function (userId, newsLikeId) {
+  const like = await prisma.newsLike.findUnique({
+    where: { id: newsLikeId }
+  });
+
+  if (!like) throw new Error("Like not found");
+  if (like.userId !== userId) throw new Error("Not authorized to remove this like");
+
+  await prisma.newsLike.delete({
+    where: { id: newsLikeId }
+  });
+
+  return { message: "Like removed successfully" };
+};

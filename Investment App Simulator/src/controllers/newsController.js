@@ -4,22 +4,27 @@ const { Parser } = require('json2csv');
 //////////////////////////////////////////////////////
 // GET NEWS CONTROLLER
 //////////////////////////////////////////////////////
-module.exports.getNewsController = function (req, res) {
-    const { category, minId } = req.query;
 
-    newsModel.getMarketNews(category, minId)
-        .then(newsList => {
-            return res.status(200).json(newsList);
-        })
-        .catch(error => {
-            console.error(error);
+module.exports.getNewsController = async function(req, res) {
+  const { category, minId } = req.query;
+  const userId = req.user?.id;
 
-            if (error.message === 'Category is required') {
-                return res.status(400).json({ error: error.message });
-            }
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-            return res.status(500).json({ error: error.message });
-        });
+  try {
+    const newsList = await newsModel.getMarketNewsWithUserLikes(userId, category, minId);
+    return res.status(200).json({ success: true, news: newsList }); // <--- wrap in success + news
+  } catch (error) {
+    console.error(error);
+
+    if (error.message === 'Category is required') {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 //////////////////////////////////////////////////////
@@ -89,4 +94,61 @@ module.exports.removeBookmarkController = async function (req, res) {
     console.error("Error removing bookmark:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
+};
+
+
+// POST /news/like
+module.exports.likeNewsController = async function(req, res) {
+    const userId = req.user.id; // from JWT
+    const newsData = req.body.newsData;
+
+    try {
+        const result = await newsModel.toggleLikeNews(userId, newsData);
+        if (!result.success) return res.status(400).json(result);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// DELETE /news/like/:newsId
+module.exports.unlikeNewsController = async function(req, res) {
+    const userId = req.user.id;
+    const newsId = parseInt(req.params.newsId);
+
+    try {
+        const result = await newsModel.unlikeNews(userId, newsId);
+        if (!result.success) return res.status(400).json(result);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// GET /news/like/:newsId
+module.exports.getNewsLikesController = async function(req, res) {
+    const newsId = parseInt(req.params.newsId);
+
+    try {
+        const likes = await newsModel.getNewsLikes(newsId);
+        return res.status(200).json({ success: true, likes });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// GET /news/likes (user's likes)
+module.exports.getUserLikesController = async function(req, res) {
+    const userId = req.user.id;
+
+    try {
+        const likes = await newsModel.getUserLikes(userId);
+        return res.status(200).json({ success: true, likes });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
