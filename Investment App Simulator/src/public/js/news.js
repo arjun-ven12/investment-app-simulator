@@ -2,6 +2,24 @@ const newsContainer = document.getElementById('news-container');
 const bookmarkContainer = document.getElementById('bookmark-container');
 const errorMessage = document.getElementById('error-message');
 
+let userBookmarks = [];
+
+// global helper to update a bookmark button's UI
+function updateBookmarkButtonUI(button, bookmarked) {
+    if (!button) return;
+    if (bookmarked) {
+        button.textContent = 'Bookmarked ✅';
+        button.disabled = true;
+        button.style.backgroundColor = '#ccc'; // greyed out
+        button.style.cursor = 'not-allowed';
+    } else {
+        button.textContent = 'Bookmark';
+        button.disabled = false;
+        button.style.backgroundColor = '#007bff';
+        button.style.cursor = 'pointer';
+    }
+}
+
 // Helper to get userId from JWT token
 function getUserIdFromToken() {
     const token = localStorage.getItem('token');
@@ -9,6 +27,25 @@ function getUserIdFromToken() {
     const payloadBase64 = token.split('.')[1];
     const payload = JSON.parse(atob(payloadBase64));
     return payload.id;
+}
+
+async function fetchUserBookmarksIds() {
+    const token = localStorage.getItem("token");
+    if (!token) return [];
+
+    try {
+        const res = await fetch('/api/news/news/bookmarks', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            return data.bookmarks.map(b => b.news.apiId); // or b.news.id if you store that
+        }
+        return [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
 }
 
 async function fetchNews(category) {
@@ -35,9 +72,11 @@ async function fetchNews(category) {
     }
 }
 
-
-function displayNews(newsList) {
+async function displayNews(newsList) {
     newsContainer.innerHTML = '';
+
+    // Fetch current user's bookmarks
+    userBookmarks = await fetchUserBookmarksIds();
 
     newsList.forEach(news => {
         const card = document.createElement('div');
@@ -68,17 +107,40 @@ function displayNews(newsList) {
         readMore.target = "_blank";
         readMore.textContent = "Read more";
 
+        // Bookmarks
         const bookmarkBtn = document.createElement('button');
         bookmarkBtn.className = 'bookmark-btn';
-        bookmarkBtn.textContent = 'Bookmark';
-        bookmarkBtn.onclick = () => bookmarkNews(news, bookmarkBtn);
 
-        bookmarkBtn.innerHTML = `
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bookmark" viewBox="0 0 16 16">
-  <path d="M2 2v13l6-5 6 5V2H2z"/>
-</svg>
-`;
-        // Like button + count
+        // set a stable key for lookup (apiId or internal id)
+        const newsKey = news.id || news.apiId;
+        card.dataset.newsKey = newsKey; // so we can find this card later
+
+        const isBookmarked = userBookmarks.includes(newsKey);
+        updateBookmarkButtonUI(bookmarkBtn, isBookmarked);
+
+        // click handler: optimistic UI update -> call API -> rollback on failure
+        bookmarkBtn.onclick = async () => {
+            // if already bookmarked locally, do nothing
+            if (userBookmarks.includes(newsKey)) return;
+
+            // optimistic UI change
+            updateBookmarkButtonUI(bookmarkBtn, true);
+
+            const result = await bookmarkNews(news); // returns server result { success: true, bookmark: ... }
+
+            if (result && result.success) {
+                // add to local list so other cards reflect state
+                userBookmarks.push(newsKey);
+
+                // refresh bookmark sidebar immediately to show the new bookmark
+                fetchBookmarks();
+            } else {
+                // rollback if server failed
+                updateBookmarkButtonUI(bookmarkBtn, false);
+            }
+        };
+
+        // Likes (existing code)
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
         likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
@@ -87,35 +149,20 @@ function displayNews(newsList) {
         likeCountSpan.className = 'like-count';
         likeCountSpan.textContent = ` ${formatLikes(news.totalLikes || 0)}`;
 
-
-        // Toggle like handler
+        // Like toggle (existing code)
         likeBtn.onclick = async () => {
-            // Optimistically update UI first
             const currentlyLiked = news.liked;
             news.liked = !currentlyLiked;
             news.totalLikes = currentlyLiked ? news.totalLikes - 1 : news.totalLikes + 1;
-
             likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
             likeCountSpan.textContent = ` ${news.totalLikes} likes`;
 
-            try {
-                const result = await toggleLike(news, likeBtn);
-
-                // If server fails, rollback
-                if (!result) {
-                    news.liked = currentlyLiked;
-                    news.totalLikes = currentlyLiked ? news.totalLikes + 1 : news.totalLikes - 1;
-                    likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-                    likeCountSpan.textContent = ` ${news.totalLikes} likes`;
-                } else {
-                    // Ensure totalLikes matches server response
-                    news.totalLikes = result.totalLikes;
-                    news.liked = result.liked;
-                    likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-                    likeCountSpan.textContent = ` ${formatLikes(result.totalLikes)}`;
-                }
-            } catch (err) {
-                console.error(err);
+            const result = await toggleLike(news, likeBtn);
+            if (result) {
+                news.totalLikes = result.totalLikes;
+                news.liked = result.liked;
+                likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
+                likeCountSpan.textContent = ` ${formatLikes(result.totalLikes)}`;
             }
         };
 
@@ -123,6 +170,7 @@ function displayNews(newsList) {
         newsContainer.appendChild(card);
     });
 }
+
 
 
 async function fetchUserLikes() {
@@ -182,7 +230,8 @@ function displayBookmarks(bookmarks) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.textContent = 'Remove ❌';
-        removeBtn.onclick = () => removeBookmark(bookmark.id);
+        // pass both bookmark id and apiId so UI can sync immediately
+        removeBtn.onclick = () => removeBookmark(bookmark.id, news.apiId)
 
         card.append(headline, summary, source, datetime, readMore, removeBtn);
         bookmarkContainer.appendChild(card);
@@ -227,15 +276,12 @@ async function fetchBookmarks() {
     }
 }
 
-
-async function bookmarkNews(newsData, button) {
+async function bookmarkNews(newsData) {
     try {
-        button.disabled = true;
         const userId = getUserIdFromToken();
         if (!userId) {
-            alert("You must be logged in to bookmark news.");
-            button.disabled = false;
-            return;
+            console.error("You must be logged in to bookmark news.");
+            return { success: false };
         }
 
         const payloadBody = {
@@ -262,22 +308,23 @@ async function bookmarkNews(newsData, button) {
         });
 
         const result = await response.json();
+
         if (!result.success) {
-            alert(result.message || "Could not bookmark news");
-            button.disabled = false;
-            return;
+            console.error(result.message || "Could not bookmark news");
+            return { success: false };
         }
 
-        alert("Bookmarked successfully!");
-        fetchBookmarks();
+        // return success without alert
+        return { success: true, data: result.bookmark };
+
     } catch (err) {
-        console.error(err);
-        alert(err.message);
-        button.disabled = false;
+        console.error(err.message);
+        return { success: false };
     }
 }
 
-async function removeBookmark(bookmarkId) {
+
+async function removeBookmark(bookmarkId, newsApiId = null) {
     const token = localStorage.getItem("token");
     if (!token) {
         alert("You must be logged in to remove a bookmark.");
@@ -299,13 +346,34 @@ async function removeBookmark(bookmarkId) {
             return;
         }
 
-        alert("Bookmark removed!");
-        fetchBookmarks(); // refresh list
+        // Remove the apiId from local userBookmarks if provided
+        if (newsApiId) {
+            userBookmarks = userBookmarks.filter(k => String(k) !== String(newsApiId));
+        } else {
+            // fallback: re-sync from server
+            userBookmarks = await fetchUserBookmarksIds();
+        }
+
+        // If the news card for this apiId exists on the page, update its button UI
+        if (newsApiId) {
+            // find the card whose dataset.newsKey equals newsApiId
+            const selector = `.news-card[data-news-key="${newsApiId}"]`;
+            const card = document.querySelector(selector);
+            if (card) {
+                const cardBtn = card.querySelector('.bookmark-btn');
+                if (cardBtn) updateBookmarkButtonUI(cardBtn, false);
+            }
+        }
+
+        // Refresh bookmark sidebar to reflect deletion
+        await fetchBookmarks();
+
     } catch (err) {
         console.error("Error removing bookmark:", err);
-        alert(err.message);
+        alert(err.message || "An error occurred while removing bookmark");
     }
 }
+
 
 async function toggleLike(newsData, button) {
     const userId = getUserIdFromToken();

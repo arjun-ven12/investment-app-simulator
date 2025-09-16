@@ -319,3 +319,30 @@ a:hover {
     stroke: #007BFF;
     transform: scale(1.2);
 }
+
+/* Bookmark button */
+.bookmark-btn {
+  background: #007BFF;
+  color: #fff;
+  position: relative;
+  padding: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.bookmark-btn:hover {
+  background: #0056b3;
+}
+
+/* Bookmarked state: greyed out and disabled cursor */
+.bookmark-btn.bookmarked {
+  background-color: #bbb;   /* greyed out */
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Keep the icon visible but muted */
+.bookmark-btn.bookmarked .bookmark-icon {
+  stroke: #666;
+  fill: none; /* optional, you can fill with #666 if you want it solid */
+  transform: scale(1);
+}
