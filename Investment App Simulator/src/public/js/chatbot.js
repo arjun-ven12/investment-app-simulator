@@ -1,17 +1,8 @@
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
-const navbarToggle = document.getElementById('navbar-toggle');
-const navbarLinks = document.querySelector('.navbar-links');
-const statsButton = document.getElementById('stats-button'); 
-const logoutButton = document.getElementById("logoutButton");
-  
-// Logout functionality
-logoutButton.addEventListener("click", () => {
-    localStorage.removeItem("token"); // Clear authentication token
-    alert("You have been logged out.");
-    window.location.href = "./login.html";
-});
+
+
 
 // States
 let conversationHistory = []; 
@@ -30,12 +21,12 @@ async function sendMessage() {
     toggleLoadingIndicator(loadingState);
 
     try {
-        const response = await fetch('/api/chatbot', {
+        const response = await fetch('/api/chatbot/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ prompt: message }),
         });
 
         if (!response.ok) {
@@ -102,11 +93,8 @@ userInput.addEventListener('keypress', (e) => {
     }
 });
 
-statsButton.addEventListener('click', fetchLogs);
+// statsButton.addEventListener('click', fetchLogs);
 
-navbarToggle.addEventListener('click', () => {
-    navbarLinks.classList.toggle('active');
-});
 
 // Initial bot message
 addMessage('Welcome to the Fintech Chatbot! How can I assist you today?');
@@ -165,3 +153,32 @@ addMessage('Welcome to the Fintech Chatbot! How can I assist you today?');
 
 // // Initial bot message
 // addMessage('Welcome! How can I assist you today?');
+
+function toggleLoadingIndicator(isLoading) {
+    if (isLoading) {
+        // Show typing bubble
+        const typingBubble = document.createElement('div');
+        typingBubble.classList.add('typing');
+        typingBubble.setAttribute('id', 'typing-indicator');
+        typingBubble.innerHTML = '<span></span><span></span><span></span>';
+        chatMessages.appendChild(typingBubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    } else {
+        // Remove typing bubble
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) typingIndicator.remove();
+    }
+}
+
+// Modified addMessage to support **bold**
+function addMessage(content, isUser = false) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', isUser ? 'user-message' : 'bot-message');
+    
+    // Convert **text** to bold
+    const formatted = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    messageElement.innerHTML = formatted;
+
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
