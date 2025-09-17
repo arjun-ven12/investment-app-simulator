@@ -296,3 +296,61 @@ module.exports.getNewsLikesSummary = async function(userId = null) {
     };
   });
 };
+
+
+module.exports.incrementNewsView = async function(newsId, newsData = null) {
+  // 1️⃣ Find news by apiId
+  let news = await prisma.news.findUnique({
+    where: { apiId: Number(newsId) }
+  });
+
+  // 2️⃣ If not found, create it using newsData
+  if (!news) {
+    if (!newsData) throw new Error("News not found and no data provided to create it");
+
+    news = await prisma.news.create({
+      data: {
+        apiId: Number(newsData.id),
+        headline: newsData.headline,
+        url: newsData.url,
+        summary: newsData.summary,
+        source: newsData.source,
+        datetime: newsData.datetime ? new Date(newsData.datetime * 1000) : null,
+        category: {
+          connect: { name: newsData.category || "forex" }
+        },
+        views: 0
+      }
+    });
+  }
+
+  // 3️⃣ Increment views
+  news = await prisma.news.update({
+    where: { id: news.id },
+    data: { views: { increment: 1 } }
+  });
+
+  return news;
+};
+
+module.exports.getNewsViews = async function(newsId) {
+  if (!newsId) throw new Error('newsId required');
+
+  // try by apiId first (numbers from API), fallback to internal id
+  const numeric = Number(newsId);
+
+  let news = await prisma.news.findUnique({
+    where: { apiId: numeric },
+  });
+
+  // fallback: maybe someone passed internal id
+  if (!news) {
+    news = await prisma.news.findUnique({
+      where: { id: numeric },
+    });
+  }
+
+  if (!news) throw new Error('News not found');
+
+  return { id: news.id, apiId: news.apiId, views: news.views || 0 };
+};

@@ -346,3 +346,10 @@ a:hover {
   fill: none; /* optional, you can fill with #666 if you want it solid */
   transform: scale(1);
 }
+
+
+.news-card .views {
+    color: #333; /* dark grey, visible */
+    font-size: 0.9rem;
+    margin-top: 4px;
+}

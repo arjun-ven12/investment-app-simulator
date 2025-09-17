@@ -1,32 +1,87 @@
+// news.js - full cleaned version with socket.io integration
+
+// ---------------- SOCKET + SVG EYE ----------------
+let socket = null;
+
+function createEyeSVG(size = 16) {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  `;
+}
+
+// ---------------- DOM & SOCKET INIT ----------------
 const newsContainer = document.getElementById('news-container');
 const bookmarkContainer = document.getElementById('bookmark-container');
 const errorMessage = document.getElementById('error-message');
 
 let userBookmarks = [];
 
-// global helper to update a bookmark button's UI
-function updateBookmarkButtonUI(button, bookmarked) {
-    if (!button) return;
-    if (bookmarked) {
-        button.textContent = 'Bookmarked ✅';
-        button.disabled = true;
-        button.style.backgroundColor = '#ccc'; // greyed out
-        button.style.cursor = 'not-allowed';
-    } else {
-        button.textContent = 'Bookmark';
-        button.disabled = false;
-        button.style.backgroundColor = '#007bff';
-        button.style.cursor = 'pointer';
-    }
-}
+document.addEventListener('DOMContentLoaded', () => {
+  // Socket client must be loaded before this file
+  if (typeof io === 'undefined') {
+    console.warn('Socket.IO client (io) is not available. Make sure /socket.io/socket.io.js is included before news.js');
+  } else {
+    socket = io(); // connect to same origin
 
+    socket.on('connect', () => console.log('Socket connected (client):', socket.id));
+    socket.on('connect_error', (err) => console.error('Socket connect_error:', err));
+
+    // Accept multiple payload shapes: { apiId, id, newsId }
+    socket.on('newsViewUpdated', (payload) => {
+      if (!payload) return;
+      const idStr = payload.apiId ? String(payload.apiId) : (payload.id ? String(payload.id) : (payload.newsId ? String(payload.newsId) : null));
+      if (!idStr) return;
+
+      const card = document.querySelector(`.news-card[data-news-key="${idStr}"]`);
+      if (!card) return;
+      const viewsDiv = card.querySelector('.views');
+      if (!viewsDiv) return;
+
+      viewsDiv.innerHTML = `${createEyeSVG(16)} ${payload.views ?? 0}`;
+    });
+  }
+
+  // still populate categories on DOMContentLoaded
+  populateCategoryFilter();
+
+  // initial data loads
+  fetchNews();
+  fetchBookmarks();
+});
+
+
+// ---------------- Helpers & API calls ----------------
 // Helper to get userId from JWT token
 function getUserIdFromToken() {
     const token = localStorage.getItem('token');
     if (!token) return null;
-    const payloadBase64 = token.split('.')[1];
-    const payload = JSON.parse(atob(payloadBase64));
-    return payload.id;
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const payload = JSON.parse(atob(payloadBase64));
+      return payload.id;
+    } catch (e) {
+      return null;
+    }
+}
+
+async function fetchNewsViews(newsId) {
+    // Allow non-authenticated fetch: remove token requirement if you want public view counts
+    const token = localStorage.getItem("token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    try {
+        const res = await fetch(`/api/news/news/views/${newsId}`, {
+            headers
+        });
+        const data = await res.json();
+        if (data.success) return data.views || 0;
+        return 0;
+    } catch (err) {
+        console.error("Failed to fetch news views:", err);
+        return 0;
+    }
 }
 
 async function fetchUserBookmarksIds() {
@@ -39,7 +94,8 @@ async function fetchUserBookmarksIds() {
         });
         const data = await res.json();
         if (data.success) {
-            return data.bookmarks.map(b => b.news.apiId); // or b.news.id if you store that
+            // store apiId as string for consistent comparisons
+            return data.bookmarks.map(b => String(b.news.apiId));
         }
         return [];
     } catch (err) {
@@ -48,13 +104,14 @@ async function fetchUserBookmarksIds() {
     }
 }
 
-async function fetchNews(category) {
+async function fetchNews(category = '') {
     const token = localStorage.getItem("token");
     try {
-        const response = await fetch(`/api/news/news?category=${category}`, {
+        const url = category ? `/api/news/news?category=${encodeURIComponent(category)}` : '/api/news/news?category=top news';
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 "Content-Type": "application/json"
             }
         });
@@ -65,20 +122,66 @@ async function fetchNews(category) {
 
         if (!result.success) throw new Error(result.message || 'Failed to fetch news');
 
-        displayNews(result.news); // <-- use result.news
+        displayNews(result.news);
     } catch (err) {
         console.error(err);
-        errorMessage.textContent = err.message;
+        if (errorMessage) errorMessage.textContent = err.message;
     }
 }
 
-async function displayNews(newsList) {
+
+// increment view API (server will broadcast)
+async function incrementNewsViewAPI(newsId, newsData) {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch('/api/news/news/view', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ newsId, newsData })
+        });
+        return await res.json();
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+
+// ---------------- UI Rendering ----------------
+
+function updateBookmarkButtonUI(button, bookmarked) {
+    if (!button) return;
+    if (bookmarked) {
+        button.textContent = 'Bookmarked ✅';
+        button.disabled = true;
+        button.style.backgroundColor = '#ccc';
+        button.style.cursor = 'not-allowed';
+    } else {
+        button.textContent = 'Bookmark';
+        button.disabled = false;
+        button.style.backgroundColor = '#007bff';
+        button.style.cursor = 'pointer';
+    }
+}
+
+function formatLikes(count) {
+    return `${count} like${count === 1 ? '' : 's'}`;
+}
+
+async function displayNews(newsList = []) {
+    if (!newsContainer) return;
     newsContainer.innerHTML = '';
 
-    // Fetch current user's bookmarks
+    // Fetch current user's bookmarks (apiId strings)
     userBookmarks = await fetchUserBookmarksIds();
 
-    newsList.forEach(news => {
+    // Ensure list is an array
+    if (!Array.isArray(newsList)) newsList = [];
+
+    for (const news of newsList) {
         const card = document.createElement('div');
         card.className = 'news-card';
 
@@ -107,40 +210,64 @@ async function displayNews(newsList) {
         readMore.target = "_blank";
         readMore.textContent = "Read more";
 
-        // Bookmarks
+        const viewsDiv = document.createElement('div');
+        viewsDiv.className = 'views';
+        viewsDiv.innerHTML = `${createEyeSVG(16)} 0`; // default while fetching
+
+        // stable key as string (apiId preferred)
+        const newsKey = String(news.apiId || news.id);
+        card.dataset.newsKey = newsKey;
+
+        // fetch actual view count and set
+        fetchNewsViews(news.apiId || news.id).then(views => {
+            news.views = views;
+            viewsDiv.innerHTML = `${createEyeSVG(16)} ${views}`;
+        });
+
+        // click handler increments view and opens article
+        readMore.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                // call server to increment and broadcast
+                const result = await incrementNewsViewAPI(news.apiId || news.id, news);
+                if (result && result.success) {
+                    // update UI immediately using returned views if available
+                    const newViews = (result.views != null) ? result.views : ((news.views || 0) + 1);
+                    news.views = newViews;
+                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${newViews}`;
+                } else {
+                    // optimistic fallback
+                    news.views = (news.views || 0) + 1;
+                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${news.views}`;
+                }
+            } catch (err) {
+                console.error("Failed to increment view:", err);
+            } finally {
+                // open article
+                window.open(news.url, "_blank");
+            }
+        });
+
+        // Bookmark button
         const bookmarkBtn = document.createElement('button');
         bookmarkBtn.className = 'bookmark-btn';
-
-        // set a stable key for lookup (apiId or internal id)
-        const newsKey = news.id || news.apiId;
-        card.dataset.newsKey = newsKey; // so we can find this card later
 
         const isBookmarked = userBookmarks.includes(newsKey);
         updateBookmarkButtonUI(bookmarkBtn, isBookmarked);
 
-        // click handler: optimistic UI update -> call API -> rollback on failure
         bookmarkBtn.onclick = async () => {
-            // if already bookmarked locally, do nothing
             if (userBookmarks.includes(newsKey)) return;
-
-            // optimistic UI change
             updateBookmarkButtonUI(bookmarkBtn, true);
-
-            const result = await bookmarkNews(news); // returns server result { success: true, bookmark: ... }
-
+            const result = await bookmarkNews(news);
             if (result && result.success) {
-                // add to local list so other cards reflect state
                 userBookmarks.push(newsKey);
-
-                // refresh bookmark sidebar immediately to show the new bookmark
                 fetchBookmarks();
             } else {
-                // rollback if server failed
                 updateBookmarkButtonUI(bookmarkBtn, false);
             }
         };
 
-        // Likes (existing code)
+        // Like button + count
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
         likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
@@ -149,11 +276,10 @@ async function displayNews(newsList) {
         likeCountSpan.className = 'like-count';
         likeCountSpan.textContent = ` ${formatLikes(news.totalLikes || 0)}`;
 
-        // Like toggle (existing code)
         likeBtn.onclick = async () => {
             const currentlyLiked = news.liked;
             news.liked = !currentlyLiked;
-            news.totalLikes = currentlyLiked ? news.totalLikes - 1 : news.totalLikes + 1;
+            news.totalLikes = currentlyLiked ? (news.totalLikes - 1) : (news.totalLikes + 1);
             likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
             likeCountSpan.textContent = ` ${news.totalLikes} likes`;
 
@@ -166,28 +292,53 @@ async function displayNews(newsList) {
             }
         };
 
-        card.append(headline, summary, source, readMore, bookmarkBtn, likeBtn, likeCountSpan);
+        card.append(headline, summary, source, readMore, viewsDiv, bookmarkBtn, likeBtn, likeCountSpan);
         newsContainer.appendChild(card);
-    });
+    }
 }
 
 
+// ---------------- Bookmarks, Likes and other helpers ----------------
 
-async function fetchUserLikes() {
+async function fetchBookmarks() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const response = await fetch('/api/news/news/likes', {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const result = await response.json();
-    // display user-liked news in a separate section
+    try {
+        const response = await fetch('/api/news/news/bookmarks', {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            let errorMsg = 'Failed to fetch bookmarks';
+            try {
+                const errJson = await response.json();
+                errorMsg = errJson.message || errorMsg;
+            } catch (_) {
+                const errText = await response.text();
+                if (errText) errorMsg = errText;
+            }
+            throw new Error(errorMsg);
+        }
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || 'Failed to fetch bookmarks');
+
+        displayBookmarks(result.bookmarks);
+    } catch (err) {
+        console.error(err);
+        if (errorMessage) errorMessage.textContent = err.message;
+    }
 }
 
 function displayBookmarks(bookmarks) {
+    if (!bookmarkContainer) return;
     bookmarkContainer.innerHTML = '';
-    if (!bookmarks.length) {
+    if (!bookmarks || !bookmarks.length) {
         bookmarkContainer.textContent = "You have no bookmarks yet.";
         return;
     }
@@ -226,55 +377,16 @@ function displayBookmarks(bookmarks) {
         readMore.target = "_blank";
         readMore.textContent = "Read more";
 
-        // 🆕 Remove button
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
-        removeBtn.textContent = 'Remove ❌';
-        // pass both bookmark id and apiId so UI can sync immediately
-        removeBtn.onclick = () => removeBookmark(bookmark.id, news.apiId)
+        removeBtn.textContent = 'Remove';
+        removeBtn.onclick = () => removeBookmark(bookmark.id, news.apiId);
 
         card.append(headline, summary, source, datetime, readMore, removeBtn);
         bookmarkContainer.appendChild(card);
     });
 }
 
-
-
-async function fetchBookmarks() {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-        const response = await fetch('/api/news/news/bookmarks', {
-            method: 'GET',
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-        });
-
-        if (!response.ok) {
-            // Try to get JSON message, fallback to plain text
-            let errorMsg = 'Failed to fetch bookmarks';
-            try {
-                const errJson = await response.json();
-                errorMsg = errJson.message || errorMsg;
-            } catch (_) {
-                const errText = await response.text();
-                if (errText) errorMsg = errText;
-            }
-            throw new Error(errorMsg);
-        }
-
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message || 'Failed to fetch bookmarks');
-
-        displayBookmarks(result.bookmarks);
-    } catch (err) {
-        console.error(err);
-        errorMessage.textContent = err.message;
-    }
-}
 
 async function bookmarkNews(newsData) {
     try {
@@ -287,7 +399,7 @@ async function bookmarkNews(newsData) {
         const payloadBody = {
             userId: parseInt(userId),
             newsData: {
-                apiId: newsData.id,
+                apiId: newsData.id || newsData.apiId,
                 category: newsData.category,
                 datetime: newsData.datetime,
                 headline: newsData.headline,
@@ -314,15 +426,13 @@ async function bookmarkNews(newsData) {
             return { success: false };
         }
 
-        // return success without alert
         return { success: true, data: result.bookmark };
 
     } catch (err) {
-        console.error(err.message);
+        console.error(err);
         return { success: false };
     }
 }
-
 
 async function removeBookmark(bookmarkId, newsApiId = null) {
     const token = localStorage.getItem("token");
@@ -346,26 +456,18 @@ async function removeBookmark(bookmarkId, newsApiId = null) {
             return;
         }
 
-        // Remove the apiId from local userBookmarks if provided
         if (newsApiId) {
             userBookmarks = userBookmarks.filter(k => String(k) !== String(newsApiId));
+            // update UI button if present
+            const card = document.querySelector(`.news-card[data-news-key="${String(newsApiId)}"]`);
+            if (card) {
+                const btn = card.querySelector('.bookmark-btn');
+                if (btn) updateBookmarkButtonUI(btn, false);
+            }
         } else {
-            // fallback: re-sync from server
             userBookmarks = await fetchUserBookmarksIds();
         }
 
-        // If the news card for this apiId exists on the page, update its button UI
-        if (newsApiId) {
-            // find the card whose dataset.newsKey equals newsApiId
-            const selector = `.news-card[data-news-key="${newsApiId}"]`;
-            const card = document.querySelector(selector);
-            if (card) {
-                const cardBtn = card.querySelector('.bookmark-btn');
-                if (cardBtn) updateBookmarkButtonUI(cardBtn, false);
-            }
-        }
-
-        // Refresh bookmark sidebar to reflect deletion
         await fetchBookmarks();
 
     } catch (err) {
@@ -394,7 +496,7 @@ async function toggleLike(newsData, button) {
             body: JSON.stringify({
                 userId: parseInt(userId),
                 newsData: {
-                    apiId: newsData.id,
+                    apiId: newsData.id || newsData.apiId,
                     headline: newsData.headline,
                     summary: newsData.summary,
                     url: newsData.url,
@@ -412,9 +514,9 @@ async function toggleLike(newsData, button) {
             return null;
         }
 
-        // Update button UI
         button.textContent = result.liked ? '❤️ Liked' : '🤍 Like';
-        return result; // <-- return result including totalLikes
+        return result;
+
     } catch (err) {
         console.error(err);
         alert(err.message);
@@ -424,6 +526,9 @@ async function toggleLike(newsData, button) {
     }
 }
 
+
+// ---------------- Category filter ----------------
+
 async function populateCategoryFilter() {
     try {
         const res = await fetch('/api/news/categories');
@@ -431,8 +536,8 @@ async function populateCategoryFilter() {
 
         if (data.success) {
             const select = document.getElementById('category-filter');
-            select.innerHTML = `<option value="">-- Select Category --</option>`; // reset
-
+            if (!select) return;
+            select.innerHTML = `<option value="">-- Select Category --</option>`;
             data.categories.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.name;
@@ -440,11 +545,8 @@ async function populateCategoryFilter() {
                 select.appendChild(option);
             });
 
-            // 🆕 add change event: fetch news when category changes
             select.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    fetchNewsByCategory(e.target.value);
-                }
+                if (e.target.value) fetchNews(e.target.value);
             });
         }
     } catch (err) {
@@ -452,61 +554,3 @@ async function populateCategoryFilter() {
     }
 }
 
-async function fetchNewsByCategory(category) {
-    const token = localStorage.getItem("token");
-    try {
-        const response = await fetch(`/api/news/news?category=${category}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch news');
-
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message || 'Failed to fetch news');
-
-        displayNews(result.news);
-    } catch (err) {
-        console.error(err);
-        errorMessage.textContent = err.message;
-    }
-}
-
-document.getElementById('category-filter').addEventListener('change', (e) => {
-    const selectedCategory = e.target.value;
-    if (selectedCategory) {
-        fetchNews(selectedCategory);
-    }
-});
-
-async function fetchNewsLikesSummary() {
-    const token = localStorage.getItem("token");
-
-    try {
-        const res = await fetch('/api/news/likes/summary', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-
-        if (!data.success) throw new Error(data.message || "Failed to fetch news likes");
-
-        console.log(data.newsLikes); // each item has { id, headline, totalLikes, likedByUser }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// helper function to format likes text
-function formatLikes(count) {
-    return `${count} like${count === 1 ? '' : 's'}`;
-}
-
-document.addEventListener("DOMContentLoaded", populateCategoryFilter);
-
-
-// Load news and bookmarks on page load
-fetchNews();
-fetchBookmarks();

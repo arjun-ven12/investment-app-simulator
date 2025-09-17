@@ -1,11 +1,11 @@
 const newsModel = require('../models/news');
-
+const { broadcastNewsView } = require('../socketBroadcast');
 const { Parser } = require('json2csv');
 //////////////////////////////////////////////////////
 // GET NEWS CONTROLLER
 //////////////////////////////////////////////////////
 
-module.exports.getNewsController = async function(req, res) {
+module.exports.getNewsController = async function (req, res) {
   const { category, minId } = req.query;
   const userId = req.user?.id;
 
@@ -30,7 +30,7 @@ module.exports.getNewsController = async function(req, res) {
 //////////////////////////////////////////////////////
 // CREATE BOOKMARKS
 //////////////////////////////////////////////////////
-module.exports.bookmarkNewsController = async function(req, res) {
+module.exports.bookmarkNewsController = async function (req, res) {
   const { userId, newsData } = req.body;
 
   if (!userId || !newsData) {
@@ -54,20 +54,20 @@ module.exports.bookmarkNewsController = async function(req, res) {
 //////////////////////////////////////////////////////
 // GET BOOKMARKS
 //////////////////////////////////////////////////////
-module.exports.getUserBookmarksController = async function(req, res) {
-    const userId = req.user.id; // Get userId from JWT middleware
+module.exports.getUserBookmarksController = async function (req, res) {
+  const userId = req.user.id; // Get userId from JWT middleware
 
-    if (!userId) {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-    try {
-        const bookmarks = await newsModel.getUserBookmarks(parseInt(userId));
-        return res.status(200).json({ success: true, bookmarks });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const bookmarks = await newsModel.getUserBookmarks(parseInt(userId));
+    return res.status(200).json({ success: true, bookmarks });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 //////////////////////////////////////////////////////
@@ -98,59 +98,59 @@ module.exports.removeBookmarkController = async function (req, res) {
 
 
 // POST /news/like
-module.exports.likeNewsController = async function(req, res) {
-    const userId = req.user.id; // from JWT
-    const newsData = req.body.newsData;
+module.exports.likeNewsController = async function (req, res) {
+  const userId = req.user.id; // from JWT
+  const newsData = req.body.newsData;
 
-    try {
-        const result = await newsModel.toggleLikeNews(userId, newsData);
-        if (!result.success) return res.status(400).json(result);
-        return res.status(200).json(result);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const result = await newsModel.toggleLikeNews(userId, newsData);
+    if (!result.success) return res.status(400).json(result);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // DELETE /news/like/:newsId
-module.exports.unlikeNewsController = async function(req, res) {
-    const userId = req.user.id;
-    const newsId = parseInt(req.params.newsId);
+module.exports.unlikeNewsController = async function (req, res) {
+  const userId = req.user.id;
+  const newsId = parseInt(req.params.newsId);
 
-    try {
-        const result = await newsModel.unlikeNews(userId, newsId);
-        if (!result.success) return res.status(400).json(result);
-        return res.status(200).json(result);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const result = await newsModel.unlikeNews(userId, newsId);
+    if (!result.success) return res.status(400).json(result);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // GET /news/like/:newsId
-module.exports.getNewsLikesController = async function(req, res) {
-    const newsId = parseInt(req.params.newsId);
+module.exports.getNewsLikesController = async function (req, res) {
+  const newsId = parseInt(req.params.newsId);
 
-    try {
-        const likes = await newsModel.getNewsLikes(newsId);
-        return res.status(200).json({ success: true, likes });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const likes = await newsModel.getNewsLikes(newsId);
+    return res.status(200).json({ success: true, likes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // GET /news/likes (user's likes)
-module.exports.getUserLikesController = async function(req, res) {
-    const userId = req.user.id;
+module.exports.getUserLikesController = async function (req, res) {
+  const userId = req.user.id;
 
-    try {
-        const likes = await newsModel.getUserLikes(userId);
-        return res.status(200).json({ success: true, likes });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const likes = await newsModel.getUserLikes(userId);
+    return res.status(200).json({ success: true, likes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 
@@ -165,7 +165,7 @@ module.exports.getCategoriesController = async function (req, res) {
 };
 
 
-module.exports.getNewsLikesSummaryController = async function(req, res) {
+module.exports.getNewsLikesSummaryController = async function (req, res) {
   const userId = req.user?.id; // optional
 
   try {
@@ -174,5 +174,36 @@ module.exports.getNewsLikesSummaryController = async function(req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports.incrementNewsViewController = async function (req, res) {
+  const { newsId, newsData } = req.body;
+
+  try {
+    const updatedNews = await newsModel.incrementNewsView(newsId, newsData);
+
+    // Pass a single object with the right keys
+    broadcastNewsView({
+      id: updatedNews.id,
+      apiId: updatedNews.apiId || updatedNews.id, // prefer apiId if available
+      views: updatedNews.views || 0
+    });
+
+    res.status(200).json({ success: true, views: news.views });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+
+module.exports.getNewsViewsController = async function (req, res) {
+  const newsId = req.params.newsId;
+  try {
+    const news = await newsModel.getNewsViews(newsId);
+    return res.status(200).json({ success: true, views: news.views, id: news.id, apiId: news.apiId });
+  } catch (err) {
+    console.error('getNewsViewsController error:', err);
+    return res.status(404).json({ success: false, message: err.message });
   }
 };
