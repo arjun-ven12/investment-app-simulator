@@ -71,6 +71,8 @@ model Stock {
   limitOrder    LimitOrder[]
   company       Company?        @relation(fields: [company_id], references: [id])
   trading       Trade[]
+  intradayPrice2 IntradayPrice2[]
+    intradayPrice3 IntradayPrice3[]
 
   @@index([symbol])
 }
@@ -323,4 +325,45 @@ model NewsCategory {
   id     Int     @id @default(autoincrement())
   name   String  @unique
   news   News[]  // one-to-many relation: a category can have multiple news articles
+}
+
+model IntradayPrice2 {
+  id         Int      @id @default(autoincrement())
+  stockId    Int
+  date       DateTime
+  openPrice  Decimal? @db.Decimal(10, 2)
+  highPrice  Decimal? @db.Decimal(10, 2)
+  lowPrice   Decimal? @db.Decimal(10, 2)
+  closePrice Decimal  @db.Decimal(10, 2)
+  volume     BigInt?
+  createdAt  DateTime @default(now())
+
+  stock Stock @relation(fields: [stockId], references: [stock_id])
+  @@index([stockId])
+@@unique([stockId, date])
+}
+
+
+model IntradayPrice3 {
+  id         Int      @id @default(autoincrement())
+  stockId    Int
+  date       DateTime
+  openPrice  Decimal? @db.Decimal(10, 2)
+  highPrice  Decimal? @db.Decimal(10, 2)
+  lowPrice   Decimal? @db.Decimal(10, 2)
+  closePrice Decimal  @db.Decimal(10, 2)
+  volume     BigInt?
+  createdAt  DateTime @default(now())
+
+  stock Stock @relation(fields: [stockId], references: [stock_id])
+  @@index([stockId])
+@@unique([stockId, date], map: "stockId_date")
+}
+
+model InvestmentGuide {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   Json // store the structured JSON we designed above
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
