@@ -1,0 +1,96 @@
+{
+  "title": "How-To Guide: Understanding Bonds & Funds",
+  "content": [
+    {
+      "heading": "What are Bonds?",
+      "content": [
+        { "type": "text", "text": "Definition: A loan you give to a government, company, or organization, and in return, they promise to pay you interest and return your principal at a future date." },
+        { "type": "text", "text": "Purpose: Bonds are used by issuers to raise money for projects or operations." },
+        { "type": "list", "title": "Key Terms:", "items": [
+          "Face Value / Principal: The amount you lend (usually $1,000 per bond).",
+          "Coupon Rate: Interest you earn, usually paid periodically.",
+          "Maturity: When the bond pays back your principal."
+        ]}
+      ]
+    },
+    {
+      "heading": "How Bonds Work",
+      "content": [
+        { "type": "list", "items": [
+          "You buy a bond at its face value (or sometimes at a discount/premium).",
+          "The issuer pays interest (coupon) at regular intervals (e.g., annually or semi-annually).",
+          "When the bond matures, you get your principal back."
+        ]}
+      ]
+    },
+    {
+      "heading": "Types of Bonds",
+      "content": [
+        { "type": "list", "items": [
+          "Government Bonds: Issued by governments; usually low risk (e.g., US Treasuries, Singapore Government Securities).",
+          "Corporate Bonds: Issued by companies; higher risk but higher potential interest.",
+          "Municipal Bonds: Issued by local governments; sometimes tax-free.",
+          "High-Yield / Junk Bonds: Issued by companies with lower credit ratings; higher risk & higher interest.",
+          "Distribution & Account Maintenance Fees"
+        ]}
+      ]
+    },
+    {
+      "heading": "Bond Funds",
+      "content": [
+        { "type": "text", "text": "Definition: A bond fund is a pooled investment vehicle that invests in a portfolio of bonds." },
+        { "type": "list", "title": "Benefits:", "items": [
+          "Diversification → reduces risk compared to owning a single bond.",
+          "Professional management → fund manager selects bonds and monitors credit risk."
+        ]},
+        { "type": "list", "title": "Types of Bond Funds:", "items": [
+          "Government Bond Funds → invest mainly in government bonds.",
+          "Corporate Bond Funds → focus on corporate debt.",
+          "High-Yield Funds → higher-risk bonds for higher returns.",
+          "Short-Term vs Long-Term Funds → based on bond maturity."
+        ]}
+      ]
+    },
+    {
+      "heading": "Costs",
+      "content": [
+        { "type": "list", "items": [
+          "Management Fees (Expense Ratio): Paid to the fund manager.",
+          "Trading/Administrative Fees: Some brokers or funds may charge transaction fees or account maintenance costs.",
+          "Load Fees: Some bond funds have front-end or back-end sales charges."
+        ]}
+      ]
+    },
+    {
+      "heading": "Risks",
+      "content": [
+        { "type": "list", "items": [
+          "Interest Rate Risk: When interest rates rise, bond prices fall.",
+          "Credit Risk: The issuer may fail to pay interest or principal (default risk).",
+          "Inflation Risk: Fixed interest may lose purchasing power if inflation is high.",
+          "Liquidity Risk: Some bonds or funds may be harder to sell quickly at a fair price."
+        ]}
+      ]
+    },
+    {
+      "heading": "Taxes",
+      "content": [
+        { "type": "list", "items": [
+          "Interest Payments: Usually taxable in the year received (except some municipal bonds).",
+          "Capital Gains: Selling bonds or bond fund shares for more than you paid may create taxable gains."
+        ]}
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        { "type": "list", "items": [
+          "Bonds are generally safer than stocks, providing regular income.",
+          "Bond funds allow diversification without buying many individual bonds.",
+          "Important factors to consider: interest rates, credit quality, fees, and taxes.",
+          "Bonds are useful for income, portfolio stability, and risk reduction in a mixed investment portfolio."
+        ]}
+      ]
+    }
+  ]
+}

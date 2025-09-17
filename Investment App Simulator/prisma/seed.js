@@ -1,5 +1,5 @@
 const prisma = require("../src/models/prismaClient");
-const path = require("path");
+const filePath = require("path");
 const fs = require("fs");
 
 const statuses = [
@@ -469,36 +469,50 @@ const referral = [
 async function main() {
   const insertedCategories = [];
   for (const category of newsCategories) {
-    const inserted = await prisma.newsCategory.create({
-      data: category,
+    await prisma.newsCategory.upsert({
+      where: { name: category.name },  // Unique field
+      update: {},                      // Do nothing if it exists
+      create: category,                // Create if it doesn't exist
     });
-    insertedCategories.push(inserted);
   }
-  console.log("News categories inserted:", insertedCategories);
+  console.log("News categories seeded (duplicates skipped)");
 
+const path = require("path");
+const fs = require("fs");
 
-  // If etf-guide.json is in project_root/how-tos/etf-guide.json
-  const guidePath = path.join(__dirname, "how-tos", "etf-guide.json");
+const howToFolderPath = path.join(__dirname, "how-tos"); // adjust folder name
 
-  const etfGuide = JSON.parse(fs.readFileSync(guidePath, "utf-8"));
-  console.log("ETF Guide loaded:", etfGuide.title);
+// Read all files in the folder
+const guideFiles = fs.readdirSync(howToFolderPath);
 
-  await prisma.investmentGuide.create({
-    data: {
-      title: etfGuide.title,
-      content: etfGuide.sections,
-    },
-  });
+for (const fileName of guideFiles) {
+  const filePath = path.join(howToFolderPath, fileName);
+  
+  // Make sure it's a JSON file
+  if (path.extname(filePath) === ".json") {
+    const guideData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const sections = guideData.sections || [];
 
-  console.log("ETF Investment guide inserted successfully");
+    await prisma.investmentGuide.create({
+      data: {
+        title: guideData.title,
+        content: sections,
+      },
+    });
+  }
+}
+
 
   // Seed statuses
-  const insertedStatuses = [];
-  for (const status of statuses) {
-    const inserted = await prisma.status.create({ data: status });
-    insertedStatuses.push(inserted);
-  }
-
+ const insertedStatuses = [];
+for (const status of statuses) {
+  const inserted = await prisma.status.upsert({
+    where: { text: status.text },
+    update: {}, // do nothing if exists
+    create: status,
+  });
+  insertedStatuses.push(inserted);
+}
   // Seed persons
   const insertedPersons = [];
   for (const person of persons) {
