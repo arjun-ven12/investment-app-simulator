@@ -136,6 +136,7 @@ model News {
   datetime    DateTime?
   categoryId  Int?           // new field for category
   category    NewsCategory?  @relation(fields: [categoryId], references: [id])
+  views     Int      @default(0)  // <-- add this
   bookmarks   Bookmark[]
   NewsComment NewsComment[]
   NewsLike    NewsLike[]
