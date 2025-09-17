@@ -19,7 +19,7 @@ const loginRegisterRouter = require('./routers/Login.register.router');
 const referralRouter = require('./routers/referral');
 const dashboardRouter = require('./routers/Dashboard');
 
-const chatHandler = require('./routers/chat');
+// const chatHandler = require('./routers/chat');
 const profileRouter = require('./routers/Profile');
 const userRoutes = require('./routers/user.router');
 const userRouter = require("./routers/user.router");
@@ -29,6 +29,8 @@ const goalsRouter = require("./routers/Goals");
 
 const chatbotRouter = require("./routers/chatbot"); 
 const newsRouter = require("./routers/news")
+const guideRouter = require("./routers/guide")
+
 
 const app = express();
 
@@ -80,6 +82,8 @@ app.use('/api/user', userRoutes);
 app.use("/api", userRouter);
 app.use("/api/goals", goalsRouter); 
 app.use("/api/chatbot", chatbotRouter); 
+app.use("/guides", guideRouter)
+
 
 // Handle unknown resources
 app.use((req, res, next) => {

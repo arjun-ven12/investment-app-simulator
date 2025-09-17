@@ -1,0 +1,124 @@
+{
+  "title": "How-To Guide: Understanding ETFs & Other Pooled Investment Vehicles",
+  "sections": [
+    {
+      "heading": "What are ETFs",
+      "content": [
+        {
+          "type": "text",
+          "text": "Exchange-Traded Funds (ETFs) are pooled investment vehicles that let investors buy a basket of assets (stocks, bonds, commodities) in one trade."
+        },
+        {
+          "type": "text",
+          "text": "Like stocks, ETFs trade on exchanges throughout the day."
+        },
+        {
+          "type": "list",
+          "title": "Benefits",
+          "items": [
+            "Diversification → reduces the risk of relying on a single company/asset.",
+            "Cost efficiency → typically lower fees than actively managed funds.",
+            "Liquidity → can buy and sell anytime during trading hours at real-time prices."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "How ETFs Compare to Other Funds Types",
+      "content": [
+        {
+          "type": "subheading",
+          "text": "Open-End Mutual Funds (Most Common)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Actively Managed → Managers decide which assets to buy/sell.",
+            "Trading: Bought or sold only at the end of the trading day.",
+            "Investor Impact: If many investors withdraw, the fund’s Assets Under Management (AUM) shrink, reducing the manager’s fee income.",
+            "Costs: Tend to have higher fees due to research and trading."
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "Closed-End Funds (CEFs)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Structure: Fixed number of shares issued → investors buy/sell on exchanges like stocks.",
+            "Manager Insulation: Investor dissatisfaction doesn’t force withdrawals → the manager’s AUM remains steady.",
+            "Trading: Shares may trade at a premium or discount to NAV depending on demand. (NAV → Net Asset Value)"
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "Exchange-Traded Funds (ETFs)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Blends traits of both: Like CEFs → traded on exchanges at real-time prices; Like mutual funds → diversified, pooled structure.",
+            "Popularity: Often passively managed (track an index), but actively managed ETFs exist too."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Costs Involved",
+      "content": [
+        {
+          "type": "subheading",
+          "text": "Management Fees"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Paid to investment managers.",
+            "Passive funds (index ETFs) → lower fees.",
+            "Active funds (mutual funds, some ETFs) → higher fees due to research, trading, and decision-making."
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "Distribution & Account Maintenance Fees"
+        },
+        {
+          "type": "text",
+          "text": "Cover customer service, recordkeeping, account statements, etc."
+        },
+        {
+          "type": "subheading",
+          "text": "Trading Costs"
+        },
+        {
+          "type": "text",
+          "text": "ETFs & CEFs: Bought/sold via brokers. May involve commissions or spreads. Open-End Mutual Funds: Bought/sold directly from the fund company at NAV (no intraday trading)."
+        }
+      ]
+    },
+    {
+      "heading": "Tax Considerations",
+      "content": [
+        {
+          "type": "text",
+          "text": "Funds regularly distribute income (interest & dividends) and capital gains. You may owe taxes on these distributions, even if you reinvest them. ETFs are usually more tax-efficient than mutual funds because of their unique 'in-kind redemption' process."
+        }
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "ETFs = flexible, low-cost, diversified → great for beginners.",
+            "Mutual funds = more managed, but higher costs.",
+            "Closed-end funds = stable for managers, but prices may differ from true value.",
+            "Always consider fees + taxes before investing."
+          ]
+        }
+      ]
+    }
+  ]
+}

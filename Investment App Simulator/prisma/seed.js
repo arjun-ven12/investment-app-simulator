@@ -1,4 +1,6 @@
 const prisma = require("../src/models/prismaClient");
+const path = require("path");
+const fs = require("fs");
 
 const statuses = [
   { text: "Pending" },
@@ -474,43 +476,58 @@ async function main() {
   }
   console.log("News categories inserted:", insertedCategories);
 
-  
- // Seed statuses
-const insertedStatuses = [];
-for (const status of statuses) {
-  const inserted = await prisma.status.create({ data: status });
-  insertedStatuses.push(inserted);
-}
 
-// Seed persons
-const insertedPersons = [];
-for (const person of persons) {
-  const inserted = await prisma.person.create({ data: person });
-  insertedPersons.push(inserted);
-}
+  // If etf-guide.json is in project_root/how-tos/etf-guide.json
+  const guidePath = path.join(__dirname, "how-tos", "etf-guide.json");
 
-// Seed tasks
-const insertedTasks = [];
-insertedTasks.push(
-  await prisma.task.create({
-    data: { name: "Seed 1", statusId: insertedStatuses[0].id },
-  })
-);
-insertedTasks.push(
-  await prisma.task.create({
-    data: { name: "Seed 2", statusId: insertedStatuses[1].id },
-  })
-);
+  const etfGuide = JSON.parse(fs.readFileSync(guidePath, "utf-8"));
+  console.log("ETF Guide loaded:", etfGuide.title);
 
-// Task assignments
-await prisma.taskAssignment.createMany({
-  data: [
-    { personId: insertedPersons[0].id, taskId: insertedTasks[0].id },
-    { personId: insertedPersons[1].id, taskId: insertedTasks[0].id },
-    { personId: insertedPersons[2].id, taskId: insertedTasks[1].id },
-    { personId: insertedPersons[3].id, taskId: insertedTasks[1].id },
-  ],
-});
+  await prisma.investmentGuide.create({
+    data: {
+      title: etfGuide.title,
+      content: etfGuide.sections,
+    },
+  });
+
+  console.log("ETF Investment guide inserted successfully");
+
+  // Seed statuses
+  const insertedStatuses = [];
+  for (const status of statuses) {
+    const inserted = await prisma.status.create({ data: status });
+    insertedStatuses.push(inserted);
+  }
+
+  // Seed persons
+  const insertedPersons = [];
+  for (const person of persons) {
+    const inserted = await prisma.person.create({ data: person });
+    insertedPersons.push(inserted);
+  }
+
+  // Seed tasks
+  const insertedTasks = [];
+  insertedTasks.push(
+    await prisma.task.create({
+      data: { name: "Seed 1", statusId: insertedStatuses[0].id },
+    })
+  );
+  insertedTasks.push(
+    await prisma.task.create({
+      data: { name: "Seed 2", statusId: insertedStatuses[1].id },
+    })
+  );
+
+  // Task assignments
+  await prisma.taskAssignment.createMany({
+    data: [
+      { personId: insertedPersons[0].id, taskId: insertedTasks[0].id },
+      { personId: insertedPersons[1].id, taskId: insertedTasks[0].id },
+      { personId: insertedPersons[2].id, taskId: insertedTasks[1].id },
+      { personId: insertedPersons[3].id, taskId: insertedTasks[1].id },
+    ],
+  });
 
   // Seed Companies
   const insertedCompanies = [];
