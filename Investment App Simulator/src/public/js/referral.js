@@ -2,44 +2,30 @@ let socket = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const userId = localStorage.getItem('userId');
-  if (!userId) {
-    alert("User not logged in.");
-    return;
-  }
+  if (!userId) return alert("User not logged in.");
 
   if (typeof io !== 'undefined') {
     socket = io();
 
     socket.on('connect', () => {
       console.log('Socket connected:', socket.id);
-      socket.emit('join', { userId }); // join user-specific room
+      socket.emit('join', { userId }, (ack) => {
+        console.log('Join ack:', ack);
+      });
     });
 
     socket.on('referralUpdate', (stats) => {
       console.log('Referral stats updated via socket:', stats);
+      updateReferralStatsUI(stats);
+      updateProgressBar(stats.creditsEarned, stats.nextTierCredits || 300);
+    });
 
-      // Update stats UI
-      document.getElementById('signupCount').innerText = stats.referralSignups;
-      document.getElementById('successCount').innerText = stats.successfulReferrals;
-      document.getElementById('creditsEarned').innerText = `$${stats.creditsEarned}`;
-
-      // Update progress bar
-      const progressFill = document.getElementById('progressFill');
-      const progressText = document.getElementById('progressText');
-      const progressPercent = Math.min((stats.creditsEarned / 300) * 100, 100);
-      progressFill.style.width = `${progressPercent}%`;
-      progressText.innerText = `${stats.creditsEarned} / 300`;
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected. Reconnecting...');
     });
   }
 
-
-  // Navbar toggle
-  const navbarToggle = document.getElementById('navbar-toggle');
-  navbarToggle?.addEventListener('click', () => {
-    document.querySelector('.navbar-links')?.classList.toggle('active');
-  });
-
-  // Copy referral link listener
+  // Copy referral link button
   function attachCopyListener() {
     const copyBtn = document.getElementById('copyReferralButton');
     copyBtn?.addEventListener('click', () => {
@@ -51,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle referral link entry
+  // Enter referral link
   const enterReferralButton = document.getElementById('enterReferralLinkButton');
   enterReferralButton?.addEventListener('click', async () => {
     const receivedLink = document.getElementById('receivedReferralLink')?.value.trim();
@@ -66,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (res.ok) {
         alert('Referral link entered successfully!');
-        fetchReferralStats();
+        fetchReferralStats(); // update own UI
       } else {
         alert(data.message || 'Failed to use referral link');
       }
@@ -85,25 +71,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       updateReferralStatsUI(data.referral);
       updateReferralLinkUI(data.referral.referralLink);
-      updateProgressBar(data.referral.creditsEarned, data.referral.nextTierCredits);
+      updateProgressBar(data.referral.creditsEarned, data.referral.nextTierCredits || 300);
     } catch (err) {
       console.error(err);
-      alert('Failed to load referral stats. Please try again later.');
+      alert('Failed to load referral stats.');
     }
   }
 
-  // Update stats UI
   function updateReferralStatsUI(stats) {
     const container = document.querySelector('.stats-container');
     container.innerHTML = `
       <div class="stat-box"><h4>${stats.referralSignups}</h4><p>Referral Signups</p></div>
       <div class="stat-box"><h4>${stats.successfulReferrals}</h4><p>Successful Referrals</p></div>
-      <div class="stat-box"><h4>${stats.rewardsExchanged}</h4><p>Rewards Exchanged</p></div>
       <div class="stat-box"><h4>$${stats.creditsEarned}</h4><p>Credits Earned</p></div>
     `;
   }
 
-  // Update referral link UI
   function updateReferralLinkUI(link) {
     const container = document.querySelector('.referral-link');
     container.innerHTML = `
@@ -113,10 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <button id="copyReferralButton">Copy</button>
       </div>
     `;
-    attachCopyListener(); // re-attach listener
+    attachCopyListener();
   }
 
-  // Update progress bar
   function updateProgressBar(creditsEarned, nextTierCredits) {
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');

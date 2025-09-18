@@ -1,5 +1,5 @@
 const referralModel = require('../models/referral');
-
+const { broadcastReferralUpdate } = require('../socketBroadcast'); // ✅ add this
 //////////////////////////////////////////////////////
 // GET REFERRAL STATS
 //////////////////////////////////////////////////////
@@ -35,18 +35,22 @@ module.exports.createReferralController = async function (req, res) {
 // USE REFERRAL LINK
 //////////////////////////////////////////////////////
 module.exports.useReferralLinkController = async function (req, res) {
-  const userId = parseInt(req.params.userId, 10);
+  const refereeId = parseInt(req.params.userId, 10);
   const { referralLink } = req.body;
 
-  if (!referralLink) return res.status(400).json({ success: false, message: 'Referral link is required' });
+  if (!referralLink) {
+    return res.status(400).json({ success: false, message: 'Referral link is required' });
+  }
 
   try {
-    const updatedReferral = await referralModel.useReferralLink(userId, referralLink);
-     broadcastReferralUpdate(updatedReferral.userId, {
+    const { ownerId, updatedReferral } = await referralModel.useReferralLink(refereeId, referralLink);
+
+    broadcastReferralUpdate(ownerId, {
       referralSignups: updatedReferral.referralSignups,
       successfulReferrals: updatedReferral.successfulReferrals,
       creditsEarned: updatedReferral.creditsEarned,
     });
+
     return res.status(200).json({
       success: true,
       message: 'Referral used successfully',
@@ -65,6 +69,7 @@ module.exports.useReferralLinkController = async function (req, res) {
     return res.status(status).json({ success: false, message: error.message });
   }
 };
+
 
 
 

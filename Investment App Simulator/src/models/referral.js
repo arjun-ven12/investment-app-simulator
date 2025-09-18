@@ -110,5 +110,5 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
     successfulReferrals: updatedReferral.successfulReferrals,
     creditsEarned: updatedReferral.creditsEarned,
   });
-  return updatedReferral;
+  return { ownerId: referral.userId, updatedReferral };
 };
