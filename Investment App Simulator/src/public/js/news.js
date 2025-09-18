@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  
   // still populate categories on DOMContentLoaded
   populateCategoryFilter();
 
@@ -185,13 +186,13 @@ async function displayNews(newsList = []) {
         const card = document.createElement('div');
         card.className = 'news-card';
 
-        if (news.image) {
-            const img = document.createElement('img');
-            img.src = news.image;
-            img.alt = news.headline;
-            img.className = 'news-image';
-            card.appendChild(img);
-        }
+        // if (news.image) {
+        //     const img = document.createElement('img');
+        //     img.src = news.image;
+        //     img.alt = news.headline;
+        //     img.className = 'news-image';
+        //     card.appendChild(img);
+        // }
 
         const headline = document.createElement('div');
         headline.className = 'headline';
@@ -224,6 +225,11 @@ async function displayNews(newsList = []) {
             viewsDiv.innerHTML = `${createEyeSVG(16)} ${views}`;
         });
 
+         requestAnimationFrame(() => {
+          
+            card.style.opacity = 1;
+            card.style.transform = 'translateY(0)';
+        });
         // click handler increments view and opens article
         readMore.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -296,6 +302,9 @@ async function displayNews(newsList = []) {
         newsContainer.appendChild(card);
     }
 }
+cards.forEach((card, i) => {
+  card.style.animation = `fadeInUp 0.5s ${i*0.08}s forwards`;
+});
 
 
 // ---------------- Bookmarks, Likes and other helpers ----------------
@@ -528,29 +537,82 @@ async function toggleLike(newsData, button) {
 
 
 // ---------------- Category filter ----------------
-
 async function populateCategoryFilter() {
-    try {
-        const res = await fetch('/api/news/categories');
-        const data = await res.json();
+  try {
+    const res = await fetch('/api/news/categories');
+    const data = await res.json();
+    if (!data.success) return;
 
-        if (data.success) {
-            const select = document.getElementById('category-filter');
-            if (!select) return;
-            select.innerHTML = `<option value="">-- Select Category --</option>`;
-            data.categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.name;
-                option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
-                select.appendChild(option);
-            });
+    const select = document.getElementById('category-filter');
+    const chipsContainer = document.getElementById('category-chips');
+    const selectWrap = document.querySelector('.select-wrap');
 
-            select.addEventListener('change', (e) => {
-                if (e.target.value) fetchNews(e.target.value);
-            });
-        }
-    } catch (err) {
-        console.error("Failed to load categories", err);
-    }
+    if (!select) return;
+    select.innerHTML = `<option value="" selected>Browse categories</option>`;
+
+    // create options + chips
+    data.categories.forEach((cat, idx) => {
+      const name = String(cat.name || cat).trim();
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+      select.appendChild(opt);
+
+      // chip
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'category-chip';
+      chip.textContent = opt.textContent;
+      chip.dataset.value = name;
+      chip.addEventListener('click', () => {
+        // set select, trigger change
+        select.value = name;
+        // visually mark active
+        document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        // small pulse effect
+        chip.animate([{ transform: 'scale(0.98)' }, { transform: 'scale(1)' }], { duration: 200 });
+        // fetch news for that category
+        fetchNews(name);
+      });
+      chipsContainer.appendChild(chip);
+    });
+
+    // toggle caret rotation while select is opened (visual only)
+    select.addEventListener('mousedown', () => selectWrap.classList.add('open'));
+    // close after small delay (native dropdown closes on mouseup)
+    select.addEventListener('blur', () => selectWrap.classList.remove('open'));
+    select.addEventListener('change', (e) => {
+      // remove active from chips, set matching chip active if exists
+      const val = e.target.value;
+      document.querySelectorAll('.category-chip').forEach(c => c.classList.toggle('active', c.dataset.value === val));
+      // call fetch news with selected category
+      if (val) fetchNews(val);
+      // small micro animation
+      selectWrap.animate([{ transform: 'translateY(-2px)' }, { transform: 'translateY(0)' }], { duration: 180 });
+    });
+
+    // optional: pre-activate first chip for top news
+    const firstChip = document.querySelector('.category-chip');
+    if (firstChip) firstChip.classList.add('active');
+  } catch (err) {
+    console.error("Failed to load categories", err);
+  }
 }
+
+// find select wrap + select (run after DOM ready)
+const selectWrap = document.querySelector('.select-wrap');
+const categorySelect = document.getElementById('category-filter');
+
+if (categorySelect && selectWrap) {
+  // open visual on pointer down / keyboard open attempt
+  categorySelect.addEventListener('pointerdown', () => selectWrap.classList.add('open'));
+  // remove open on blur
+  categorySelect.addEventListener('blur', () => selectWrap.classList.remove('open'));
+  // also remove on change after a short delay so rotated caret is smooth
+  categorySelect.addEventListener('change', () => {
+    setTimeout(() => selectWrap.classList.remove('open'), 180);
+  });
+}
+
 

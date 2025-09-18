@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>News Feed</title>
   <link rel="stylesheet" href="../css/news.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -15,9 +16,19 @@
 
     <h1>News Feed</h1>
     <div class="category-wrapper">
-      <select id="category-filter">
-        <option value="" selected disabled>-- Select Category --</option>
-      </select>
+      <label for="category-filter" class="sr-only">Choose category</label>
+      <div class="dropdown">
+      <div class="select-wrap dropdown">
+        <select id="category-filter" aria-label="News category">
+          <option value="" selected disabled>Browse categories</option>
+          <!-- options injected by JS -->
+        </select>
+
+        </div>
+      </div>
+
+      <!-- optional chips row created by JS for quick picks -->
+      <div id="category-chips" class="category-chips" aria-hidden="true"></div>
     </div>
     <div class="layout">
       <!-- Main News Section -->
