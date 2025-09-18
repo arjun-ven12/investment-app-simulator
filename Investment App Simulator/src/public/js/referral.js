@@ -1,163 +1,134 @@
+let socket = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-    const signupForm = document.getElementById('signupForm');
-    const referralForm = document.getElementById('referralForm');
-    const referralCodeDiv = document.getElementById('referralCode');
-    const statsContainer = document.querySelector('.stats-container');
-    const referralLink = document.querySelector('.referral-link');
-    const userId = localStorage.getItem('userId');
-    const enterReferralLinkButton = document.getElementById('enterReferralLinkButton');
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    alert("User not logged in.");
+    return;
+  }
 
-    const showMessage = (message, type = 'success') => {
-        const messageBox = document.createElement('div');
-        messageBox.textContent = message;
-        messageBox.className = `message ${type}`;
-        document.body.prepend(messageBox);
-        setTimeout(() => messageBox.remove(), 3000);
-    };
+  if (typeof io !== 'undefined') {
+    socket = io();
 
-    // Fetch and display referral stats
-    const fetchReferralStats = async (userId) => {
-        try {
-            const response = await fetch(`/stats/${userId}`); // Fetch referral stats for the user
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to fetch referral stats');
-            }
-
-            const stats = await response.json();
-
-            // Update the received referral link in the DOM
-            referralLink.innerHTML = `
-                <h3>Share the link with your friends!.</h3>
-                <div class="link-container">
-                    <input type="text" value="${stats.referralLink}" id="referralLink" readonly>
-                    <button onclick="copyReferralLink()" style="color: black;">Copy</button>
-                </div>
-                <div class="social-icons">
-                <button onclick="shareOnFacebook()"><i class="fab fa-facebook"></i> Facebook</button>
-                <button onclick="shareOnTwitter()"><i class="fab fa-twitter"></i> Twitter</button>
-                <button onclick="shareOnLinkedIn()"><i class="fab fa-linkedin"></i> LinkedIn</button>
-                <button onclick="shareOnEmail()"><i class="fas fa-envelope"></i> Gmail</button>
-                <button onclick="shareOnWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                <button onclick="shareOnTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
-            </div>
-            `;
-
-            // Update the stats in the DOM
-            statsContainer.innerHTML = `
-                <div class="stat-box">
-                    <h4>${stats.referralSignups}</h4>
-                    <p>Referral Signups</p>
-                </div>
-                <div class="stat-box">
-                    <h4>${stats.successfulReferrals}</h4>
-                    <p>Successful Referrals</p>
-                </div>
-                <div class="stat-box">
-                    <h4>${stats.rewardsExchanged}</h4>
-                    <p>Rewards Exchanged</p>
-                </div>
-                <div class="stat-box">
-                    <h4>$${stats.creditsEarned}</h4>
-                    <p>Credits Earned</p>
-                </div>
-            `;
-        } catch (error) {
-            console.error('Error fetching referral stats:', error.message);
-            showMessage('Failed to load referral stats. Please try again later.', 'error');
-        }
-    };
-
-    // Fetch the referral stats on page load
-    fetchReferralStats(userId);
-
-    // Handle referral link entry
-    enterReferralLinkButton.addEventListener('click', async () => {
-        const referralLink = document.getElementById('receivedReferralLink').value;
-
-        try {
-            const response = await fetch(`/stats/${userId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ referralLink }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                alert('Referral link entered successfully!');
-                fetchReferralStats(userId); 
-            } else {
-                const error = await response.json();
-                alert(error.error);
-            }
-        } catch (error) {
-            console.error(error.message);
-            showMessage('An error occurred. Please try again.', 'error');
-        }
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+      socket.emit('join', { userId }); // join user-specific room
     });
-});
 
-// Functions for copying and sharing referral links
-function copyReferralLink() {
-    const referralLink = document.getElementById("referralLink");
-    referralLink.select();
-    document.execCommand("copy");
-    alert("Referral link copied to clipboard!");
-}
+    socket.on('referralUpdate', (stats) => {
+      console.log('Referral stats updated via socket:', stats);
 
-function enterReferralLink() {
-    alert("Referral link entered successfully!");
-}
+      // Update stats UI
+      document.getElementById('signupCount').innerText = stats.referralSignups;
+      document.getElementById('successCount').innerText = stats.successfulReferrals;
+      document.getElementById('creditsEarned').innerText = `$${stats.creditsEarned}`;
 
-function shareOnFacebook() {
-    copyReferralLink(); // Copy referral link to clipboard
-    const referralLink = document.getElementById("referralLink").value;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`;
-    window.open(facebookUrl, '_blank');
-}
+      // Update progress bar
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const progressPercent = Math.min((stats.creditsEarned / 300) * 100, 100);
+      progressFill.style.width = `${progressPercent}%`;
+      progressText.innerText = `${stats.creditsEarned} / 300`;
+    });
+  }
 
-function shareOnTwitter() {
-    copyReferralLink(); // Copy referral link to clipboard
-    const referralLink = document.getElementById("referralLink").value;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=Check%20this%20out!&url=${encodeURIComponent(referralLink)}`;
-    window.open(twitterUrl, '_blank');
-}
 
-function shareOnLinkedIn() {
-    copyReferralLink(); // Copy referral link to clipboard
-    const referralLink = document.getElementById("referralLink").value;
-    const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(referralLink)}`;
-    window.open(linkedInUrl, '_blank');
-}
+  // Navbar toggle
+  const navbarToggle = document.getElementById('navbar-toggle');
+  navbarToggle?.addEventListener('click', () => {
+    document.querySelector('.navbar-links')?.classList.toggle('active');
+  });
 
-function shareOnEmail() {
-    copyReferralLink(); // Copy referral link to clipboard
-    const referralLink = document.getElementById("referralLink").value;
-    const emailSubject = "Check out Fintech!";
-    const emailBody = `I thought you might be interested in this: ${referralLink}`;
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    window.open(gmailUrl, '_blank');
-}
+  // Copy referral link listener
+  function attachCopyListener() {
+    const copyBtn = document.getElementById('copyReferralButton');
+    copyBtn?.addEventListener('click', () => {
+      const referralInput = document.getElementById('referralLink');
+      referralInput?.select();
+      referralInput?.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      alert("Referral link copied!");
+    });
+  }
 
-function shareOnWhatsApp() {
-    copyReferralLink();
-    const referralLink = document.getElementById("referralLink").value;
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(referralLink)}`;
-    window.open(whatsappUrl, '_blank');
-}
+  // Handle referral link entry
+  const enterReferralButton = document.getElementById('enterReferralLinkButton');
+  enterReferralButton?.addEventListener('click', async () => {
+    const receivedLink = document.getElementById('receivedReferralLink')?.value.trim();
+    if (!receivedLink) return alert("Please enter a referral link!");
 
-function shareOnTelegram() {
-    copyReferralLink();
-    const referralLink = document.getElementById("referralLink").value;
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent("Check this out!")}`;
-    window.open(telegramUrl, '_blank');
-}
+    try {
+      const res = await fetch(`/referral/${userId}/use`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referralLink: receivedLink })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Referral link entered successfully!');
+        fetchReferralStats();
+      } else {
+        alert(data.message || 'Failed to use referral link');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred. Please try again.');
+    }
+  });
 
-const logoutButton = document.getElementById("logoutButton");
-  
-// Logout functionality
-logoutButton.addEventListener("click", () => {
-    localStorage.removeItem("token"); // Clear authentication token
-    alert("You have been logged out.");
-    window.location.href = "./login.html";
+  // Fetch referral stats
+  async function fetchReferralStats() {
+    try {
+      const res = await fetch(`/referral/${userId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch referral stats');
+
+      updateReferralStatsUI(data.referral);
+      updateReferralLinkUI(data.referral.referralLink);
+      updateProgressBar(data.referral.creditsEarned, data.referral.nextTierCredits);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load referral stats. Please try again later.');
+    }
+  }
+
+  // Update stats UI
+  function updateReferralStatsUI(stats) {
+    const container = document.querySelector('.stats-container');
+    container.innerHTML = `
+      <div class="stat-box"><h4>${stats.referralSignups}</h4><p>Referral Signups</p></div>
+      <div class="stat-box"><h4>${stats.successfulReferrals}</h4><p>Successful Referrals</p></div>
+      <div class="stat-box"><h4>${stats.rewardsExchanged}</h4><p>Rewards Exchanged</p></div>
+      <div class="stat-box"><h4>$${stats.creditsEarned}</h4><p>Credits Earned</p></div>
+    `;
+  }
+
+  // Update referral link UI
+  function updateReferralLinkUI(link) {
+    const container = document.querySelector('.referral-link');
+    container.innerHTML = `
+      <h3>Share the link with your friends!</h3>
+      <div class="link-container">
+        <input type="text" id="referralLink" value="${link}" readonly>
+        <button id="copyReferralButton">Copy</button>
+      </div>
+    `;
+    attachCopyListener(); // re-attach listener
+  }
+
+  // Update progress bar
+  function updateProgressBar(creditsEarned, nextTierCredits) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    const progressPercent = Math.min((creditsEarned / 300) * 100, 100);
+    progressFill.style.width = `${progressPercent}%`;
+    progressText.innerText = `${creditsEarned} / 300`;
+
+    const nextRewardElem = document.getElementById('nextReward');
+    if (nextRewardElem) nextRewardElem.innerText = `$${Math.min(nextTierCredits, 300)}`;
+  }
+
+  // Initial load
+  fetchReferralStats();
 });

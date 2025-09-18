@@ -1,160 +1,114 @@
 const prisma = require('./prismaClient');
+const { broadcastReferralUpdate } = require('../socketBroadcast'); // ✅ add this
+//////////////////////////////////////////////////////
+// HELPER FUNCTIONS
+//////////////////////////////////////////////////////
+
+// Calculate current earned credits based on successful referrals
+function calculateCredits(successfulReferrals) {
+  const base = 100;      // first referral
+  const increment = 50;  // each additional
+  const max = 300;
+  if (successfulReferrals === 0) return 0; // 0 if no referrals yet
+  return Math.min(base + (successfulReferrals - 1) * increment, max);
+}
+
+// Calculate next tier credits (what user will get for next referral)
+function calculateNextTierCredits(successfulReferrals) {
+  const base = 100;
+  const increment = 50;
+  const max = 300;
+  return Math.min(base + successfulReferrals * increment, max);
+}
 
 //////////////////////////////////////////////////////
 // GET REFERRAL STATS
 //////////////////////////////////////////////////////
-module.exports.getReferralStats = function getReferralStats(userId) {
-    if (!userId || typeof userId !== 'number') {
-        throw new Error(`Invalid user ID: ${userId}`);
-    }
+module.exports.getReferralStats = async function getReferralStats(userId) {
+  const referral = await prisma.referral.findFirst({ where: { userId } });
+  if (!referral) throw new Error('Referral data not found');
 
-    return prisma.referral
-        .findFirst({
-            where: { userId }, 
-        })
-        .then(referral => {
-            console.log('Referral object from database:', referral); // Debug log
-            if (!referral) {
-                throw new Error(`Referral data for user ID "${userId}" not found`);
-            }
+  const creditsEarned = calculateCredits(referral.successfulReferrals);
+  const nextTierCredits = calculateNextTierCredits(referral.successfulReferrals);
 
-            // Prepare referral stats
-            return {
-                referralSignups: referral.referralSignups,
-                successfulReferrals: referral.successfulReferrals,
-                rewardsExchanged: referral.rewardsExchanged,
-                creditsEarned: referral.creditsEarned,
-                referralLink: referral.referralLink,
-            };
-        })
-        .catch(error => {
-            console.error('Error fetching referral stats:', error.message);
-            throw error;
-        });
-};
-
-//////////////////////////////////////////////////////
-// UPDATE REFERRAL
-//////////////////////////////////////////////////////
-module.exports.updateReferral = async function updateReferral(userId, referralLink) {
-    try {
-        const referral = await prisma.referral.findUnique({
-            where: { referralLink },
-        });
-
-        if (!referral) {
-            throw new Error('Referral link not found!');
-        }
-
-        // Fetch the user data to check the creation time
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-        });
-
-        if (!user) {
-            throw new Error('User not found!');
-        }
-
-        // Convert `createdAt` from GMT to GMT+8
-        const userCreatedAtGMT = new Date(user.createdAt);
-        const userCreatedAtGMTPlus8 = new Date(userCreatedAtGMT.getTime() + 8 * 60 * 60 * 1000);
-
-        // Get the current time in GMT+8
-        const currentTimeGMTPlus8 = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
-
-        // Calculate the time difference in hours
-        const timeDifferenceInHours = (currentTimeGMTPlus8 - userCreatedAtGMTPlus8) / (1000 * 60 * 60);
-
-        if (timeDifferenceInHours > 5) {
-            throw new Error('You cannot use the referral system after 5 hours of account creation!');
-        }
-
-        // Check the `successfulReferrals` for the user
-        const userReferralStats = await prisma.referral.findFirst({
-            where: { userId },
-            select: { successfulReferrals: true },
-            select: { referralSignups: true },
-        });
-
-        if (!userReferralStats) {
-            throw new Error('User has no referrals!');
-        }
-
-        if (userReferralStats.successfulReferrals > 5 || userReferralStats.referralSignups > 5) {
-            throw new Error('You cannot use the referral system as you have exceeded the maximum successful referrals limit!');
-        }
-
-        const userReferral = await prisma.referral.findFirst({
-            where: { userId, referralLink },
-        });
-
-        if (userReferral) {
-            throw new Error('You cannot use your own referral link!');
-        }
-
-        const usage = await prisma.referralUsage.findFirst({
-            where: { userId, referralId: referral.id },
-        });
-
-        if (usage) {
-            throw new Error('Referral link has already been used by this user!');
-        }
-
-        const newCreditsEarned = referral.creditsEarned + (referral.successfulReferrals + 1) * 100;
-
-        const [updatedReferral] = await prisma.$transaction([
-            prisma.referral.update({
-                where: { id: referral.id },
-                data: {
-                    referralSignups: { increment: 1 },
-                    successfulReferrals: { increment: 1 },
-                    creditsEarned: newCreditsEarned,
-                },
-            }),
-            prisma.referralUsage.create({
-                data: { userId, referralId: referral.id },
-            }),
-            prisma.user.update({
-                where: { id: referral.userId },
-                data: { wallet: { increment: newCreditsEarned } },
-            }),
-        ]);
-
-        return updatedReferral;
-    } catch (error) {
-        throw error; // Pass the error to the controller for further handling
-    }
+  return {
+    referralSignups: referral.referralSignups,
+    successfulReferrals: referral.successfulReferrals,
+    rewardsExchanged: referral.rewardsExchanged,
+    creditsEarned,      // dynamically calculated
+    referralLink: referral.referralLink,
+    currentTier: referral.tier,
+    nextTierCredits,
+  };
 };
 
 //////////////////////////////////////////////////////
 // CREATE REFERRAL
 //////////////////////////////////////////////////////
-module.exports.createReferral = function createReferral(userId, referralLink) {
-    const parsedUserId = parseInt(userId, 10);
+module.exports.createReferral = async function createReferral(userId) {
+  if (!userId || isNaN(userId)) throw new Error('Invalid user ID');
 
-    if (isNaN(parsedUserId)) {
-        throw new Error(`Invalid userId: ${userId}`);
-    }
+  const referralLink = `https://www.fintech.com/referral/${Math.random().toString(36).substr(2, 9)}`;
 
-    return prisma.referral.create({
-        data: {
-            userId: parsedUserId,
-            referralLink,
-            referralSignups: 0,
-            successfulReferrals: 0,
-            rewardsExchanged: 0,
-            creditsEarned: 0,
-            wallet: 100000
-        }
-    })
-    .then(function (referral) {
-        console.log('Referral created successfully!');
-        return referral;
-    })
-    .catch(function (error) {
-        console.error('Error creating referral:', error);
-        throw error;
-    });
+  const referral = await prisma.referral.create({
+    data: {
+      userId,
+      referralLink,
+      referralSignups: 0,
+      successfulReferrals: 0,
+      rewardsExchanged: 0,
+      creditsEarned: 0,
+      wallet: 100000,
+      tier: 1,
+    },
+  });
+
+  return referral;
 };
 
+//////////////////////////////////////////////////////
+// USE REFERRAL LINK
+//////////////////////////////////////////////////////
+module.exports.useReferralLink = async function useReferralLink(userId, referralLink) {
+  if (!userId || isNaN(userId)) throw new Error('Invalid user ID');
 
+  const referral = await prisma.referral.findUnique({ where: { referralLink } });
+  if (!referral) throw new Error('Referral link not found');
+  if (referral.userId === userId) throw new Error('Cannot use your own referral link');
+
+  const alreadyUsed = await prisma.referralUsage.findFirst({
+    where: { userId, referralId: referral.id },
+  });
+  if (alreadyUsed) throw new Error('Referral link already used by this user');
+
+  // Increment stats
+  const newSuccessfulReferrals = referral.successfulReferrals + 1;
+  const newCredits = calculateCredits(newSuccessfulReferrals);
+
+  const [updatedReferral] = await prisma.$transaction([
+    prisma.referral.update({
+      where: { id: referral.id },
+      data: {
+        referralSignups: { increment: 1 },
+        successfulReferrals: { increment: 1 },
+        creditsEarned: newCredits,
+        tier: { increment: 1 }, // optional
+      },
+    }),
+    prisma.referralUsage.create({
+      data: { userId, referralId: referral.id, status: 'SUCCESSFUL' },
+    }),
+    prisma.user.update({
+      where: { id: referral.userId },
+      data: { wallet: { increment: newCredits } },
+    }),
+  ]);
+
+  // Broadcast referral update to referral owner
+  broadcastReferralUpdate(referral.userId, {
+    referralSignups: updatedReferral.referralSignups,
+    successfulReferrals: updatedReferral.successfulReferrals,
+    creditsEarned: updatedReferral.creditsEarned,
+  });
+  return updatedReferral;
+};

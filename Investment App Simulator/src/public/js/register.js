@@ -1,111 +1,51 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const registerForm = document.getElementById("registerForm");
+registerForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
 
-  if (!registerForm) {
-    console.error("Register form not found in the DOM.");
-    return;
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (password !== confirmPassword) return alert("Passwords do not match");
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+  if (!passwordRegex.test(password)) return alert("Password must include uppercase, lowercase, number, and special character");
+
+  try {
+    // 1️⃣ Register user
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    const data = await res.json();
+    console.log("Registration response:", data);
+
+    if (!res.ok) throw new Error(data.message || "Registration failed");
+
+    const userId = data.userId;
+    if (!userId) throw new Error("User ID not returned from registration");
+
+    localStorage.setItem("userId", userId);
+
+    // 2️⃣ Create referral immediately
+    const referralRes = await fetch("/referral", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+
+    const referralData = await referralRes.json();
+    if (!referralRes.ok) throw new Error(referralData.message || "Failed to create referral");
+
+    console.log("Referral created:", referralData);
+
+    alert("Registration successful!");
+    window.location.href = "/html/login.html";
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
   }
-
-  registerForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const username = document.getElementById("username").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-
-    // Validate passwords
-    if (password !== confirmPassword) {
-      alert("Passwords do not match. Please try again.");
-      return;
-    }
-
-
-    // Validate password strength
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-    if (!passwordRegex.test(password)) {
-      alert("Password must have at least 8 characters, including uppercase, lowercase, number, and special character.");
-      return;
-    }
-    
-    const registrationData = {
-      username: username,
-      email: email,
-      password: password,
-    };
-
-    // Utility function to handle fetch requests
-    function fetchMethod(url, callback, method = "POST", body = null) {
-      const options = {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: body ? JSON.stringify(body) : null,
-      };
-
-      fetch(url, options)
-        .then((response) =>
-          response
-            .json()
-            .then((data) => callback(response.status, data))
-            .catch(() =>
-              callback(response.status, { message: "Invalid JSON response" })
-            )
-        )
-        .catch((error) => {
-          console.error("Fetch error:", error);
-          callback(500, { message: "Internal server error" });
-        });
-    }
-
-    // Nested fetch for registration and referral creation
-    function registerUser() {
-      fetchMethod("/api/register", handleRegistrationResponse, "POST", registrationData);
-    }
-
-    function handleRegistrationResponse(status, data) {
-      if (status === 201) {
-        alert("Registration successful!");
-
-        // Save userId in localStorage if returned by the backend
-        if (data.userId) {
-          localStorage.setItem("userId", data.userId);
-        } else {
-          alert("User ID not returned from registration. Referral cannot be created.");
-          return;
-        }
-
-        // Proceed to create referral
-        createReferral();
-      } else {
-        alert("Registration failed: " + (data.message || "Unknown error"));
-      }
-    }
-
-    function createReferral() {
-      const userId = localStorage.getItem("userId");
-
-      if (!userId) {
-        alert("User ID not found in localStorage. Cannot create referral.");
-        return;
-      }
-
-      const referralData = { userId };
-
-      fetchMethod("/stats/", handleReferralResponse, "POST", referralData);
-    }
-
-    function handleReferralResponse(status, data) {
-      if (status === 201) {
-        alert("Referral created successfully!");
-        window.location.href = "/html/login.html"; // Redirect after successful registration and referral creation
-      } else {
-        alert("Referral creation failed: " + (data.message || "Unknown error"));
-      }
-    }
-
-    // Start the registration process
-    registerUser();
-  });
 });

@@ -59,54 +59,61 @@ router.get('/info', async (req, res) => {
     }
 });
 
-/**
- * Route to register a new user
- */
 router.post('/register', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
-
-          // REGEX FOR PASSWORD VALIDATION
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return res.status(400).json({ 
-                message: "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character." 
-            });
-        }
-
-        const existingUser = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { username },
-                    { email },
-                ],
-            },
-        });
-
-        if (existingUser) {
-            return res.status(409).json({ message: "Username or email already exists" });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = await prisma.user.create({
-            data: {
-                username,
-                email,
-                password: hashedPassword,
-            },
-        });
-
-        res.status(201).json({ message: "User registered successfully", user: newUser });
-    } catch (error) {
-        console.error("Error during registration:", error);
-        res.status(500).json({ message: "Internal server error" });
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character."
+      });
+    }
+
+    const existingUser = await prisma.user.findFirst({
+      where: { OR: [{ username }, { email }] },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ message: "Username or email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Use a transaction to create user + referral atomically
+    const [newUser, newReferral] = await prisma.$transaction([
+      prisma.user.create({
+        data: { username, email, password: hashedPassword },
+        select: { id: true, username: true, email: true }
+      }),
+      // We’ll create referral after we have the userId
+    ]).then(async ([user]) => {
+      const referral = await prisma.referral.create({
+        data: {
+          userId: user.id,
+          referralLink: `https://www.fintech.com/referral/${Math.random().toString(36).substring(2, 9)}`,
+          referralSignups: 0,
+          successfulReferrals: 0,
+          rewardsExchanged: 0,
+          creditsEarned: 0,
+          wallet: 100000,
+        }
+      });
+      return [user, referral];
+    });
+
+    res.status(201).json({ message: "User registered successfully", user: newUser, referral: newReferral });
+
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
+
 
 /**
  * Route to login a user

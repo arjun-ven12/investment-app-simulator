@@ -1,186 +1,198 @@
-
-/* Header */
-h1 {
-    font-size: 1.8rem;
-    color: #ffffff; /* Cyan header */
-    font-weight: 700;
-    text-align: center;
+/* GENERAL STYLING */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #111);
+    color: #fff;
+    margin: 0;
+    padding: 0;
 }
 
-/* Credit Box */
-.credit-box {
-    background-color: #1F1F1F; /* Dark card background */
-    color: #00d9ff; /* Cyan text */
-    padding: 15px;
-    margin: 20px 0;
-    border-radius: 10px;
-    font-size: 1.2rem;
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+h1 {
     text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #00d9ff;
+}
+
+/* CREDIT BOX */
+.credit-box {
+    background: linear-gradient(145deg, #111111, #1a1a1a);
+    border-radius: 15px;
+    padding: 25px 30px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
 }
 
 .credit-box h2 {
-    margin: 0;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #00fff7;
+}
+
+.progress-info p {
+    font-size: 1.05rem;
+    margin: 5px 0;
+    color: #ccc;
+}
+
+.progress-bar-container {
+    margin-top: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #222;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00d9ff, #00bfff);
+    transition: width 0.6s ease-in-out;
+}
+
+#progressText {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #fff;
+    display: block;
     text-align: center;
 }
 
-.credit-box p {
-    margin-top: 5px;
-}
-
-/* Referral Link Section */
+/* REFERRAL LINK SECTION */
 .referral-link {
-    margin-top: 20px;
-    text-align: left;
+    background-color: #111;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
 }
 
 .referral-link h3 {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #ffffff; /* Cyan subheading */
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: #00d9ff;
 }
 
 .link-container {
     display: flex;
-    align-items: center;
-    margin: 10px 0;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .link-container input {
     flex: 1;
-    padding: 10px;
-    border: 1px solid #555555; /* Subtle border */
-    background-color: #333333; /* Dark input background */
-    color: #FFFFFF; /* Light text */
-    border-radius: 6px 0 0 6px;
-    font-size: 0.9rem;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #fff;
+    font-size: 1rem;
 }
 
 .link-container button {
-    padding: 10px 15px;
-    background-color: #00d9ff; /* Cyan button */
-    color: #FFFFFF;
+    padding: 12px 20px;
+    background: #00d9ff;
+    color: #000;
+    font-weight: 600;
     border: none;
-    border-radius: 0 6px 6px 0;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.link-container button:hover {
+    background: #00bfff;
+}
+
+/* SOCIAL BUTTONS */
+.social-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .social-icons button {
-    background-color: #333333; /* Dark button background */
+    flex: 1 1 140px;
+    padding: 10px;
+    border-radius: 10px;
     border: none;
-    border-radius: 6px;
-    padding: 10px 15px;
-    color: #FFFFFF; /* Light text */
+    background-color: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
     cursor: pointer;
-    font-size: 0.9rem;
+    transition: 0.3s;
 }
 
 .social-icons button:hover {
-    background-color: #00d9ff; /* Cyan hover effect */
+    background-color: #00d9ff;
+    color: #000;
 }
 
-/* Stats Section */
+/* RECEIVED LINK SECTION */
+.received-referral-link {
+    background-color: #111;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
+}
+
+.received-referral-link h3 {
+    font-size: 1.3rem;
+    color: #00d9ff;
+    margin-bottom: 15px;
+}
+
+/* STATS SECTION */
 .stats-container {
     display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .stat-box {
-    width: 22%;
-    background-color: #1F1F1F; /* Dark box background */
-    padding: 8px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    flex: 1 1 200px;
+    background-color: #111;
+    padding: 25px;
+    border-radius: 15px;
     text-align: center;
-    color: #FFFFFF;
+    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.2);
+    border: 1px solid #00d9ff;
 }
 
 .stat-box h4 {
-    font-size: 1.4rem;
-    color: #00BFFF; /* Cyan numbers */
-    margin: 0;
+    font-size: 1.6rem;
+    color: #00d9ff;
+    margin: 0 0 5px 0;
 }
 
 .stat-box p {
-    font-size: 0.9rem;
-    color: #CCCCCC; /* Subtle text */
-    margin-top: 5px;
+    font-size: 1rem;
+    color: #ccc;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .stats-container {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .stat-box {
-        width: 100%;
-    }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .stats-container { flex-direction: column; gap: 15px; }
+    .social-icons { flex-direction: column; }
 }
 
-/* Main container */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column; /* stack children vertically */
-    gap: 30px; /* spacing between sections */
-}
-
-/* Credit box, referral link, received link, stats container */
-.credit-box,
-.referral-link,
-.received-referral-link,
-.stats-container {
-    background-color: #111; /* dark black */
-    color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,255,255,0.2); /* subtle cyan shadow */
-}
-
-/* Referral stats boxes */
-.stats-container {
-    display: flex;
-    flex-wrap: wrap; /* wrap on small screens */
-    gap: 20px;
-}
-
-.stat-box {
-    flex: 1 1 200px; /* take equal space, min 200px */
-    background-color: #111;
-    border: 1px solid #00ffff;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-/* Buttons */
-button {
-    background-color: #00ffff;
-    color: black;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #00cccc;
-}
-
-/* Input fields */
-input[type="text"], input[type="tel"], input[type="password"] {
-    padding: 8px;
-    width: 100%;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #00ffff;
-    background-color: #222;
-    color: #fff;
+@media (max-width: 480px) {
+    .link-container { flex-direction: column; }
+    .link-container button { width: 100%; }
 }

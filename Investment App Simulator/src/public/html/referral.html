@@ -4,91 +4,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Program</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/referral.css">
-    <title>Referral</title>
 </head>
 
 <body>
+    <!-- Navbar -->
     <div id="navbar-container"></div>
-    <!-- Main Container -->
-    <div class="container">
-        <h1>Refer Friends & Earn Credit</h1>
 
-        <!-- Credit Box -->
-        <div class="credit-box">
-            <h2>$100 Credit</h2>
-            <p>Introduce a friend to Fintech and you'll be credited $100 in your account.</p>
-            <p>Every extra referral earns you an extra $100 on top of the previous amount.</p>
-        </div>
+    <main class="container">
+        <h1>Refer Friends & Earn Rewards</h1>
+
+        <!-- Credit & Progress Box -->
+        <section class="credit-box">
+            <h2>Your Reward Progress</h2>
+            <div class="progress-info">
+                <p>Next Referral: <strong id="nextReward">$0</strong></p>
+                <p>Maximum Cap: <strong>$300</strong></p>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressText">0 / 300</span>
+            </div>
+        </section>
 
         <!-- Referral Link Sharing -->
-        <div class="referral-link">
-            <h3>Share my referral link with friends</h3>
+        <section class="referral-link" id="referralLinkContainer">
+            <h3>Your Referral Link</h3>
             <div class="link-container">
                 <input type="text" value="" id="referralLink" readonly>
-                <button onclick="copyReferralLink()" style="color: black;">Copy Link</button>
+                <button id="copyReferralButton"><i class="fas fa-copy"></i> Copy</button>
             </div>
             <div class="social-icons">
-                <button onclick="shareOnFacebook()"><i class="fab fa-facebook"></i> Facebook</button>
-                <button onclick="shareOnTwitter()"><i class="fab fa-twitter"></i> Twitter</button>
-                <button onclick="shareOnLinkedIn()"><i class="fab fa-linkedin"></i> LinkedIn</button>
-                <button onclick="shareOnEmail()"><i class="fas fa-envelope"></i> Gmail</button>
-                <button onclick="shareOnWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                <button onclick="shareOnTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
+                <button id="shareFacebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+                <button id="shareTwitter"><i class="fab fa-twitter"></i> Twitter</button>
+                <button id="shareLinkedIn"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
+                <button id="shareEmail"><i class="fas fa-envelope"></i> Email</button>
+                <button id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button id="shareTelegram"><i class="fab fa-telegram-plane"></i> Telegram</button>
             </div>
-        </div>
+        </section>
 
         <!-- Received Referral Link Section -->
-        <div class="received-referral-link">
-            <h3>Key in the referral link you got from your friend here.</h3>
+        <section class="received-referral-link">
+            <h3>Enter a Friend’s Referral Link</h3>
             <div class="link-container">
-                <input type="text" id="receivedReferralLink">
-                <button id="enterReferralLinkButton" style="color: black;">Enter</button>
+                <input type="text" id="receivedReferralLink" placeholder="Paste referral link here">
+                <button id="enterReferralLinkButton"><i class="fas fa-check"></i> Submit</button>
             </div>
-        </div>
+        </section>
 
         <!-- Referral Stats -->
-        <div class="stats-container">
+        <section class="stats-container">
             <div class="stat-box">
-                <h4>21</h4>
+                <h4 id="signupCount">0</h4>
                 <p>Referral Signups</p>
             </div>
             <div class="stat-box">
-                <h4>12</h4>
+                <h4 id="successCount">0</h4>
                 <p>Successful Referrals</p>
             </div>
             <div class="stat-box">
-                <h4>5</h4>
+                <h4 id="rewardsCount">0</h4>
                 <p>Rewards Exchanged</p>
             </div>
-            <div class="stat-box">
-                <h4>$120</h4>
-                <p>Credits Earned</p>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
+    <script src="../js/navbar.js"></script>
     <script src="../js/referral.js"></script>
-    <script src="../js/home.js"></script>
-    <script>
-        // Toggle mobile menu
-        document.getElementById('navbar-toggle').onclick = function () {
-            document.querySelector('.navbar-links').classList.toggle('active');
-        };
-
-        // Function to copy referral link
-        function copyReferralLink() {
-            const referralLink = document.getElementById("referralLink");
-            referralLink.select();
-            referralLink.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand("copy");
-            alert("Referral link copied to clipboard!");
-        }
-
-    </script>
-    
 </body>
-<script src="../js/navbar.js"></script>
+
 </html>

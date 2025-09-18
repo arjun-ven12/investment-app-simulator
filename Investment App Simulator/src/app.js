@@ -72,7 +72,7 @@ app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
 
 
-app.use('/stats', referralRouter);
+app.use('/referral', referralRouter);
 app.use('/dashboard', dashboardRouter);
 
 // app.use('/api/chat', chatHandler);
