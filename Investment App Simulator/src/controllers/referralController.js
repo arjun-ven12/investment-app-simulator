@@ -71,6 +71,23 @@ module.exports.useReferralLinkController = async function (req, res) {
 };
 
 
+//////////////////////////////////////////////////////
+// GET REFERRAL USAGE HISTORY
+//////////////////////////////////////////////////////
+module.exports.getReferralHistoryController = async function (req, res) {
+  const userId = parseInt(req.params.userId, 10);
+  if (isNaN(userId)) return res.status(400).json({ success: false, message: 'Invalid user ID' });
+
+  try {
+    const history = await referralModel.getReferralHistory(userId);
+    return res.status(200).json({ success: true, history });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 
 
 

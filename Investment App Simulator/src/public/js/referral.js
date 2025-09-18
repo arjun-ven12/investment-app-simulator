@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const userId = localStorage.getItem('userId');
   if (!userId) return alert("User not logged in.");
 
+  referralLinkInput = document.getElementById('referralLink');
+
+  // -------- Socket Setup --------
   if (typeof io !== 'undefined') {
     socket = io();
 
@@ -25,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Copy referral link button
+  // -------- Copy Referral Link --------
   function attachCopyListener() {
     const copyBtn = document.getElementById('copyReferralButton');
     copyBtn?.addEventListener('click', () => {
@@ -37,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Enter referral link
+  attachCopyListener();
+
+  // -------- Enter Referral Link --------
   const enterReferralButton = document.getElementById('enterReferralLinkButton');
   enterReferralButton?.addEventListener('click', async () => {
     const receivedLink = document.getElementById('receivedReferralLink')?.value.trim();
@@ -52,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (res.ok) {
         alert('Referral link entered successfully!');
-        fetchReferralStats(); // update own UI
+        fetchReferralStats();
+        fetchReferralHistory();
       } else {
         alert(data.message || 'Failed to use referral link');
       }
@@ -62,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fetch referral stats
+  // -------- Fetch Referral Stats --------
   async function fetchReferralStats() {
     try {
       const res = await fetch(`/referral/${userId}`);
@@ -78,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // -------- Update UI --------
   function updateReferralStatsUI(stats) {
     const container = document.querySelector('.stats-container');
     container.innerHTML = `
@@ -93,24 +100,120 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3>Share the link with your friends!</h3>
       <div class="link-container">
         <input type="text" id="referralLink" value="${link}" readonly>
-        <button id="copyReferralButton">Copy</button>
+        <button id="copyReferralButton"><i class="fas fa-copy"></i> Copy</button>
       </div>
     `;
+    referralLinkInput = document.getElementById('referralLink'); // reassign
     attachCopyListener();
   }
 
-  function updateProgressBar(creditsEarned, nextTierCredits) {
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
+  const rewardTiers = [100, 150, 200, 250, 300]; // reward levels
 
-    const progressPercent = Math.min((creditsEarned / 300) * 100, 100);
-    progressFill.style.width = `${progressPercent}%`;
-    progressText.innerText = `${creditsEarned} / 300`;
-
-    const nextRewardElem = document.getElementById('nextReward');
-    if (nextRewardElem) nextRewardElem.innerText = `$${Math.min(nextTierCredits, 300)}`;
+  function getNextTier(credits) {
+    for (let tier of rewardTiers) if (credits < tier) return tier;
+    return rewardTiers[rewardTiers.length - 1]; // max cap
   }
 
-  // Initial load
+  function getPrevTier(credits) {
+    let prev = 0;
+    for (let tier of rewardTiers) {
+      if (credits < tier) return prev;
+      prev = tier;
+    }
+    return rewardTiers[rewardTiers.length - 1];
+  }
+
+  function calculateNextTierCredits(successfulReferrals) {
+  const base = 100;
+  const increment = 50;
+  const max = 300;
+  return Math.min(base + successfulReferrals * increment, max);
+}
+
+
+function updateProgressBar(creditsEarned) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const nextRewardElem = document.getElementById('nextReward');
+
+    if (!progressFill || !progressText || !nextRewardElem) return;
+
+    const maxCap = 300; // hardcoded max cap
+
+    // Calculate % relative to max cap
+    const progressPercent = Math.min((creditsEarned / maxCap) * 100, 100);
+    progressFill.style.width = `${progressPercent}%`;
+
+    // Show "credits / 300" instead of "credits / nextTier"
+    progressText.innerText = `${creditsEarned} / ${maxCap}`;
+
+    // Next reward still shows next tier
+    const nextTier = getNextTier(creditsEarned);
+    nextRewardElem.innerText = `$${nextTier}`;
+}
+
+
+
+  // -------- Referral History --------
+  async function fetchReferralHistory() {
+    try {
+      const res = await fetch(`/referral/${userId}/history`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch referral history');
+
+      const tbody = document.querySelector('#referralTable tbody');
+      tbody.innerHTML = '';
+
+      data.history.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.referralOwnerId === parseInt(userId, 10) ? 'Sent' : 'Used'}</td>
+          <td>${item.usedByUserId || item.referralOwnerId}</td>
+          <td>${new Date(item.usedAt).toLocaleString()}</td>
+          <td class="status">${item.status}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // -------- Social Share Buttons --------
+  function setupShareButtons() {
+    const share = (url) => window.open(url, '_blank');
+
+    document.getElementById('shareWhatsapp')?.addEventListener('click', () => {
+      const link = encodeURIComponent(referralLinkInput.value);
+      share(`https://api.whatsapp.com/send?text=Join%20using%20my%20referral%20link:%20${link}`);
+    });
+
+    document.getElementById('shareFacebook')?.addEventListener('click', () => {
+      const link = encodeURIComponent(referralLinkInput.value);
+      share(`https://www.facebook.com/sharer/sharer.php?u=${link}`);
+    });
+
+    document.getElementById('shareTwitter')?.addEventListener('click', () => {
+      const link = encodeURIComponent(referralLinkInput.value);
+      share(`https://twitter.com/intent/tweet?url=${link}&text=Join%20using%20my%20referral%20link!`);
+    });
+
+    document.getElementById('shareLinkedIn')?.addEventListener('click', () => {
+      const link = encodeURIComponent(referralLinkInput.value);
+      share(`https://www.linkedin.com/sharing/share-offsite/?url=${link}`);
+    });
+
+    document.getElementById('copyLink')?.addEventListener('click', () => {
+      referralLinkInput.select();
+      referralLinkInput.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      alert('Referral link copied!');
+    });
+  }
+
+  setupShareButtons();
+
+  // -------- Initial Load --------
   fetchReferralStats();
+  fetchReferralHistory();
 });

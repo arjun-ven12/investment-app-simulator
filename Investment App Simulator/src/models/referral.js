@@ -112,3 +112,35 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
   });
   return { ownerId: referral.userId, updatedReferral };
 };
+
+
+
+//////////////////////////////////////////////////////
+// GET REFERRAL HISTORY
+//////////////////////////////////////////////////////
+module.exports.getReferralHistory = async function (userId) {
+ const history = await prisma.referralUsage.findMany({
+  where: {
+    OR: [
+      { userId },               // the user who used a referral
+      { referral: { userId } }  // referrals created by this user
+    ]
+  },
+  include: {
+    referral: true,  // includes the referral info (owner etc.)
+  },
+  orderBy: {
+    createdAt: "desc"  // the field in your schema is `createdAt`, not `usedAt`
+  }
+});
+
+return history.map(item => ({
+  id: item.id,
+  usedByUserId: item.userId,
+  referralOwnerId: item.referral?.userId,
+  status: item.status,
+  usedAt: item.createdAt,
+  referralLink: item.referral?.referralLink,
+}));
+
+};

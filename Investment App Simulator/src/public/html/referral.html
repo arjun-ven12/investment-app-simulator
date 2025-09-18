@@ -2,77 +2,100 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referral Program</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/referral.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referral Program</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/referral.css">
 </head>
 
 <body>
-    <!-- Navbar -->
-    <div id="navbar-container"></div>
+  <div id="navbar-container"></div>
 
-    <main class="container">
-        <h1>Refer Friends & Earn Rewards</h1>
+  <main class="container">
+    <h1>Refer Friends & Earn Rewards</h1>
 
-        <!-- Credit & Progress Box -->
-        <section class="credit-box">
-            <h2>Your Reward Progress</h2>
-            <div class="progress-info">
-                <p>Next Referral: <strong id="nextReward">$0</strong></p>
-                <p>Maximum Cap: <strong>$300</strong></p>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <span id="progressText">0 / 300</span>
-            </div>
-        </section>
+    <section class="credit-box glass">
+      <h2>Your Reward Progress</h2>
+      <div class="progress-info">
+        <p>Next Reward: <strong id="nextReward">$0</strong></p>
+        <p>Maximum Cap: <strong>$300</strong></p>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span id="progressText">0 / 300</span>
+      </div>
+    </section>
 
-        <!-- Referral Link Sharing -->
-        <section class="referral-link" id="referralLinkContainer">
-            <h3>Your Referral Link</h3>
-            <div class="link-container">
-                <input type="text" value="" id="referralLink" readonly>
-                <button id="copyReferralButton"><i class="fas fa-copy"></i> Copy</button>
-            </div>
-            <div class="social-icons">
-                <button id="shareFacebook"><i class="fab fa-facebook-f"></i> Facebook</button>
-                <button id="shareTwitter"><i class="fab fa-twitter"></i> Twitter</button>
-                <button id="shareLinkedIn"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
-                <button id="shareEmail"><i class="fas fa-envelope"></i> Email</button>
-                <button id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                <button id="shareTelegram"><i class="fab fa-telegram-plane"></i> Telegram</button>
-            </div>
-        </section>
+    <section class="referral-link glass" id="referralLinkContainer">
+      <h3>Share the link with your friends!</h3>
+      <div class="link-container">
+        <input type="text" id="referralLink" readonly>
+        <button id="copyReferralButton"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+    </section>
 
-        <!-- Received Referral Link Section -->
-        <section class="received-referral-link">
-            <h3>Enter a Friend’s Referral Link</h3>
-            <div class="link-container">
-                <input type="text" id="receivedReferralLink" placeholder="Paste referral link here">
-                <button id="enterReferralLinkButton"><i class="fas fa-check"></i> Submit</button>
-            </div>
-        </section>
+    <section class="received-referral-link glass">
+      <h3>Enter a Friend’s Referral Link</h3>
+      <div class="link-container">
+        <input type="text" id="receivedReferralLink" placeholder="Paste referral link here">
+        <button id="enterReferralLinkButton"><i class="fas fa-check"></i> Submit</button>
+      </div>
+    </section>
 
-        <!-- Referral Stats -->
-        <section class="stats-container">
-            <div class="stat-box">
-                <h4 id="signupCount">0</h4>
-                <p>Referral Signups</p>
-            </div>
-            <div class="stat-box">
-                <h4 id="successCount">0</h4>
-                <p>Successful Referrals</p>
-            </div>
-        </section>
-    </main>
-<script src="/socket.io/socket.io.js"></script>
-    <script src="../js/navbar.js"></script>
-    <script src="../js/referral.js"></script>
+    <!-- Social Share Section right below referral input -->
+    <section class="referral-share glass">
+      <h3>Share via Socials</h3>
+      <div class="social-icons">
+        <button id="shareWhatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button id="shareFacebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+        <button id="shareTwitter"><i class="fab fa-twitter"></i> Twitter</button>
+        <button id="shareLinkedIn"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
+        <button id="copyLink"><i class="fas fa-link"></i> Copy Link</button>
+      </div>
+    </section>
+
+    <section class="stats-container">
+      <div class="stat-box glass">
+        <h4 id="signupCount">0</h4>
+        <p>Referral Signups</p>
+      </div>
+      <div class="stat-box glass">
+        <h4 id="successCount">0</h4>
+        <p>Successful Referrals</p>
+      </div>
+      <div class="stat-box glass">
+        <h4 id="creditsEarned">$0</h4>
+        <p>Credits Earned</p>
+      </div>
+    </section>
+
+    <section class="referral-history glass">
+      <h3>Referral Usage History</h3>
+      <table id="referralTable">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>User ID</th>
+            <th>Timestamp</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- JS will populate rows here -->
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/referral.js"></script>
 </body>
 
 </html>
