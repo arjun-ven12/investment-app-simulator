@@ -56,3 +56,6 @@ ALTER TABLE "IntradayPrice2" ADD CONSTRAINT "IntradayPrice2_stockId_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "IntradayPrice3" ADD CONSTRAINT "IntradayPrice3_stockId_fkey" FOREIGN KEY ("stockId") REFERENCES "Stock"("stock_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "InvestmentGuide"
+ADD CONSTRAINT "InvestmentGuide_title_key" UNIQUE ("title");

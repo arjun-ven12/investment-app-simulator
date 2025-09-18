@@ -362,7 +362,7 @@ model IntradayPrice3 {
 
 model InvestmentGuide {
   id        Int      @id @default(autoincrement())
-  title     String
+  title   String @unique
   content   Json // store the structured JSON we designed above
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
