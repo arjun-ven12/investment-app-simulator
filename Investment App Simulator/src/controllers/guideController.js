@@ -15,3 +15,13 @@ module.exports.getGuideByIdController = async function (req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+module.exports.getAllGuidesController = async function (req, res) {
+  try {
+    const guides = await guideModel.getAllGuides();
+    return res.status(200).json({ success: true, guides });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

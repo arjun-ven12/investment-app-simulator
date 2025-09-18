@@ -1,6 +1,6 @@
 const prisma = require("../src/models/prismaClient");
-const filePath = require("path");
 const fs = require("fs");
+const path = require("path");
 
 const statuses = [
   { text: "Pending" },
@@ -477,30 +477,30 @@ async function main() {
   }
   console.log("News categories seeded (duplicates skipped)");
 
-const path = require("path");
-const fs = require("fs");
 
-const howToFolderPath = path.join(__dirname, "how-tos"); // adjust folder name
+const guideFolder = path.join(__dirname, "how-tos");
+const files = fs.readdirSync(guideFolder);
 
-// Read all files in the folder
-const guideFiles = fs.readdirSync(howToFolderPath);
+for (const fileName of files) {
+  const filePath = path.join(guideFolder, fileName);
+  const guideData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
-for (const fileName of guideFiles) {
-  const filePath = path.join(howToFolderPath, fileName);
-  
-  // Make sure it's a JSON file
-  if (path.extname(filePath) === ".json") {
-    const guideData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const sections = guideData.sections || [];
-
-    await prisma.investmentGuide.create({
-      data: {
-        title: guideData.title,
-        content: sections,
-      },
-    });
+  // Make sure content exists
+  if (!guideData.content) {
+    console.warn(`Skipping ${fileName} because content is missing`);
+    continue;
   }
+
+  await prisma.investmentGuide.upsert({
+    where: { title: guideData.title },
+    update: {},
+    create: {
+      title: guideData.title,
+      content: guideData.content, // Prisma Json field
+    },
+  });
 }
+
 
 
   // Seed statuses

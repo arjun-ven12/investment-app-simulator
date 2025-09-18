@@ -1,4 +1,6 @@
-const GUIDE_ID = 1;
+// Get ID dynamically from query string (?id=10)
+const urlParams = new URLSearchParams(window.location.search);
+const GUIDE_ID = urlParams.get("id");
 
 async function fetchGuideById(guideId) {
     const token = localStorage.getItem("token");
@@ -22,6 +24,11 @@ async function fetchGuideById(guideId) {
 }
 
 async function fetchGuide() {
+    if (!GUIDE_ID) {
+        document.getElementById('guide-title').innerText = "Invalid or missing guide ID";
+        return;
+    }
+
     const guide = await fetchGuideById(GUIDE_ID);
     if (guide) renderGuide(guide);
 }
@@ -39,7 +46,6 @@ function renderGuide(guide) {
         const headingEl = document.createElement('div');
         headingEl.className = 'section-heading';
         headingEl.innerHTML = `<span>${section.heading}</span> <span class="toggle-btn">►</span>`;
-
 
         const contentEl = document.createElement('div');
         contentEl.className = 'section-content';
@@ -70,15 +76,13 @@ function renderGuide(guide) {
                 contentEl.appendChild(ul);
             }
         });
+
         headingEl.addEventListener('click', () => {
             const isOpen = contentEl.classList.contains('show');
             contentEl.classList.toggle('show');
             headingEl.classList.toggle('active');
-
-            // Switch arrow symbols instead of rotating +
             headingEl.querySelector('.toggle-btn').textContent = isOpen ? '►' : '▼';
         });
-
 
         sectionEl.appendChild(headingEl);
         sectionEl.appendChild(contentEl);

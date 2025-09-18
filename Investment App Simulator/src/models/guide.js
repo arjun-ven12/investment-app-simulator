@@ -12,3 +12,10 @@ module.exports.getGuideById = async function (id) {
   if (!guide) throw new Error('Guide not found');
   return guide;
 };
+
+module.exports.getAllGuides = async function () {
+  const guides = await prisma.investmentGuide.findMany({
+    orderBy: { id: 'asc' }, // optional: sort by id
+  });
+  return guides;
+};
