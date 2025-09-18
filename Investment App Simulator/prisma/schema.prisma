@@ -215,17 +215,21 @@ model Referral {
   successfulReferrals Int             @default(0)
   rewardsExchanged    Int             @default(0)
   creditsEarned       Int             @default(0)
-  userId              Int?
+  tier                Int             @default(1)
   wallet              Int             @default(100000)
+  expiresAt           DateTime?
+  userId              Int?
   user                User?           @relation("UserReferrals", fields: [userId], references: [id], onDelete: Cascade)
   referralUsages      ReferralUsage[]
   referredUsers       User[]          @relation("UserReferredBy")
 }
 
+
 model ReferralUsage {
   id         Int       @id @default(autoincrement())
   userId     Int?
   referralId Int?
+  status     String    @default("PENDING")
   createdAt  DateTime  @default(now())
   referral   Referral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
   user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
