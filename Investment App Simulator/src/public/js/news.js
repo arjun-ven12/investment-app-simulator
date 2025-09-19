@@ -186,13 +186,6 @@ async function displayNews(newsList = []) {
         const card = document.createElement('div');
         card.className = 'news-card';
 
-        // if (news.image) {
-        //     const img = document.createElement('img');
-        //     img.src = news.image;
-        //     img.alt = news.headline;
-        //     img.className = 'news-image';
-        //     card.appendChild(img);
-        // }
 
         const headline = document.createElement('div');
         headline.className = 'headline';
