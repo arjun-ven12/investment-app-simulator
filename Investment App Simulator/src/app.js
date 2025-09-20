@@ -23,8 +23,8 @@ const dashboardRouter = require('./routers/Dashboard');
 
 // const chatHandler = require('./routers/chat');
 const profileRouter = require('./routers/Profile');
-const userRoutes = require('./routers/user.router');
-const userRouter = require("./routers/user.router");
+// const userRoutes = require('./routers/user.router');
+const userRouter = require("./routers/user");
 const settingRouter = require("./routers/setting");
 
 const goalsRouter = require("./routers/Goals"); 
@@ -81,7 +81,7 @@ app.use('/dashboard', dashboardRouter);
 
 // app.use('/api/chat', chatHandler);
 app.use('/profile', profileRouter);
-app.use('/api/user', userRoutes);
+app.use('/user', userRouter);
 // Register the router
 app.use("/api", userRouter);
 app.use("/api/goals", goalsRouter); 
