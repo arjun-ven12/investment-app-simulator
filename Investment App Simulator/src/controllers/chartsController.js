@@ -1,3 +1,4 @@
+
 const chartsModel = require('../models/Charts');
 
 const { Parser } = require('json2csv');
@@ -26,7 +27,7 @@ module.exports.getStockChartData = function (req, res) {
 
 
 module.exports.getCompanyDetails = function (req, res) {
-    const companySymbol = req.params.symbol; 
+    const companySymbol = req.params.symbol;
 
     return chartsModel
         .getCompanyDetails(companySymbol)
@@ -45,23 +46,27 @@ module.exports.getCompanyDetails = function (req, res) {
 };
 
 
-module.exports.tradeStock = function (req, res) {
-    const { userId, stockId, quantity, price, tradeType } = req.body;
+module.exports.tradeStock = async function (req, res) {
+    const { userId, stockId, quantity, tradeType } = req.body;
 
-    return chartsModel
-        .tradeStock(userId, stockId, quantity, price, tradeType)
-        .then(function (tradeData) {
-            return res.status(200).json(tradeData);
-        })
-        .catch(function (error) {
-            console.error(error);
+    try {
+        const tradeData = await chartsModel.tradeStock(userId, stockId, quantity, tradeType);
 
-            if (error.message === 'Insufficient funds') {
-                return res.status(400).json({ error: error.message });
-            }
+        // Emit update to that user's channel
+        const io = req.app.get('io');
+        io.to(`user_${userId}`).emit('portfolioUpdate', tradeData);
+        io.to(`user_${userId}`).emit('broadcastTradeHistoryUpdate', tradeData);
 
-            return res.status(500).json({ error: error.message });
-        });
+        return res.status(200).json(tradeData);
+    } catch (error) {
+        console.error(error);
+
+        if (error.message === 'Insufficient funds') {
+            return res.status(400).json({ error: error.message });
+        }
+
+        return res.status(500).json({ error: error.message });
+    }
 };
 
 
@@ -114,28 +119,33 @@ module.exports.getStockIdBySymbol = function (req, res) {
 
 
 
-module.exports.getUserPortfolio = function (req, res) {
-    const userId = parseInt(req.params.userId, 10);
 
-    if (isNaN(userId)) {
+
+const { broadcastPortfolioUpdate } = require('../socketBroadcast');
+
+module.exports.getUserPortfolio = async function (req, res) {
+    const userId = Number(req.params.userId);
+
+    if (!Number.isInteger(userId)) {
         return res.status(400).json({ error: 'Invalid user ID.' });
     }
 
-    return chartsModel
-        .getUserPortfolio(userId)
-        .then(function (portfolio) {
-            return res.status(200).json(portfolio);
-        })
-        .catch(function (error) {
-            console.error(error);
+    try {
+        const portfolio = await chartsModel.getUserPortfolio(userId);
 
-            if (error.message.includes('not found')) {
-                return res.status(404).json({ error: error.message });
-            }
 
-            return res.status(500).json({ error: error.message });
-        });
+        return res.status(200).json(portfolio);
+    } catch (error) {
+        console.error('Error fetching user portfolio:', error);
+
+        if (error.message?.includes('not found')) {
+            return res.status(404).json({ error: error.message });
+        }
+
+        return res.status(500).json({ error: error.message || 'Server error' });
+    }
 };
+
 
 module.exports.getAllStocks = function (req, res) {
     return chartsModel
@@ -240,25 +250,59 @@ exports.searchStocksController = function (req, res) {
 //////////////////////////////////////////////////
 
   
+  // // Controller for favoriting a stock
+  // exports.favoriteStockController = function (req, res) {
+  //   const { userId, symbol } = req.body;
+  
+  //   if (!userId || !symbol) {
+  //     return res.status(400).json({ message: "User ID and stock symbol are required" });
+  //   }
+
+  //       const io = req.app.get('io');
+  //   io.to(`user_${userId}`).emit('broadcastfavoriteStock', stockFavoritedData);
+  
+  //   return chartsModel
+  //     .favoriteStock(userId, symbol)
+  //     .then((favorite) => {
+  //       return res.status(201).json({ success: true, message: "Stock favorited successfully", favorite });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error favoriting stock:", error);
+  //       return res.status(500).json({ success: false, message: "Error favoriting stock", error });
+  //     });
+  // };
+  
   // Controller for favoriting a stock
-  exports.favoriteStockController = function (req, res) {
-    const { userId, symbol } = req.body;
-  
-    if (!userId || !symbol) {
-      return res.status(400).json({ message: "User ID and stock symbol are required" });
-    }
-  
-    return chartsModel
-      .favoriteStock(userId, symbol)
-      .then((favorite) => {
-        return res.status(201).json({ success: true, message: "Stock favorited successfully", favorite });
-      })
-      .catch((error) => {
-        console.error("Error favoriting stock:", error);
-        return res.status(500).json({ success: false, message: "Error favoriting stock", error });
+exports.favoriteStockController = function (req, res) {
+  const { userId, symbol } = req.body;
+
+  if (!userId || !symbol) {
+    return res.status(400).json({ message: "User ID and stock symbol are required" });
+  }
+
+  chartsModel
+    .favoriteStock(userId, symbol)
+    .then((favorite) => {
+      // After success, emit to the user-specific room
+      const io = req.app.get('io');
+      io.to(`user_${userId}`).emit('broadcastfavoriteStock', favorite);
+
+      return res.status(201).json({ 
+        success: true, 
+        message: "Stock favorited successfully", 
+        favorite 
       });
-  };
-  
+    })
+    .catch((error) => {
+      console.error("Error favoriting stock:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Error favoriting stock", 
+        error 
+      });
+    });
+};
+
 
 
   exports.getFavoriteStocksController = function (req, res) {
@@ -311,37 +355,94 @@ exports.unfavoriteStockController = function (req, res) {
 
 
 
-// Controller for creating a limit order
-exports.createLimitOrderController = function (req, res) {
-    const { userId, stockId, quantity, limitPrice, orderType } = req.body;
+// // Controller for creating a limit order
+// exports.createLimitOrderController = function (req, res) {
+//     const { userId, stockId, quantity, limitPrice, orderType } = req.body;
 
-    if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
-        return res.status(400).json({ message: "All fields are required." });
-    }
-    const userIdInt = parseInt(userId)
+//     if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
+//         return res.status(400).json({ message: "All fields are required." });
+//     }
+//     const userIdInt = parseInt(userId)
 
-    return chartsModel
-        .createLimitOrder(userIdInt, stockId, quantity, limitPrice, orderType)
-        .then((limitOrder) => {
-            return res.status(201).json({ message: "Limit order created successfully", limitOrder });
-        })
-        .catch((error) => {
-            console.error("Error creating limit order:", error);
-            return res.status(500).json({ message: "Error creating limit order", error });
-        });
-};
+//     return chartsModel
+//         .createLimitOrder(userIdInt, stockId, quantity, limitPrice, orderType)
+//         .then((limitOrder) => {
+//             return res.status(201).json({ message: "Limit order created successfully", limitOrder });
+//         })
+//         .catch((error) => {
+//             console.error("Error creating limit order:", error);
+//             return res.status(500).json({ message: "Error creating limit order", error });
+//         });
+// };
 
   
-  // Controller for processing limit orders
-  exports.processLimitOrdersController = function (req, res) {
-    const { stockId, currentPrice } = req.body;
+//   // Controller for processing limit orders
+//   exports.processLimitOrdersController = function (req, res) {
+//     const { stockId, currentPrice } = req.body;
 
-    if (!stockId || !currentPrice) {
-        return res.status(400).json({ message: "Stock ID and current price are required." });
+//     if (!stockId || !currentPrice) {
+//         return res.status(400).json({ message: "Stock ID and current price are required." });
+//     }
+
+//     return chartsModel
+//         .processLimitOrders(stockId, currentPrice)
+//         .then((executedOrders) => {
+//             return res.status(200).json({ message: "Limit orders processed", executedOrders });
+//         })
+//         .catch((error) => {
+//             console.error("Error processing limit orders:", error);
+//             return res.status(500).json({ message: "Error processing limit orders", error });
+//         });
+// };
+
+
+
+// Create limit order
+exports.createLimitOrderController = async function (req, res) {
+  const { userId, stockId, quantity, limitPrice, orderType } = req.body;
+
+  if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    const userIdInt = parseInt(userId);
+
+    // Create the limit order in DB
+    const limitOrder = await chartsModel.createLimitOrder(
+      userIdInt,
+      stockId,
+      quantity,
+      limitPrice,
+      orderType
+    );
+
+    // Emit websocket update AFTER the limit order is successfully created
+    const io = req.app.get('io');
+    io.to(`user_${userIdInt}`).emit('broadcastLimitTradeHistoryUpdate', limitOrder);
+
+    return res
+      .status(201)
+      .json({ message: "Limit order created successfully", limitOrder });
+  } catch (error) {
+    console.error("Error creating limit order:", error);
+    return res
+      .status(500)
+      .json({ message: "Error creating limit order", error });
+  }
+};
+
+
+// Process limit orders — now it fetches latest price automatically
+exports.processLimitOrdersController = function (req, res) {
+    const { stockId } = req.body;
+
+    if (!stockId) {
+        return res.status(400).json({ message: "Stock ID is required." });
     }
 
     return chartsModel
-        .processLimitOrders(stockId, currentPrice)
+        .processLimitOrders(stockId)
         .then((executedOrders) => {
             return res.status(200).json({ message: "Limit orders processed", executedOrders });
         })
@@ -669,4 +770,27 @@ exports.getLatestLimitOrderControllerSell = function (req, res) {
       console.error("Error in getLatestLimitOrderController:", error);
       return res.status(500).json({ message: "Error fetching latest limit order", error: error.message });
     });
+};
+
+
+
+//////////////////////////////////////////////////
+/////////// REALTIME QUOTE Functionality
+//////////////////////////////////////////////////
+
+
+
+module.exports.getStockChartRealData = async function (req, res) {
+    const symbol = req.params.symbol;
+    // const interval = req.query.interval;
+    const dateFrom = req.query.date_from;
+    const dateTo = req.query.date_to;
+
+    try {
+        const chartData = await chartsModel.getIntradayData(symbol, dateFrom, dateTo);
+        return res.status(200).json(chartData);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    }
 };

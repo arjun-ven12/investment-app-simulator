@@ -1,217 +1,199 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Dashboard</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/investment.css">
-    <script src="../js/charts.js" type="text/javascript"></script>
 
-    <title>Investment Charts</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/investment.css">
+ <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- JS -->
+    <script src="../js/charts.js" defer></script>
 </head>
 
 <body>
     <div id="navbar-container"></div>
-    <div class="content">
 
-        <h1>Stock Search</h1>
-        <div class="search-container">
-            <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
-            <button id="search-button">Search</button>
-          </div>
-          <h4>Favorited Stock list based on api:</h4>
+<div class="content">
+  <br></br>
 
-        <ul id="stock-list"></ul>
-
-        <div id="favorites-container">
-            <ul id="favorite-stocks"></ul>
-          </div>
-        
-          <div id="favorites-error-message" style="color:red;"></div>
-
-          <br></br>
-          <br></br>
-
-        <div>
-            <h2>The Stock List (in database):</h2>
-        </div>
-        <div id="error-message"></div> <!-- To display error messages -->
-
-        <div id="stocks-container"></div> <!-- To display the stocks -->
-
-
-
-        <br></br>
-        <br></br>
-
-        <h2>Start Investing:</h2>
-        <form id="chart-form">
-            <label for="symbol">Enter Stock Symbol:</label>
-            <input type="text" id="symbol" name="symbol" placeholder="AAPL, TSLA, MSFT">
-            <select name="timeFrame">
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-            </select>
-            <button type="submit">Get Stock Details</button>
-        </form>
-
-        <!-- <div class="container"> -->
-        <div class="container2">
-
-            <h4>USA Market Status</h4>            
-            <div id="market-status">Loading market status...</div>
-
-            <div>
-                <canvas id="myChart"></canvas>
-            </div>
-
-
-            <div class="trading-card2">
-                <!-- Portfolio data and pie chart will be injected here -->
-            </div>
-            <br></br>
-            <div class="content">
-                <h1>Your Trade History</h1>
-
-                <div id="trades-error" style="color: red;"></div>
-                <table id="trades-table" border="1" cellpadding="10" cellspacing="0" style="width: 100%; text-align: center;">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Stock Symbol</th>
-                      <th>Trade Type</th>
-                      <th>Quantity</th>
-                      <th>Price</th>
-                      <th>Total Amount</th>
-                    </tr>
-                  </thead>                
-                  <button id="export-trades" class="submit-button">Export Trade History</button>
-
-                  <tbody id="trades-table-body">
-                    <!-- Trade rows will be injected here by trades.js -->
-                  </tbody>
-                </table>
-              </div>
-        </div>
-        <br></br>
-
-        <div class="content">
-            <h1>Your Limit Order History</h1>
-            <div id="limit-orders-error" style="color: red;"></div>
-            <button id="export-limit-orders" class="submit-button">Export Limit Order History</button>
-            <table id="limit-orders-table" border="1" cellpadding="10" cellspacing="0" style="width: 100%; text-align: center;">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Stock Symbol</th>
-                  <th>Order Type</th>
-                  <th>Quantity</th>
-                  <th>Limit Price</th>
-                  <th>Total Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="limit-orders-table-body">
-                <!-- Limit order rows will be injected here by limitOrders.js -->
-              </tbody>
-            </table>
-          </div>
-          <br></br>
-
-        <div class="container">
-            <div class="company-card"></div>
-            <div class="trading-card">
-                <form id="trading-form">
-
-                    <h2>Trade Stock</h2>
-                    <p>For limit orders, simply change the price in the price box to your preferred limit order:</p>
-                    <div class="form-group">
-                        <label for="price">Price</label>
-                        <input type="number" id="price" name="price" placeholder="Enter a price">
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Quantity</label>
-                        <input type="number" id="quantity" name="quantity" placeholder="Enter quantity">
-                    </div>
-                    <div class="form-group">
-                        <label for="amount">Amount</label>
-                        <input type="text" id="amount" name="amount" placeholder="--" readonly>
-                    </div>
-                    <div id="buy-error" style="color: red;"></div>
-
-                    <button type="button" id="submit-buy" class="submit-button">Buy</button>
-                    <button type="button" id="submit-sell" class="submit-button">Sell</button>
-                    <button type="button" id="limit-submit-buy" class="submit-button">Limit Order Buy</button>
-                    <button type="button" id="limit-submit-sell" class="submit-button">Limit Order Sell</button>
-                </form>
-            </div>
-        </div>
-        
-        <div class="content">
-            <h1>Investment Recommendations</h1>
-            <div class="search-container">
-              <!-- <input type="text" id="symbol-input" placeholder="Enter stock symbol (e.g., TSLA)"> -->
-              <!-- <button id="load-recommendations">Load Recommendations</button> -->
-              <div id="recommendation-error" style="color: red; margin-top: 10px;"></div>
-            </div>
-        
-            <div id="chart-container">
-              <canvas id="recommendationChart"></canvas>
-            </div>
-          </div>
-
-
-        <br></br>
-
-    <h1>Search Stock Comments</h1>
-  
-    <!-- Section to search for a stock and show its comments -->
-    <div class="content">
-        <div id="comments-error" style="color: red;"></div>
-        <div class="stock-symbol-search">
-          <label for="stock-symbol">Stock Symbol:</label>
-          <input type="text" id="stock-symbol" placeholder="Enter stock symbol (e.g., AAPL)">
-          <button id="load-comments-button">Load Comments</button>
-        </div>
-        <div class="new-comment">
-          <textarea id="comment-content" rows="4" placeholder="Write your comment here..."></textarea>
-          <button id="submit-comment-button">Submit Comment</button>
-        </div>
-        <ul id="comments-list"></ul>
-      </div>
-    <br></br>
-
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-        <script src="../js/home.js"></script>
-        <script>
-          // Logout functionality
-          document.addEventListener("DOMContentLoaded", () => {
-              const logoutButton = document.getElementById("logoutButton");
-      
-              if (logoutButton) {
-                  logoutButton.addEventListener("click", () => {
-                      localStorage.removeItem("token"); // Clear authentication token
-                      alert("You have been logged out.");
-                      window.location.href = "./login.html";
-                  });
-              }
-          });
-      </script>
-      
-
+  <h1>Stock Search</h1>
+    <div class="search-container">
+        <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
+        <button id="search-button">Search</button>
     </div>
 
+    <h4>Favorited Stocks</h4>
+    <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
+    <div id="favorites-error-message" class="error-message"></div>
 
-    <!-- Chart.js Library -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js"></script> -->
-    <!-- <script src="path/to/chartjs/dist/chart.umd.js"></script> -->
+    <div id="error-message" class="error-message"></div>
+    <div id="stocks-container"></div>
 
-    <!-- Custom Scripts -->
-    <!-- <script  src="your-script.js"></script> -->
-    <!-- <script src="../js/charts.js"></script> -->
-    <script src="../js/navbar.js"></script>
-    
+    <!-- Changed id to match JS -->
+    <ul id="stock-list"></ul>
+</div>
+
+    <!-- Chart + Trading Form Two-Column Layout -->
+    <div class="container">
+        <div class="chart-container">
+            <form id="chart-form-intraday" class="chart-form">
+                <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required>
+                    <label for="range">Select Range:</label>
+                      <select name="range" id="range">
+                          <option value="1d">Last 1 Day</option>
+                          <option value="1w" selected>Last 1 Week</option>
+                          <option value="1m">Last 1 Month</option>
+                          <option value="6m">Last 6 Months</option>
+                          <option value="1y">Last 1 Year</option>
+                          <!-- <option value="5y">Last 5 Years</option> -->
+                      </select>
+                <button type="submit">Generate Chart</button>
+            </form>
+            <canvas id="myChart2"></canvas>
+        </div>
+
+        <div class="trading-card">
+            <form id="trading-form">
+                <h2>Trade Stock</h2>
+                <p>For limit orders, adjust the price in the box to your preferred limit.</p>
+
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="number" id="price" name="price" placeholder="Enter a price">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" placeholder="Enter quantity">
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <input type="text" id="amount" name="amount" placeholder="--" readonly>
+                </div>
+
+                <div id="buy-error" class="error-message"></div>
+
+                <button type="button" id="submit-buy" class="submit-button">Buy</button>
+                <button type="button" id="submit-sell" class="submit-button">Sell</button>
+                <button type="button" id="limit-submit-buy" class="submit-button">Limit Order Buy</button>
+                <button type="button" id="limit-submit-sell" class="submit-button">Limit Order Sell</button>
+            </form>
+        </div>
+    </div>
+     <div id="market-status-banner">
+    <span id="market-status">Loading market status...</span>
+</div>
+
+    <!-- Market Status -->
+    <div class="content">
+
+        <div class="trading-card2"></div>
+    </div>
+
+<!-- Parent container for side-by-side layout -->
+<div class="history-container">
+    <!-- Trade History -->
+    <div class="history-column">
+        <h1>Your Trade History</h1>
+        <div id="trades-error" class="error-message"></div>
+        <button id="export-trades" class="submit-button">Export Trade History</button>
+        <table id="trades-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Stock Symbol</th>
+                    <th>Trade Type</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody id="trades-table-body"></tbody>
+        </table>
+    </div>
+
+    <!-- Limit Orders -->
+    <div class="history-column">
+        <h1>Your Limit Order History</h1>
+        <div id="limit-orders-error" class="error-message"></div>
+        <button id="export-limit-orders" class="submit-button">Export Limit Order History</button>
+        <table id="limit-orders-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Stock Symbol</th>
+                    <th>Order Type</th>
+                    <th>Quantity</th>
+                    <th>Limit Price</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="limit-orders-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+
+    <!-- Investment Recommendations -->
+    <div class="content">
+        <h1>Investment Recommendations</h1>
+        <div id="recommendation-error" class="error-message"></div>
+        <canvas id="recommendationChart"></canvas>
+    </div>
+
+    <!-- Stock Comments -->
+    <div class="content">
+        <h1>Search Stock Comments</h1>
+        <div id="comments-error" class="error-message"></div>
+
+        <div class="stock-symbol-search">
+            <label for="stock-symbol">Stock Symbol:</label>
+            <input type="text" id="stock-symbol" placeholder="Enter stock symbol (e.g., AAPL)">
+            <button id="load-comments-button">Load Comments</button>
+        </div>
+
+        <div class="new-comment">
+            <textarea id="comment-content" rows="4" placeholder="Write your comment here..."></textarea>
+            <button id="submit-comment-button">Submit Comment</button>
+        </div>
+
+        <ul id="comments-list"></ul>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="../js/home.js" defer></script>
+    <script src="../js/navbar.js" defer></script>
+
+    <script>
+        // Logout functionality
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutButton = document.getElementById("logoutButton");
+            if (logoutButton) {
+                logoutButton.addEventListener("click", () => {
+                    localStorage.removeItem("token");
+                    alert("You have been logged out.");
+                    window.location.href = "./login.html";
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
+
