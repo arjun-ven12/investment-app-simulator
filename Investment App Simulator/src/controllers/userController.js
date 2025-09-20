@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../../prisma/prismaClient'); // your Prisma client
 const referralModel = require('../models/referral');
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecret'; // set this in .env
-
+const userModel = require('../models/user')
 //////////////////////////////////////////////////////
 // REGISTER USER
 //////////////////////////////////////////////////////
@@ -96,3 +96,25 @@ module.exports.login = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+//////////////////////////////////////////////////////
+// GET SPECIFIC USER DETAILS
+//////////////////////////////////////////////////////
+
+module.exports.getUserDetails = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const user = await userModel.getUserBasicInfo(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ user }); // { username, wallet }
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+

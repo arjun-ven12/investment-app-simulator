@@ -1,60 +1,66 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const usernameDisplay = document.getElementById("username");
-    const walletDisplay = document.getElementById("wallet");
+    const usernameEl = document.getElementById("username");
+    const walletEl = document.getElementById("wallet");
     const walletToggle = document.getElementById("walletToggle");
     const logoutButton = document.getElementById("logoutButton");
 
-    // Wallet is hidden by default
     let isWalletVisible = false;
 
-    try {
-        const response = await fetchWithToken("/api/user/details", { method: "GET" });
-        if (response.ok) {
-            const userData = await response.json();
+    // Fetch user details
+    async function fetchUserDetails() {
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
+        if (!userId) return alert("User not logged in.");
+        if (!token) return null;
 
-            // Set username
-            usernameDisplay.textContent = userData.username;
+        try {
+            const res = await fetch(`/user/get/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
 
-            // Store wallet value, but keep hidden
-            walletDisplay.setAttribute("data-value", userData.wallet);
-            walletDisplay.textContent = "****"; // hidden initially
-        } else {
-            console.error("Failed to fetch user details:", response.status, response.statusText);
+            // Handle both formats: { user: {...} } or { success: true, user: {...} }
+            if (data.success === false) {
+                console.error("Failed to fetch user details:", data.message);
+                return null;
+            }
+
+            return data.user || data; // fallback if success not included
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return null;
         }
-    } catch (error) {
-        console.error("Error fetching user details:", error);
+    }
+
+    // Render user info
+    async function renderUser() {
+        const user = await fetchUserDetails();
+        if (!user) {
+            usernameEl.textContent = "Guest";
+            walletEl.textContent = "****";
+            return;
+        }
+
+        usernameEl.textContent = user.username;
+        walletEl.setAttribute("data-value", user.wallet);
+        walletEl.textContent = "****"; // hidden by default
     }
 
     // Toggle wallet visibility
     walletToggle.addEventListener("click", () => {
+        const walletValue = walletEl.getAttribute("data-value");
         if (isWalletVisible) {
-            walletDisplay.textContent = "****";
+            walletEl.textContent = "****";
             walletToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
         } else {
-            const walletValue = walletDisplay.getAttribute("data-value");
-            walletDisplay.textContent = `$${walletValue}`;
+            walletEl.textContent = `$${walletValue}`;
             walletToggle.innerHTML = '<i class="fas fa-eye"></i>';
         }
         isWalletVisible = !isWalletVisible;
     });
 
-    // Logout
-    logoutButton.addEventListener("click", () => {
-        localStorage.removeItem("token");
-        alert("You have been logged out.");
-        window.location.href = "./login.html";
-    });
-});
 
-// Wrapper for fetch with token
-async function fetchWithToken(url, options = {}) {
-    const token = localStorage.getItem("token");
-    return fetch(url, {
-        ...options,
-        headers: {
-            ...options.headers,
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-        },
-    });
-}
+
+    // Load user info
+    renderUser();
+});

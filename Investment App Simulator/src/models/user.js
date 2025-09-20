@@ -99,3 +99,17 @@ module.exports.login = async function (req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+//////////////////////////////////////////////////////
+// GET SPECIFIC USER BASIC INFO
+//////////////////////////////////////////////////////
+module.exports.getUserBasicInfo = async (userId) => {
+  return await prisma.user.findUnique({
+    where: { id: parseInt(userId) },
+    select: {
+      username: true,
+      wallet: true,
+    },
+  });
+};
