@@ -1,0 +1,148 @@
+{
+  "title": "How-To Guide: Understanding Investment Strategies",
+  "content": [
+    {
+      "heading": "What are Investment Strategies",
+      "content": [
+        {
+          "type": "text",
+          "text": "Plans or approaches investors use to select, manage, and grow their investments based on goals, risk tolerance, and market outlook."
+        },
+        {
+          "type": "text",
+          "text": "Purpose: To guide decision-making, manage risk, and maximize returns over time."
+        }
+      ]
+    },
+    {
+      "heading": "Dollar-Cost Averaging",
+      "content": [
+        {
+          "type": "text",
+          "text": "Investing a fixed amount of money at regular intervals, regardless of market price."
+        },
+        {
+          "type": "text",
+          "text": "Reduces the impact of market volatility and avoids trying to time the market."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "Investing $500 every month into a stock or ETF. You buy more shares when prices are low and fewer shares when prices are high."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Benefit: Smooths out investment risk over time, making it easier for long-term growth."
+        },
+        {
+          "type": "text",
+          "text": "Risk: May underperform if markets consistently rise and lump-sum investing would have been better."
+        }
+      ]
+    },
+    {
+      "heading": "Value vs Growth Investing",
+      "content": [
+        {
+          "type": "subheading",
+          "text": "Value Investing"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Focuses on stocks that appear undervalued based on fundamentals (e.g., low P/E ratio, strong assets).",
+            "Goal: Buy low, sell high over the long term.",
+            "Suitable for investors seeking stability and long-term growth."
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "Growth Investing"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Focuses on companies expected to grow earnings faster than the market average.",
+            "Often involves higher valuation ratios, but with potential for high returns.",
+            "Suitable for investors willing to accept higher risk for higher growth."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Momentum Trading",
+      "content": [
+        {
+          "type": "text",
+          "text": "Investing based on trends and price momentum, buying assets that are rising and selling those that are falling."
+        },
+        {
+          "type": "text",
+          "text": "Seeks to capitalize on short- to medium-term market movements."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "Buying a stock after a strong quarterly earnings report, expecting the uptrend to continue."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Benefit: Can generate quick returns if trends continue."
+        },
+        {
+          "type": "text",
+          "text": "Risk: Markets can reverse unexpectedly, leading to losses."
+        }
+      ]
+    },
+    {
+      "heading": "Income Investing",
+      "content": [
+        {
+          "type": "text",
+          "text": "Focuses on generating steady cash flow from investments, such as dividends from stocks or interest from bonds."
+        },
+        {
+          "type": "text",
+          "text": "Provides passive income and can be more stable in volatile markets."
+        },
+        {
+          "type": "list",
+          "title": "Examples",
+          "items": [
+            "Dividend-paying stocks",
+            "Government or corporate bonds",
+            "Real Estate Investment Trusts (REITs)"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Benefit: Provides regular income and potential for long-term growth."
+        },
+        {
+          "type": "text",
+          "text": "Risk: Income may fluctuate, and capital gains may be limited compared to growth strategies."
+        }
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Choose an investment strategy that aligns with your goals, risk tolerance, and time horizon.",
+            "Dollar-cost averaging helps reduce timing risk and smooths out investments over time.",
+            "Value investing focuses on stability and buying undervalued stocks, while growth investing targets high potential growth.",
+            "Momentum trading seeks short-term gains but is riskier.",
+            "Income investing provides steady cash flow and can stabilize portfolios in volatile markets."
+          ]
+        }
+      ]
+    }
+  ]
+}

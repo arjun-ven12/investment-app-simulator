@@ -1,0 +1,109 @@
+{
+  "title": "How-To Guide: Understanding Options & Derivatives",
+  "content": [
+    {
+      "heading": "What are Options?",
+      "content": [
+        { "type": "text", "text": "Definition: A financial contract that gives you the right (but not the obligation) to buy or sell an asset (like a stock) at a set price within a certain period." },
+        { "type": "text", "text": "Purpose: Used for speculation (betting on price movements), hedging (protecting against losses), or generating income." },
+        { "type": "list", "title": "Key Terms:", "items": [
+          "Call Option: Right to buy an asset at a set price (strike).",
+          "Put Option: Right to sell an asset at a set price.",
+          "Strike Price: The agreed price at which the option can be exercised.",
+          "Expiry Date: The last date the option can be used.",
+          "Premium: The price you pay to buy the option."
+        ]}
+      ]
+    },
+    {
+      "heading": "How do Options Work?",
+      "content": [
+        { "type": "list", "items": [
+          "You pay a premium to buy an option.",
+          "If market prices move in your favor, you can exercise the option (or sell it for profit).",
+          "If prices move against you, you can let the option expire—your loss is limited to the premium."
+        ]}
+      ]
+    },
+    {
+      "heading": "Option Strategies",
+      "content": [
+        { "type": "subheading", "text": "Covered Calls" },
+        { "type": "text", "text": "How it works: You already own a stock (e.g., 100 shares of Company A). You sell a call option on the same stock, agreeing to sell it at a certain strike price if exercised. In return, you collect the option premium upfront." },
+        { "type": "text", "text": "When to use: If you believe the stock will stay flat or rise only slightly. You earn income from the premium, but cap your upside if the stock rallies strongly (since you may be forced to sell at the strike)." },
+        { "type": "text", "text": "Benefit: Extra income from premiums, reduces downside slightly." },
+
+        { "type": "subheading", "text": "Protective Put" },
+        { "type": "text", "text": "How it works: You own a stock but want to protect yourself against big losses. You buy a put option, which gives you the right to sell the stock at a set strike price." },
+        { "type": "text", "text": "When to use: If you want insurance during volatile markets but still want to keep holding your stock long-term." },
+        { "type": "text", "text": "Benefit: Limits downside risk, as the put guarantees a minimum selling price." },
+        { "type": "text", "text": "Risk: You must pay a premium for the put, which can reduce overall returns if the stock never falls." },
+
+        { "type": "subheading", "text": "Spreads" },
+        { "type": "text", "text": "How it works: You combine multiple options (calls or puts) to control risk and reward." },
+        { "type": "list", "title": "Common Examples:", "items": [
+          "Bull Call Spread: Buy a call at a lower strike, sell another call at a higher strike. Profits if stock rises, but gains are capped. Cheaper than just buying a call.",
+          "Bear Put Spread: Buy a put at a higher strike, sell another put at a lower strike. Profits if stock falls, but losses are capped.",
+          "Iron Condor: Sell one out-of-the-money call and one out-of-the-money put, while also buying further out-of-the-money options for protection. Profits if the stock stays within a range."
+        ]},
+        { "type": "text", "text": "When to use: When you expect moderate moves (up or down), or want to profit from stable prices with limited risk." },
+        { "type": "text", "text": "Benefit: Lower cost than buying single options, with defined risk/reward." },
+        { "type": "text", "text": "Risk: Profits are capped; if stock moves strongly against your view, losses can still occur (though limited)." }
+      ]
+    },
+    {
+      "heading": "Futures & CFDs (If Applicable)",
+      "content": [
+        { "type": "text", "text": "Definition: Futures are contracts to buy/sell an asset at a set price on a future date. CFDs (Contracts for Difference) let you trade price movements without owning the asset." },
+        { "type": "list", "title": "Key Concepts:", "items": [
+          "Leverage: You control a large position with a small initial investment.",
+          "Margin: The deposit required to open and maintain a leveraged trade."
+        ]},
+        { "type": "text", "text": "Uses: Hedging (e.g., locking in commodity prices) or speculation." },
+        { "type": "text", "text": "Note: Leverage can magnify both gains and losses." }
+      ]
+    },
+    {
+      "heading": "Costs",
+      "content": [
+        { "type": "list", "items": [
+          "Premiums: Price paid to enter option contracts.",
+          "Commissions/Fees: Broker charges for trading options, futures, or CFDs.",
+          "Margin Costs: For leveraged trades, you may need to add extra funds if losses exceed your margin (margin call)."
+        ]}
+      ]
+    },
+    {
+      "heading": "Risks",
+      "content": [
+        { "type": "list", "items": [
+          "Leverage Risk: Losses can exceed your initial investment in futures/CFDs.",
+          "Time Decay: Options lose value as expiry approaches if the market doesn’t move favorably.",
+          "Volatility Risk: Option prices depend heavily on market volatility; unexpected changes affect premiums.",
+          "Liquidity Risk: Some options/futures markets may have low trading volume, making it harder to enter/exit positions."
+        ]}
+      ]
+    },
+    {
+      "heading": "Taxes",
+      "content": [
+        { "type": "list", "items": [
+          "Capital Gains: Profits from trading options, futures, or CFDs are usually taxable.",
+          "Complex Treatment: Depending on jurisdiction, derivatives may be taxed differently than stocks (e.g., short-term vs long-term gains)."
+        ]}
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        { "type": "list", "items": [
+          "Options offer flexibility: they can hedge, speculate, or generate income.",
+          "Strategies like covered calls and protective puts help manage risk.",
+          "Futures/CFDs involve leverage, which amplifies gains and losses.",
+          "Costs, risks, and taxes should always be factored into derivative trading.",
+          "Advanced but powerful tools—best used with proper risk management."
+        ]}
+      ]
+    }
+  ]
+}

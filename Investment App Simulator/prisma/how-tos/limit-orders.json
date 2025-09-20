@@ -1,0 +1,127 @@
+{
+  "title": "How-To Guide: Understanding Limit Orders",
+  "content": [
+    {
+      "heading": "What is a Limit Order",
+      "content": [
+        {
+          "type": "text",
+          "text": "An instruction to buy or sell a security at a specified price or better."
+        },
+        {
+          "type": "text",
+          "text": "Gives investors control over the price they pay or receive, rather than executing immediately at the market price."
+        },
+        {
+          "type": "list",
+          "title": "Use Cases",
+          "items": [
+            "Avoid overpaying when buying a stock.",
+            "Lock in profits by selling only at a desired price.",
+            "Plan trades in advance for volatile or fast-moving markets."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "How Limit Orders Work",
+      "content": [
+        {
+          "type": "text",
+          "text": "Buying: The order executes only at the limit price or lower."
+        },
+        {
+          "type": "text",
+          "text": "Selling: The order executes only at the limit price or higher."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "Stock XYZ is trading at $50. You want to buy only if it drops to $48. You place a buy limit order at $48. It executes only if the price falls to $48 or lower.",
+            "You own Stock ABC at $100 and want to sell if it reaches $110. You place a sell limit order at $110. It executes only at $110 or higher."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Types of Limit Orders",
+      "content": [
+        {
+          "type": "text",
+          "text": "Buy Limit Order: Executes at the limit price or lower."
+        },
+        {
+          "type": "text",
+          "text": "Sell Limit Order: Executes at the limit price or higher."
+        },
+        {
+          "type": "list",
+          "title": "Time Frames",
+          "items": [
+            "Day Order: Expires if not executed by the end of the trading day.",
+            "Good Till Cancelled (GTC): Remains active until executed or manually cancelled."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Partial Fills: In some cases, only part of the order may execute if insufficient shares are available at the limit price."
+        }
+      ]
+    },
+    {
+      "heading": "Benefits",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Price Control: Ensures you don’t pay more or sell for less than your target price.",
+            "Risk Management: Protects against sudden market spikes or drops.",
+            "Strategic Planning: Useful for pre-determined entries and exits without constant monitoring."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Risk & Limitations",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Non-Execution Risk: Order may never execute if the market never reaches your limit price.",
+            "Partial Fills: Especially in less liquid stocks, only part of your order may be filled.",
+            "Opportunity Cost: You might miss out on gains if the price moves past your limit quickly.",
+            "Market Volatility: Rapid price changes may result in missed opportunities."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Practical Tips",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Use limit orders for volatile stocks or markets.",
+            "Combine with stop-loss or take-profit strategies for better risk management.",
+            "Review and adjust GTC orders periodically to reflect changing market conditions.",
+            "Be realistic with your limit prices—setting them too far from the current price reduces chances of execution."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Limit orders provide more control than market orders but require patience.",
+            "Best used when you have a specific target price in mind or when avoiding short-term price swings.",
+            "Essential tool for disciplined trading, strategic entries/exits, and risk management."
+          ]
+        }
+      ]
+    }
+  ]
+}

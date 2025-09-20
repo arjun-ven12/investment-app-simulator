@@ -1,0 +1,192 @@
+{
+  "title": "How-To Guide: Understanding Portfolio Management",
+  "content": [
+    {
+      "heading": "What is Portfolio Management?",
+      "content": [
+        {
+          "type": "text",
+          "text": "The art and science of selecting and overseeing a mix of investments (stocks, bonds, ETFs, commodities, etc.) to achieve long-term financial goals."
+        },
+        {
+          "type": "text",
+          "text": "Purpose: Balance growth potential with risk, ensuring your investments align with your risk tolerance, time horizon, and objectives."
+        }
+      ]
+    },
+    {
+      "heading": "Building a Diversified Portfolio",
+      "content": [
+        {
+          "type": "text",
+          "text": "Diversification: Spreading investments across different asset classes reduces the impact of any single investment’s poor performance."
+        },
+        {
+          "type": "list",
+          "title": "Main Asset Classes",
+          "items": [
+            "Stocks: Higher risk, higher potential return. Provide growth.",
+            "Bonds: Lower risk, steady income. Provide stability.",
+            "ETFs (Exchange-Traded Funds): Pooled investments that track indexes, sectors, or commodities; offer diversification at low cost.",
+            "Commodities (e.g., gold, oil): Can hedge against inflation or market downturns."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Risk vs Reward",
+      "content": [
+        {
+          "type": "text",
+          "text": "Risk: The chance that investments may lose value."
+        },
+        {
+          "type": "text",
+          "text": "Reward: The potential returns you expect for taking on risk."
+        },
+        {
+          "type": "list",
+          "title": "Key Measures",
+          "items": [
+            "Volatility: How much investment prices fluctuate. High volatility = higher risk.",
+            "Beta: A measure of how much an investment moves compared to the market (e.g., beta > 1 means more volatile than the market).",
+            "Standard Deviation: A statistical measure of variability in returns; higher deviation means more uncertainty in performance."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Key Measure of Risk",
+      "content": [
+        {
+          "type": "text",
+          "text": "When managing a portfolio, it’s not just about picking investments — it’s about understanding how risky they are. These three measures help investors compare and balance their choices."
+        }
+      ]
+    },
+    {
+      "heading": "Volatility",
+      "content": [
+        {
+          "type": "text",
+          "text": "The degree to which an investment’s price goes up and down over time."
+        },
+        {
+          "type": "text",
+          "text": "High volatility can bring big gains but also steep losses. Low volatility means steadier performance."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "A tech stock may swing +10% one week and –8% the next, while a government bond may barely move. Which one you choose depends on your risk tolerance."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Beta",
+      "content": [
+        {
+          "type": "text",
+          "text": "A measure of how much an investment moves compared to the overall market (usually compared to the S&P 500 or a broad index)."
+        },
+        {
+          "type": "text",
+          "text": "It tells you if an asset is more or less sensitive to market changes."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "Beta = 1: Moves about the same as the market.",
+            "Beta > 1: More volatile (e.g., a stock with beta 1.5 rises 15% when the market rises 10%).",
+            "Beta < 1: Less volatile (e.g., utilities with beta 0.5 rise only 5% when the market rises 10%).",
+            "Investor takeaway: Conservative investors often prefer lower-beta stocks, while aggressive investors may seek higher beta for greater upside."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Standard Deviation",
+      "content": [
+        {
+          "type": "text",
+          "text": "A statistical measure of how spread out returns are from their average."
+        },
+        {
+          "type": "text",
+          "text": "Higher standard deviation means more unpredictable performance."
+        },
+        {
+          "type": "list",
+          "title": "Example",
+          "items": [
+            "A mutual fund with a standard deviation of 20% might swing between –20% and +20% in a year.",
+            "Another fund with 10% swings less, offering more stability.",
+            "Investor takeaway: Compare funds or ETFs using standard deviation to understand which ones carry more risk."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Asset Allocation",
+      "content": [
+        {
+          "type": "text",
+          "text": "The process of dividing your portfolio among different asset classes (stocks, bonds, cash, etc.) based on your personal situation."
+        },
+        {
+          "type": "list",
+          "title": "Types of Allocation",
+          "items": [
+            "Age-Based: Younger investors may invest more in stocks (growth), while older investors lean towards bonds (stability).",
+            "Risk-Based: Aggressive investors tilt towards stocks; conservative investors lean towards bonds and cash.",
+            "Goal-Based: Allocation depends on the purpose of investing (e.g., saving for retirement, buying a home, or funding education)."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Costs",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Management Fees: Paid to portfolio managers or advisors.",
+            "Fund Expense Ratios: Ongoing fees for mutual funds or ETFs.",
+            "Trading Costs: Commissions or bid-ask spreads when buying/selling."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Risks",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Market Risk: Overall market declines can affect most assets.",
+            "Concentration Risk: Too much exposure to one sector or asset class increases vulnerability.",
+            "Interest Rate Risk: Rising rates can hurt bonds.",
+            "Inflation Risk: Reduces the purchasing power of investment returns."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "A diversified portfolio balances risk and reward.",
+            "Asset allocation is the most important driver of long-term returns.",
+            "Risk tolerance, goals, and time horizon should guide portfolio decisions.",
+            "Monitoring and rebalancing are essential to keep your portfolio aligned with your strategy."
+          ]
+        }
+      ]
+    }
+  ]
+}
