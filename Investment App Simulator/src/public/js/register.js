@@ -1,7 +1,3 @@
-const registerForm = document.getElementById("registerForm");
-const warningCard = document.getElementById("warningCard");
-const warningText = document.getElementById("warningText");
-
 registerForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -14,9 +10,12 @@ registerForm.addEventListener("submit", async function (event) {
   warningCard.classList.add("d-none");
   warningText.textContent = "";
 
+  // Password mismatch check with shake effect
   if (password !== confirmPassword) {
     warningText.textContent = "Passwords do not match.";
     warningCard.classList.remove("d-none");
+    warningCard.classList.add("show");
+    setTimeout(() => warningCard.classList.remove("show"), 400);
     return;
   }
 
@@ -25,6 +24,8 @@ registerForm.addEventListener("submit", async function (event) {
     warningText.textContent =
       "Password must include uppercase, lowercase, number, and special character.";
     warningCard.classList.remove("d-none");
+    warningCard.classList.add("show");
+    setTimeout(() => warningCard.classList.remove("show"), 400);
     return;
   }
 
@@ -39,6 +40,8 @@ registerForm.addEventListener("submit", async function (event) {
     if (!res.ok) {
       warningText.textContent = data.message || "Registration failed.";
       warningCard.classList.remove("d-none");
+      warningCard.classList.add("show");
+      setTimeout(() => warningCard.classList.remove("show"), 400);
       return;
     }
 
@@ -50,14 +53,7 @@ registerForm.addEventListener("submit", async function (event) {
   } catch (err) {
     warningText.textContent = err.message || "Unexpected error occurred.";
     warningCard.classList.remove("d-none");
+    warningCard.classList.add("show");
+    setTimeout(() => warningCard.classList.remove("show"), 400);
   }
 });
-
-if (password !== confirmPassword) {
-  warningText.textContent = "Passwords do not match.";
-  warningCard.classList.remove("d-none");
-  warningCard.classList.add("show");
-  setTimeout(() => warningCard.classList.remove("show"), 400);
-  return;
-}
-

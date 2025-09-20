@@ -64,10 +64,11 @@ html, body {
 }
 
 .login-link {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: #aaa;
   font-size: 0.9rem;
   text-align: left;
+  padding-top: 10px
 }
 
 .login-link a {
@@ -80,13 +81,11 @@ html, body {
   text-decoration: underline;
 }
 
-
 .form-card h1 {
-  /* margin-bottom: 10px; */
   font-weight: 900;
   text-align: left;
-
 }
+
 /* Inputs */
 .form-card input {
   width: 100%;
@@ -119,61 +118,63 @@ html, body {
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
-
-
-/* Login Link */
-.login-link {
-  margin-top: 20px;
-  color: #aaa;
-  font-size: 0.9rem;
+/* Button hover animation */
+.form-card button {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.form-card button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, #fff, #aaa, #fff);
+  transition: all 0.5s;
+  z-index: 0;
+}
+.form-card button::before {
+  background: linear-gradient(120deg, #ffcc00, #ff6600, #ffcc00);
 }
 
-.login-link a {
-  color: #fff;
-  text-decoration: none;
+.form-card button:hover {
+  color: #fff; /* stays visible on the gradient */
 }
 
-.login-link a:hover {
-  text-decoration: underline;
+.form-card button {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  color: #ffffff; /* ensures visible text */
+  transition: color 0.6s ease; /* slower text color change */
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .container {
-    flex-direction: column;
-  }
-  .left-panel, .right-panel {
-    height: 50vh;
-    flex: unset;
-  }
-  .form-card {
-    width: 90%;
-    padding: 30px;
-  }
+.form-card button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, #fff, #aaa, #fff);
+  transition: all 1s;
+  z-index: 0; /* under text */
+    background: linear-gradient(120deg, #fff, #aaa, #fff);
+  transition: left 0.6s ease; /* slower gradient slide */
 }
 
-
-/* Form Rows: group inputs in one line */
-.form-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 10px;
+.form-card button:hover {
+  color: #000; /* text visible on hover gradient */
+  z-index: 2;  /* text above the gradient */
 }
-
-/* Make inputs wider inside rows */
-.form-row input {
-  flex: 1 1 100%;  /* stretch inputs to full available width */
-  min-width: 0;    /* ensures proper shrinking in flex layout */
-}
-
-/* Referral code stays full width */
-.form-row:last-child input {
-  flex: 1 1 100%;
-}
-
 
 
 /* Input focus glow */
@@ -202,9 +203,54 @@ html, body {
   overflow: hidden;
   z-index: 1;
 }
+.form-card button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, #fff, #aaa, #fff);
+  transition: all 0.5s;
+  z-index: 0;
+}
 
+/* Warning card shake */
+.warning-card {
+  margin-top: 15px;
+  background-color: #ff4c4c;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: none;
+}
 
+.warning-card.show {
+  display: block;
+  animation: shake 0.4s;
+}
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+  }
+  .left-panel, .right-panel {
+    height: 50vh;
+    flex: unset;
+  }
+  .form-card {
+    width: 90%;
+    padding: 30px;
+  }
+}
 
 /* Form card entrance */
 .form-card {
@@ -235,33 +281,22 @@ html, body {
 @keyframes fadeUp {
   to {
     opacity: 1;
-    transform: translateY(20);
+    transform: translateY(0);
   }
 }
 
-/* Warning card shake */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  50% { transform: translateX(6px); }
-  75% { transform: translateX(-6px); }
+/* Left panel background movement */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: moveBackground 20s linear infinite;
 }
-.warning-card.show {
-  animation: shake 0.4s;
-}
-
-
-
-
-.left-panel h1 {
-  animation: slideUp 1s ease forwards;
-}
-
-.left-panel p {
-  animation: slideUp 1.2s ease forwards;
-}
-
-
 
 @keyframes moveBackground {
   0% { transform: translate(0,0); }
@@ -269,73 +304,33 @@ html, body {
 }
 
 
-.input-container {
-  position: relative;
-  width: 100%;
-}
 
-.input-container input {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid #555;
-  background: transparent;
-  color: #fff;
-  font-size: 1rem;
-}
-
-.input-container label {
-  position: absolute;
-  top: 40%;
-  left: 16px;
-  transform: translateY(-50%);
-  color: #777;
-  pointer-events: none;
-  font-size: 1rem;
-  z-index: 10;
-
-}
-
-
-
-
-
-/* Button Base */
 .form-card button {
   position: relative;
   overflow: hidden;
   z-index: 1;
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid #fff;
-  background: transparent;
   color: #fff; /* default text color */
-  font-weight: 600;
-  cursor: pointer;
   transition: color 0.6s ease;
 }
 
-/* Gradient Layer Behind Text */
 .form-card button::before {
   content: "";
   position: absolute;
   top: 0;
-  left: -100%; /* start off-screen */
+  left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(120deg, #c8f5d7, #30b157, #2ee709);
+  background: linear-gradient(120deg, #ffffff, #0059ff, #0d1d74);
   transition: left 0.8s ease;
   z-index: -1; /* behind text */
 }
 
-/* Hover: slide gradient in */
 .form-card button:hover::before {
-  left: 0;
+  left: 0; /* slide in the gradient */
 }
 
-/* Hover: ensure text is visible on gradient */
+/* Hover: text color for contrast */
 .form-card button:hover {
-  color: #000000; /* contrast text on gradient */
-  z-index: 1; /* text stays above gradient */
+  color: #ffffff; /* keeps text visible */
+  z-index: 1; /* ensures text is above the gradient */
 }
