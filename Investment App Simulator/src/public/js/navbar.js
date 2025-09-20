@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error('Error loading navbar:', err));
 });
 
-// Optional: navbar toggle and logout functionality
+// Navbar initialization with token check
 function initNavbar() {
     const toggle = document.getElementById('navbar-toggle');
     const links = document.querySelector('.navbar-links');
@@ -23,6 +23,16 @@ function initNavbar() {
     });
 
     const logoutButton = document.getElementById('logoutButton');
+    const token = localStorage.getItem('token');
+
+    // Auto-redirect if no token
+    if (!token) {
+        window.location.href = '/html/login.html';
+    }
+
+    // Hide logout button if no token
+    logoutButton.style.display = token ? 'block' : 'none';
+
     logoutButton.addEventListener('click', () => {
         localStorage.removeItem('token');
         window.location.href = '/html/login.html';
