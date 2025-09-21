@@ -726,11 +726,11 @@ window.addEventListener('DOMContentLoaded', function () {
     const categories = ['strongBuy', 'buy', 'hold', 'sell', 'strongSell'];
 
     const colors = [
-      'rgba(0, 255, 0, 0.8)',      // Strong Buy → Green
-      'rgba(144, 238, 144, 1)',  // Buy → Light Green
-      'rgba(255, 217, 0, 1)',    // Hold → Gold/Yellow
-      'rgba(255, 166, 0, 1)',    // Sell → Orange
-      'rgba(255, 0, 0, 1)'       // Strong Sell → Red
+      'rgba(224, 235, 255, 0.9)',  // Strong Buy → light accent (#E0EBFF)
+      'rgba(180, 200, 230, 0.9)',  // Buy → slightly darker blue
+      'rgba(140, 160, 200, 0.9)',  // Hold → medium blue
+      'rgba(80, 100, 150, 0.9)',   // Sell → dark blue
+      'rgba(40, 50, 80, 0.9)'      // Strong Sell → darkest blue
     ];
     const borderColors = colors.map(c => c.replace('0.7', '1'));
 
@@ -1021,7 +1021,7 @@ window.addEventListener('DOMContentLoaded', function () {
                             backgroundColor: 'white',
                             fill: false,
                             tension: 0.1,
-                            borderWidth: 1,
+                            borderWidth: 2,
                             pointRadius: 2,
                             pointBackgroundColor: 'cyan',
                             pointBorderColor: 'cyan'
@@ -1063,7 +1063,7 @@ window.addEventListener('DOMContentLoaded', function () {
                     plugins: [ChartZoom]
                 });
 
-                alert(`Chart created for ${symbolValue} (${rangeValue})!`);
+              //  alert(`Chart created for ${symbolValue} (${rangeValue})!`);
             })
             .catch(err => {
                 console.error('Error creating chart:', err);
@@ -1276,61 +1276,193 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function renderPortfolio(portfolio) {
-    if (!portfolio || portfolio.length === 0) {
-      portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
-      return;
-    }
+  // function renderPortfolio(portfolio) {
+  //   if (!portfolio || portfolio.length === 0) {
+  //     portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
+  //     return;
+  //   }
 
-    const stockColumns = portfolio.map(stock => {
-      const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
-      return `
-        <div class="stock-column">
-          <h3>${stock.symbol} (${stock.companyName})</h3>
-          <p><strong>Quantity:</strong> ${stock.quantity}</p>
-          <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
-        </div>
-      `;
-    }).join('');
+  //   const stockColumns = portfolio.map(stock => {
+  //     const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
+  //     return `
+  //       <div class="stock-column">
+  //         <h3>${stock.symbol} (${stock.companyName})</h3>
+  //         <p><strong>Quantity:</strong> ${stock.quantity}</p>
+  //         <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
+  //       </div>
+  //     `;
+  //   }).join('');
 
-    portfolioContainer.innerHTML = `
-      <h2>Your Portfolio</h2>
-      <div class="stock-grid">${stockColumns}</div>
-      <canvas id="portfolioPieChart"></canvas>
+  //   portfolioContainer.innerHTML = `
+  //     <h2>Your Portfolio</h2>
+  //     <div class="stock-grid">${stockColumns}</div>
+  //     <canvas id="portfolioPieChart"></canvas>
+  //   `;
+
+  //   const labels = portfolio.map(stock => stock.symbol);
+  //   const data = portfolio.map(stock => parseFloat(stock.totalAmount));
+  //   const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+
+  //   new Chart(ctx, {
+  //     type: 'pie',
+  //     data: {
+  //       labels,
+  //       datasets: [{
+  //         data,
+  //         backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'],
+  //         hoverOffset: 4
+  //       }]
+  //     },
+  //     options: {
+  //       responsive: true,
+  //       maintainAspectRatio: false,
+  //       plugins: {
+  //         legend: { position: 'top' },
+  //         tooltip: {
+  //           callbacks: {
+  //             label: function(context) {
+  //               const total = context.dataset.data.reduce((a,b) => a+b, 0);
+  //               const percentage = ((context.raw / total) * 100).toFixed(2);
+  //               return `${context.label}: $${context.raw} (${percentage}%)`;
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+//   let portfolioChart = null; // <- global reference
+
+// function renderPortfolio(portfolio) {
+//   if (!portfolio || portfolio.length === 0) {
+//     portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
+//     return;
+//   }
+
+//   const stockColumns = portfolio.map(stock => {
+//     const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
+//     return `
+//       <div class="stock-column">
+//         <h3>${stock.symbol} (${stock.companyName})</h3>
+//         <p><strong>Quantity:</strong> ${stock.quantity}</p>
+//         <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
+//       </div>
+//     `;
+//   }).join('');
+
+//   portfolioContainer.innerHTML = `
+//     <h2>Your Portfolio</h2>
+//     <div class="stock-grid">${stockColumns}</div>
+//     <canvas id="portfolioPieChart"></canvas>
+//   `;
+
+//   const labels = portfolio.map(stock => stock.symbol);
+//   const data = portfolio.map(stock => parseFloat(stock.totalAmount));
+//   const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+
+//   // Destroy old chart if it exists
+//   if (portfolioChart) {
+//     portfolioChart.destroy();
+//   }
+
+//   portfolioChart = new Chart(ctx, {
+//     type: 'pie',
+//     data: {
+//       labels,
+//       datasets: [{
+//         data,
+//         backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'], // monotone colors
+//         hoverOffset: 4
+//       }]
+//     },
+//     options: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       plugins: {
+//         legend: { position: 'top' },
+//         tooltip: {
+//           callbacks: {
+//             label: function(context) {
+//               const total = context.dataset.data.reduce((a,b) => a+b, 0);
+//               const percentage = ((context.raw / total) * 100).toFixed(2);
+//               return `${context.label}: $${context.raw} (${percentage}%)`;
+//             }
+//           }
+//         }
+//       }
+//     }
+//   });
+let portfolioChart = null; // global reference
+
+function renderPortfolio(portfolio) {
+  // Clear container first
+  portfolioContainer.innerHTML = '';
+
+  // Handle empty portfolio
+  if (!portfolio || portfolio.length === 0) {
+    portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
+    return;
+  }
+
+  // Generate stock columns
+  const stockColumns = portfolio.map(stock => {
+    const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
+    return `
+      <div class="stock-column">
+        <h3>${stock.symbol} (${stock.companyName})</h3>
+        <p><strong>Quantity:</strong> ${stock.quantity}</p>
+        <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
+      </div>
     `;
+  }).join('');
 
-    const labels = portfolio.map(stock => stock.symbol);
-    const data = portfolio.map(stock => parseFloat(stock.totalAmount));
-    const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+  // Inject portfolio content
+  portfolioContainer.innerHTML = `
+    <h2>Your Portfolio</h2>
+    <div class="stock-grid">${stockColumns}</div>
+    <div class="portfolio-chart-container">
+      <canvas id="portfolioPieChart"></canvas>
+    </div>
+  `;
 
-    new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels,
-        datasets: [{
-          data,
-          backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'],
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const total = context.dataset.data.reduce((a,b) => a+b, 0);
-                const percentage = ((context.raw / total) * 100).toFixed(2);
-                return `${context.label}: $${context.raw} (${percentage}%)`;
-              }
+  // Destroy previous chart if exists
+  if (portfolioChart) {
+    portfolioChart.destroy();
+  }
+
+  const labels = portfolio.map(stock => stock.symbol);
+  const data = portfolio.map(stock => parseFloat(stock.totalAmount));
+  const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+
+  // Create new chart
+  portfolioChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = context.dataset.data.reduce((a,b) => a+b, 0);
+              const percentage = ((context.raw / total) * 100).toFixed(2);
+              return `${context.label}: $${context.raw} (${percentage}%)`;
             }
           }
         }
       }
-    });
-  }
+    }
+  });
+
+}
+
 
   fetchPortfolio();
 

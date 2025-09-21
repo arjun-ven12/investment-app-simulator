@@ -1,571 +1,4 @@
 
-/* :root {
-    --bg-color: #000000;
-    --text-color: #ffffff;
-    --navbar-bg: #131313;
-    --navbar-hover: #333333;
-    --link-color: #b3b3b3;
-    --link-hover-color: #00d9ff;
-    --chart-bg: #131313;
-    --button-bg: #3a3a3a;
-    --button-hover: #555555;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0 0 40px;
-}
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #000000;
-  color: #fff;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-}
-
-.navbar-logo a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-.navbar-links {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-}
-
-.navbar-links li {
-  margin-right: 20px;
-}
-
-.navbar-links a {
-  color: #fff;
-  text-decoration: none;
-}
-
-.navbar-toggle {
-  display: none;
-  cursor: pointer;
-}
-@media (max-width: 768px) {
-    .navbar-links {
-        display: none;
-        flex-direction: column;
-    }
-
-    .navbar-toggle {
-        display: block;
-    }
-}
-
-.content {
-    width: 80%;
-    max-width: 800px;
-    margin: 20px auto;
-    text-align: center;
-}
-
-form {
-    margin-bottom: 20px;
-}
-
-form label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 10px;
-}
-
-form input {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--chart-bg);
-    color: var(--text-color);
-}
-
-form button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0ff;
-    color: black;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-form button:hover {
-    background-color: var(--button-hover);
-}
-
-canvas {
-    background-color: var(--chart-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    width: 80%;
-    height: auto;
-    border: 1px solid #1e1e1e;
-    padding: 10px;
-}
-
-.company-card {
-    width: 60%;
-    text-align: left;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #1e1e1e;
-    background-color: var(--chart-bg);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    font-family: 'Arial', sans-serif;
-    font-size: 14px;
-}
-
-.submit-button {
-    width: 100%;
-}
-
-.trading-card {
-    width: 60%;
-    text-align: left;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #1e1e1e;
-    background-color: var(--chart-bg);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    font-family: 'Arial', sans-serif;
-    font-size: 14px;
-}
-
-.company-card h2 {
-    margin-top: 0;
-}
-
-.company-card a {
-    color: #0ff;
-    text-decoration: none;
-}
-
-.company-card a:hover {
-    text-decoration: underline;
-}
-
-.container {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.form-group label {
-    font-weight: bold;
-    flex: 1;
-}
-
-.form-group input {
-    flex: 2;
-    padding: 5px;
-    font-size: 14px;
-}
-
-.direction-toggle {
-    display: flex;
-    gap: 10px;
-}
-
-.direction {
-    flex: 1;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ccc;
-    background-color: white;
-    cursor: pointer;
-}
-
-.direction.active {
-    background-color: #3a7afe;
-    color: white;
-}
-
-.submit-button {
-    padding: 10px;
-    background-color: #0ff;
-    color: black;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-}
-
-.content {
-    height: 100%;
-    width: 100%;
-}
-
-.trading-card2 {
-    flex: 0 0 25%;
-    padding: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #1e1e1e;
-    background-color: var(--chart-bg);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    font-family: 'Arial', sans-serif;
-    font-size: 14px;
-}
-
-.portfolio-section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    justify-content: center;
-    padding: 20px;
-}
-
-.trading-card2 {
-    flex: 1;
-    min-width: 300px;
-    max-width: 600px;
-}
-
-.trading-card2 {
-    padding: 20px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
-}
-
-.stock-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: space-between;
-}
-
-.stock-column {
-    flex: 1 1 calc(45% - 10px);
-    min-width: 120px;
-    background: #111111;
-    border: 1px solid #1e1e1e;
-    border-radius: 6px;
-    padding: 10px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-#portfolioPieChart {
-    max-width: 250px;
-    max-height: 250px;
-    margin: 20px auto;
-    display: block;
-}
-
-#stocks-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.stock-card {
-    display: flex;
-    align-items: center;
-    background-color: #202123;
-    padding-left: 20px;
-    padding-right: 15px;
-    border: 1px solid rgb(40, 41, 44);
-    border-radius: 8px;
-    width: 200px;
-    justify-content: space-between;
-}
-
-.favorite-btn {
-    background-color: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    transition: color 0.3s;
-    color: white;
-}
-
-.favorite-btn:hover {
-    color: cyan;
-}
-
-.stock-card span {
-    font-size: 20px;
-}
-
-#error-message {
-    color: red;
-    font-size: 16px;
-    text-align: center;
-    margin: 20px 0;
-}
-
-
-
-#stock-search-section {
-    margin-bottom: 40px;
-  }
-  
-  .search-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  #stock-list {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-  }
-  
-  #favorites-container {
-    margin: 20px 0;
-  }
-  
-  #favorite-stocks {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  
-  #favorite-stocks li {
-    background-color: #222;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 16px;
-    color: var(--text-color);
-  }
-  
-  /* ---------- Chart Form Section ---------- 
-  #chart-form {
-    margin: 40px 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    align-items: center;
-  }
-  
-  #chart-form label {
-    font-size: 16px;
-    margin-bottom: 5px;
-  }
-  
-  #chart-form input,
-  #chart-form select,
-  #chart-form button {
-    margin: 5px;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--chart-bg);
-    color: var(--text-color);
-  }
-  
-  #chart-form button {
-    background-color: #0ff;
-    color: black;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  #chart-form button:hover {
-    background-color: var(--button-hover);
-  }
-  
-  /* ---------- Market Status Section ---------- 
-  #market-status {
-    font-size: 20px;
-    margin-bottom: 20px;
-    font-weight: normal;
-  }
-  
-  /* ---------- Stock Comments Section ---------- 
-  #stock-comments-section {
-    margin-top: 40px;
-    text-align: left;
-    background-color: #1a1a1a;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  #stock-comments-section h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .stock-symbol-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-  
-  .stock-symbol-search label {
-    font-size: 16px;
-    font-weight: bold;
-  }
-  
-  .stock-symbol-search input {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--chart-bg);
-    color: var(--text-color);
-  }
-  
-  .stock-symbol-search button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0ff;
-    color: black;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .stock-symbol-search button:hover {
-    background-color: var(--button-hover);
-  }
-  
-  .new-comment {
-    margin-bottom: 20px;
-  }
-  
-  .new-comment textarea {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--chart-bg);
-    color: var(--text-color);
-    resize: vertical;
-    min-height: 80px;
-  }
-  
-  .new-comment button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0ff;
-    color: black;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-
-
-  #load-recommendations {
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0ff;
-    color: black;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-
-
-  
-  .new-comment button:hover {
-    background-color: var(--button-hover);
-  }
-  
-  #comments-container {
-    margin-top: 20px;
-  }
-  
-  #comments-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  #comments-list li {
-    background-color: #222;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  
-  #comments-list li p {
-    margin: 0 0 5px;
-  }
-  
-  #comments-list li small {
-    color: #ccc;
-  }
-  
-  #comments-list li button {
-    margin-right: 10px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 3px;
-    background-color: var(--button-bg);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  #comments-list li button:hover {
-    background-color: var(--button-hover);
-  }
-
-  
-
-  /* Unfavorite Button Styles 
-.unfav-button {
-    background-color: #0ff;    /* Initial background color 
-    color: #000;               /* Text color 
-    border: none;              /* Remove default border 
-    padding: 8px 12px;         /* Add some padding 
-    border-radius: 4px;        /* Rounded corners 
-    cursor: pointer;           /* Pointer cursor on hover 
-    font-weight: bold;         /* Bold text for clarity 
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-  
-  .unfav-button:hover {
-    background-color: #00bcd4; /* Darker shade on hover 
-    transform: scale(1.05);    /* Slight scale up on hover for a subtle effect 
-  }
-
-   */
    /* Import Outfit font */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
 
@@ -586,7 +19,7 @@ body {
 
 h1 {
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 100;
     margin-bottom: 8px;
     color: #ffffff;
 }
@@ -608,10 +41,10 @@ h4 {
 
 /* Container & Layout */
 .content {
-    width: 80%;
+    width: 100%;
     margin: 15px auto;
     padding: 15px;
-    background-color: #12121a80; /* ultra-dark card background */
+    background-color: #00000080; /* ultra-dark card background */
     border-radius: 12px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.6);
 }
@@ -619,25 +52,24 @@ h4 {
 .container {
     display: grid;
     grid-template-columns: 80% 20%;
-    gap: 20px;
-    margin: 30px auto;        
-    padding: 0 50px;           
+    gap: 10px;          
     box-sizing: border-box;
-    max-width: 1500px;
+    width: 100%;
 }
 
 .chart-container, .trading-card {
-    background-color: #1c1c28;
+    background-color: #000000;
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     width: 100%;
     margin: 10px 0;
-}
+    outline: 1px solid #53596B;
+  }
 
-.trading-card{
+/* .trading-card{
   max-width: 300px;
-}
+} */
 
 /* Side-by-side container */
 .history-container {
@@ -645,21 +77,23 @@ h4 {
     grid-template-columns: 1fr 1fr; /* 2 equal columns */
     gap: 10px;
     width: 100%;
-    margin: 20px 0;
-    padding-left: 40px;
-        padding-right: 40px;
+    margin: 10px 0;
+    /* padding-left: 40px;
+        padding-right: 40px; */
       /* max-width: 1500px; */
 
 }
 
 /* Column styling */
 .history-column {
-    background-color: #1c1c28b3;
+    background-color: #000000b3;
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     overflow-x: auto;
     width: auto;    
+    outline: 1px solid #53596B;
+
 }
 
 /* Table styling */
@@ -678,11 +112,11 @@ h4 {
 }
 
 .history-column th {
-    background-color: #2a2a38;
+    background-color: #1b1b22;
 }
 
 .history-column tr:hover {
-    background-color: #2e2e40;
+    background-color: #1b1b22;
 }
 
 /* Responsive: stack on smaller screens */
@@ -700,13 +134,25 @@ form {
     font-size: 0.9rem; /* slightly smaller text in forms */
 }
 
-input, select, textarea, button {
+select, textarea, button {
     padding: 10px 12px;
     border-radius: 6px;
     border: none;
     font-size: 0.85rem; /* smaller input text */
     background-color: #1c1c28;
     color: #fff;
+    width: auto
+}
+
+
+input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem; /* smaller input text */
+  background-color: #1c1c28;
+  color: #fff;
+  width: 100%
 }
 
 input:focus, select:focus, textarea:focus {
@@ -723,8 +169,8 @@ select::placeholder {
 
 
 /* Buttons */
-button, .submit-button {
-    background-color: #0ff;
+button {
+    background-color: #E0EBFF;
     color: #000000;
     cursor: pointer;
     font-weight: 500;
@@ -735,8 +181,35 @@ button, .submit-button {
     margin: 2px;
 }
 
+#submit-comment-button2 {
+  background-color: #E0EBFF;
+  color: #000000;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.3s, transform 0.2s;
+  border-radius: 6px;
+  border: none;
+  margin: 2px;
+  width: 100%;
+}
+
+
+.submit-button {
+  background-color: #E0EBFF;
+  color: #000000;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.3s, transform 0.2s;
+  border-radius: 6px;
+  border: none;
+  margin: 2px;
+  width: 100%;
+}
+
 button:hover, .submit-button:hover {
-    background-color: #357ab8;
+    background-color: #94cdff;
     transform: translateY(-2px);
 }
 
@@ -795,7 +268,7 @@ tr:hover {
 
 /* Charts */
 canvas {
-    background-color: #12121a;
+    background-color: #000000;
     border-radius: 12px;
     padding: 8px;
 }
@@ -873,7 +346,7 @@ canvas {
     padding: 6px 12px;
     border-radius: 6px;
     border: none;
-    background-color: #0ff;
+    background-color: #E0EBFF;
     color: black;
     font-size: 0.85rem;
     cursor: pointer;
@@ -907,16 +380,19 @@ canvas {
 
 #market-status-banner {
     position: fixed;      
-    top: 50px;             
+    top: 50px;     
+    left: 0;        
     width: 100%;
-    background-color: #0ff;
-    color: rgb(0, 0, 0);
+    background-color: #000000;
+    color: rgb(255, 255, 255);
     overflow: hidden;         /* Hide overflow */
     white-space: nowrap;      /* Keep text on one line */
-    font-weight: bold;
+    font-weight: light;
     font-size: 1.1rem;
     z-index: 1000;
     padding: 10px 0;
+    border-bottom: 1.5px solid #53596B;
+
 }
 
 #market-status {
@@ -935,13 +411,15 @@ canvas {
 
 
 .favorite-stocks-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  display: flex;
+  flex-direction: column; /* stack items vertically */
   gap: 10px;
   margin-top: 10px;
+  width: 100%; /* take full width of sidebar */
 }
 
-.favorite-stock-item {
+
+/* .favorite-stock-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -949,7 +427,7 @@ canvas {
   border-radius: 6px;
   padding: 6px 10px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+} */
 
 .favorite-stock-item button {
   background: #ff4d4f;
@@ -962,4 +440,313 @@ canvas {
 
 .favorite-stock-item button:hover {
   background: #d9363e;
+}
+
+.favorite-stock-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #171720ad;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.favorite-stock-item:hover {
+  background-color: #2a2a38;
+  transform: translateY(-2px);
+}
+
+
+
+/* Sidebar (Watchlist) */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: #000000;
+  padding: 20px 15px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  border-right: 1.5px solid #53596B;
+
+}
+
+/* Sidebar header */
+.sidebar h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #0ff; /* highlight color */
+}
+
+/* Sidebar search */
+.sidebar .search-container {
+  margin-bottom: 15px;
+}
+
+.sidebar #stock-search {
+  width: 100%;
+}
+
+/* Watchlist items */
+#watchlist {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin-top: 10px;
+  padding: 0;
+}
+
+#watchlist li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background-color: #171720ad;
+  border-radius: 8px;
+  transition: background 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+#watchlist li:hover {
+  background-color: #2a2a38;
+  transform: translateY(-2px);
+  outline;
+}
+
+#watchlist li span {
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+#watchlist li button {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  background-color: #E0EBFF;
+  color: #000;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#watchlist li button:hover {
+  background-color: #357ab8;
+}
+
+/* Push main content right */
+.main-content {
+  margin-left: 260px; /* same as sidebar width */
+  padding: 20px;
+}
+
+/* Container to position the arrow */
+.select-wrapper {
+  position: relative;
+  width: 200px; /* or 100% if you want full width */
+  display: inline-block;
+}
+
+/* Dropdown styling */
+#range {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #1c1c28; /* dark background */
+  color: #fff; /* white text */
+  border: 1px solid #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none; /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border 0.3s, background 0.3s;
+}
+
+/* Hover & focus states */
+#range:hover, #range:focus {
+  border-color: #0ff; /* highlight on hover/focus */
+  outline: none;
+}
+
+/* Add custom arrow using pseudo-element */
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #0ff;
+  font-size: 0.8rem;
+}
+
+/* Option styling */
+#range option {
+  background-color: #1c1c28;
+  color: #fff;
+}
+
+/* Label styling */
+label[for="range"] {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+
+
+/* ==================== Global Fade-in ==================== */
+body {
+  animation: fadeInBody 0.8s ease forwards;
+}
+
+@keyframes fadeInBody {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Only animate new elements that you add dynamically */
+.animate-slideup {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 0.6s forwards;
+}
+
+@keyframes slideUp {
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Sidebar slide-in (only once) */
+.sidebar {
+  transform: translateX(-100%);
+  animation: slideInLeft 0.8s forwards;
+}
+
+@keyframes slideInLeft {
+  to { transform: translateX(0); }
+}
+
+/* Buttons hover animation stays */
+/* button:hover,
+#stock-list li button:hover,
+#favorite-stocks li button:hover,
+#watchlist li button:hover {
+  transform: translateY(-2px) scale(1.05);
+} */
+
+
+
+
+
+
+/* Portfolio container */
+#portfolioContainer {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 1200px;
+  color: #ffffff;
+}
+
+/* Portfolio title */
+#portfolioContainer h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #E0EBFF;
+  text-align: center;
+}
+
+/* Grid for stocks */
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+/* Individual stock card */
+.stock-column {
+  background-color: #000000;
+  border: 1px solid #53596B;
+  border-radius: 12px;
+  padding: 15px 20px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+  transition: transform 0.2s, background 0.3s;
+  overflow-wrap: anywhere;
+}
+
+.stock-column h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #E0EBFF;
+}
+
+.stock-column p {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.stock-column strong {
+  color: #E0EBFF;
+}
+
+/* Hover effect */
+.stock-column:hover {
+  background-color: #12121a;
+  transform: translateY(-3px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .stock-grid {
+      grid-template-columns: 1fr; /* stack cards on small screens */
+  }
+}
+
+
+
+.portfolio-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* left chart bigger than portfolio */
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.fullscreen-chart {
+  height: 100%;
+}
+
+.trading-card2 {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 900px) {
+  .portfolio-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
