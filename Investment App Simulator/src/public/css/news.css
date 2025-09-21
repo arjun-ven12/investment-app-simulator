@@ -8,6 +8,13 @@ body {
   line-height: 1.6;
 }
 
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 h1,
 h2 {
   margin: 1rem 0;

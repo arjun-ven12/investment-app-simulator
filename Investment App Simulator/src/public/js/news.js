@@ -172,20 +172,21 @@ function formatLikes(count) {
     return `${count} like${count === 1 ? '' : 's'}`;
 }
 
+function formatViews(count) {
+    if (count === 1) return '1 view';
+    return `${count || 0} views`;
+}
+
 async function displayNews(newsList = []) {
     if (!newsContainer) return;
     newsContainer.innerHTML = '';
 
-    // Fetch current user's bookmarks (apiId strings)
     userBookmarks = await fetchUserBookmarksIds();
-
-    // Ensure list is an array
     if (!Array.isArray(newsList)) newsList = [];
 
     for (const news of newsList) {
         const card = document.createElement('div');
         card.className = 'news-card';
-
 
         const headline = document.createElement('div');
         headline.className = 'headline';
@@ -204,56 +205,13 @@ async function displayNews(newsList = []) {
         readMore.target = "_blank";
         readMore.textContent = "Read more";
 
-        const viewsDiv = document.createElement('div');
-        viewsDiv.className = 'views';
-        viewsDiv.innerHTML = `${createEyeSVG(16)} 0`; // default while fetching
-
-        // stable key as string (apiId preferred)
         const newsKey = String(news.apiId || news.id);
         card.dataset.newsKey = newsKey;
 
-        // fetch actual view count and set
-        fetchNewsViews(news.apiId || news.id).then(views => {
-            news.views = views;
-            viewsDiv.innerHTML = `${createEyeSVG(16)} ${views}`;
-        });
-
-         requestAnimationFrame(() => {
-          
-            card.style.opacity = 1;
-            card.style.transform = 'translateY(0)';
-        });
-        // click handler increments view and opens article
-        readMore.addEventListener('click', async (e) => {
-            e.preventDefault();
-            try {
-                // call server to increment and broadcast
-                const result = await incrementNewsViewAPI(news.apiId || news.id, news);
-                if (result && result.success) {
-                    // update UI immediately using returned views if available
-                    const newViews = (result.views != null) ? result.views : ((news.views || 0) + 1);
-                    news.views = newViews;
-                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${newViews}`;
-                } else {
-                    // optimistic fallback
-                    news.views = (news.views || 0) + 1;
-                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${news.views}`;
-                }
-            } catch (err) {
-                console.error("Failed to increment view:", err);
-            } finally {
-                // open article
-                window.open(news.url, "_blank");
-            }
-        });
-
         // Bookmark button
         const bookmarkBtn = document.createElement('button');
-        bookmarkBtn.className = 'bookmark-btn';
-
-        const isBookmarked = userBookmarks.includes(newsKey);
-        updateBookmarkButtonUI(bookmarkBtn, isBookmarked);
-
+        bookmarkBtn.className = 'bookmark-btn full-width';
+        updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(newsKey));
         bookmarkBtn.onclick = async () => {
             if (userBookmarks.includes(newsKey)) return;
             updateBookmarkButtonUI(bookmarkBtn, true);
@@ -266,38 +224,73 @@ async function displayNews(newsList = []) {
             }
         };
 
-        // Like button + count
+        // Like button
         const likeBtn = document.createElement('button');
-        likeBtn.className = 'like-btn';
+        likeBtn.className = 'like-btn full-width';
         likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
 
-        const likeCountSpan = document.createElement('span');
-        likeCountSpan.className = 'like-count';
-        likeCountSpan.textContent = ` ${formatLikes(news.totalLikes || 0)}`;
+        // Views row (eye icon + likes)
+        const viewsDiv = document.createElement('div');
+        viewsDiv.className = 'views';
+        viewsDiv.style.display = 'flex';
+        viewsDiv.style.alignItems = 'center';
+        viewsDiv.style.gap = '8px';
+        viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(0)}  ${formatLikes(news.totalLikes || 0)}`;
 
+        // Fetch actual views
+        fetchNewsViews(news.apiId || news.id).then(views => {
+            news.views = views;
+            viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(views)} &nbsp; ${formatLikes(news.totalLikes || 0)}`;
+        });
+
+        // Like button click
         likeBtn.onclick = async () => {
             const currentlyLiked = news.liked;
             news.liked = !currentlyLiked;
             news.totalLikes = currentlyLiked ? (news.totalLikes - 1) : (news.totalLikes + 1);
             likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-            likeCountSpan.textContent = ` ${news.totalLikes} likes`;
+            viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views || 0)}   ${formatLikes(news.totalLikes)}`;
 
             const result = await toggleLike(news, likeBtn);
             if (result) {
                 news.totalLikes = result.totalLikes;
                 news.liked = result.liked;
                 likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-                likeCountSpan.textContent = ` ${formatLikes(result.totalLikes)}`;
+                viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views || 0)}  ${formatLikes(result.totalLikes)}`;
             }
         };
 
-        card.append(headline, summary, source, readMore, viewsDiv, bookmarkBtn, likeBtn, likeCountSpan);
+        // Read more click increments view
+        readMore.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const result = await incrementNewsViewAPI(news.apiId || news.id, news);
+                if (result && result.success) {
+                    const newViews = (result.views != null) ? result.views : ((news.views || 0) + 1);
+                    news.views = newViews;
+                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(newViews)}  ${formatLikes(news.totalLikes || 0)}`;
+                } else {
+                    news.views = (news.views || 0) + 1;
+                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views)}  ${formatLikes(news.totalLikes || 0)}`;
+                }
+            } catch (err) {
+                console.error("Failed to increment view:", err);
+            } finally {
+                window.open(news.url, "_blank");
+            }
+        });
+
+        requestAnimationFrame(() => {
+            card.style.opacity = 1;
+            card.style.transform = 'translateY(0)';
+        });
+
+        // Append in order
+        card.append(headline, summary, source, readMore, bookmarkBtn, likeBtn, viewsDiv);
         newsContainer.appendChild(card);
     }
 }
-cards.forEach((card, i) => {
-  card.style.animation = `fadeInUp 0.5s ${i*0.08}s forwards`;
-});
+
 
 
 // ---------------- Bookmarks, Likes and other helpers ----------------
