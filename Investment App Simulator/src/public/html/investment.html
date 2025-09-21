@@ -77,12 +77,25 @@
             <option value="6m">Last 6 Months</option>
             <option value="1y">Last 1 Year</option>
           </select>
+
+            <!-- ADD THIS FOR CHART TYPE -->
+            <div class="select-wrapper">
+              <select name="chartType" id="chartType">
+                <option value="line">Line (Close Price)</option>
+                <option value="candlestick">Candlestick</option>
+              </select>
+            </div>
+
+  <!-- <button type="submit">Show Chart</button> -->
           <button type="submit">Generate Chart</button>
         </form>
-        <canvas id="myChart2"></canvas>
+        <div class="chart-wrapper">
+          <canvas id="myChart2"></canvas>
+        </div>
       </div>
 
-      <div class="trading-card">
+      <div class="trading-card">       
+
         <form id="trading-form">
           <h2>Trade Stock</h2>
           <p>For limit orders, adjust the price in the box to your preferred limit.</p>
@@ -109,7 +122,8 @@
           <button type="button" id="limit-submit-buy" class="submit-button">Limit Order Buy</button>
           <button type="button" id="limit-submit-sell" class="submit-button">Limit Order Sell</button>
         </form>
-      </div>
+        <br> <br>
+   <div class="company-card"></div>    </div> 
     </div>
 
     <!-- Market Status Banner -->

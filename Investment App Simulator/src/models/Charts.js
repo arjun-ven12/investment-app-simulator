@@ -989,251 +989,6 @@ exports.getUserTrades = function getUserTrades(userId) {
 
 const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
 
-// module.exports.getIntradayData = async function getIntradayData(symbol, interval, dateFrom, dateTo) {
-//     if (!symbol) throw new Error('Stock symbol is required.');
-
-//     // Default to past 7 days if no dates provided
-//     const now = new Date();
-//     const defaultTo = now.toISOString().split('T')[0];
-//     const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-//         .toISOString()
-//         .split('T')[0];
-
-//     const params = new URLSearchParams({
-//         access_key: API_KEY,
-//         symbols: symbol,
-//         interval: interval || '1hour',
-//         sort: 'ASC',
-//         limit: 1000,
-//         date_from: dateFrom || defaultFrom,
-//         date_to: dateTo || defaultTo
-//     });
-
-//     const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
-
-//     try {
-//         const response = await fetch(url);
-//         if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
-//         const data = await response.json();
-
-//         if (!data.data || data.data.length === 0) {
-//             throw new Error('No intraday data found for this symbol.');
-//         }
-
-//         // Convert to Chart.js-friendly format
-//         const labels = data.data.map(item => item.date);
-//         const prices = data.data.map(item => item.close);
-
-//         return {
-//             labels,
-//             datasets: [
-//                 {
-//                     label: `${symbol} Price`,
-//                     data: prices,
-//                     borderColor: 'blue',
-//                     fill: false,
-//                 }
-//             ]
-//         };
-//     } catch (err) {
-//         console.error('Error fetching intraday data:', err);
-//         throw err;
-//     }
-// };
-
-// module.exports.getIntradayData = async function (symbol, interval, dateFrom, dateTo) {
-//     if (!symbol) throw new Error('Stock symbol is required.');
-
-//     // Default to past 7 days if no dates provided
-//     const now = new Date();
-//     const defaultTo = now.toISOString().split('T')[0];
-//     const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-//         .toISOString()
-//         .split('T')[0];
-
-//     const params = new URLSearchParams({
-//         access_key: API_KEY,
-//         symbols: symbol,
-//         interval: interval,
-//         sort: 'ASC',
-//         limit: 1000,
-//         date_from: dateFrom || defaultFrom,
-//         date_to: dateTo || defaultTo
-//     });
-
-//     const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
-
-//     try {
-//         const response = await fetch(url);
-//         if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
-//         const data = await response.json();
-
-//         if (!data.data || data.data.length === 0) {
-//             throw new Error('No intraday data found for this symbol.');
-//         }
-
-//         // Upsert stock in DB
-//         const stock = await prisma.stock.upsert({
-//             where: { symbol: symbol },
-//             update: {},
-//             create: { symbol: symbol }
-//         });
-
-//         // Upsert each intraday price into IntradayPrice2 table
-//         for (const item of data.data) {
-//             const dateObj = new Date(item.date);
-
-//             const existing = await prisma.intradayPrice3.findFirst({
-//                 where: { stockId: stock.stock_id, date: dateObj }
-//             });
-
-//             if (existing) {
-//                 await prisma.intradayPrice3.update({
-//                     where: { id: existing.id },
-//                     data: {
-//                         openPrice: item.open,
-//                         highPrice: item.high,
-//                         lowPrice: item.low,
-//                         closePrice: item.close,
-//                         volume: item.volume
-//                     }
-//                 });
-//             } else {
-//                 await prisma.intradayPrice3.create({
-//                     data: {
-//                         stockId: stock.stock_id,
-//                         date: dateObj,
-//                         openPrice: item.open,
-//                         highPrice: item.high,
-//                         lowPrice: item.low,
-//                         closePrice: item.close,
-//                         volume: item.volume
-//                     }
-//                 });
-//             }
-//         }
-
-//         // Convert API data to Chart.js-friendly format
-//         const labels = data.data.map(item => item.date);
-//         const prices = data.data.map(item => item.close);
-
-//         return {
-//             labels,
-//             datasets: [
-//                 {
-//                     label: `${symbol} Price`,
-//                     data: prices,
-//                     borderColor: 'white',
-//                     fill: false,
-//                 }
-//             ]
-//         };
-
-//     } catch (err) {
-//         console.error('Error fetching intraday data:', err);
-//         throw err;
-//     }
-// };
-
-module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
-    if (!symbol) throw new Error('Stock symbol is required.');
-
-    // Default to past 7 days if no dates provided
-    const now = new Date();
-    const defaultTo = now.toISOString().split('T')[0];
-    const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-
-    const params = new URLSearchParams({
-        access_key: API_KEY,
-        symbols: symbol,
-        sort: 'ASC',
-        limit: 1000,
-        date_from: dateFrom || defaultFrom,
-        date_to: dateTo || defaultTo
-    });
-
-    const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
-        const data = await response.json();
-
-        if (!data.data || data.data.length === 0) {
-            throw new Error('No intraday data found for this symbol.');
-        }
-
-        // Upsert stock in DB
-        const stock = await prisma.stock.upsert({
-            where: { symbol: symbol },
-            update: {},
-            create: { symbol: symbol }
-        });
-
-        console.log(`Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`);
-
-        // Upsert each intraday price into IntradayPrice3 table
-        for (const item of data.data) {
-            try {
-                const dateObj = new Date(item.date);
-                dateObj.setMilliseconds(0); // normalize milliseconds
-                dateObj.setSeconds(0); // optional: normalize seconds if API provides exact minute data
-
-                await prisma.intradayPrice3.upsert({
-                    where: {
-                        stockId_date: {
-                            stockId: stock.stock_id,
-                            date: dateObj
-                        }
-                    },
-                    update: {
-                        openPrice: item.open,
-                        highPrice: item.high,
-                        lowPrice: item.low,
-                        closePrice: item.close,
-                        volume: item.volume
-                    },
-                    create: {
-                        stockId: stock.stock_id,
-                        date: dateObj,
-                        openPrice: item.open,
-                        highPrice: item.high,
-                        lowPrice: item.low,
-                        closePrice: item.close,
-                        volume: item.volume
-                    }
-                });
-
-                // console.log(`Upserted price for ${symbol} at ${dateObj.toISOString()}`);
-            } catch (err) {
-                console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
-            }
-        }
-
-        // Convert API data to Chart.js-friendly format
-        const labels = data.data.map(item => item.date);
-        const prices = data.data.map(item => item.close);
-
-        return {
-            labels,
-            datasets: [
-                {
-                    label: `${symbol} Price`,
-                    data: prices,
-                    borderColor: 'white',
-                    fill: false,
-                }
-            ]
-        };
-
-    } catch (err) {
-        console.error('Error fetching intraday data:', err);
-        throw err;
-    }
-};
-
 
 // module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
 //     if (!symbol) throw new Error('Stock symbol is required.');
@@ -1279,7 +1034,7 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
 //             try {
 //                 const dateObj = new Date(item.date);
 //                 dateObj.setMilliseconds(0); // normalize milliseconds
-//                 dateObj.setSeconds(0); // optional: normalize seconds
+//                 dateObj.setSeconds(0); // optional: normalize seconds if API provides exact minute data
 
 //                 await prisma.intradayPrice3.upsert({
 //                     where: {
@@ -1305,27 +1060,132 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
 //                         volume: item.volume
 //                     }
 //                 });
+
+//                 // console.log(`Upserted price for ${symbol} at ${dateObj.toISOString()}`);
 //             } catch (err) {
 //                 console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
 //             }
 //         }
 
-//         // Return OHLC array for candlestick chart
-//         const ohlcData = data.data.map(item => ({
-//             date: item.date,
-//             openPrice: item.open,
-//             highPrice: item.high,
-//             lowPrice: item.low,
-//             closePrice: item.close
-//         }));
+//         // Convert API data to Chart.js-friendly format
+//         const labels = data.data.map(item => item.date);
+//         const prices = data.data.map(item => item.close);
 
-//         return ohlcData;
+//         return {
+//             labels,
+//             datasets: [
+//                 {
+//                     label: `${symbol} Price`,
+//                     data: prices,
+//                     borderColor: 'white',
+//                     fill: false,
+//                 }
+//             ]
+//         };
 
 //     } catch (err) {
 //         console.error('Error fetching intraday data:', err);
 //         throw err;
 //     }
 // };
+
+
+
+
+
+
+
+module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
+    if (!symbol) throw new Error('Stock symbol is required.');
+
+    // Default to past 7 days if no dates provided
+    const now = new Date();
+    const defaultTo = now.toISOString().split('T')[0];
+    const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
+
+    const params = new URLSearchParams({
+        access_key: API_KEY,
+        symbols: symbol,
+        sort: 'ASC',
+        limit: 1000,
+        date_from: dateFrom || defaultFrom,
+        date_to: dateTo || defaultTo
+    });
+
+    const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
+        const data = await response.json();
+
+        if (!data.data || data.data.length === 0) {
+            throw new Error('No intraday data found for this symbol.');
+        }
+
+        // Upsert stock in DB
+        const stock = await prisma.stock.upsert({
+            where: { symbol: symbol },
+            update: {},
+            create: { symbol: symbol }
+        });
+
+        console.log(`Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`);
+
+        // Upsert each intraday price into IntradayPrice3 table
+        for (const item of data.data) {
+            try {
+                const dateObj = new Date(item.date);
+                dateObj.setMilliseconds(0); // normalize milliseconds
+                dateObj.setSeconds(0); // optional: normalize seconds
+
+                await prisma.intradayPrice3.upsert({
+                    where: {
+                        stockId_date: {
+                            stockId: stock.stock_id,
+                            date: dateObj
+                        }
+                    },
+                    update: {
+                        openPrice: item.open,
+                        highPrice: item.high,
+                        lowPrice: item.low,
+                        closePrice: item.close,
+                        volume: item.volume
+                    },
+                    create: {
+                        stockId: stock.stock_id,
+                        date: dateObj,
+                        openPrice: item.open,
+                        highPrice: item.high,
+                        lowPrice: item.low,
+                        closePrice: item.close,
+                        volume: item.volume
+                    }
+                });
+            } catch (err) {
+                console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
+            }
+        }
+
+        // Return OHLC array for candlestick chart
+        const ohlcData = data.data.map(item => ({
+            date: item.date,
+            openPrice: item.open,
+            highPrice: item.high,
+            lowPrice: item.low,
+            closePrice: item.close
+        }));
+
+        return ohlcData;
+
+    } catch (err) {
+        console.error('Error fetching intraday data:', err);
+        throw err;
+    }
+};
 
 
 

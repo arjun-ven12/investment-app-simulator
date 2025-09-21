@@ -51,10 +51,11 @@ h4 {
 
 .container {
     display: grid;
-    grid-template-columns: 80% 20%;
+    grid-template-columns: 75% 25%;
     gap: 10px;          
     box-sizing: border-box;
     width: 100%;
+    /* max-height: 600px; */
 }
 
 .chart-container, .trading-card {
@@ -388,7 +389,7 @@ canvas {
     overflow: hidden;         /* Hide overflow */
     white-space: nowrap;      /* Keep text on one line */
     font-weight: light;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     z-index: 1000;
     padding: 10px 0;
     border-bottom: 1.5px solid #53596B;
@@ -399,6 +400,8 @@ canvas {
     display: inline-block;
     padding-left: 100%;       /* Start from right */
     animation: scroll-text 15s linear infinite;  /* Adjust speed */
+    font-size: 1.3rem;
+    font-weight: 400;
 }
 
 @keyframes scroll-text {
@@ -551,7 +554,7 @@ canvas {
 /* Container to position the arrow */
 .select-wrapper {
   position: relative;
-  width: 200px; /* or 100% if you want full width */
+  width: 100%; /* or 100% if you want full width */
   display: inline-block;
 }
 
@@ -598,11 +601,65 @@ canvas {
 /* Label styling */
 label[for="range"] {
   display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #fff;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+
+
+/* Dropdown styling */
+#chartType {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #1c1c28; /* dark background */
+  color: #fff; /* white text */
+  border: 1px solid #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none; /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border 0.3s, background 0.3s;
+}
+
+/* Hover & focus states */
+#chartType:hover,
+#chartType:focus {
+  border-color: #0ff; /* highlight on hover/focus */
+  outline: none;
+}
+
+/* Add custom arrow using pseudo-element */
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #0ff;
+  font-size: 0.8rem;
+}
+
+/* Option styling */
+#chartType option {
+  background-color: #1c1c28;
+  color: #fff;
+}
+
+/* Optional label styling */
+label[for="chartType"] {
+  display: block;
   margin-bottom: 5px;
   font-weight: 500;
   color: #fff;
   font-size: 0.9rem;
 }
+
 
 
 
@@ -741,6 +798,7 @@ body {
 .trading-card2 {
   height: 100%;
   overflow-y: auto;
+  width: 300px
 }
 
 /* Responsive: stack on smaller screens */
@@ -749,4 +807,59 @@ body {
     grid-template-columns: 1fr;
     gap: 10px;
   }
+}
+
+
+
+/* Ensure chart container has a fixed height */
+#myChart2, .fullscreen-chart canvas {
+  width: 100% !important;
+height:100%
+}
+
+
+
+.company-card-content {
+  background-color: #000000; /* dark-blue/gray background */
+  color: #E0EBFF; /* light text */
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  max-width: 400px;
+  margin: 0px auto;
+  transition: transform 0.2s, box-shadow 0.2s;
+  outline: 1px solid #53596B;
+
+}
+
+.company-card-content:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.company-card-content h2 {
+  margin-top: 10px;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.company-logo img {
+  border-radius: 8px;
+  /* border: 2px solid #E0EBFF;  */
+  /* background-color: #fff; */
+}
+
+.company-card-content p {
+  margin: 6px 0;
+  font-size: 1.1rem;
+  padding-bottom: 5px;
+}
+
+.company-card-content a {
+  color: #0ff; /* theme blue for links */
+  text-decoration: none;
+}
+
+.company-card-content a:hover {
+  text-decoration: underline;
 }

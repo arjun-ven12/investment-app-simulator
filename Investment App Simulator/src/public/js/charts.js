@@ -964,129 +964,129 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 
-window.addEventListener('DOMContentLoaded', function () {
-    const intradayForm = document.getElementById('chart-form-intraday');
-    const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
-    const rangeSelect = intradayForm.querySelector("select[name='range']");
-    const chartCanvas = document.getElementById('myChart2');
-    let intradayChart = null;
+// window.addEventListener('DOMContentLoaded', function () {
+//     const intradayForm = document.getElementById('chart-form-intraday');
+//     const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
+//     const rangeSelect = intradayForm.querySelector("select[name='range']");
+//     const chartCanvas = document.getElementById('myChart2');
+//     let intradayChart = null;
 
-    intradayForm.addEventListener('submit', function (event) {
-        event.preventDefault();
+//     intradayForm.addEventListener('submit', function (event) {
+//         event.preventDefault();
 
-        const symbolValue = chartSymbolInput.value.trim();
-        const rangeValue = rangeSelect.value;
+//         const symbolValue = chartSymbolInput.value.trim();
+//         const rangeValue = rangeSelect.value;
 
-        if (!symbolValue) {
-            alert('Please enter a stock symbol.');
-            return;
-        }
+//         if (!symbolValue) {
+//             alert('Please enter a stock symbol.');
+//             return;
+//         }
 
-        // Calculate date_from and date_to based on rangeValue
-        const now = new Date();
-        let dateFrom = new Date();
-        switch (rangeValue) {
-            case '1d': dateFrom.setDate(now.getDate() - 1); break;
-            case '1w': dateFrom.setDate(now.getDate() - 7); break;
-            case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
-            case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
-            case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
-            case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
-            default: dateFrom.setDate(now.getDate() - 7);
-        }
+//         // Calculate date_from and date_to based on rangeValue
+//         const now = new Date();
+//         let dateFrom = new Date();
+//         switch (rangeValue) {
+//             case '1d': dateFrom.setDate(now.getDate() - 1); break;
+//             case '1w': dateFrom.setDate(now.getDate() - 7); break;
+//             case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
+//             case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
+//             case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
+//             case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
+//             default: dateFrom.setDate(now.getDate() - 7);
+//         }
 
-        const dateFromStr = dateFrom.toISOString().split('T')[0];
-        const dateToStr = now.toISOString().split('T')[0];
+//         const dateFromStr = dateFrom.toISOString().split('T')[0];
+//         const dateToStr = now.toISOString().split('T')[0];
 
-        const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFromStr}&date_to=${dateToStr}`;
-        console.log('Fetching chart data from URL:', apiUrl);
+//         const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFromStr}&date_to=${dateToStr}`;
+//         console.log('Fetching chart data from URL:', apiUrl);
 
-        fetch(apiUrl)
-            .then(response => response.ok ? response.json() : response.json().then(data => { throw new Error(data.error) }))
-            .then(chartData => {
-                const dataPoints = chartData.labels.map((label, idx) => ({
-                    x: new Date(label),
-                    y: chartData.datasets[0].data[idx]
-                }));
+//         fetch(apiUrl)
+//             .then(response => response.ok ? response.json() : response.json().then(data => { throw new Error(data.error) }))
+//             .then(chartData => {
+//                 const dataPoints = chartData.labels.map((label, idx) => ({
+//                     x: new Date(label),
+//                     y: chartData.datasets[0].data[idx]
+//                 }));
 
-                if (intradayChart) intradayChart.destroy();
+//                 if (intradayChart) intradayChart.destroy();
 
-                intradayChart = new Chart(chartCanvas, {
-                    type: 'line',
-                    data: {
-                        datasets: [{
-                            label: chartData.datasets[0].label,
-                            data: dataPoints,
-                            borderColor: 'white',
-                            backgroundColor: 'white',
-                            fill: false,
-                            tension: 0.1,
-                            borderWidth: 2,
-                            pointRadius: 2,
-                            pointBackgroundColor: 'cyan',
-                            pointBorderColor: 'cyan'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                type: 'time',
-                                time: {
-                                    tooltipFormat: 'MMM dd, yyyy HH:mm',
-                                    unit: 'day', // default
-                                    minUnit: 'hour'
-                                },
-                                title: { display: true, text: 'Date', color: 'white' },
-                                ticks: { color: 'white', maxRotation: 45, minRotation: 45 },
-                                grid: { color: 'rgba(255,255,255,0.2)' }
-                            },
-                            y: {
-                                title: { display: true, text: 'Close Price', color: 'white' },
-                                ticks: { color: 'white' },
-                                grid: { color: 'rgba(255,255,255,0.2)' }
-                            }
-                        },
-                        plugins: {
-                            legend: { labels: { color: 'white' } },
-                            zoom: {
-                                pan: { enabled: true, mode: 'x' },
-                                zoom: {
-                                    wheel: { enabled: true },
-                                    pinch: { enabled: true },
-                                    mode: 'x',
-                                    onZoom: ({chart}) => updateTimeUnit(chart)
-                                }
-                            }
-                        }
-                    },
-                    plugins: [ChartZoom]
-                });
+//                 intradayChart = new Chart(chartCanvas, {
+//                     type: 'line',
+//                     data: {
+//                         datasets: [{
+//                             label: chartData.datasets[0].label,
+//                             data: dataPoints,
+//                             borderColor: 'white',
+//                             backgroundColor: 'white',
+//                             fill: false,
+//                             tension: 0.1,
+//                             borderWidth: 2,
+//                             pointRadius: 2,
+//                             pointBackgroundColor: 'cyan',
+//                             pointBorderColor: 'cyan'
+//                         }]
+//                     },
+//                     options: {
+//                         responsive: true,
+//                         scales: {
+//                             x: {
+//                                 type: 'time',
+//                                 time: {
+//                                     tooltipFormat: 'MMM dd, yyyy HH:mm',
+//                                     unit: 'day', // default
+//                                     minUnit: 'hour'
+//                                 },
+//                                 title: { display: true, text: 'Date', color: 'white' },
+//                                 ticks: { color: 'white', maxRotation: 45, minRotation: 45 },
+//                                 grid: { color: 'rgba(255,255,255,0.2)' }
+//                             },
+//                             y: {
+//                                 title: { display: true, text: 'Close Price', color: 'white' },
+//                                 ticks: { color: 'white' },
+//                                 grid: { color: 'rgba(255,255,255,0.2)' }
+//                             }
+//                         },
+//                         plugins: {
+//                             legend: { labels: { color: 'white' } },
+//                             zoom: {
+//                                 pan: { enabled: true, mode: 'x' },
+//                                 zoom: {
+//                                     wheel: { enabled: true },
+//                                     pinch: { enabled: true },
+//                                     mode: 'x',
+//                                     onZoom: ({chart}) => updateTimeUnit(chart)
+//                                 }
+//                             }
+//                         }
+//                     },
+//                     plugins: [ChartZoom]
+//                 });
 
-              //  alert(`Chart created for ${symbolValue} (${rangeValue})!`);
-            })
-            .catch(err => {
-                console.error('Error creating chart:', err);
-                alert(`Failed to create chart: ${err.message}`);
-            });
-    });
+//               //  alert(`Chart created for ${symbolValue} (${rangeValue})!`);
+//             })
+//             .catch(err => {
+//                 console.error('Error creating chart:', err);
+//                 alert(`Failed to create chart: ${err.message}`);
+//             });
+//     });
 
-    function updateTimeUnit(chart) {
-        if (!chart.scales.x) return;
+//     function updateTimeUnit(chart) {
+//         if (!chart.scales.x) return;
 
-        const xScale = chart.scales.x;
-        const diffMs = xScale.max - xScale.min;
-        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+//         const xScale = chart.scales.x;
+//         const diffMs = xScale.max - xScale.min;
+//         const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-        let newUnit = 'hour';
-        if (diffDays > 730) newUnit = 'month'; // > 2 years
-        else if (diffDays > 90) newUnit = 'week';
-        else if (diffDays > 2) newUnit = 'day';
+//         let newUnit = 'hour';
+//         if (diffDays > 730) newUnit = 'month'; // > 2 years
+//         else if (diffDays > 90) newUnit = 'week';
+//         else if (diffDays > 2) newUnit = 'day';
 
-        chart.options.scales.x.time.unit = newUnit;
-        chart.update('none'); // update chart without animation
-    }
-});
+//         chart.options.scales.x.time.unit = newUnit;
+//         chart.update('none'); // update chart without animation
+//     }
+// });
 
 // window.addEventListener('DOMContentLoaded', function () {
 //     const intradayForm = document.getElementById('chart-form-intraday');
@@ -1208,6 +1208,169 @@ window.addEventListener('DOMContentLoaded', function () {
 //         }
 //     });
 // });
+
+
+// JSwindow.addEventListener('DOMContentLoaded', function () {
+  const intradayForm = document.getElementById('chart-form-intraday');
+  const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
+  const rangeSelect = intradayForm.querySelector("select[name='range']");
+  const chartTypeSelect = intradayForm.querySelector("select[name='chartType']");
+  const chartCanvas = document.getElementById('myChart2');
+  let intradayChart = null;
+
+  function getTimeUnit(data) {
+    if (!data || data.length === 0) return 'day';
+    const diffMs = data[data.length - 1].x - data[0].x;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    if (diffDays <= 1) return 'hour';
+    if (diffDays <= 7) return 'day';
+    if (diffDays <= 60) return 'week';
+    return 'month';
+  }
+
+  intradayForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const symbolValue = chartSymbolInput.value.trim();
+    const rangeValue = rangeSelect.value;
+    const chartType = chartTypeSelect.value;
+
+    if (!symbolValue) { alert('Enter a symbol'); return; }
+
+    const now = new Date();
+    let dateFrom = new Date();
+    switch(rangeValue) {
+      case '1d': dateFrom.setDate(now.getDate() - 1); break;
+      case '1w': dateFrom.setDate(now.getDate() - 7); break;
+      case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
+      case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
+      case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
+      case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
+      default: dateFrom.setDate(now.getDate() - 7);
+    }
+
+    const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFrom.toISOString().split('T')[0]}&date_to=${now.toISOString().split('T')[0]}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error('Failed to fetch OHLC data');
+      const ohlcData = await response.json();
+      if (!Array.isArray(ohlcData) || ohlcData.length === 0) throw new Error('No OHLC data');
+
+      const formattedData = ohlcData.map(item => ({
+        x: new Date(item.date).getTime(),
+        o: item.openPrice,
+        h: item.highPrice,
+        l: item.lowPrice,
+        c: item.closePrice
+      })).sort((a, b) => a.x - b.x);
+
+      const timeUnit = getTimeUnit(formattedData);
+
+      // Destroy old chart if exists
+      if (intradayChart) {
+        intradayChart.destroy();
+        intradayChart = null;
+      }
+
+      // Clear canvas and fix height
+      const ctx = chartCanvas.getContext('2d');
+      ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+      //chartCanvas.height = 00;
+
+      // Chart configuration
+      let config;
+      if (chartType === 'line') {
+        config = {
+          type: 'line',
+          data: {
+            labels: formattedData.map(d => new Date(d.x)),
+            datasets: [{
+              label: `${symbolValue} Close Price`,
+              data: formattedData.map(d => d.c),
+              borderColor: '#E0EBFF', // line color
+              fill: true,
+              tension: 0.1,
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+      
+                if (!chartArea) {
+                  return null; // Chart not fully initialized yet
+                }
+      
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, 'rgba(143,173,253,0.4)'); // top: semi-transparent, more blue
+                gradient.addColorStop(1, 'rgba(143,173,253,0)');   // bottom: fully transparent
+                
+                return gradient;
+              }
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'time',
+                time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.2)' },
+                title: { display: true, text: 'Date', color: 'white' }
+              },
+              y: {
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.2)' },
+                title: { display: true, text: 'Price', color: 'white' }
+              }
+            },
+            plugins: { legend: { labels: { color: 'white' } } }
+          }
+        };
+      }
+      
+      
+
+      else { // candlestick
+        config = {
+          type: 'candlestick',
+          data: {
+            datasets: [{
+              label: `${symbolValue} Candlestick`,
+              data: formattedData,
+              color: { up: '#00c853', down: '#d50000', unchanged: '#999' }
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'time',
+                time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.2)' },
+                title: { display: true, text: 'Date', color: 'white' }
+              },
+              y: {
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.2)' },
+                title: { display: true, text: 'Price', color: 'white' }
+              }
+            },
+            plugins: { legend: { labels: { color: 'white' } } }
+          }
+        };
+      }
+
+      intradayChart = new Chart(ctx, config);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  });
+
+
 
 
 
@@ -1416,7 +1579,7 @@ function renderPortfolio(portfolio) {
 
   // Inject portfolio content
   portfolioContainer.innerHTML = `
-    <h2>Your Portfolio</h2>
+    <h1>Your Portfolio</h1>
     <div class="stock-grid">${stockColumns}</div>
     <div class="portfolio-chart-container">
       <canvas id="portfolioPieChart"></canvas>
@@ -1756,6 +1919,7 @@ window.addEventListener('DOMContentLoaded', function () {
       })
       .then(company => {
         companyCardContainer.innerHTML = `
+        <div class="company-card-content">
           <div class="company-logo">
             ${company.logo ? `<img src="${company.logo}" alt="${company.name} logo" width="100">` : ''}
           </div>
@@ -1768,8 +1932,9 @@ window.addEventListener('DOMContentLoaded', function () {
           <p><strong>Shares Outstanding:</strong> ${company.shareOutstanding ? company.shareOutstanding.toLocaleString() : 'N/A'}</p>
           <p><strong>Phone:</strong> ${company.phone || 'N/A'}</p>
           <p><strong>Website:</strong> ${company.website ? `<a href="${company.website}" target="_blank">${company.website}</a>` : 'N/A'}</p>
-        `;
-
+        </div>
+      `;
+      
       })
       .catch(error => {
         console.error('Error fetching company data:', error);
