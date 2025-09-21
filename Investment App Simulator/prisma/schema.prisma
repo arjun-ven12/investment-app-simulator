@@ -10,35 +10,35 @@ datasource db {
 }
 
 model Task {
-id       Int              @id @default(autoincrement())
-name     String
-statusId Int
-status   Status           @relation(fields: [statusId], references: [id])
-persons  TaskAssignment[]
+  id       Int              @id @default(autoincrement())
+  name     String
+  statusId Int
+  status   Status           @relation(fields: [statusId], references: [id])
+  persons  TaskAssignment[]
 }
 
 model Status {
-id    Int    @id @default(autoincrement())
-text  String @unique
-tasks Task[]
+  id    Int    @id @default(autoincrement())
+  text  String @unique
+  tasks Task[]
 }
 
 model Person {
-id     Int              @id @default(autoincrement())
-email  String           @unique
-name   String
-avatar String?
-tasks  TaskAssignment[]
+  id     Int              @id @default(autoincrement())
+  email  String           @unique
+  name   String
+  avatar String?
+  tasks  TaskAssignment[]
 }
 
 model TaskAssignment {
-taskId     Int
-personId   Int
-assignedAt DateTime @default(now())
-person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId     Int
+  personId   Int
+  assignedAt DateTime @default(now())
+  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-@@id([taskId, personId], name: "assignmentId")
+  @@id([taskId, personId], name: "assignmentId")
 }
 
 model Company {
@@ -62,18 +62,18 @@ model Company {
 }
 
 model Stock {
-  stock_id      Int             @id @default(autoincrement())
-  symbol        String          @unique @db.VarChar(10)
-  sector        String?         @db.VarChar(100)
-  company_id    Int?
-  change        Int?
-  favoriteStock FavoriteStock[]
-  hist_prices   HistPrice[]
-  limitOrder    LimitOrder[]
-  company       Company?        @relation(fields: [company_id], references: [id])
-  trading       Trade[]
+  stock_id       Int              @id @default(autoincrement())
+  symbol         String           @unique @db.VarChar(10)
+  sector         String?          @db.VarChar(100)
+  company_id     Int?
+  change         Int?
+  favoriteStock  FavoriteStock[]
+  hist_prices    HistPrice[]
+  limitOrder     LimitOrder[]
+  company        Company?         @relation(fields: [company_id], references: [id])
+  trading        Trade[]
   intradayPrice2 IntradayPrice2[]
-    intradayPrice3 IntradayPrice3[]
+  intradayPrice3 IntradayPrice3[]
 
   @@index([symbol])
 }
@@ -137,9 +137,9 @@ model News {
   url         String
   source      String?
   datetime    DateTime?
-  categoryId  Int?           // new field for category
-  category    NewsCategory?  @relation(fields: [categoryId], references: [id])
-  views     Int      @default(0)  // <-- add this
+  categoryId  Int? // new field for category
+  category    NewsCategory? @relation(fields: [categoryId], references: [id])
+  views       Int           @default(0) // <-- add this
   bookmarks   Bookmark[]
   NewsComment NewsComment[]
   NewsLike    NewsLike[]
@@ -223,8 +223,8 @@ model Referral {
   user                User?           @relation("UserReferrals", fields: [userId], references: [id], onDelete: Cascade)
   referralUsages      ReferralUsage[]
   referredUsers       User[]          @relation("UserReferredBy")
+  ReferralBadge       ReferralBadge[]
 }
-
 
 model ReferralUsage {
   id         Int       @id @default(autoincrement())
@@ -236,6 +236,17 @@ model ReferralUsage {
   user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, referralId])
+}
+
+model ReferralBadge {
+  id         Int      @id @default(autoincrement())
+  referralId Int
+  badgeName  String
+  createdAt  DateTime @default(now())
+  referral   Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@unique([referralId, badgeName]) // Prevent duplicate badges
+  @@index([referralId])
 }
 
 model Comment {
@@ -327,9 +338,9 @@ model NewsLike {
 }
 
 model NewsCategory {
-  id     Int     @id @default(autoincrement())
-  name   String  @unique
-  news   News[]  // one-to-many relation: a category can have multiple news articles
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  news News[] // one-to-many relation: a category can have multiple news articles
 }
 
 model IntradayPrice2 {
@@ -344,10 +355,10 @@ model IntradayPrice2 {
   createdAt  DateTime @default(now())
 
   stock Stock @relation(fields: [stockId], references: [stock_id])
-  @@index([stockId])
-@@unique([stockId, date])
-}
 
+  @@unique([stockId, date])
+  @@index([stockId])
+}
 
 model IntradayPrice3 {
   id         Int      @id @default(autoincrement())
@@ -361,13 +372,14 @@ model IntradayPrice3 {
   createdAt  DateTime @default(now())
 
   stock Stock @relation(fields: [stockId], references: [stock_id])
+
+  @@unique([stockId, date], map: "stockId_date")
   @@index([stockId])
-@@unique([stockId, date], map: "stockId_date")
 }
 
 model InvestmentGuide {
   id        Int      @id @default(autoincrement())
-  title   String @unique
+  title     String   @unique
   content   Json // store the structured JSON we designed above
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

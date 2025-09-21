@@ -1,288 +1,326 @@
-/* GENERAL STYLING */
+/* Global Styles */
 body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #0a0a0a, #111);
-    color: #fff;
-    margin: 0;
-    padding: 0;
+  font-family: 'Outfit', sans-serif;
+  background: #0a0a0a;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
+/* Container */
 .container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 35px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-h1 {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #ffffff;
+/* Headings */
+h1, h2, h3, h4 {
+  color: #fff;
+  margin: 0 0 10px 0;
 }
 
-/* CREDIT BOX */
-.credit-box {
-    background: linear-gradient(145deg, #111111, #1a1a1a);
-    border-radius: 15px;
-    padding: 25px 30px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
-}
-
-.credit-box h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #00fff7;
-}
-
-.progress-info p {
-    font-size: 1.05rem;
-    margin: 5px 0;
-    color: #ccc;
-}
-
-.progress-bar-container {
-    margin-top: 20px;
+/* Progress Bar */
+.progress-section {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 10px;
 }
 
 .progress-bar {
-    width: 100%;
-    height: 20px;
-    background-color: #222;
-    border-radius: 15px;
-    overflow: hidden;
+  width: 100%;
+  height: 25px;
+  background-color: #000000;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 10px 0;
+  /* add this 👇 */
+  border: 1px solid #E0EBFF;
+  margin-top: 10px;
 }
 
 .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #00d9ff, #00bfff);
-    transition: width 0.6s ease-in-out;
+  height: 100%;
+  width: 0%;
+  background: #E0EBFF;
+  transition: width 0.8s ease-in-out;
 }
 
 #progressText {
-    margin-top: 5px;
-    font-size: 0.9rem;
-    color: #fff;
-    display: block;
-    text-align: center;
+  display: block;
+  margin-top: 5px;
+  color: #fff;
+  font-weight: 500;
+  padding-top: 10px;
 }
 
-/* REFERRAL LINK SECTION */
-.referral-link {
-    background-color: #111;
+h1, p{
+    padding-left: 50px;
+}
+
+.friend-referral-section p{
+padding-left: 0;
+}
+/* Referral Cards */
+.referral-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  border: #ccc;
+}
+
+/* Referral Code + QR on the same line */
+.card.referral-full {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  background: #7f94c3;
+  border-radius: 15px;
+    padding: 30px;
     border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
+  margin-bottom: 0; /* spacing handled by referral-cards gap */
 }
 
-.referral-link h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: #00d9ff;
+.card.referral-full h4{
+color: rgb(255, 255, 255)
+}
+/* Referral Code Section */
+.referral-code-section {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* for copy icon */
+    
 }
 
-.link-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+
+/* Input + Copy Icon Wrapper */
+.referral-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: white;
 }
 
-.link-container input {
-    flex: 1;
-    padding: 12px 15px;
-    border-radius: 10px;
-    border: 1px solid #555;
-    background-color: #222;
-    color: #fff;
-    font-size: 1rem;
+.referral-row input {
+  flex: 1;
+  padding: 10px 36px 10px 12px;
+  border-radius: 8px;
+  background: #7f94c3;  /* same as card */
+  color: #ffffff;       /* white text */
+  font-size: 0.95rem;
+  font-family: 'Outfit', sans-serif;
+  border: 1px white solid;         /* ✅ removes the black border */
+  outline: none;        /* ✅ remove browser default blue/black outline */
 }
 
-.link-container button {
-    padding: 12px 20px;
-    background: #00d9ff;
-    color: #000;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.referral-row input:focus {
+  border: 2px solid #fff;   /* White border when clicked/focused */
+  outline: none;            /* Remove default outline */
 }
 
-.link-container button:hover {
-    background: #00bfff;
+.referral-row .copy-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.referral-row .copy-icon:hover {
+  transform: scale(1.2);
 }
 
-/* SOCIAL BUTTONS */
-.social-icons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+/* QR Section */
+.friend-referral-section {
+  flex: 0 0 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
-.social-icons button {
-    flex: 1 1 140px;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    background-color: #222;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: 0.3s;
+.qr-placeholder {
+  width: 100px;
+  height: 100px;
+  background: #7f94c3;
+  border: 2px dashed #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
-.social-icons button:hover {
-    background-color: #00d9ff;
-    color: #000;
+/* How It Works Section */
+.how-it-works-card {
+  display: block;
+  background: #000;
+  border-radius: 15px;
+  gap: 15px;
 }
 
-/* RECEIVED LINK SECTION */
-.received-referral-link {
-    background-color: #111;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
+.steps-container-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
 }
 
-.received-referral-link h3 {
-    font-size: 1.3rem;
-    color: #00d9ff;
-    margin-bottom: 15px;
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
-/* STATS SECTION */
-.stats-container {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-top: 20px;
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  transition: transform 0.3s;
+}
+
+.step:hover {
+  transform: translateY(-5px);
+}
+
+.step-icon {
+  background: none;
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  animation: bounce 1.2s infinite alternate;
+}
+
+
+.step span {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.step-line {
+  height: 2px;
+  background: #fff;
+  flex: 1;
+}
+
+/* Toggle under How It Works */
+.how-it-works-toggle {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.how-it-works-toggle i {
+  margin-right: 5px;
+}
+
+/* Stats Section */
+.stats-section {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
 }
 
 .stat-box {
-    flex: 1 1 200px;
-    background-color: #111;
-    padding: 25px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.2);
-    border: 1px solid #00d9ff;
+  flex: 1;
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(255,255,255,0.05);
+  transition: transform 0.3s;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
 }
 
 .stat-box h4 {
-    font-size: 1.6rem;
-    color: #00d9ff;
-    margin: 0 0 5px 0;
+  font-size: 2rem;
+  margin-bottom: 5px;
 }
 
 .stat-box p {
-    font-size: 1rem;
-    color: #ccc;
+  color: #ccc;
 }
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .stats-container { flex-direction: column; gap: 15px; }
-    .social-icons { flex-direction: column; }
-}
-
-@media (max-width: 480px) {
-    .link-container { flex-direction: column; }
-    .link-container button { width: 100%; }
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
 
 
 #referralTable {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
- font-family: 'Outfit', sans-serif; /* changed from Roboto */
-  color: #fff;
-  margin-top: 20px;
 }
 
 #referralTable th, #referralTable td {
   padding: 12px 15px;
-  text-align: center;
-}
-
-#referralTable thead {
-  background-color: #0a0a0a;
-  border-bottom: 2px solid #6ba8b3;
+  border-bottom: 1px solid #333;
+  text-align: left;
 }
 
 #referralTable th {
-  font-weight: 500;
-  color: #00d9ff;
+  background: #111;
+  color: #fff;
 }
 
-#referralTable tbody tr:nth-child(even) {
-  background-color: #111111;
+
+.stats-section {
+  display: flex;
+  justify-content: center; /* centers horizontally */
+  gap: 40px; /* space between the two boxes */
+  background-color: #000;
 }
 
-#referralTable tbody tr:nth-child(odd) {
-  background-color: #1a1a1a;
+/* Referral History Section */
+.history-section {
+  background: #000000; /* Black background */
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 30px;
 }
 
-#referralTable tbody tr:hover {
-  background-color: #222;
+.history-section h3 {
+  color: #E0EBFF; /* Accent color */
+  margin-bottom: 15px;
 }
 
-.status {
+/* Table Styling */
+#referralTable {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #E0EBFF; /* Outline color */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#referralTable th,
+#referralTable td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #E0EBFF; /* Row separator */
+  text-align: left;
+}
+
+#referralTable th {
+  background: #000000; 
+  color: #E0EBFF; /* Accent for headings */
   font-weight: 600;
-  color: #00ffea;
 }
 
-
-
-.referral-share {
-    background-color: #111;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25);
+#referralTable td {
+  background: #000000; /* Match section background */
+  color: #fff;
 }
 
-.referral-share h3 {
-    font-size: 1.3rem;
-    color: #00d9ff;
-    margin-bottom: 15px;
-}
-
-.social-icons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.social-icons button {
-    flex: 1 1 140px;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background-color: #222;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.social-icons button:hover {
-    background-color: #00d9ff;
-    color: #000;
+#referralTable tr:hover td {
+  background: #1a1a1a; /* Subtle hover effect */
 }

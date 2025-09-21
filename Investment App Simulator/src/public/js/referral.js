@@ -2,9 +2,8 @@ let socket = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const userId = localStorage.getItem('userId');
+  
   if (!userId) return alert("User not logged in.");
-
-  referralLinkInput = document.getElementById('referralLink');
 
   // -------- Socket Setup --------
   if (typeof io !== 'undefined') {
@@ -19,8 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('referralUpdate', (stats) => {
       console.log('Referral stats updated via socket:', stats);
-      updateReferralStatsUI(stats);
-      updateProgressBar(stats.creditsEarned, stats.nextTierCredits || 300);
+      updateStatsUI(stats);
+      updateProgressBar(stats.creditsEarned);
+      updateReferralLinkUI(stats.referralLink);
     });
 
     socket.on('disconnect', () => {
@@ -28,26 +28,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // -------- Copy Referral Link --------
-  function attachCopyListener() {
-    const copyBtn = document.getElementById('copyReferralButton');
-    copyBtn?.addEventListener('click', () => {
-      const referralInput = document.getElementById('referralLink');
-      referralInput?.select();
-      referralInput?.setSelectionRange(0, 99999);
-      document.execCommand('copy');
-      alert("Referral link copied!");
-    });
+  // -------- Update Stats UI --------
+function updateStatsUI(stats) {
+  const signupCount = document.getElementById('signupCount');
+  const creditsEarned = document.getElementById('creditsEarned');
+
+  if (signupCount) signupCount.innerText = stats.referralSignups ?? 0;
+  if (creditsEarned) creditsEarned.innerText = `$${stats.creditsEarned ?? 0}`;
+}
+  // -------- Update Referral Link UI --------
+  function updateReferralLinkUI(link) {
+    const referralInput = document.getElementById('referralCode');
+    if (referralInput) referralInput.value = link;
   }
 
-  attachCopyListener();
+  // -------- Copy Referral Code --------
+  const referralCodeInput = document.getElementById('referralCode');
+  const copyBtn = document.getElementById('copyReferral');
+  copyBtn?.addEventListener('click', () => {
+    referralCodeInput.select();
+    referralCodeInput.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    alert('Referral code copied!');
+  });
 
-  // -------- Enter Referral Link --------
+  // -------- Enter Friend's Referral Link --------
   const enterReferralButton = document.getElementById('enterReferralLinkButton');
   enterReferralButton?.addEventListener('click', async () => {
     const receivedLink = document.getElementById('receivedReferralLink')?.value.trim();
     if (!receivedLink) return alert("Please enter a referral link!");
-
     try {
       const res = await fetch(`/referral/${userId}/use`, {
         method: 'PUT',
@@ -75,84 +84,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to fetch referral stats');
 
-      updateReferralStatsUI(data.referral);
+      updateStatsUI(data.referral);
       updateReferralLinkUI(data.referral.referralLink);
-      updateProgressBar(data.referral.creditsEarned, data.referral.nextTierCredits || 300);
+      updateProgressBar(data.referral.creditsEarned);
     } catch (err) {
       console.error(err);
       alert('Failed to load referral stats.');
     }
   }
 
-  // -------- Update UI --------
-  function updateReferralStatsUI(stats) {
-    const container = document.querySelector('.stats-container');
-    container.innerHTML = `
-      <div class="stat-box"><h4>${stats.referralSignups}</h4><p>Referral Signups</p></div>
-      <div class="stat-box"><h4>${stats.successfulReferrals}</h4><p>Successful Referrals</p></div>
-      <div class="stat-box"><h4>$${stats.creditsEarned}</h4><p>Credits Earned</p></div>
-    `;
-  }
-
-  function updateReferralLinkUI(link) {
-    const container = document.querySelector('.referral-link');
-    container.innerHTML = `
-      <h3>Share the link with your friends!</h3>
-      <div class="link-container">
-        <input type="text" id="referralLink" value="${link}" readonly>
-        <button id="copyReferralButton"><i class="fas fa-copy"></i> Copy</button>
-      </div>
-    `;
-    referralLinkInput = document.getElementById('referralLink'); // reassign
-    attachCopyListener();
-  }
-
-  const rewardTiers = [100, 150, 200, 250, 300]; // reward levels
+  // -------- Progress Bar --------
+  const rewardTiers = [100, 150, 200, 250, 300];
 
   function getNextTier(credits) {
     for (let tier of rewardTiers) if (credits < tier) return tier;
-    return rewardTiers[rewardTiers.length - 1]; // max cap
-  }
-
-  function getPrevTier(credits) {
-    let prev = 0;
-    for (let tier of rewardTiers) {
-      if (credits < tier) return prev;
-      prev = tier;
-    }
     return rewardTiers[rewardTiers.length - 1];
   }
 
-  function calculateNextTierCredits(successfulReferrals) {
-  const base = 100;
-  const increment = 50;
-  const max = 300;
-  return Math.min(base + successfulReferrals * increment, max);
-}
-
-
-function updateProgressBar(creditsEarned) {
+  function updateProgressBar(creditsEarned) {
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
     const nextRewardElem = document.getElementById('nextReward');
 
     if (!progressFill || !progressText || !nextRewardElem) return;
 
-    const maxCap = 300; // hardcoded max cap
-
-    // Calculate % relative to max cap
+    const maxCap = 300;
     const progressPercent = Math.min((creditsEarned / maxCap) * 100, 100);
     progressFill.style.width = `${progressPercent}%`;
-
-    // Show "credits / 300" instead of "credits / nextTier"
     progressText.innerText = `${creditsEarned} / ${maxCap}`;
-
-    // Next reward still shows next tier
-    const nextTier = getNextTier(creditsEarned);
-    nextRewardElem.innerText = `$${nextTier}`;
-}
-
-
+    nextRewardElem.innerText = `$${getNextTier(creditsEarned)}`;
+  }
 
   // -------- Referral History --------
   async function fetchReferralHistory() {
@@ -179,39 +140,25 @@ function updateProgressBar(creditsEarned) {
     }
   }
 
-  // -------- Social Share Buttons --------
-  function setupShareButtons() {
-    const share = (url) => window.open(url, '_blank');
+  // -------- How It Works Toggle --------
+  const toggleTip = document.getElementById('toggleHowItWorks');
+  const stepsCard = document.querySelector('.steps-container-card');
+  const howItWorksHeading = document.querySelector('.how-it-works-card h4');
+  const hidden = localStorage.getItem('howItWorksHidden') === 'true';
 
-    document.getElementById('shareWhatsapp')?.addEventListener('click', () => {
-      const link = encodeURIComponent(referralLinkInput.value);
-      share(`https://api.whatsapp.com/send?text=Join%20using%20my%20referral%20link:%20${link}`);
-    });
+  stepsCard.style.display = hidden ? 'none' : 'flex';
+  howItWorksHeading.style.display = hidden ? 'none' : 'block';
+  toggleTip.innerHTML = hidden ? 'Show Tip <i class="fas fa-chevron-down"></i>'
+    : 'Hide Tip <i class="fas fa-chevron-up"></i>';
 
-    document.getElementById('shareFacebook')?.addEventListener('click', () => {
-      const link = encodeURIComponent(referralLinkInput.value);
-      share(`https://www.facebook.com/sharer/sharer.php?u=${link}`);
-    });
-
-    document.getElementById('shareTwitter')?.addEventListener('click', () => {
-      const link = encodeURIComponent(referralLinkInput.value);
-      share(`https://twitter.com/intent/tweet?url=${link}&text=Join%20using%20my%20referral%20link!`);
-    });
-
-    document.getElementById('shareLinkedIn')?.addEventListener('click', () => {
-      const link = encodeURIComponent(referralLinkInput.value);
-      share(`https://www.linkedin.com/sharing/share-offsite/?url=${link}`);
-    });
-
-    document.getElementById('copyLink')?.addEventListener('click', () => {
-      referralLinkInput.select();
-      referralLinkInput.setSelectionRange(0, 99999);
-      document.execCommand('copy');
-      alert('Referral link copied!');
-    });
-  }
-
-  setupShareButtons();
+  toggleTip.addEventListener('click', () => {
+    const isHidden = stepsCard.style.display === 'none';
+    stepsCard.style.display = isHidden ? 'flex' : 'none';
+    howItWorksHeading.style.display = isHidden ? 'block' : 'none';
+    toggleTip.innerHTML = isHidden ? 'Hide Tip <i class="fas fa-chevron-up"></i>'
+      : 'Show Tip <i class="fas fa-chevron-down"></i>';
+    localStorage.setItem('howItWorksHidden', !isHidden);
+  });
 
   // -------- Initial Load --------
   fetchReferralStats();
