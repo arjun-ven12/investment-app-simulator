@@ -75,6 +75,7 @@ model Stock {
   intradayPrice2 IntradayPrice2[]
   intradayPrice3 IntradayPrice3[]
   StopLossOrder  StopLossOrder[]
+  StopLimitOrder StopLimitOrder[]
 
   @@index([symbol])
 }
@@ -181,16 +182,16 @@ model BlogComment {
 }
 
 model User {
-  id               Int             @id @default(autoincrement())
-  email            String          @unique
+  id               Int              @id @default(autoincrement())
+  email            String           @unique
   password         String
-  wallet           Int             @default(100000)
-  createdAt        DateTime        @default(now())
+  wallet           Int              @default(100000)
+  createdAt        DateTime         @default(now())
   referredById     Int?
-  status           String          @default("Sufficient Money")
-  userReferralLink String?         @unique
-  username         String          @unique
-  updatedAt        DateTime        @updatedAt
+  status           String           @default("Sufficient Money")
+  userReferralLink String?          @unique
+  username         String           @unique
+  updatedAt        DateTime         @updatedAt
   name             String?
   phoneNumber      Int?
   BlogComment      BlogComment[]
@@ -201,14 +202,15 @@ model User {
   Goal             Goal[]
   limitOrders      LimitOrder[]
   RedeemBy         RedeemBy[]
-  referrals        Referral[]      @relation("UserReferrals")
+  referrals        Referral[]       @relation("UserReferrals")
   referralUsages   ReferralUsage[]
   trading          Trade[]
-  referredBy       Referral?       @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
+  referredBy       Referral?        @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
   bookmarks        Bookmark[]
   NewsComment      NewsComment[]
   NewsLike         NewsLike[]
   StopLossOrder    StopLossOrder[]
+  StopLimitOrder   StopLimitOrder[]
 }
 
 model Referral {
@@ -393,9 +395,27 @@ model StopLossOrder {
   stockId      Int
   quantity     Int
   triggerPrice Decimal  @db.Decimal(10, 2)
-  orderType    String   // "STOP_MARKET" or "STOP_LIMIT"
+  orderType    String // "STOP_MARKET" or "STOP_LIMIT"
   limitPrice   Decimal? @db.Decimal(10, 2) // only used for STOP_LIMIT
   status       String   @default("PENDING") // PENDING, EXECUTED, CANCELLED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+
+  @@index([stockId])
+}
+
+model StopLimitOrder {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  stockId      Int
+  quantity     Int
+  triggerPrice Decimal  @db.Decimal(10, 2)
+  limitPrice   Decimal  @db.Decimal(10, 2)
+  tradeType    String // "BUY" or "SELL"
+  status       String   @default("PENDING") // "PENDING", "EXECUTED", "CANCELLED"
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
