@@ -74,7 +74,7 @@ model Stock {
   trading        Trade[]
   intradayPrice2 IntradayPrice2[]
   intradayPrice3 IntradayPrice3[]
-  StopLossOrder  StopLossOrder[]
+  StopMarketOrder  StopMarketOrder[]
   StopLimitOrder StopLimitOrder[]
 
   @@index([symbol])
@@ -209,7 +209,7 @@ model User {
   bookmarks        Bookmark[]
   NewsComment      NewsComment[]
   NewsLike         NewsLike[]
-  StopLossOrder    StopLossOrder[]
+  StopMarketOrder    StopMarketOrder[]
   StopLimitOrder   StopLimitOrder[]
 }
 
@@ -389,7 +389,7 @@ model InvestmentGuide {
   updatedAt DateTime @updatedAt
 }
 
-model StopLossOrder {
+model StopMarketOrder {
   id           Int      @id @default(autoincrement())
   userId       Int
   stockId      Int
