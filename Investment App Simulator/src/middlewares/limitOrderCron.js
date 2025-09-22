@@ -3,6 +3,7 @@ const { DateTime } = require('luxon'); // install: npm i luxon
 const prisma = require('../../prisma/prismaClient');
 const { processLimitOrders } = require('../models/Charts');
 const { processStopMarketOrders } = require('../models/stopLoss');
+const { processStopLimitOrders } = require('../models/stopLimit');
 
 async function getAllStockIds() {
   const stocks = await prisma.stock.findMany({ select: { stock_id: true } });
@@ -35,6 +36,11 @@ cron.schedule('*/30 * * * *', async () => {
         console.log(`Executed ${executedLimitOrders.length} LIMIT orders for stock ID ${stockId}`);
       }
 
+      const executedStopLimitOrders = await processStopLimitOrders(stockId);
+      if (executedStopLimitOrders && executedStopLimitOrders.length) {
+        console.log(`Executed ${executedStopLimitOrders.length} STOP-LIMIT orders for stock ID ${stockId}`);
+      }
+      
       // Stop-Loss Orders
       const executedStopLossOrders = await processStopMarketOrders(stockId);
       if (executedStopLossOrders.length) {

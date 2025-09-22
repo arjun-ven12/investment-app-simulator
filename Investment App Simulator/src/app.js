@@ -34,6 +34,7 @@ const newsRouter = require("./routers/news")
 const guideRouter = require("./routers/guide")
 const stopLossRouter = require("./routers/stopLoss");
 
+const stopLimitRouter = require("./routers/stopLimit");
 
 const app = express();
 
@@ -73,7 +74,7 @@ app.use('/chartInvestment', chartsInvestmentRouter);
 app.use('/settings', settingRouter);
 app.use('/api/news', newsRouter)
 app.use('/stop-market', stopLossRouter)
-
+app.use('/stop-limit', stopLimitRouter)
 
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
