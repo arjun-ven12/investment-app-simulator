@@ -40,7 +40,7 @@ cron.schedule('*/30 * * * *', async () => {
       if (executedStopLimitOrders && executedStopLimitOrders.length) {
         console.log(`Executed ${executedStopLimitOrders.length} STOP-LIMIT orders for stock ID ${stockId}`);
       }
-      
+
       // Stop-Loss Orders
       const executedStopLossOrders = await processStopMarketOrders(stockId);
       if (executedStopLossOrders.length) {
