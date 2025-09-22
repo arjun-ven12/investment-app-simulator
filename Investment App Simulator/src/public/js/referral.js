@@ -164,3 +164,20 @@ function updateStatsUI(stats) {
   fetchReferralStats();
   fetchReferralHistory();
 });
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('toggleHowItWorks');
+    const card = document.querySelector('.how-it-works-card');
+
+    if (!toggle || !card) return;
+
+    // start open
+    card.classList.remove('closed');
+    toggle.addEventListener('click', () => {
+      const closed = card.classList.toggle('closed');
+      toggle.innerHTML = closed
+        ? '<i class="fas fa-chevron-down"></i> Show Tip'
+        : '<i class="fas fa-chevron-up"></i> Hide Tip';
+    });
+  });

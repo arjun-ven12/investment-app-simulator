@@ -1,55 +1,59 @@
-/* Global Styles */
-body {
+/* ========== GLOBAL ========== */
+* { box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* no horizontal scroll */
   font-family: 'Outfit', sans-serif;
   background: #0a0a0a;
   color: #fff;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
 }
 
-/* Container */
+/* ========== LAYOUT CONTAINER ========== */
+/* NOTE: avoid nested .container classes in HTML (see HTML changes below) */
 .container {
-  max-width: 1600px;
+  max-width: 1300px;
+  width: 100%;
   margin: 0 auto;
-  padding: 30px 40px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 30px;
 }
 
-/* Headings */
+/* use a separate inner wrapper if you need nested spacing */
+.inner-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+}
+
+/* HEADINGS */
 h1, h2, h3, h4 {
   color: #fff;
   margin: 0 0 10px 0;
 }
 
-/* Progress Bar */
-.progress-section {
-  width: 100%;
-  text-align: center;
-  padding-bottom: 10px;
-}
-
+/* ========== PROGRESS BAR ========== */
+.progress-section { width: 100%; text-align: center; padding-bottom: 10px; }
 .progress-bar {
   width: 100%;
   height: 25px;
-  background-color: #000000;
+  background-color: #000;
   border-radius: 20px;
   overflow: hidden;
-  margin: 10px 0;
-  /* add this 👇 */
   border: 1px solid #E0EBFF;
   margin-top: 10px;
 }
-
 .progress-fill {
   height: 100%;
   width: 0%;
   background: #E0EBFF;
   transition: width 0.8s ease-in-out;
 }
-
 #progressText {
   display: block;
   margin-top: 5px;
@@ -58,269 +62,137 @@ h1, h2, h3, h4 {
   padding-top: 10px;
 }
 
-h1, p{
-    padding-left: 50px;
-}
-
-.friend-referral-section p{
-padding-left: 0;
-}
-/* Referral Cards */
+/* ========== REFERRAL CARDS ========== */
 .referral-cards {
   display: flex;
   flex-direction: column;
   gap: 30px;
-  border: #ccc;
+  width: 100%;
 }
 
-/* Referral Code + QR on the same line */
+/* referral row can wrap on smaller screens */
 .card.referral-full {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   gap: 20px;
   background: #7f94c3;
   border-radius: 15px;
-    padding: 30px;
-    border-radius: 15px;
-  margin-bottom: 0; /* spacing handled by referral-cards gap */
-}
-
-.card.referral-full h4{
-color: rgb(255, 255, 255)
-}
-/* Referral Code Section */
-.referral-code-section {
-  flex: 1.5;
-  display: flex;
-  flex-direction: column;
-  position: relative; /* for copy icon */
-    
-}
-
-
-/* Input + Copy Icon Wrapper */
-.referral-row {
-  position: relative;
-  display: flex;
+  padding: 30px;
+  margin-bottom: 0;
   align-items: center;
-  color: white;
+  flex-wrap: wrap;           /* allow wrapping to avoid overflow */
 }
 
+/* make sections flexible but shrinkable */
+.referral-code-section { flex: 1 1 420px; min-width: 0; }
+.friend-referral-section { flex: 0 0 180px; }
+
+/* input + copy icon */
+.referral-row { position: relative; display: flex; align-items: center; color: white; width: 100%; }
 .referral-row input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0; /* critical so flex items can shrink */
   padding: 10px 36px 10px 12px;
   border-radius: 8px;
-  background: #7f94c3;  /* same as card */
-  color: #ffffff;       /* white text */
-  font-size: 0.95rem;
-  font-family: 'Outfit', sans-serif;
-  border: 1px white solid;         /* ✅ removes the black border */
-  outline: none;        /* ✅ remove browser default blue/black outline */
-}
-
-.referral-row input:focus {
-  border: 2px solid #fff;   /* White border when clicked/focused */
-  outline: none;            /* Remove default outline */
-}
-
-.referral-row .copy-icon {
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-.referral-row .copy-icon:hover {
-  transform: scale(1.2);
-}
-
-/* QR Section */
-.friend-referral-section {
-  flex: 0 0 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.qr-placeholder {
-  width: 100px;
-  height: 100px;
   background: #7f94c3;
-  border: 2px dashed #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
   color: #ffffff;
-  font-size: 0.85rem;
-  text-align: center;
+  font-size: 0.95rem;
+  border: 1px solid #fff;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* critical: prevent URL overflow */
+  white-space: nowrap;
+}
+.referral-row input:focus { border: 2px solid #fff; outline: none; }
+.referral-row .copy-icon {
+  position: absolute; right: 10px; cursor: pointer; transition: transform 0.2s;
+}
+.referral-row .copy-icon:hover { transform: scale(1.15); }
+
+/* QR */
+.qr-placeholder {
+  width: 100px; height: 100px;
+  background: #7f94c3;
+  border: 2px dashed #fff;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; color: #fff; font-size: 0.85rem;
 }
 
-/* How It Works Section */
+/* ========== HOW IT WORKS (collapsible) ========== */
+/* card always participates in layout but collapses via max-height */
 .how-it-works-card {
-  display: block;
   background: #000;
   border-radius: 15px;
-  gap: 15px;
+  padding: 18px;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(.2,.9,.2,1), padding 0.25s;
+  max-height: 520px; /* when open */
+}
+.how-it-works-card.closed { 
+  max-height: 68px; /* collapsed - still shows header + toggle */
+  padding-bottom: 12px;
 }
 
-.steps-container-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-}
+/* steps */
+.steps-container-card { display: flex; gap: 15px; align-items: center; justify-content: space-between; }
+.step-wrapper { display: flex; align-items: center; gap: 10px; width: 100%; flex-wrap: nowrap; }
+.step { display: flex; flex-direction: column; align-items: center; flex: 1 1 0; transition: transform .25s }
+.step:hover { transform: translateY(-5px) }
+.step-icon { color:#fff; font-size:1.5rem; margin-bottom:5px; animation: bounce 1.2s infinite alternate; }
+.step span { font-size: 0.75rem; text-align:center; }
+.step-line { height: 2px; background: #fff; flex: 1; min-width: 32px; }
 
-.step-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
+/* toggle */
+.how-it-works-toggle { display: inline-block; text-align: center; cursor: pointer; color: #fff; font-size: 0.85rem; margin-top: 12px; }
+.how-it-works-toggle i { margin-right: 6px; }
 
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  transition: transform 0.3s;
-}
+/* ========== STATS & TABLE ========== */
+.stats-section { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+.stat-box { flex:1 1 220px; background:#1a1a1a; padding: 20px; border-radius:15px; text-align:center; box-shadow:0 8px 25px rgba(255,255,255,0.03); }
+.stat-box h4 { font-size:2rem; margin-bottom:5px; }
+.stat-box p { color:#ccc }
 
-.step:hover {
-  transform: translateY(-5px);
-}
-
-.step-icon {
-  background: none;
-  color: #fff;
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-  animation: bounce 1.2s infinite alternate;
-}
-
-
-.step span {
-  font-size: 0.75rem;
-  text-align: center;
-}
-
-.step-line {
-  height: 2px;
-  background: #fff;
-  flex: 1;
-}
-
-/* Toggle under How It Works */
-.how-it-works-toggle {
-  display: block;
-  text-align: center;
-  margin-top: 15px;
-  cursor: pointer;
-  color: #fff;
-  font-size: 0.85rem;
-}
-
-.how-it-works-toggle i {
-  margin-right: 5px;
-}
-
-/* Stats Section */
-.stats-section {
-  display: flex;
-  gap: 20px;
-  justify-content: space-between;
-}
-
-.stat-box {
-  flex: 1;
-  background: #1a1a1a;
-  padding: 20px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(255,255,255,0.05);
-  transition: transform 0.3s;
-}
-
-.stat-box:hover {
-  transform: translateY(-5px);
-}
-
-.stat-box h4 {
-  font-size: 2rem;
-  margin-bottom: 5px;
-}
-
-.stat-box p {
-  color: #ccc;
-}
-
-
+/* table wrapper — enables horizontal scroll on mobile */
+.table-wrapper { width:100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 #referralTable {
   width: 100%;
   border-collapse: collapse;
-}
-
-#referralTable th, #referralTable td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #333;
-  text-align: left;
-}
-
-#referralTable th {
-  background: #111;
-  color: #fff;
-}
-
-
-.stats-section {
-  display: flex;
-  justify-content: center; /* centers horizontally */
-  gap: 40px; /* space between the two boxes */
-  background-color: #000;
-}
-
-/* Referral History Section */
-.history-section {
-  background: #000000; /* Black background */
-  padding: 20px;
-  border-radius: 15px;
-  margin-top: 30px;
-}
-
-.history-section h3 {
-  color: #E0EBFF; /* Accent color */
-  margin-bottom: 15px;
-}
-
-/* Table Styling */
-#referralTable {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #E0EBFF; /* Outline color */
+  border: 1px solid #E0EBFF;
   border-radius: 10px;
   overflow: hidden;
+  min-width: 600px; /* keeps table readable on wide screens */
+}
+#referralTable th, #referralTable td { padding: 12px 15px; border-bottom: 1px solid #E0EBFF; text-align:left; }
+#referralTable th { background: #000; color: #E0EBFF; font-weight:600; }
+#referralTable td { background: #000; color: #fff; }
+#referralTable tr:hover td { background: #1a1a1a; }
+
+/* ========== SMALL ELEMENT ADJUSTMENTS ========== */
+a, img, svg, input, button, textarea { max-width: 100%; height: auto; }
+
+/* ========== RESPONSIVE ========== */
+/* Medium screens / small laptops */
+@media (max-width: 1024px) {
+  .container { padding: 18px; max-width: 1000px; }
+  .card.referral-full { padding: 20px; gap: 16px; }
+  .friend-referral-section { flex-basis: 170px; }
 }
 
-#referralTable th,
-#referralTable td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #E0EBFF; /* Row separator */
-  text-align: left;
+/* Mobile phones */
+@media (max-width: 768px) {
+  .container { padding: 14px; }
+  .card.referral-full { padding: 16px; gap: 12px; }
+  .referral-code-section { flex: 1 1 100%; }
+  .friend-referral-section { flex: 1 1 100%; order: 2; display:flex; justify-content:center; }
+  .steps-container-card { flex-direction: column; align-items: center; gap: 18px; }
+  .step-line { display:none; }
+  .qr-placeholder { width: 80px; height: 80px; }
+  #referralTable { min-width: 520px; } /* table still scrolls */
+  h1 { font-size: 1.4rem; text-align: center; }
 }
 
-#referralTable th {
-  background: #000000; 
-  color: #E0EBFF; /* Accent for headings */
-  font-weight: 600;
-}
-
-#referralTable td {
-  background: #000000; /* Match section background */
-  color: #fff;
-}
-
-#referralTable tr:hover td {
-  background: #1a1a1a; /* Subtle hover effect */
+/* Extra small phones */
+@media (max-width: 420px) {
+  .progress-bar { height: 16px; }
+  .referral-row input { font-size: 0.82rem; padding: 8px 36px 8px 10px; }
+  .qr-placeholder { width: 68px; height: 68px; }
 }
