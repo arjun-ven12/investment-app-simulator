@@ -32,6 +32,7 @@ const goalsRouter = require("./routers/Goals");
 const chatbotRouter = require("./routers/chatbot"); 
 const newsRouter = require("./routers/news")
 const guideRouter = require("./routers/guide")
+const stopLossRouter = require("./routers/stopLoss");
 
 
 const app = express();
@@ -71,6 +72,8 @@ app.use('/realLimit', realLimitRouter);
 app.use('/chartInvestment', chartsInvestmentRouter);
 app.use('/settings', settingRouter);
 app.use('/api/news', newsRouter)
+app.use('/stop-market', stopLossRouter)
+
 
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
