@@ -74,6 +74,7 @@ model Stock {
   trading        Trade[]
   intradayPrice2 IntradayPrice2[]
   intradayPrice3 IntradayPrice3[]
+  StopLossOrder  StopLossOrder[]
 
   @@index([symbol])
 }
@@ -207,6 +208,7 @@ model User {
   bookmarks        Bookmark[]
   NewsComment      NewsComment[]
   NewsLike         NewsLike[]
+  StopLossOrder    StopLossOrder[]
 }
 
 model Referral {
@@ -383,4 +385,22 @@ model InvestmentGuide {
   content   Json // store the structured JSON we designed above
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StopLossOrder {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  stockId      Int
+  quantity     Int
+  triggerPrice Decimal  @db.Decimal(10, 2)
+  orderType    String   // "STOP_MARKET" or "STOP_LIMIT"
+  limitPrice   Decimal? @db.Decimal(10, 2) // only used for STOP_LIMIT
+  status       String   @default("PENDING") // PENDING, EXECUTED, CANCELLED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+
+  @@index([stockId])
 }
