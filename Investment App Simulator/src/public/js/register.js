@@ -57,3 +57,4 @@ registerForm.addEventListener("submit", async function (event) {
     setTimeout(() => warningCard.classList.remove("show"), 400);
   }
 });
+

@@ -1,53 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Paper Trading</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../css/login.css" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Left panel with branding -->
-      <div class="left-panel">
-        <div class="overlay">
-          <h1>Paper Trading</h1>
-          <p>
-            Practice trading risk-free and grow your portfolio skills in a safe
-            environment.
-          </p>
-        </div>
-      </div>
 
-      <!-- Right panel: login form -->
-      <div class="right-panel">
-        <div class="form-card">
-          <h1>Login to Your Account</h1>
-          <p class="login-link">
-            Don't have an account? <a href="register.html">Sign up</a>
-          </p>
-          <form id="loginForm">
-            <div class="form-row">
-              <input type="text" id="username" placeholder="Username" required />
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Paper Trading</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/login.css" />
+</head>
 
-            <div class="form-row">
-              <input type="password" id="password" placeholder="Password" required />
-            </div>
-
-            <button type="submit">Login</button>
-          </form>
-
-          <div id="warningCard" class="warning-card d-none">
-            <p id="warningText"></p>
-          </div>
-        </div>
+<body>
+  <div class="container">
+    <!-- Left panel with branding -->
+    <div class="left-panel">
+      <div class="overlay">
+        <h1>Paper Trading</h1>
+        <p>
+          Practice trading risk-free and grow your portfolio skills in a safe
+          environment.
+        </p>
       </div>
     </div>
-    <script src="../js/login.js"></script>
-  </body>
+
+    <!-- Right panel: login form -->
+    <div class="right-panel">
+      <div class="form-card">
+        <h1>Login to Your Account</h1>
+        <p class="login-link">
+          Don't have an account? <a href="register.html">Sign up</a>
+        </p>
+        <form id="loginForm">
+          <div class="form-row">
+            <input type="text" id="username" placeholder="Username" required />
+          </div>
+
+          <div class="form-row">
+            <input type="password" id="password" placeholder="Password" required />
+          </div>
+
+          <button type="submit">Login</button>
+        </form>
+
+        <div id="successCard" class="success-card d-none">
+          <span id="successText"></span>
+        </div>
+        <div id="warningCard" class="warning-card d-none">
+          <span id="warningText"></span>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+  <script src="../js/login.js"></script>
+</body>
+
 </html>

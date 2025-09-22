@@ -1,78 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register - Paper Trading</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../css/register.css" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Left panel with branding -->
-      <div class="left-panel">
-        <div class="overlay">
-          <h1>Paper Trading</h1>
-          <p>
-            Practice trading risk-free and grow your portfolio skills in a safe
-            environment.
-          </p>
-        </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - Paper Trading</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/register.css" />
+</head>
+
+<body>
+  <div class="container">
+    <!-- Left panel with branding -->
+    <div class="left-panel">
+      <div class="overlay">
+        <h1>Paper Trading</h1>
+        <p>
+          Practice trading risk-free and grow your portfolio skills in a safe
+          environment.
+        </p>
       </div>
+    </div>
 
-      <!-- Right panel: registration form -->
-      <div class="right-panel">
-        <div class="form-card">
-          <h1>Create Your Account</h1>
-          <p class="login-link">
-            Already have an account? <a href="login.html">Log in</a>
-          </p>
-          <form id="registerForm">
-            <div class="form-row">
-              <input
-                type="text"
-                id="username"
-                placeholder="Username"
-                required
-              />
-              <input type="email" id="email" placeholder="Email" required />
-            </div>
-
-            <div class="form-row">
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                required
-              />
-              <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirm Password"
-                required
-              />
-            </div>
-
-            <div class="form-row">
-              <input
-                type="text"
-                id="referralCode"
-                placeholder="Referral Code (Optional)"
-              />
-            </div>
-
-            <button type="submit">Sign Up</button>
-          </form>
-
-          <div id="warningCard" class="warning-card d-none">
-            <p id="warningText"></p>
+    <!-- Right panel: registration form -->
+    <div class="right-panel">
+      <div class="form-card">
+        <h1>Create Your Account</h1>
+        <p class="login-link">
+          Already have an account? <a href="login.html">Log in</a>
+        </p>
+        <form id="registerForm">
+          <div class="form-row">
+            <input type="text" id="username" placeholder="Username" required />
+            <input type="email" id="email" placeholder="Email" required />
           </div>
+
+          <div class="form-row">
+            <input type="password" id="password" placeholder="Password" required />
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+          </div>
+
+          <div class="form-row">
+            <input type="text" id="referralCode" placeholder="Referral Code (Optional)" />
+          </div>
+
+          <button type="submit">Sign Up</button>
+        </form>
+        <div id="successCard" class="success-card d-none">
+          <span id="successText"></span>
+        </div>
+        <div id="warningCard" class="warning-card d-none">
+          <p id="warningText"></p>
         </div>
       </div>
     </div>
-    <script src="../js/register.js"></script>
-  </body>
+  </div>
+  <script src="../js/register.js"></script>
+</body>
+
 </html>

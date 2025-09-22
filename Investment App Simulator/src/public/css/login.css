@@ -334,3 +334,57 @@ html, body {
   color: #ffffff; /* keeps text visible */
   z-index: 1; /* ensures text is above the gradient */
 }
+
+
+/* Warning Card */
+.warning-card {
+  display: none;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.1); /* subtle red tint */
+  color: #ffffff;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+/* When visible */
+.warning-card:not(.d-none) {
+  display: block;
+}
+
+/* Shake animation (already defined, reusing) */
+.warning-card.show {
+  animation: shake 0.4s;
+}
+
+/* Success Card */
+.success-card {
+  display: none;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  background-color: rgba(46, 204, 113, 0.1); /* soft green tint */
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+/* When visible */
+.success-card:not(.d-none) {
+  display: block;
+}
+
+/* Entrance effect */
+.success-card.show {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
