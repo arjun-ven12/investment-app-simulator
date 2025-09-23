@@ -23,6 +23,13 @@ function broadcastReferralUpdate(userId, stats) {
   ioInstance.to(room).emit('referralUpdate', stats);
 }
 
+function broadcastReferralHistoryUpdate(userId, history) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `user_${userId}`;
+  console.log(`Broadcasting referral history update to room: ${room}`, history.length, 'entries');
+  ioInstance.to(room).emit('referralHistoryUpdate', history);
+}
+
 function broadcastPortfolioUpdate(userId) {
   if (!ioInstance) return console.warn('Socket not initialized');
   console.log('Broadcasting portfolio update for user:', userId);
@@ -64,7 +71,8 @@ module.exports = {
   broadcastPortfolioUpdate,
   broadcastTradeHistoryUpdate,
   broadcastLimitTradeHistoryUpdate,
-  broadcastfavoriteStock
+  broadcastfavoriteStock,
+  broadcastReferralHistoryUpdate
 };
 
 

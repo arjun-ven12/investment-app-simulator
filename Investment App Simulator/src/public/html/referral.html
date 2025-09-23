@@ -15,103 +15,103 @@
   <div id="navbar-container"></div>
 
   <main class="container">
- <h1>Referral Riches Await, Join the<br> Winning Circle and Amplify <br>Your Gains!</h1>
- <p>Earn up to 300 dollars as reward for successful referrals.</p>
+    <h1>Referral Riches Await, Join the<br> Winning Circle and Amplify <br>Your Gains!</h1>
+    <p>Earn up to 5000 dollars as reward for successful referrals.</p>
 
-  
-  <div class="inner-container">
-<section class="progress-section">
-  <h2>Your Reward Progress</h2>
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-  <span id="progressText">0 / 300</span>
 
-  <!-- Next reward display for JS -->
-  <div class="next-reward">
-    Next Reward: <span id="nextReward">$0</span>
-  </div>
-</section>
-
-<div class="referral-cards">
-
-  <!-- Referral code + QR code: same row -->
-  <div class="card referral-full">
-    <div class="referral-code-section">
-      <h4>Referral Link</h4>
-      <div class="referral-row">
-        <input type="text" id="referralCode" value="https://www.fintech.com/referral/ABC123" readonly>
-        <i class="fas fa-copy copy-icon" id="copyReferral"></i>
-      </div>
-    </div>
-
-    <div class="friend-referral-section">
-      <h4>QR Code</h4>
-      <div class="qr-placeholder">
-      </div>
-    </div>
-  </div>
-
-  <!-- How It Works card: separate block below -->
-  <div class="how-it-works-card">
-    <h4>How It Works</h4>
-    <div class="steps-container-card">
-      <div class="step-wrapper">
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-paper-plane"></i></div>
-          <span>Share your referral code, link or QR Code with friends.</span>
+    <div class="inner-container">
+      <section class="progress-section">
+        <h2>Your Reward Progress</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
         </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-user-plus"></i></div>
-          <span>Your friends sign up successfully with your referral code.</span>
+        <span id="progressText">0 / 300</span>
+
+        <!-- Next reward display for JS -->
+        <div class="next-reward">
+          Next Reward: <span id="nextReward">$0</span>
         </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-money-bill-wave"></i></div>
-          <span>You will receive 100 dollars with an increment of 50 dollars, capped at 300 dollars</span>
+      </section>
+
+      <div class="referral-cards">
+
+        <!-- Referral code + QR code: same row -->
+        <div class="card referral-full">
+          <div class="referral-code-section">
+            <h4>Referral Link</h4>
+            <div class="referral-row">
+              <input type="text" id="referralCode"readonly>
+              <i class="fas fa-copy copy-icon" id="copyReferral"></i>
+            </div>
+          </div>
+
+          <div class="friend-referral-section">
+            <h4>QR Code</h4>
+            <div class="qr-placeholder">
+            </div>
+          </div>
         </div>
+
+        <!-- How It Works card: separate block below -->
+        <div class="how-it-works-card">
+          <h4>How It Works</h4>
+          <div class="steps-container-card">
+            <div class="step-wrapper">
+              <div class="step">
+                <div class="step-icon"><i class="fas fa-paper-plane"></i></div>
+                <span>Share your referral code, link or QR Code with friends.</span>
+              </div>
+              <div class="step-line"></div>
+              <div class="step">
+                <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+                <span>Your friends sign up successfully with your referral code.</span>
+              </div>
+              <div class="step-line"></div>
+              <div class="step">
+                <div class="step-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <span>You will receive 100 dollars with an increment of 50 dollars, capped at 300 dollars</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toggle now on its own line -->
+          <div class="how-it-works-toggle" id="toggleHowItWorks">
+            <i class="fas fa-chevron-up"></i> Hide Tip
+          </div>
+        </div>
+
       </div>
+
+
+
     </div>
 
-    <!-- Toggle now on its own line -->
-    <div class="how-it-works-toggle" id="toggleHowItWorks">
-      <i class="fas fa-chevron-up"></i> Hide Tip
-    </div>
-  </div>
-
-</div>
-
-
-
-</div>
-
-</section>
+    </section>
 
 
     <!-- Referral History Table -->
     <section class="history-section">
       <h3>Referral Usage History</h3>
-       <div class="table-wrapper">
-      <table id="referralTable">
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>User ID</th>
-            <th>Timestamp</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows populated by JS -->
-        </tbody>
-        </div>
-      </table>
+      <div class="table-wrapper">
+<table id="referralTable">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Used By</th>
+      <th>Owner</th>
+      <th>Timestamp</th>
+
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+
     </section>
 
- 
 
-  </div>
+
+    </div>
   </main>
 
 

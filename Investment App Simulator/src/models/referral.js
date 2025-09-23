@@ -1,23 +1,23 @@
 const prisma = require('./prismaClient');
-const { broadcastReferralUpdate } = require('../socketBroadcast'); // ✅ add this
+const { broadcastReferralUpdate, broadcastReferralHistoryUpdate } = require('../socketBroadcast'); // ✅ add this
 //////////////////////////////////////////////////////
 // HELPER FUNCTIONS
 //////////////////////////////////////////////////////
 
 // Calculate current earned credits based on successful referrals
 function calculateCredits(successfulReferrals) {
-  const base = 100;      // first referral
-  const increment = 50;  // each additional
-  const max = 300;
-  if (successfulReferrals === 0) return 0; // 0 if no referrals yet
+  const base = 1000;      // first referral
+  const increment = 500;  // each additional
+  const max = 5000;       // set max cap, adjust as needed
+  if (successfulReferrals === 0) return 0;
   return Math.min(base + (successfulReferrals - 1) * increment, max);
 }
 
 // Calculate next tier credits (what user will get for next referral)
 function calculateNextTierCredits(successfulReferrals) {
-  const base = 100;
-  const increment = 50;
-  const max = 300;
+  const base = 1000;
+  const increment = 500;
+  const max = 5000;
   return Math.min(base + successfulReferrals * increment, max);
 }
 
@@ -110,6 +110,9 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
     successfulReferrals: updatedReferral.successfulReferrals,
     creditsEarned: updatedReferral.creditsEarned,
   });
+const updatedHistory = await module.exports.getReferralHistory(referral.userId);
+broadcastReferralHistoryUpdate(referral.userId, updatedHistory);
+
   return { ownerId: referral.userId, updatedReferral };
 };
 
@@ -119,28 +122,45 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
 // GET REFERRAL HISTORY
 //////////////////////////////////////////////////////
 module.exports.getReferralHistory = async function (userId) {
- const history = await prisma.referralUsage.findMany({
-  where: {
-    OR: [
-      { userId },               // the user who used a referral
-      { referral: { userId } }  // referrals created by this user
-    ]
-  },
-  include: {
-    referral: true,  // includes the referral info (owner etc.)
-  },
-  orderBy: {
-    createdAt: "desc"  // the field in your schema is `createdAt`, not `usedAt`
-  }
-});
+  const history = await prisma.referralUsage.findMany({
+    where: { 
+      OR: [
+        { userId },               // usage by this user
+        { referral: { userId } }  // usage of this user's referral
+      ]
+    },
+    include: {
+      user: { select: { username: true } }, // who used the referral
+      referral: {
+        include: {
+          user: { select: { username: true } } // owner of referral
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
 
-return history.map(item => ({
-  id: item.id,
-  usedByUserId: item.userId,
-  referralOwnerId: item.referral?.userId,
-  status: item.status,
-  usedAt: item.createdAt,
-  referralLink: item.referral?.referralLink,
-}));
+  return history.map(item => {
+    const usedByName = item.user?.username ?? 'Unknown';
+    const ownerName = item.referral?.user?.username ?? 'Unknown';
 
+    let actionText = '';
+    if (item.userId === userId) {
+      actionText = `You used ${ownerName}'s referral`;
+    } else if (item.referral?.userId === userId) {
+      actionText = `${usedByName} used your referral`;
+    } else {
+      actionText = `${usedByName} used ${ownerName}'s referral`;
+    }
+
+    return {
+      id: item.id,
+      action: actionText,
+      usedBy: usedByName,
+      referralOwner: ownerName,
+      usedAt: item.createdAt,
+      referralLink: item.referral?.referralLink ?? 'N/A'
+    };
+  });
 };
+

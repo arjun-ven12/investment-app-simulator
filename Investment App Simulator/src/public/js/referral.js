@@ -2,7 +2,7 @@ let socket = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const userId = localStorage.getItem('userId');
-  
+
   if (!userId) return alert("User not logged in.");
 
   // -------- Socket Setup --------
@@ -20,8 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Referral stats updated via socket:', stats);
       updateStatsUI(stats);
       updateProgressBar(stats.creditsEarned);
-      updateReferralLinkUI(stats.referralLink);
     });
+
+    socket.on('referralHistoryUpdate', (history) => {
+  console.log('Referral history updated via socket:', history);
+  updateReferralHistoryTable(history);
+});
 
     socket.on('disconnect', () => {
       console.log('Socket disconnected. Reconnecting...');
@@ -29,19 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------- Update Stats UI --------
-function updateStatsUI(stats) {
-  const signupCount = document.getElementById('signupCount');
-  const creditsEarned = document.getElementById('creditsEarned');
+  function updateStatsUI(stats) {
+    const signupCount = document.getElementById('signupCount');
+    const creditsEarned = document.getElementById('creditsEarned');
 
-  if (signupCount) signupCount.innerText = stats.referralSignups ?? 0;
-  if (creditsEarned) creditsEarned.innerText = `$${stats.creditsEarned ?? 0}`;
-}
-  // -------- Update Referral Link UI --------
-  function updateReferralLinkUI(link) {
-    const referralInput = document.getElementById('referralCode');
-    if (referralInput) referralInput.value = link;
+    if (signupCount) signupCount.innerText = stats.referralSignups ?? 0;
+    if (creditsEarned) creditsEarned.innerText = `$${stats.creditsEarned ?? 0}`;
   }
 
+  function updateReferralLinkUI(link) {
+  console.log('Updating referral input with link:', link); // <-- debug
+  const referralInput = document.getElementById('referralCode');
+  if (referralInput) referralInput.value = link;
+}
   // -------- Copy Referral Code --------
   const referralCodeInput = document.getElementById('referralCode');
   const copyBtn = document.getElementById('copyReferral');
@@ -94,7 +98,7 @@ function updateStatsUI(stats) {
   }
 
   // -------- Progress Bar --------
-  const rewardTiers = [100, 150, 200, 250, 300];
+  const rewardTiers = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000];
 
   function getNextTier(credits) {
     for (let tier of rewardTiers) if (credits < tier) return tier;
@@ -108,37 +112,42 @@ function updateStatsUI(stats) {
 
     if (!progressFill || !progressText || !nextRewardElem) return;
 
-    const maxCap = 300;
+    const maxCap = 5000; // update max cap here
     const progressPercent = Math.min((creditsEarned / maxCap) * 100, 100);
     progressFill.style.width = `${progressPercent}%`;
     progressText.innerText = `${creditsEarned} / ${maxCap}`;
     nextRewardElem.innerText = `$${getNextTier(creditsEarned)}`;
   }
 
+  function updateReferralHistoryTable(history) {
+  const tbody = document.querySelector('#referralTable tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = ''; // clear old rows
+
+  history.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.action}</td>
+      <td>${item.usedBy}</td>
+      <td>${item.referralOwner}</td>
+      <td>${new Date(item.usedAt).toLocaleString()}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
   // -------- Referral History --------
-  async function fetchReferralHistory() {
-    try {
-      const res = await fetch(`/referral/${userId}/history`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to fetch referral history');
-
-      const tbody = document.querySelector('#referralTable tbody');
-      tbody.innerHTML = '';
-
-      data.history.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.referralOwnerId === parseInt(userId, 10) ? 'Sent' : 'Used'}</td>
-          <td>${item.usedByUserId || item.referralOwnerId}</td>
-          <td>${new Date(item.usedAt).toLocaleString()}</td>
-          <td class="status">${item.status}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    } catch (err) {
-      console.error(err);
-    }
+async function fetchReferralHistory() {
+  try {
+    const res = await fetch(`/referral/${userId}/history`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to fetch referral history');
+    updateReferralHistoryTable(data.history);
+  } catch (err) {
+    console.error(err);
   }
+}
+
 
   // -------- How It Works Toggle --------
   const toggleTip = document.getElementById('toggleHowItWorks');
@@ -166,18 +175,18 @@ function updateStatsUI(stats) {
 });
 
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.getElementById('toggleHowItWorks');
-    const card = document.querySelector('.how-it-works-card');
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('toggleHowItWorks');
+  const card = document.querySelector('.how-it-works-card');
 
-    if (!toggle || !card) return;
+  if (!toggle || !card) return;
 
-    // start open
-    card.classList.remove('closed');
-    toggle.addEventListener('click', () => {
-      const closed = card.classList.toggle('closed');
-      toggle.innerHTML = closed
-        ? '<i class="fas fa-chevron-down"></i> Show Tip'
-        : '<i class="fas fa-chevron-up"></i> Hide Tip';
-    });
+  // start open
+  card.classList.remove('closed');
+  toggle.addEventListener('click', () => {
+    const closed = card.classList.toggle('closed');
+    toggle.innerHTML = closed
+      ? '<i class="fas fa-chevron-down"></i> Show Tip'
+      : '<i class="fas fa-chevron-up"></i> Hide Tip';
   });
+});
