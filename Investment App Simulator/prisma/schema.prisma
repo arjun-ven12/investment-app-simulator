@@ -111,6 +111,7 @@ model LimitOrder {
   quantity   Int
   limitPrice Decimal  @db.Decimal(10, 2)
   orderType  String
+  timeframe String @default("gtc")
   status     String   @default("PENDING")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -231,13 +232,14 @@ model Referral {
 }
 
 model ReferralUsage {
-  id         Int       @id @default(autoincrement())
-  userId     Int?
-  referralId Int?
-  status     String    @default("PENDING")
-  createdAt  DateTime  @default(now())
-  referral   Referral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
-  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int       @id @default(autoincrement())
+  userId        Int?
+  referralId    Int?
+  status        String    @default("PENDING")
+  creditsEarned Int       @default(0)   // <-- ADD THIS
+  createdAt     DateTime  @default(now())
+  referral      Referral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, referralId])
 }
