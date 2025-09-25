@@ -1,6 +1,5 @@
 
 
-console.log("✅ Unified order JS loaded");
 
 document.addEventListener('DOMContentLoaded', () => {
   // ===== Elements =====
@@ -279,14 +278,62 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     }
   }
+function renderStopMarketTable(orders) {
+    stopMarketTableBody.innerHTML = "";
+    orders.forEach(order => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(order.createdAt).toLocaleString()}</td>
+        <td>${order.stock?.symbol || "--"}</td>
+        <td>${order.tradeType}</td>
+        <td>${order.quantity}</td>
+        <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
+        <td>${order.status || "Pending"}</td>
+      `;
+      stopMarketTableBody.appendChild(tr);
+    });
+  }
 
+    function renderStopLimitTable(orders) {
+    stopLimitTableBody.innerHTML = "";
+    orders.forEach(order => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(order.createdAt).toLocaleString()}</td>
+        <td>${order.stock?.symbol || "--"}</td>
+        <td>${order.tradeType}</td>
+        <td>${order.quantity}</td>
+        <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
+        <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
+        <td>${order.status || "Pending"}</td>
+      `;
+      stopLimitTableBody.appendChild(tr);
+    });
+  }
+  
+if (typeof io !== 'undefined') {
+  socket = io();
+
+  socket.on('connect', () => {
+    console.log('Socket connected:', socket.id);
+    socket.emit('join', { userId }, (ack) => console.log('Join ack:', ack));
+  });
+
+  // Listen for full table updates
+  socket.on('stopMarketUpdate', renderStopMarketTable);
+  socket.on('stopLimitUpdate', renderStopLimitTable);
+
+  socket.on('disconnect', () => {
+    console.log('Socket disconnected. Reconnecting...');
+  });
+}
   // Initial fetch
   fetchStopMarketOrders();
   fetchStopLimitOrders();
-
-  // Optional: Refresh every 30 seconds
-  setInterval(() => {
-    fetchStopMarketOrders();
-    fetchStopLimitOrders();
-  }, 30000);
+ 
+    renderStopLimitTable([]);
+  renderStopMarketTable([]);
 });
+
+
+

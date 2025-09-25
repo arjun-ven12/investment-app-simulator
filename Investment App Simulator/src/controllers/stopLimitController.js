@@ -1,4 +1,5 @@
 const stopLimitModel = require('../models/stopLimit');
+const socketBroadcast = require('../socketBroadcast');
 
 exports.createStopLimitOrderController = async (req, res) => {
   const { stockId, quantity, triggerPrice, limitPrice, tradeType } = req.body;
@@ -9,10 +10,16 @@ exports.createStopLimitOrderController = async (req, res) => {
   }
 
   try {
-    const order = await stopLimitModel.createStopLimitOrder(userId, stockId, quantity, triggerPrice, limitPrice, tradeType);
-    const io = req.app.get('io');
-    io.to(`user_${userId}`).emit('broadcastStopLimitOrder', order);
-    res.status(201).json({ message: "Stop-limit order created", order });
+    // Create the new order
+    await stopLimitModel.createStopLimitOrder(userId, stockId, quantity, triggerPrice, limitPrice, tradeType);
+
+    // Get the full table after creation
+    const updatedTable = await stopLimitModel.getUserStopLimitOrders(userId);
+
+    // Broadcast the full table via sockets
+    socketBroadcast.broadcastStopLimitUpdate(userId, updatedTable);
+
+    res.status(201).json({ message: "Stop-limit order created", orders: updatedTable });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error creating stop-limit order", error: err.message });
@@ -31,5 +38,3 @@ exports.getUserStopLimitOrdersController = async (req, res) => {
     res.status(500).json({ message: "Error fetching stop-limit orders", error: err.message });
   }
 };
-
-

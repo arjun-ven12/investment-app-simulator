@@ -63,6 +63,19 @@ function broadcastfavoriteStock(userId) {
   ioInstance.to(`user_${userId}`).emit('broadcastfavoriteStock');
 }
 
+function broadcastStopMarketUpdate(userId, updatedTable) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `user_${userId}`;
+  console.log(`Broadcasting updated stop-market table to room: ${room}, ${updatedTable.length} orders`);
+  ioInstance.to(room).emit('stopMarketUpdate', updatedTable);
+}
+
+function broadcastStopLimitUpdate(userId, updatedTable) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `user_${userId}`;
+  console.log(`Broadcasting updated stop-limit table to room: ${room}, ${updatedTable.length} orders`);
+  ioInstance.to(room).emit('stopLimitUpdate', updatedTable);
+}
 
 module.exports = {
   setSocketIO,
@@ -72,7 +85,9 @@ module.exports = {
   broadcastTradeHistoryUpdate,
   broadcastLimitTradeHistoryUpdate,
   broadcastfavoriteStock,
-  broadcastReferralHistoryUpdate
+  broadcastReferralHistoryUpdate,
+  broadcastStopLimitUpdate,
+  broadcastStopMarketUpdate
 };
 
 

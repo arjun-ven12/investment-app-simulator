@@ -1,40 +1,47 @@
 const stopMarketModel = require('../models/stopMarket');
+const { broadcastStopMarketUpdate } = require('../socketBroadcast');
+
 
 // Create stop-market order
 exports.createStopMarketOrderController = async (req, res) => {
     const { stockId, quantity, triggerPrice, orderType } = req.body;
-    const userId = req.user.id; // from JWT token
+    const userId = req.user.id;
 
     if (!stockId || !quantity || !triggerPrice || !orderType) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     try {
-        const stopOrder = await stopMarketModel.createStopMarketOrder(
+        // 1️⃣ Create the new stop-market order
+        await stopMarketModel.createStopMarketOrder(
             userId, stockId, quantity, triggerPrice, orderType
         );
 
-        // Immediately attempt to execute orders for this stock
-        const executedOrders = await stopMarketModel.processStopMarketOrders(stockId);
+        // 2️⃣ Process any pending stop-market orders for this stock
+        await stopMarketModel.processStopMarketOrders(stockId);
+
+        // 3️⃣ Fetch the full updated stop-market table for this user
+        const updatedOrders = await stopMarketModel.getUserStopMarketOrders(userId);
+
+        // 4️⃣ Broadcast the updated table to the frontend
+        broadcastStopMarketUpdate(userId, updatedOrders);
 
         return res.status(201).json({
-            message: "Stop-market order created",
-            stopOrder,
-            executed: executedOrders.length > 0
+            message: "Stop-market order created and table updated",
+            orders: updatedOrders
         });
+
     } catch (err) {
-    console.error(err);
+        console.error(err);
 
-    // If it's a validation/user error, send 400
-    if (err.message.includes("Buy stop-market trigger") || 
-        err.message.includes("Sell stop-market trigger") ||
-        err.message.includes("Insufficient")) {
-        return res.status(400).json({ message: err.message });
+        if (err.message.includes("Buy stop-market trigger") ||
+            err.message.includes("Sell stop-market trigger") ||
+            err.message.includes("Insufficient")) {
+            return res.status(400).json({ message: err.message });
+        }
+
+        return res.status(500).json({ message: "Internal server error", error: err.message });
     }
-
-    // Otherwise, server error
-    return res.status(500).json({ message: "Internal server error", error: err.message });
-}
 };
 
 // Get user's stop-market orders
