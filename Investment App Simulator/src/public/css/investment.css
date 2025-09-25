@@ -466,7 +466,7 @@ canvas {
 /* Sidebar (Watchlist) */
 .sidebar {
   position: fixed;
-  top: 0;
+  top: 50px; /* same height as your market-status-banner */
   left: 0;
   width: 260px;
   height: 100vh;
@@ -521,7 +521,6 @@ canvas {
 #watchlist li:hover {
   background-color: #2a2a38;
   transform: translateY(-2px);
-  outline;
 }
 
 #watchlist li span {
@@ -862,4 +861,101 @@ height:100%
 
 .company-card-content a:hover {
   text-decoration: underline;
+}
+
+
+.form-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.pretty-radio {
+  position: relative;
+  padding-left: 25px; /* space for circle */
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.pretty-radio input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #000000; /* light background instead of white */
+  box-sizing: border-box;
+}
+
+.radio-label::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background: #ffffff; /* fill color */
+  border-radius: 100%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pretty-radio input:checked + .radio-label::after {
+  opacity: 1;
+}
+.hidden {
+  display: none;
+}
+
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
+
+.form-group.radio-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  opacity: 1;
+  height: auto;
+}
+
+
+.form-group-radio {
+  display: flex;
+  gap: 50px;
+  align-items: center; /* aligns Buy & Sell to the same vertical line */
+  padding: 10px 0;
+}
+
+.pretty-radio input {
+  vertical-align: middle; /* ensures the radio button lines up with the label text */
+}
+
+.pretty-radio .radio-label {
+  vertical-align: middle;
+  display: inline-block; /* makes sure the span respects alignment */
+  font-size: 13px;
 }

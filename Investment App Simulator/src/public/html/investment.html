@@ -4,140 +4,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investment Dashboard</title>
-
-  <!-- Fonts & Icons -->
+  <title>Investment Dashboard</title> <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-  <!-- Main CSS (your file) -->
-  <link rel="stylesheet" href="../css/investment.css" />
-
-  <!-- Sidebar & layout helper styles (keeps your IDs intact) -->
-
-  <!-- Socket.IO + Chart libraries (same as your previous) -->
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/investment.css" /> <!-- Socket.IO + Chart libraries -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
-  <!-- Your app JS (deferred) -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script> <!-- App JS -->
   <script src="../js/charts.js" defer></script>
+  <!-- <script src="../js/limitorder.js" defer></script> -->
+  <script src="../js/stopMarketOrder.js" defer></script>
+  <script src="../js/stopLimitOrder.js" defer></script>
   <script src="../js/home.js" defer></script>
   <script src="../js/navbar.js" defer></script>
 </head>
 
-<body>
-  <!-- FIXED LEFT SIDEBAR (keeps original IDs intact) -->
+<body> <input type="hidden" id="current-stock-id" value=""> <!-- Sidebar -->
   <div class="sidebar">
-    <br><br><br><br><br><br>
+
     <h1>WatchList</h1>
-    <!-- Search (still uses #stock-search and #search-button) -->
-    <div class="search-container">
-      <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
+    <div class="search-container"> <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
       <button id="search-button">Search</button>
-    </div>
-<br>
-    <!-- Favorited Stocks (ID preserved) -->
+    </div> <br>
     <h4>Favorited Stocks</h4>
     <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
     <div id="favorites-error-message" class="error-message"></div>
-
-    <!-- Search results container(s) (IDs preserved) -->
     <div id="error-message" class="error-message" style="margin-top:8px;"></div>
-
-    <!-- optional container for results if your JS uses #stocks-container -->
     <div id="stocks-container" style="margin-top:8px;"></div>
-
-    <!-- keep #stock-list for search results (so existing JS that injects li into #stock-list still works) -->
     <h3>Search Results</h3>
     <ul id="stock-list"></ul>
-  </div>
-
-  <!-- MAIN APP (pushed to the right) -->
-  <div class="main-content">
-    <div id="navbar-container"></div>
-
-    <div class="content">
-      <br />
+  </div> <!-- Main Content -->
+  <div class="main-content"> <!-- Navbar -->
+    <div id="navbar-container"></div> <!-- Dashboard Header -->
+    <div class="content"> <br />
       <h1>Stock Dashboard</h1>
-    </div>
-
-    <!-- Chart + Trading Form Two-Column Layout -->
+    </div> <!-- Chart + Trading Form -->
     <div class="container">
       <div class="chart-container">
-        <form id="chart-form-intraday" class="chart-form">
-          <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required>
-          <label for="range">Select Range:</label>
-          <select name="range" id="range">
+        <form id="chart-form-intraday" class="chart-form"> <input type="text" name="chartSymbol"
+            placeholder="Enter symbol (e.g. AAPL)" required> <label for="range">Select Range:</label> <select
+            name="range" id="range">
             <option value="1d">Last 1 Day</option>
             <option value="1w" selected>Last 1 Week</option>
             <option value="1m">Last 1 Month</option>
             <option value="6m">Last 6 Months</option>
             <option value="1y">Last 1 Year</option>
           </select>
-
-            <!-- ADD THIS FOR CHART TYPE -->
-            <div class="select-wrapper">
-              <select name="chartType" id="chartType">
-                <option value="line">Line (Close Price)</option>
-                <option value="candlestick">Candlestick</option>
-              </select>
-            </div>
-
-  <!-- <button type="submit">Show Chart</button> -->
-          <button type="submit">Generate Chart</button>
+          <div class="select-wrapper"> <select name="chartType" id="chartType">
+              <option value="line">Line (Close Price)</option>
+              <option value="candlestick">Candlestick</option>
+            </select> </div> <button type="submit">Generate Chart</button>
         </form>
-        <div class="chart-wrapper">
-          <canvas id="myChart2"></canvas>
-        </div>
+        <div class="chart-wrapper"> <canvas id="myChart2"></canvas> </div>
       </div>
-
-      <div class="trading-card">       
-
+      <div class="trading-card">
         <form id="trading-form">
           <h2>Trade Stock</h2>
-          <p>For limit orders, adjust the price in the box to your preferred limit.</p>
+          <div class="form-group-radio"> <label class="pretty-radio"> <input type="radio" name="side" value="buy" checked>
+              <span class="radio-label">Buy</span> </label> <label class="pretty-radio"> <input type="radio" name="side"
+                value="sell"> <span class="radio-label">Sell</span> </label> </div>
+                
+          <div class="form-group"> <label for="order-type">Order Type</label> <select id="order-type" name="order-type">
+              <option value="" disabled selected>Please select</option>
+              <option value="market">Market Order</option>
+              <option value="stop-market">Stop Market Order</option>
+              <option value="stop-limit">Stop Limit Order</option>
+            </select> </div>
+          <div class="form-group hidden" id="timeframe-container"> <label for="timeframe">Time Frame</label> <select
+              id="timeframe" name="timeframe">
+              <option value="gtc">Good Till Cancelled (GTC)</option>
+              <option value="day">Day Order</option>
+            </select> </div>
 
-          <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" id="price" name="price" placeholder="Enter a price">
+          <div class="form-group"> <label for="price">Stock Price</label> <input type="number" id="price" name="price"
+              placeholder="Enter price" step="0.01"> </div>
+
+          <div class="form-group"> <label for="quantity">Quantity</label> <input type="number" id="quantity"
+              name="quantity" placeholder="Enter quantity"> </div>
+
+          <div class="form-group hidden" id="stop-limit-container">
+            <label for="stop-limit-price">Stop Limit Price</label>
+            <input type="number" id="stop-limit-price" placeholder="Enter stop limit price" step="0.01">
           </div>
 
-          <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" id="quantity" name="quantity" placeholder="Enter quantity">
+
+          <div class="form-group hidden" id="stop-limit-trigger-container">
+            <label for="stop-limit-trigger">Trigger Price</label>
+            <input type="number" id="stop-limit-trigger" name="stop-limit-trigger" placeholder="Enter trigger price"
+              step="0.01">
           </div>
-
-          <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="text" id="amount" name="amount" placeholder="--" readonly>
+          <div class="form-group hidden" id="stop-market-container"> <label for="trigger-price">Trigger Price</label>
+            <input type="number" id="trigger-price" name="trigger-price" placeholder="Enter trigger price" step="0.01">
           </div>
-
-          <div id="buy-error" class="error-message"></div>
-
-          <button type="button" id="submit-buy" class="submit-button">Buy</button>
-          <button type="button" id="submit-sell" class="submit-button">Sell</button>
-          <button type="button" id="limit-submit-buy" class="submit-button">Limit Order Buy</button>
-          <button type="button" id="limit-submit-sell" class="submit-button">Limit Order Sell</button>
+          <div class="form-group"> <label for="amount">Amount</label> <input type="text" id="amount" name="amount"
+              placeholder="--" readonly> </div>
+          <div id="buy-error" class="error-message"></div> <button type="submit" class="submit-button"
+            id="submit-order">Submit Order</button>
         </form>
-        <br> <br>
-   <div class="company-card"></div>    </div> 
-    </div>
-
-    <!-- Market Status Banner -->
-    <div id="market-status-banner">
-      <span id="market-status">Loading market status...</span>
-    </div>
-
-
+      </div>
+      <div class="company-card"></div>
+    </div> <!-- Market Status Banner -->
+    <div id="market-status-banner"> <span id="market-status">Loading market status...</span> </div>
     <!-- Trade History + Limit Orders -->
     <div class="history-container">
       <div class="history-column">
         <h1>Your Trade History</h1>
-        <div id="trades-error" class="error-message"></div>
-        <button id="export-trades" class="submit-button">Export Trade History</button>
+        <div id="trades-error" class="error-message"></div> <button id="export-trades" class="submit-button">Export
+          Trade History</button>
         <table id="trades-table">
           <thead>
             <tr>
@@ -152,11 +128,10 @@
           <tbody id="trades-table-body"></tbody>
         </table>
       </div>
-
       <div class="history-column">
         <h1>Your Limit Order History</h1>
-        <div id="limit-orders-error" class="error-message"></div>
-        <button id="export-limit-orders" class="submit-button">Export Limit Order History</button>
+        <div id="limit-orders-error" class="error-message"></div> <button id="export-limit-orders"
+          class="submit-button">Export Limit Order History</button>
         <table id="limit-orders-table">
           <thead>
             <tr>
@@ -172,70 +147,68 @@
           <tbody id="limit-orders-table-body"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Investment Recommendations -->
-
-    <!-- <div class="chart-container">
-      <div class="content fullscreen-chart">
-        <h1>Investment Recommendations</h1>
-        <div id="recommendation-error" class="error-message"></div>
-        <canvas id="recommendationChart"></canvas>
+    </div> <!-- Stop Orders -->
+    <div class="history-container">
+      <div class="history-column">
+        <h1>Your Stop-Market Orders</h1>
+        <div id="stop-market-error" class="error-message"></div>
+        <table id="stop-market-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Stock Symbol</th>
+              <th>Trade Type</th>
+              <th>Quantity</th>
+              <th>Trigger Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="stop-market-table-body"></tbody>
+        </table>
       </div>
-    </div>
-      <div class="content chart-container">
-      <div class="trading-card2"></div>
-    </div>
-   -->
-
-   <div class="portfolio-container">
-    <div class="chart-container">
-      <div class="content fullscreen-chart">
-        <h1>Investment Recommendations</h1>
-        <div id="recommendation-error" class="error-message"></div>
-        <canvas id="recommendationChart"></canvas>
+      <div class="history-column">
+        <h1>Your Stop-Limit Orders</h1>
+        <div id="stop-limit-error" class="error-message"></div>
+        <table id="stop-limit-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Stock Symbol</th>
+              <th>Trade Type</th>
+              <th>Quantity</th>
+              <th>Trigger Price</th>
+              <th>Limit Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="stop-limit-table-body"></tbody>
+        </table>
       </div>
-    </div>
-  
-    <div class="chart-container">
-      <div class="content trading-card2"></div>
-    </div>
-  </div>
-  
-
-    <!-- Stock Comments -->
+    </div> <!-- Portfolio / Investment Recommendations -->
+    <div class="portfolio-container">
+      <div class="chart-container">
+        <div class="content fullscreen-chart">
+          <h1>Investment Recommendations</h1>
+          <div id="recommendation-error" class="error-message"></div> <canvas id="recommendationChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="content trading-card2"></div>
+      </div>
+    </div> <!-- Stock Comments -->
     <div class="content chart-container">
       <h1>Search Stock Comments</h1>
       <div id="comments-error" class="error-message"></div>
-
-      <div class="stock-symbol-search">
-        <label for="stock-symbol">Stock Symbol:</label>
-        <input type="text" id="stock-symbol" placeholder="Enter stock symbol (e.g., AAPL)">
-        <button id="load-comments-button">Load Comments</button>
-      </div>
-
-      <div class="new-comment">
-        <textarea id="comment-content" rows="4" placeholder="Write your comment here..."></textarea>
-        <button id="submit-comment-button2">Submit Comment</button>
-      </div>
-
+      <div class="stock-symbol-search"> <label for="stock-symbol">Stock Symbol:</label> <input type="text"
+          id="stock-symbol" placeholder="Enter stock symbol (e.g., AAPL)"> <button id="load-comments-button">Load
+          Comments</button> </div>
+      <div class="new-comment"> <textarea id="comment-content" rows="4"
+          placeholder="Write your comment here..."></textarea> <button id="submit-comment-button2">Submit
+          Comment</button> </div>
       <ul id="comments-list"></ul>
     </div>
-  </div>
-
-  <!-- Logout Script -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const logoutButton = document.getElementById("logoutButton");
-      if (logoutButton) {
-        logoutButton.addEventListener("click", () => {
-          localStorage.removeItem("token");
-          alert("You have been logged out.");
-          window.location.href = "./login.html";
-        });
-      }
-    });
-  </script>
+  </div> <!-- END main-content --> <!-- Logout Script -->
+  <script> document.addEventListener("DOMContentLoaded", () => { const logoutButton = document.getElementById("logoutButton"); if (logoutButton) { logoutButton.addEventListener("click", () => { localStorage.removeItem("token"); alert("You have been logged out."); window.location.href = "./login.html"; }); } }); </script>
 </body>
 
 </html>

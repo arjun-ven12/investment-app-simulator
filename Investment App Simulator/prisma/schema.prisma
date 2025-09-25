@@ -397,7 +397,7 @@ model StopMarketOrder {
   stockId      Int
   quantity     Int
   triggerPrice Decimal  @db.Decimal(10, 2)
-  orderType    String // "STOP_MARKET" or "STOP_LIMIT"
+  tradeType    String   // <-- ADD THIS: "BUY" or "SELL"
   limitPrice   Decimal? @db.Decimal(10, 2) // only used for STOP_LIMIT
   status       String   @default("PENDING") // PENDING, EXECUTED, CANCELLED
   createdAt    DateTime @default(now())

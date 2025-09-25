@@ -1,11 +1,10 @@
 const prisma = require('../../prisma/prismaClient');
 
 // Create a stop-market order (BUY or SELL)
-module.exports.createStopMarketOrder = async (userId, stockId, quantity, triggerPrice, orderType) => {
+module.exports.createStopMarketOrder = async (userId, stockId, quantity, triggerPrice, tradeType) => {
     const latestPrice = await module.exports.getLatestPrice(stockId);
 
-    if (orderType === "BUY") {
-        // Buy stop-market trigger must be higher than current market price
+    if (tradeType === "BUY") {
         if (triggerPrice <= latestPrice) {
             throw new Error(`Buy stop-market trigger (${triggerPrice}) must be higher than current market price (${latestPrice})`);
         }
@@ -17,8 +16,7 @@ module.exports.createStopMarketOrder = async (userId, stockId, quantity, trigger
             throw new Error("Insufficient funds to place this buy stop-market order");
         }
 
-    } else if (orderType === "SELL") {
-        // Sell stop-market trigger must be lower than current market price
+    } else if (tradeType === "SELL") {
         if (triggerPrice >= latestPrice) {
             throw new Error(`Sell stop-market trigger (${triggerPrice}) must be lower than current market price (${latestPrice})`);
         }
@@ -26,8 +24,8 @@ module.exports.createStopMarketOrder = async (userId, stockId, quantity, trigger
         const trades = await prisma.trade.findMany({ where: { userId, stockId } });
         const totalOwned = trades.reduce((sum, t) => sum + t.quantity, 0);
 
-        const pendingOrders = await prisma.StopMarketOrder.findMany({
-            where: { userId, stockId, status: "PENDING", orderType: "SELL" }
+        const pendingOrders = await prisma.stopMarketOrder.findMany({
+            where: { userId, stockId, status: "PENDING", tradeType: "SELL" }
         });
         const totalPending = pendingOrders.reduce((sum, o) => sum + o.quantity, 0);
 
@@ -36,14 +34,13 @@ module.exports.createStopMarketOrder = async (userId, stockId, quantity, trigger
         }
     }
 
-    // Create the order
-    return prisma.StopMarketOrder.create({
+    return prisma.stopMarketOrder.create({
         data: {
             userId,
             stockId,
             quantity,
             triggerPrice,
-            orderType,
+            tradeType,   // ✅ FIXED
             status: "PENDING"
         }
     });
@@ -51,12 +48,25 @@ module.exports.createStopMarketOrder = async (userId, stockId, quantity, trigger
 
 // Get user's stop-market orders
 module.exports.getUserStopMarketOrders = async (userId) => {
-    return prisma.StopMarketOrder.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' }
-    });
+  return prisma.stopMarketOrder.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      tradeType: true,       // currently STOP_MARKET or STOP_LIMIT
+      quantity: true,
+      triggerPrice: true,
+      limitPrice: true,
+      status: true,
+      createdAt: true,
+      stock: {
+        select: {
+          symbol: true,      // return stock symbol instead of stockId
+        },
+      },
+    },
+  });
 };
-
 // Process stop-market orders
 module.exports.processStopMarketOrders = async (stockId) => {
     const pendingOrders = await prisma.StopMarketOrder.findMany({
@@ -68,7 +78,7 @@ module.exports.processStopMarketOrders = async (stockId) => {
     for (const order of pendingOrders) {
         const latestPrice = await module.exports.getLatestPrice(order.stockId);
 
-        if (order.orderType === "BUY" && latestPrice >= parseFloat(order.triggerPrice)) {
+        if (order.tradeType === "BUY" && latestPrice >= parseFloat(order.triggerPrice)) {
             await prisma.trade.create({
                 data: {
                     userId: order.userId,
@@ -89,7 +99,7 @@ module.exports.processStopMarketOrders = async (stockId) => {
             });
             executedOrders.push(order.id);
             console.log(`Executed BUY stop-market order ${order.id} at ${latestPrice}`);
-        } else if (order.orderType === "SELL" && latestPrice <= parseFloat(order.triggerPrice)) {
+        } else if (order.tradeType === "SELL" && latestPrice <= parseFloat(order.triggerPrice)) {
             await prisma.trade.create({
                 data: {
                     userId: order.userId,

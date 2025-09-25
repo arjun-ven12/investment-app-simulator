@@ -23,9 +23,18 @@ exports.createStopMarketOrderController = async (req, res) => {
             executed: executedOrders.length > 0
         });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Error creating stop-market order", error: err.message });
+    console.error(err);
+
+    // If it's a validation/user error, send 400
+    if (err.message.includes("Buy stop-market trigger") || 
+        err.message.includes("Sell stop-market trigger") ||
+        err.message.includes("Insufficient")) {
+        return res.status(400).json({ message: err.message });
     }
+
+    // Otherwise, server error
+    return res.status(500).json({ message: "Internal server error", error: err.message });
+}
 };
 
 // Get user's stop-market orders
