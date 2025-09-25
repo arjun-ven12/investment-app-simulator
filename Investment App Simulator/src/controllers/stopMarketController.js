@@ -57,3 +57,28 @@ exports.getUserStopOrdersController = async (req, res) => {
         return res.status(500).json({ message: "Error fetching stop-market orders", error: err.message });
     }
 };
+// Process all pending stop-market orders (for cron)
+exports.processStopMarketOrdersController = async (req, res) => {
+    try {
+        // Optional: accept stockId to process one stock, or leave empty for all
+        const { stockId } = req.body;
+
+        // If stockId is provided, process only that stock; otherwise process all pending orders
+        const executedOrders = stockId
+            ? await stopMarketModel.processStopMarketOrders(stockId)
+            : await stopMarketModel.processAllPendingOrders();
+
+        // Broadcast updated tables to all affected users
+        if (executedOrders.length) {
+            for (const userId of executedOrders.map(o => o.userId)) {
+                const orders = await stopMarketModel.getUserStopMarketOrders(userId);
+                broadcastStopMarketUpdate(userId, orders);
+            }
+        }
+
+        res.status(200).json({ message: "Stop-market orders processed", executedOrders });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error processing stop-market orders", error: err.message });
+    }
+};

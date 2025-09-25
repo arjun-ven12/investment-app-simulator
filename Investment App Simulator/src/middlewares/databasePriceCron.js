@@ -84,6 +84,18 @@ async function updateIntradayForSymbols(symbols) {
                     if (executedOrders.length) {
                         console.log(`Executed ${executedOrders.length} limit orders for stock ${item.symbol}`);
                     }
+
+                    // Trigger stop-limit orders for the same stock
+                    const executedStopLimitOrders = await processStopLimitOrders(stock.stock_id);
+                    if (executedStopLimitOrders.length) {
+                        console.log(`Executed ${executedStopLimitOrders.length} stop-limit orders for stock ${item.symbol}`);
+                    }
+
+                    // --- Process stop-market orders ---
+                    const executedStopMarketOrders = await processStopMarketOrders(stock.stock_id);
+                    if (executedStopMarketOrders.length) {
+                        console.log(`Executed ${executedStopMarketOrders.length} stop-market orders for stock ${item.symbol}`);
+                    }
                 } catch (err) {
                     console.error(`Failed to upsert/process for ${item.symbol} at ${item.date}:`, err);
                 }

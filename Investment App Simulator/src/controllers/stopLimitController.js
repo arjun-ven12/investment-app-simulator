@@ -38,3 +38,15 @@ exports.getUserStopLimitOrdersController = async (req, res) => {
     res.status(500).json({ message: "Error fetching stop-limit orders", error: err.message });
   }
 };
+
+
+exports.processStopLimitOrdersController = async (req, res) => {
+  try {
+    const { stockId } = req.body; // optional, process only this stock if provided
+    await stopLimitModel.processStopLimitOrders(stockId);
+    res.status(200).json({ message: 'Stop-limit orders processed successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error processing stop-limit orders', error: err.message });
+  }
+};

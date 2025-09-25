@@ -122,6 +122,34 @@ module.exports.processStopMarketOrders = async (stockId) => {
     return executedOrders;
 };
 
+// Process all pending stop-market orders across all stocks
+module.exports.processAllPendingOrders = async () => {
+    const pendingOrders = await prisma.StopMarketOrder.findMany({ where: { status: 'PENDING' } });
+    const executedOrders = [];
+
+    for (const order of pendingOrders) {
+        const latestPrice = await module.exports.getLatestPrice(order.stockId);
+
+        if ((order.tradeType === "BUY" && latestPrice >= order.triggerPrice) ||
+            (order.tradeType === "SELL" && latestPrice <= order.triggerPrice)) {
+
+            if (order.tradeType === "BUY") {
+                await prisma.user.update({ where: { id: order.userId }, data: { wallet: { decrement: latestPrice * order.quantity } } });
+            }
+
+            await prisma.trade.create({
+                data: { userId: order.userId, stockId: order.stockId, quantity: order.quantity, tradeType: order.tradeType, price: latestPrice, totalAmount: latestPrice * order.quantity }
+            });
+
+            await prisma.StopMarketOrder.update({ where: { id: order.id }, data: { status: 'EXECUTED', updatedAt: new Date() } });
+            executedOrders.push(order);
+            console.log(`Executed ${order.tradeType} stop-market order ${order.id} at ${latestPrice}`);
+        }
+    }
+
+    return executedOrders;
+};
+
 // Get latest stock price
 module.exports.getLatestPrice = async (stockId) => {
     const price = await prisma.intradayPrice3.findFirst({

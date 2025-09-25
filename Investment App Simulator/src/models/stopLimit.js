@@ -1,4 +1,5 @@
 const prisma = require('../../prisma/prismaClient');
+const socketBroadcast = require('../socketBroadcast');
 
 module.exports.createStopLimitOrder = async (userId, stockId, quantity, triggerPrice, limitPrice, tradeType) => {
   // Fetch latest market price
@@ -79,8 +80,14 @@ module.exports.getUserStopLimitOrders = async (userId) => {
 };
 
 
-module.exports.processStopLimitOrders = async () => {
-  const pendingOrders = await prisma.StopLimitOrder.findMany({ where: { status: "PENDING" } });
+
+
+module.exports.processStopLimitOrders = async (stockId = null) => {
+  // Fetch pending orders, optionally filtered by stockId
+  const whereClause = { status: "PENDING" };
+  if (stockId) whereClause.stockId = stockId;
+
+  const pendingOrders = await prisma.StopLimitOrder.findMany({ where: whereClause });
 
   for (const order of pendingOrders) {
     const latestPriceData = await prisma.intradayPrice3.findFirst({
@@ -110,7 +117,6 @@ module.exports.processStopLimitOrders = async () => {
       }
     } else if (order.tradeType === "BUY") {
       if (price >= order.triggerPrice && price <= order.limitPrice) {
-        // Deduct wallet
         await prisma.user.update({
           where: { id: order.userId },
           data: { wallet: { decrement: price * order.quantity } }
@@ -133,4 +139,31 @@ module.exports.processStopLimitOrders = async () => {
       }
     }
   }
+
+ // broadcast updates via socket
+    if (executedOrders.length) {
+        const users = [...new Set(executedOrders.map(o => o.userId))];
+        for (const userId of users) {
+            const updatedOrders = await module.exports.getUserStopLimitOrders(userId);
+            socketBroadcast.broadcastStopLimitUpdate(userId, updatedOrders);
+        }
+    }
+    return executedOrders;
+};
+
+module.exports.getUserStopLimitOrders = async (userId) => {
+  return prisma.stopLimitOrder.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      tradeType: true,
+      quantity: true,
+      triggerPrice: true,
+      limitPrice: true,
+      status: true,
+      createdAt: true,
+      stock: { select: { symbol: true } }
+    }
+  });
 };

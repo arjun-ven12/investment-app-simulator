@@ -8,5 +8,5 @@ router.post('/create', jwtMiddleware.verifyToken, stopMarketController.createSto
 
 // Get all stop-market orders for a user
 router.get('/user/:userId', jwtMiddleware.verifyToken, stopMarketController.getUserStopOrdersController);
-
+router.post('/process', jwtMiddleware.verifyToken, stopMarketController.processStopMarketOrdersController);
 module.exports = router;
