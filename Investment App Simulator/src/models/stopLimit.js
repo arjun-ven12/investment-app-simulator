@@ -167,3 +167,47 @@ module.exports.getUserStopLimitOrders = async (userId) => {
     }
   });
 };
+
+
+// Cancel a stop-limit order (soft cancel)
+module.exports.cancelStopLimitOrder = async (userId, orderId) => {
+  const order = await prisma.stopLimitOrder.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!order) throw new Error("Stop-limit order not found");
+
+  if (order.userId !== userId) {
+    throw new Error("You are not authorized to cancel this order");
+  }
+
+  if (order.status !== "PENDING") {
+    throw new Error("Only pending orders can be cancelled");
+  }
+
+  await prisma.stopLimitOrder.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED", updatedAt: new Date() },
+  });
+
+  return module.exports.getUserStopLimitOrders(userId);
+};
+
+// Delete a stop-limit order (hard delete)
+module.exports.deleteStopLimitOrder = async (userId, orderId) => {
+  const order = await prisma.stopLimitOrder.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!order) throw new Error("Stop-limit order not found");
+
+  if (order.userId !== userId) {
+    throw new Error("You are not authorized to delete this order");
+  }
+
+  await prisma.stopLimitOrder.delete({
+    where: { id: orderId },
+  });
+
+  return module.exports.getUserStopLimitOrders(userId);
+};

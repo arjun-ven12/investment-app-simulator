@@ -50,3 +50,40 @@ exports.processStopLimitOrdersController = async (req, res) => {
     res.status(500).json({ message: 'Error processing stop-limit orders', error: err.message });
   }
 };
+
+
+// Cancel stop-limit order
+exports.cancelStopLimitOrderController = async (req, res) => {
+  const { orderId } = req.body;
+  const userId = req.user.id;
+
+  if (!orderId) return res.status(400).json({ message: "Order ID is required" });
+
+  try {
+    const updatedOrders = await stopLimitModel.cancelStopLimitOrder(userId, parseInt(orderId));
+    socketBroadcast.broadcastStopLimitUpdate(userId, updatedOrders);
+
+    res.status(200).json({ message: "Stop-limit order cancelled", orders: updatedOrders });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Delete stop-limit order
+exports.deleteStopLimitOrderController = async (req, res) => {
+  const { orderId } = req.params;
+  const userId = req.user.id;
+
+  if (!orderId) return res.status(400).json({ message: "Order ID is required" });
+
+  try {
+    const updatedOrders = await stopLimitModel.deleteStopLimitOrder(userId, parseInt(orderId));
+    socketBroadcast.broadcastStopLimitUpdate(userId, updatedOrders);
+
+    res.status(200).json({ message: "Stop-limit order deleted", orders: updatedOrders });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: err.message });
+  }
+};
