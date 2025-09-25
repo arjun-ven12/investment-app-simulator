@@ -1,6 +1,3 @@
-
-
-
 document.addEventListener('DOMContentLoaded', () => {
   // ===== Elements =====
   const tradingForm = document.getElementById('trading-form');
@@ -214,102 +211,106 @@ document.addEventListener("DOMContentLoaded", () => {
   const stopMarketError = document.getElementById("stop-market-error");
   const stopLimitError = document.getElementById("stop-limit-error");
 
-  // Fetch Stop-Market Orders
-  async function fetchStopMarketOrders() {
-    try {
-      const res = await fetch(`/stop-market/user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+  function renderStopMarketTable(orders) {
+  stopMarketTableBody.innerHTML = "";
+  orders.forEach(order => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(order.createdAt).toLocaleString()}</td>
+      <td>${order.stock?.symbol || "--"}</td>
+      <td>${order.tradeType}</td>
+      <td>${order.quantity}</td>
+      <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
+      <td>${order.status || "Pending"}</td>
+      <td>
+        ${order.status?.toLowerCase() === "pending" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>` : ""}
+      </td>
+    `;
+    stopMarketTableBody.appendChild(tr);
+  });
 
-      if (!res.ok) throw new Error(data.message || "Error fetching stop-market orders");
+  attachCancelListeners(); // call helper to add event listeners
+}
 
-      // Clear table first
-      stopMarketTableBody.innerHTML = "";
+function renderStopLimitTable(orders) {
+  stopLimitTableBody.innerHTML = "";
+  orders.forEach(order => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(order.createdAt).toLocaleString()}</td>
+      <td>${order.stock?.symbol || "--"}</td>
+      <td>${order.tradeType}</td>
+      <td>${order.quantity}</td>
+      <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
+      <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
+      <td>${order.status || "Pending"}</td>
+      <td>
+        ${order.status?.toLowerCase() === "pending" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-limit">Cancel</button>` : ""}
+      </td>
+    `;
+    stopLimitTableBody.appendChild(tr);
+  });
 
-      data.orders.forEach((order) => {
-        const triggerPrice = parseFloat(order.triggerPrice) || 0;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-  <td>${new Date(order.createdAt).toLocaleString()}</td>
-  <td>${order.stock?.symbol || "--"}</td>
-  <td>${order.tradeType}</td>
-  <td>${order.quantity}</td>
-  <td>${triggerPrice.toFixed(2)}</td>
-  <td>${order.status || "Pending"}</td>
-  `;
-        stopMarketTableBody.appendChild(tr);
-      });
-    } catch (err) {
-      stopMarketError.textContent = err.message;
-      console.error(err);
-    }
-  }
+  attachCancelListeners();
+}
 
-  // Fetch Stop-Limit Orders
-  async function fetchStopLimitOrders() {
-    try {
-      const res = await fetch(`/stop-limit/user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Error fetching stop-limit orders");
-
-      // Clear table first
-      stopLimitTableBody.innerHTML = "";
-      data.orders.forEach((order) => {
-        const triggerPrice = parseFloat(order.triggerPrice) || 0;
-        const limitPrice = parseFloat(order.limitPrice) || 0;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-  <td>${new Date(order.createdAt).toLocaleString()}</td>
-  <td>${order.stock?.symbol || "--"}</td>
-  <td>${order.tradeType}</td>
-  <td>${order.quantity}</td>
-  <td>${triggerPrice.toFixed(2)}</td>
-  <td>${limitPrice.toFixed(2)}</td>
-  <td>${order.status || "Pending"}</td>
-  `;
-        stopLimitTableBody.appendChild(tr);
-      });
-    } catch (err) {
-      stopLimitError.textContent = err.message;
-      console.error(err);
-    }
-  }
-function renderStopMarketTable(orders) {
-    stopMarketTableBody.innerHTML = "";
-    orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${new Date(order.createdAt).toLocaleString()}</td>
-        <td>${order.stock?.symbol || "--"}</td>
-        <td>${order.tradeType}</td>
-        <td>${order.quantity}</td>
-        <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
-        <td>${order.status || "Pending"}</td>
-      `;
-      stopMarketTableBody.appendChild(tr);
+// Helper to attach cancel button listeners
+function attachCancelListeners() {
+  document.querySelectorAll(".cancel-btn").forEach(btn => {
+    btn.removeEventListener("click", cancelHandler); // remove old listener if any
+    btn.addEventListener("click", cancelHandler);
+  });
+}
+async function fetchStopLimitOrders() {
+  try {
+    const res = await fetch(`/stop-limit/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-  }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error fetching stop-limit orders");
 
-    function renderStopLimitTable(orders) {
-    stopLimitTableBody.innerHTML = "";
-    orders.forEach(order => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${new Date(order.createdAt).toLocaleString()}</td>
-        <td>${order.stock?.symbol || "--"}</td>
-        <td>${order.tradeType}</td>
-        <td>${order.quantity}</td>
-        <td>${parseFloat(order.triggerPrice).toFixed(2)}</td>
-        <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
-        <td>${order.status || "Pending"}</td>
-      `;
-      stopLimitTableBody.appendChild(tr);
-    });
+    renderStopLimitTable(data.orders); // pass fetched data here
+  } catch (err) {
+    stopLimitError.textContent = err.message;
+    console.error(err);
   }
+}
+
+async function fetchStopMarketOrders() {
+  try {
+    const res = await fetch(`/stop-market/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error fetching stop-market orders");
+
+    renderStopMarketTable(data.orders); // pass fetched data here
+  } catch (err) {
+    stopMarketError.textContent = err.message;
+    console.error(err);
+  }
+}
+
+async function cancelHandler(e) {
+  const btn = e.currentTarget;
+  const orderId = btn.dataset.id;
+  const type = btn.dataset.type;
+  try {
+    const res = await fetch(`/${type}/cancel/${orderId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to cancel order");
+    alert("Order cancelled successfully");
+    if (type === "stop-market") fetchStopMarketOrders();
+    else fetchStopLimitOrders();
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+}
+
   
 if (typeof io !== 'undefined') {
   socket = io();

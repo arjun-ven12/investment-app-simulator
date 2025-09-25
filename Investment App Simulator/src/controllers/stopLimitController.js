@@ -54,7 +54,7 @@ exports.processStopLimitOrdersController = async (req, res) => {
 
 // Cancel stop-limit order
 exports.cancelStopLimitOrderController = async (req, res) => {
-  const { orderId } = req.body;
+  const { orderId } = req.params;
   const userId = req.user.id;
 
   if (!orderId) return res.status(400).json({ message: "Order ID is required" });

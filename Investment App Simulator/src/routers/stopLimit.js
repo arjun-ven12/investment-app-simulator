@@ -8,7 +8,7 @@ router.get('/user/:userId', jwtMiddleware.verifyToken, stopLimitController.getUs
 
 router.post('/process', jwtMiddleware.verifyToken, stopLimitController.processStopLimitOrdersController);
 
-router.post('/cancel', jwtMiddleware.verifyToken, stopLimitController.cancelStopLimitOrderController);
+router.post('/cancel/:orderId', jwtMiddleware.verifyToken, stopLimitController.cancelStopLimitOrderController);
 router.delete('/:orderId', jwtMiddleware.verifyToken, stopLimitController.deleteStopLimitOrderController);
 
 module.exports = router;

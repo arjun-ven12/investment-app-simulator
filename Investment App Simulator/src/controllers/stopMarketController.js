@@ -85,7 +85,7 @@ exports.processStopMarketOrdersController = async (req, res) => {
 
 // Cancel stop-market order controller
 exports.cancelStopMarketOrderController = async (req, res) => {
-    const { orderId } = req.body;
+    const orderId = parseInt(req.params.orderId, 10);
     const userId = req.user.id;
 
     if (!orderId) return res.status(400).json({ message: "Order ID is required" });
@@ -110,7 +110,7 @@ exports.cancelStopMarketOrderController = async (req, res) => {
 
 // Delete stop-market order controller
 exports.deleteStopMarketOrderController = async (req, res) => {
-    const { orderId } = req.params;
+    const orderId = req.params.id;
     const userId = req.user.id;
 
     if (!orderId) return res.status(400).json({ message: "Order ID is required" });
