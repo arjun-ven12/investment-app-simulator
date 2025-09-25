@@ -80,35 +80,32 @@ document.addEventListener('DOMContentLoaded', () => {
     timeframeContainer?.classList.add("hidden");
     stopLimitDisclaimer.style.display = 'none';
     stopMarketDisclaimer.style.display = 'none';
-      const priceInput = document.getElementById("price"); // your normal limit/market price input
-  if (priceInput) priceInput.readOnly = true;
+    const priceInput = document.getElementById("price"); // your normal limit/market price input
+    if (priceInput) priceInput.readOnly = true;
 
     switch (selected) {
       case "market":
-        timeframeContainer?.classList.remove("hidden");
+        // timeframe hidden for market
         quantityInput.required = true;
         break;
 
       case "limit":
-        timeframeContainer?.classList.remove("hidden");
-        stopLimitContainer?.classList.remove("hidden");
+        timeframeContainer?.classList.remove("hidden"); // show timeframe only for limit
         quantityInput.required = true;
-        priceInput.readOnly = false;
-        if (priceInput) priceInput.readOnly = false; // allow editing only here
+        if (priceInput) priceInput.readOnly = false; // editable price
+        // ensure stop-limit price is hidden
+        stopLimitContainer?.classList.add("hidden");
+        stopLimitDisclaimer.style.display = 'none';
         break;
 
       case "stop-market":
         stopMarketContainer.classList.remove("hidden");
-        stopLimitContainer.classList.add("hidden");
-        stopLimitDisclaimer.style.display = "none";
         stopMarketDisclaimer.style.display = "block";
-         document.getElementById("stop-limit-trigger-container")?.classList.add("hidden"); // hide stop-limit trigger
         break;
 
       case "stop-limit":
-        stopMarketContainer?.classList.add("hidden"); // hide stop-market
         stopLimitContainer?.classList.remove("hidden");
-        document.getElementById("stop-limit-trigger-container")?.classList.remove("hidden"); // show stop-limit trigger
+        document.getElementById("stop-limit-trigger-container")?.classList.remove("hidden");
         quantityInput.required = true;
         stopLimitDisclaimer.style.display = 'block';
         break;
