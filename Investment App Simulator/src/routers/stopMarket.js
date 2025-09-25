@@ -9,4 +9,10 @@ router.post('/create', jwtMiddleware.verifyToken, stopMarketController.createSto
 // Get all stop-market orders for a user
 router.get('/user/:userId', jwtMiddleware.verifyToken, stopMarketController.getUserStopOrdersController);
 router.post('/process', jwtMiddleware.verifyToken, stopMarketController.processStopMarketOrdersController);
+// Cancel a stop-market order
+router.post('/cancel', jwtMiddleware.verifyToken, stopMarketController.cancelStopMarketOrderController);
+// Delete a stop-market order
+router.delete('/:orderId', jwtMiddleware.verifyToken, stopMarketController.deleteStopMarketOrderController);
+
+
 module.exports = router;

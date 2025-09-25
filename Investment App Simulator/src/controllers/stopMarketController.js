@@ -82,3 +82,53 @@ exports.processStopMarketOrdersController = async (req, res) => {
         res.status(500).json({ message: "Error processing stop-market orders", error: err.message });
     }
 };
+
+// Cancel stop-market order controller
+exports.cancelStopMarketOrderController = async (req, res) => {
+    const { orderId } = req.body;
+    const userId = req.user.id;
+
+    if (!orderId) return res.status(400).json({ message: "Order ID is required" });
+
+    try {
+        const updatedOrders = await stopMarketModel.cancelStopMarketOrder(userId, orderId);
+
+        // Broadcast updated orders to frontend
+        broadcastStopMarketUpdate(userId, updatedOrders);
+
+        res.status(200).json({ message: "Stop-market order cancelled", orders: updatedOrders });
+    } catch (err) {
+        console.error(err);
+
+        if (err.message.includes("not found") || err.message.includes("authorized") || err.message.includes("pending")) {
+            return res.status(400).json({ message: err.message });
+        }
+
+        res.status(500).json({ message: "Internal server error", error: err.message });
+    }
+};
+
+// Delete stop-market order controller
+exports.deleteStopMarketOrderController = async (req, res) => {
+    const { orderId } = req.params;
+    const userId = req.user.id;
+
+    if (!orderId) return res.status(400).json({ message: "Order ID is required" });
+
+    try {
+        const updatedOrders = await stopMarketModel.deleteStopMarketOrder(userId, parseInt(orderId));
+
+        // Broadcast updated orders to frontend
+        broadcastStopMarketUpdate(userId, updatedOrders);
+
+        res.status(200).json({ message: "Stop-market order deleted", orders: updatedOrders });
+    } catch (err) {
+        console.error(err);
+
+        if (err.message.includes("not found") || err.message.includes("authorized")) {
+            return res.status(400).json({ message: err.message });
+        }
+
+        res.status(500).json({ message: "Internal server error", error: err.message });
+    }
+};

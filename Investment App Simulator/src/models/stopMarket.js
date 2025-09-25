@@ -159,3 +159,61 @@ module.exports.getLatestPrice = async (stockId) => {
     if (!price) throw new Error('No intraday price data for this stock');
     return parseFloat(price.closePrice);
 };
+
+
+// Cancel a stop-market order
+module.exports.cancelStopMarketOrder = async (userId, orderId) => {
+    // Find the order
+    const order = await prisma.StopMarketOrder.findUnique({
+        where: { id: orderId },
+    });
+
+    if (!order) {
+        throw new Error("Stop-market order not found");
+    }
+
+    // Ensure only the owner can cancel
+    if (order.userId !== userId) {
+        throw new Error("You are not authorized to cancel this order");
+    }
+
+    // Only PENDING orders can be cancelled
+    if (order.status !== "PENDING") {
+        throw new Error("Only pending orders can be cancelled");
+    }
+
+    // Update status to CANCELLED
+    await prisma.StopMarketOrder.update({
+        where: { id: orderId },
+        data: { status: "CANCELLED", updatedAt: new Date() },
+    });
+
+    // Optionally return updated orders for broadcasting
+    return module.exports.getUserStopMarketOrders(userId);
+};
+
+
+// Delete a stop-market order (hard delete from DB)
+module.exports.deleteStopMarketOrder = async (userId, orderId) => {
+    // Find order
+    const order = await prisma.stopMarketOrder.findUnique({
+        where: { id: orderId },
+    });
+
+    if (!order) {
+        throw new Error("Stop-market order not found");
+    }
+
+    // Ensure only the owner can delete
+    if (order.userId !== userId) {
+        throw new Error("You are not authorized to delete this order");
+    }
+
+    // Hard delete from DB
+    await prisma.stopMarketOrder.delete({
+        where: { id: orderId },
+    });
+
+    // Return updated orders for broadcasting
+    return module.exports.getUserStopMarketOrders(userId);
+};
