@@ -1,5 +1,7 @@
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const homeModel = require('../models/Home');
 
 
 //////////////////////////////////////////////////////
@@ -97,4 +99,24 @@ module.exports.authenticateUser = async (username, password) => {
         console.error("Error during authentication:", error.message);
         throw error;
     }
+};
+
+
+
+////////////////////////////////////
+//// LEADERBOARD
+////////////////////////////////////
+
+exports.getLeaderboardController = function (req, res) {
+  const limit = parseInt(req.query.limit) || 10;
+
+  homeModel
+    .getLeaderboard(limit)
+    .then((data) => {
+      return res.status(200).json({ message: "Leaderboard fetched successfully", leaderboard: data });
+    })
+    .catch((error) => {
+      console.error("Error fetching leaderboard:", error);
+      return res.status(500).json({ message: "Error fetching leaderboard", error });
+    });
 };

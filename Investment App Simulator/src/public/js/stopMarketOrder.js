@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
   // ===== Elements =====
   const tradingForm = document.getElementById('trading-form');
@@ -90,13 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
         quantityInput.required = true;
         if (priceInput) priceInput.readOnly = false; // editable price
         // ensure stop-limit price is hidden
-        stopLimitContainer?.classList.add("hidden");
+        stopLimitContainer.style.display = 'none';
         stopLimitDisclaimer.style.display = 'none';
         break;
 
       case "stop-market":
         stopMarketContainer.classList.remove("hidden");
         stopMarketDisclaimer.style.display = "block";
+        document.getElementById('stop-limit-trigger-container').style.display ='none';
+
         break;
 
       case "stop-limit":
@@ -104,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("stop-limit-trigger-container")?.classList.remove("hidden");
         quantityInput.required = true;
         stopLimitDisclaimer.style.display = 'block';
+
         break;
     }
   });

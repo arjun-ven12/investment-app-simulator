@@ -41,25 +41,29 @@ model TaskAssignment {
   @@id([taskId, personId], name: "assignmentId")
 }
 
+
 model Company {
-  id          Int       @id @default(autoincrement())
-  symbol      String    @unique
-  name        String
-  founded     Int
-  employees   Int
-  address     String
-  city        String
-  country     String
-  zipCode     String
-  phone       String
-  website     String
-  description String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  stocks      Stock[]
+  id                   Int       @id @default(autoincrement())
+  symbol               String    @unique
+  name                 String
+  country              String?
+  currency             String?
+  exchange             String?
+  founded              Int?
+  phone                String?
+  website              String?
+  industry             String?
+  marketCapitalization Float?
+  shareOutstanding     Float?
+  logo                 String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime? @updatedAt
+
+  stocks               Stock[]
 
   @@index([symbol])
 }
+
 
 model Stock {
   stock_id       Int              @id @default(autoincrement())

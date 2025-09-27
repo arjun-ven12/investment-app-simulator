@@ -1,100 +1,111 @@
 
 
-// import { Chart, registerables } from 'chart.js';
-// import zoomPlugin from 'chartjs-plugin-zoom';
+window.currentStockId = null;
 
-// Chart.register(...registerables, zoomPlugin);
+////////////////////////////////////////////////////
+//////// HTML Frontend Fields
+///////////////////////////////////////////////////
 
+function renderPaginationControls() {
+  const totalPages = Math.ceil(allTrades.length / pageSize);
+  const paginationContainer = document.getElementById('trade-pagination');
+  paginationContainer.innerHTML = '';
 
-window.addEventListener('DOMContentLoaded', function () {
-  const symbolInput = document.querySelector("input[name='symbol']");
-  const timeFrameSelect = document.querySelector("select[name='timeFrame']"); 
-  const form = document.querySelector("form");
+  if (currentPage > 1) {
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Previous';
+    prevBtn.addEventListener('click', () => {
+      currentPage--;
+      renderTradeTablePage(currentPage);
+      renderPaginationControls();
+    });
+    paginationContainer.appendChild(prevBtn);
+  }
 
-  form.addEventListener('submit', function (event) {
-      event.preventDefault();
+  if (currentPage < totalPages) {
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next →';
+    nextBtn.addEventListener('click', () => {
+      currentPage++;
+      renderTradeTablePage(currentPage);
+      renderPaginationControls();
+    });
+    paginationContainer.appendChild(nextBtn);
+  }
 
-      const symbol = symbolInput.value.trim();
-      const timeFrame = timeFrameSelect.value; // Get weekly or monthly
-
-      if (!symbol) {
-          alert('Please enter a stock symbol.');
-          return;
-      }
-
-      fetch(`/chartInvestment/${symbol}?timeFrame=${timeFrame}`)
-          .then(function (response) {
-              if (response.ok) {
-                  return response.json();
-              } 
-              else {
-                  return response.json().then(function (data) {
-                      throw new Error(`Error fetching chart data: ${data.error}`);
-                  });
-             }
-          })
-
-          .then(function (chartData) {
-              const ctx = document.getElementById('myChart');
-              new Chart(ctx, {
-                  type: 'line',
-                  data: chartData,
-                  options: {
-                      plugins: {
-                          zoom: {
-                              pan: {
-                                  enabled: true,
-                                  mode: 'x',
-                              },
-                              zoom: {
-                                  wheel: {
-                                      enabled: true,
-                                      speed: 0.1,
-                                  },
-                                  pinch: {
-                                      enabled: true,
-                                  },
-                                  mode: 'xy',
-                                  drag: {
-                                      enabled: true,
-                                  },
-                              },
-                          },
-                      },
-                      responsive: true,
-                      scales: {
-                          x: {
-                              title: { display: true, text: 'Date' },
-                          },
-                          y: {
-                              title: { display: true, text: 'Close Price' },
-                          },
-                      },
-                  },
-              });
-              alert(`Chart created for ${symbol} (${timeFrame})!`);
-          })
-          .catch(function (error) {
-              console.error('Error creating chart:', error);
-            //  alert(`Failed to create chart: ${error.message}`);
-          });
-  });
-});
+  // Optional: show page numbers
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = ` Page ${currentPage} of ${totalPages} `;
+  paginationContainer.appendChild(pageIndicator);
+}
 
 
 
+// document.addEventListener("DOMContentLoaded", () => {
+//   const orderType = document.getElementById("order-type");
+//   const stopLossContainer = document.getElementById("stop-loss-container");
+//   const stopLimitContainer = document.getElementById("stop-limit-container");
+
+//   const stopLossCheck = document.getElementById("stop-loss-check");
+//   const stopLossInput = document.getElementById("stop-loss-input");
+
+//   const stopLimitCheck = document.getElementById("stop-limit-check");
+//   const stopLimitInput = document.getElementById("stop-limit-input");
+
+//   // Function to reset checkboxes & inputsyes 
+//   function resetStopInputs() {
+//     stopLossCheck.checked = false;
+//     stopLossInput.classList.add("hidden");
+//     stopLimitCheck.checked = false;
+//     stopLimitInput.classList.add("hidden");
+//   }
+
+//   // Show/Hide stop loss vs stop limit depending on order type
+//   orderType.addEventListener("change", () => {
+//     resetStopInputs();
+
+//     if (orderType.value === "market") {
+//       stopLossContainer.classList.remove("hidden");
+//       stopLimitContainer.classList.add("hidden");
+//     } else if (orderType.value === "limit") {
+//       stopLimitContainer.classList.remove("hidden");
+//       stopLossContainer.classList.add("hidden");
+//     } else {
+//       stopLossContainer.classList.add("hidden");
+//       stopLimitContainer.classList.add("hidden");
+//     }
+//   });
+
+//   // Show input when checkbox is ticked
+//   stopLossCheck.addEventListener("change", () => {
+//     stopLossInput.classList.toggle("hidden", !stopLossCheck.checked);
+//   });
+
+//   stopLimitCheck.addEventListener("change", () => {
+//     stopLimitInput.classList.toggle("hidden", !stopLimitCheck.checked);
+//   });
+// });
+
+
+// const orderTypeSelect = document.getElementById('order-type');
+// const timeframeContainer = document.getElementById('timeframe-container');
+
+// orderTypeSelect.addEventListener('change', () => {
+//   if (orderTypeSelect.value === 'limit') {
+//     timeframeContainer.classList.remove('hidden');
+//   } else {
+//     timeframeContainer.classList.add('hidden');
+//   }
+// });
 
 
 
 
 
+////////////////////////////////////////////////////
+//////// Stock Search
+///////////////////////////////////////////////////
 
-
-
-
-///////////////////////////////////
-/////// CA2
-///////////////////////////////////
 
 window.addEventListener('DOMContentLoaded', function () {
   const searchInput = document.getElementById('stock-search');
@@ -209,197 +220,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 //////////////////////////////////////////////////
-/////////// Limit Order Functionality
-//////////////////////////////////////////////////
-
-
-
-// window.addEventListener('DOMContentLoaded', function () {
-//   const tradingForm = document.querySelector('#trading-form');
-//   const priceInput = document.querySelector('#price');
-//   const quantityInput = document.querySelector('#quantity');
-//   const amountInput = document.querySelector('#amount');
-//   const symbolInput = document.querySelector('#symbol');
-//   const submitBuyButton = document.querySelector('#limit-submit-buy');
-//   const submitSellButton = document.querySelector('#limit-submit-sell');
-//   const errorMessage = document.querySelector('#error-message');
-//   let latestPrice = 0;
-
-//   function fetchStockId(symbol) {
-//     return fetch(`/stocks/id/${symbol}`)
-//       .then((response) => {
-//         if (!response.ok) throw new Error('Failed to fetch stock ID');
-//         return response.json();
-//       })
-//       .then((data) => data.stock_id);
-//   }
-
-//   function fetchLatestPrice(stock_id) {
-//     return fetch(`/stocks/price/${stock_id}`)
-//       .then((response) => {
-//         if (!response.ok) throw new Error('Failed to fetch latest price');
-//         return response.json();
-//       })
-//       .then((data) => {
-//         latestPrice = parseFloat(data.price);
-//         priceInput.value = latestPrice;
-//         calculateAmount();
-//       })
-//       .catch((error) => {
-//         console.error('Error fetching latest price:', error);
-//         alert('Could not fetch the latest price for the stock.');
-//       });
-//   }
-
-//   function calculateAmount() {
-//     const price = parseFloat(priceInput.value) || 0;
-//     const quantity = parseInt(quantityInput.value) || 0;
-//     amountInput.value = (price * quantity).toFixed(2);
-//   }
-
-//   // Modified decideTradeType: If the price equals latestPrice, do not create a limit order.
-//   function decideTradeType(orderType) {
-//     const price = parseFloat(priceInput.value);
-//     if (isNaN(price) || price <= 0) {
-//       alert('Invalid price entered.');
-//       return;
-//     }
-//     // If the entered price is the same as the latest market price, do not allow a limit order.
-//     if (price === latestPrice) {
-//       alert('Limit order price must differ from the current market price.');
-//       return;
-//     }
-//     // Proceed with creating a limit order
-//     createLimitOrder(orderType);
-//   }
-
-//   function createLimitOrder(orderType) {
-//     const userId = localStorage.getItem('userId');
-//     const symbol = symbolInput.value.trim();
-//     const price = parseFloat(priceInput.value);
-//     const quantity = parseInt(quantityInput.value);
-
-//     if (!userId || !symbol) {
-//       errorMessage.textContent = 'User or stock symbol not selected.';
-//       return;
-//     }
-
-//     if (isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
-//       errorMessage.textContent = 'Invalid price or quantity.';
-//       return;
-//     }
-
-//     fetchStockId(symbol)
-//       .then((stockId) => {
-//         return fetch('/limit/limit-order', {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ userId, stockId, quantity, limitPrice: price, orderType }),
-//         });
-//       })
-//       .then((response) => {
-//         if (!response.ok) {
-//           return response.json().then((data) => {
-//             throw new Error(`Error creating limit order: ${data.message}`);
-//           });
-//         }
-//         return response.json();
-//       })
-//       .then((data) => {
-//         alert(`${orderType} limit order created successfully!`);
-//         console.log('Limit order created:', data.limitOrder);
-//         tradingForm.reset();
-//         amountInput.value = '--';
-//       })
-//       .catch((error) => {
-//         console.error('Error creating limit order:', error);
-//         errorMessage.textContent = 'Error creating limit order. Please try again later.';
-//       });
-//   }
-
-//   function processLimitOrders(manualPrice = null) {
-//     const symbol = symbolInput.value.trim();
-//     const currentPrice = manualPrice !== null ? manualPrice : latestPrice;
-
-//     fetchStockId(symbol)
-//       .then((stockId) => {
-//         return fetch('/limit/process-limit-orders', {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ stockId, currentPrice }),
-//         });
-//       })
-//       .then((response) => {
-//         if (!response.ok) {
-//           return response.json().then((data) => {
-//             throw new Error(`Error processing limit orders: ${data.message}`);
-//           });
-//         }
-//         return response.json();
-//       })
-//       .then((data) => {
-//         alert(`Processed limit orders: ${data.executedOrders.length}`);
-//         console.log('Limit orders executed:', data.executedOrders);
-//       })
-//       .catch((error) => {
-//         console.error('Error processing limit orders:', error);
-//         errorMessage.textContent = 'Error processing limit orders. Please try again later.';
-//       });
-//   }
-
-//   function showManualPricePopup() {
-//     const manualPrice = prompt('Enter the current price to overwrite limit orders:');
-//     const enteredPrice = parseFloat(manualPrice);
-//     if (isNaN(enteredPrice) || enteredPrice <= 0) {
-//       alert('Please enter a valid price.');
-//       return;
-//     }
-//     processLimitOrders(enteredPrice);
-//   }
-
-//   submitBuyButton.addEventListener('click', function () {
-//     decideTradeType('BUY');
-//   });
-
-//   submitSellButton.addEventListener('click', function () {
-//     decideTradeType('SELL');
-//   });
-
-//   const processOrdersButton = document.createElement('button');
-//   processOrdersButton.textContent = 'Process Limit Orders';
-//   processOrdersButton.classList.add('submit-button');
-//   processOrdersButton.addEventListener('click', () => processLimitOrders());
-//   document.body.appendChild(processOrdersButton);
-
-//   const overwriteOrdersButton = document.createElement('button');
-//   overwriteOrdersButton.textContent = 'Overwrite Limit Orders';
-//   overwriteOrdersButton.classList.add('submit-button');
-//   overwriteOrdersButton.addEventListener('click', showManualPricePopup);
-//   document.body.appendChild(overwriteOrdersButton);
-
-//   symbolInput.addEventListener('input', function () {
-//     const symbol = symbolInput.value.trim();
-//     if (!symbol) return;
-
-//     fetchStockId(symbol)
-//       .then((stockId) => fetchLatestPrice(stockId))
-//       .catch((error) => {
-//         console.error('Error fetching stock data:', error);
-//       });
-//   });
-
-//   priceInput.addEventListener('input', calculateAmount);
-//   quantityInput.addEventListener('input', calculateAmount);
-// });
-
-
-
-
-//////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
-
-
 
 
 
@@ -624,17 +446,11 @@ submitCommentButton.addEventListener('click', function (e) {
 
 
 
-
-
-
-
-
-
-
-
 //////////////////////////////////////////////////
 /////////// Market Status Functionality
 //////////////////////////////////////////////////
+
+
 
 // market-status.js
 window.addEventListener('DOMContentLoaded', function () {
@@ -666,6 +482,7 @@ window.addEventListener('DOMContentLoaded', function () {
       marketStatusEl.textContent = "Error retrieving market status";
     });
 });
+
 
 
 //////////////////////////////////////////////////
@@ -793,140 +610,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-
-
 //////////////////////////////////////////////////
-/////////// Retrieve trades Functionality
+/////////// Export Trades
 //////////////////////////////////////////////////
-
-
-
-// window.addEventListener('DOMContentLoaded', function () {
-// // Assume the logged-in user's ID is stored in localStorage
-// const userId = localStorage.getItem('userId'); // e.g., "3"
-// const tradesTableBody = document.getElementById('trades-table-body');
-// const errorDisplay = document.getElementById('trades-error');
-
-// function loadUserTrades(userId) {
-//   fetch(`/trade/user-trades?userId=${encodeURIComponent(userId)}`)
-//     .then(response => {
-//       if (!response.ok) {
-//         return response.json().then(data => { 
-//           throw new Error(data.message || "Error fetching trades");
-//         });
-//       }
-//       return response.json();
-//     })
-//     .then(data => {
-//       renderTrades(data.trades);
-//     })
-//     .catch(error => {
-//       console.error("Error:", error);
-//       errorDisplay.textContent = error.message;
-//     });
-// }
-
-// function renderTrades(trades) {
-//   tradesTableBody.innerHTML = ""; // Clear previous table rows
-
-//   if (!trades || trades.length === 0) {
-//     tradesTableBody.innerHTML = `<tr><td colspan="6">No trades found.</td></tr>`;
-//     return;
-//   }
-
-//   trades.forEach(trade => {
-//     // Create a table row for each trade.
-//     // You can customize the columns (e.g., trade date, symbol, quantity, price, totalAmount, tradeType).
-//     const row = document.createElement('tr');
-
-//     // Format the date nicely
-//     const tradeDate = new Date(trade.tradeDate).toLocaleString();
-
-//     // Use the stock symbol from the included stock data
-//     const symbol = trade.stock ? trade.stock.symbol : "N/A";
-
-//     row.innerHTML = `
-//       <td>${tradeDate}</td>
-//       <td>${symbol}</td>
-//       <td>${trade.tradeType}</td>
-//       <td>${trade.quantity}</td>
-//       <td>${parseFloat(trade.price).toFixed(2)}</td>
-//       <td>${parseFloat(trade.totalAmount).toFixed(2)}</td>
-//     `;
-//     tradesTableBody.appendChild(row);
-//   });
-// }
-
-// if (userId) {
-//   loadUserTrades(userId);
-// } else {
-//   errorDisplay.textContent = "User not logged in.";
-// }
-// });
-
-
-
-
-// window.addEventListener('DOMContentLoaded', function () {
-// // Assume the logged-in user's ID is stored in localStorage
-// const userId = localStorage.getItem('userId'); // e.g., "3"
-// const limitOrdersTableBody = document.getElementById('limit-orders-table-body');
-// const errorDisplay = document.getElementById('limit-orders-error');
-
-// function loadUserLimitOrders(userId) {
-//   fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
-//     .then(response => {
-//       if (!response.ok) {
-//         return response.json().then(data => { 
-//           throw new Error(data.message || "Error fetching limit orders");
-//         });
-//       }
-//       return response.json();
-//     })
-//     .then(data => {
-//       renderLimitOrders(data.limitOrders);
-//     })
-//     .catch(error => {
-//       console.error("Error:", error);
-//       errorDisplay.textContent = error.message;
-//     });
-// }
-
-// function renderLimitOrders(limitOrders) {
-//   limitOrdersTableBody.innerHTML = ""; // Clear previous table rows
-
-//   if (!limitOrders || limitOrders.length === 0) {
-//     limitOrdersTableBody.innerHTML = `<tr><td colspan="7">No limit orders found.</td></tr>`;
-//     return;
-//   }
-
-//   limitOrders.forEach(order => {
-//     // Format the date nicely
-//     const orderDate = new Date(order.createdAt).toLocaleString();
-//     // Use the stock symbol from the included stock data (if available)
-//     const symbol = order.stock ? order.stock.symbol : "N/A";
-    
-//     const row = document.createElement('tr');
-//     row.innerHTML = `
-//       <td>${orderDate}</td>
-//       <td>${symbol}</td>
-//       <td>${order.orderType}</td>
-//       <td>${order.quantity}</td>
-//       <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
-//       <td>${parseFloat(order.limitPrice * order.quantity).toFixed(2)}</td>
-//       <td>${order.status}</td>
-//     `;
-//     limitOrdersTableBody.appendChild(row);
-//   });
-// }
-
-// if (userId) {
-//   loadUserLimitOrders(userId);
-// } else {
-//   errorDisplay.textContent = "User not logged in.";
-// }
-// });
 
 
 window.addEventListener('DOMContentLoaded', function () {
@@ -958,256 +644,14 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 
+
+
 ///////////////////////////////////////////////////
 /////////// Realtime Chart Functionality
 ///////////////////////////////////////////////////
 
 
 
-// window.addEventListener('DOMContentLoaded', function () {
-//     const intradayForm = document.getElementById('chart-form-intraday');
-//     const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
-//     const rangeSelect = intradayForm.querySelector("select[name='range']");
-//     const chartCanvas = document.getElementById('myChart2');
-//     let intradayChart = null;
-
-//     intradayForm.addEventListener('submit', function (event) {
-//         event.preventDefault();
-
-//         const symbolValue = chartSymbolInput.value.trim();
-//         const rangeValue = rangeSelect.value;
-
-//         if (!symbolValue) {
-//             alert('Please enter a stock symbol.');
-//             return;
-//         }
-
-//         // Calculate date_from and date_to based on rangeValue
-//         const now = new Date();
-//         let dateFrom = new Date();
-//         switch (rangeValue) {
-//             case '1d': dateFrom.setDate(now.getDate() - 1); break;
-//             case '1w': dateFrom.setDate(now.getDate() - 7); break;
-//             case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
-//             case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
-//             case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
-//             case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
-//             default: dateFrom.setDate(now.getDate() - 7);
-//         }
-
-//         const dateFromStr = dateFrom.toISOString().split('T')[0];
-//         const dateToStr = now.toISOString().split('T')[0];
-
-//         const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFromStr}&date_to=${dateToStr}`;
-//         console.log('Fetching chart data from URL:', apiUrl);
-
-//         fetch(apiUrl)
-//             .then(response => response.ok ? response.json() : response.json().then(data => { throw new Error(data.error) }))
-//             .then(chartData => {
-//                 const dataPoints = chartData.labels.map((label, idx) => ({
-//                     x: new Date(label),
-//                     y: chartData.datasets[0].data[idx]
-//                 }));
-
-//                 if (intradayChart) intradayChart.destroy();
-
-//                 intradayChart = new Chart(chartCanvas, {
-//                     type: 'line',
-//                     data: {
-//                         datasets: [{
-//                             label: chartData.datasets[0].label,
-//                             data: dataPoints,
-//                             borderColor: 'white',
-//                             backgroundColor: 'white',
-//                             fill: false,
-//                             tension: 0.1,
-//                             borderWidth: 2,
-//                             pointRadius: 2,
-//                             pointBackgroundColor: 'cyan',
-//                             pointBorderColor: 'cyan'
-//                         }]
-//                     },
-//                     options: {
-//                         responsive: true,
-//                         scales: {
-//                             x: {
-//                                 type: 'time',
-//                                 time: {
-//                                     tooltipFormat: 'MMM dd, yyyy HH:mm',
-//                                     unit: 'day', // default
-//                                     minUnit: 'hour'
-//                                 },
-//                                 title: { display: true, text: 'Date', color: 'white' },
-//                                 ticks: { color: 'white', maxRotation: 45, minRotation: 45 },
-//                                 grid: { color: 'rgba(255,255,255,0.2)' }
-//                             },
-//                             y: {
-//                                 title: { display: true, text: 'Close Price', color: 'white' },
-//                                 ticks: { color: 'white' },
-//                                 grid: { color: 'rgba(255,255,255,0.2)' }
-//                             }
-//                         },
-//                         plugins: {
-//                             legend: { labels: { color: 'white' } },
-//                             zoom: {
-//                                 pan: { enabled: true, mode: 'x' },
-//                                 zoom: {
-//                                     wheel: { enabled: true },
-//                                     pinch: { enabled: true },
-//                                     mode: 'x',
-//                                     onZoom: ({chart}) => updateTimeUnit(chart)
-//                                 }
-//                             }
-//                         }
-//                     },
-//                     plugins: [ChartZoom]
-//                 });
-
-//               //  alert(`Chart created for ${symbolValue} (${rangeValue})!`);
-//             })
-//             .catch(err => {
-//                 console.error('Error creating chart:', err);
-//                 alert(`Failed to create chart: ${err.message}`);
-//             });
-//     });
-
-//     function updateTimeUnit(chart) {
-//         if (!chart.scales.x) return;
-
-//         const xScale = chart.scales.x;
-//         const diffMs = xScale.max - xScale.min;
-//         const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-//         let newUnit = 'hour';
-//         if (diffDays > 730) newUnit = 'month'; // > 2 years
-//         else if (diffDays > 90) newUnit = 'week';
-//         else if (diffDays > 2) newUnit = 'day';
-
-//         chart.options.scales.x.time.unit = newUnit;
-//         chart.update('none'); // update chart without animation
-//     }
-// });
-
-// window.addEventListener('DOMContentLoaded', function () {
-//     const intradayForm = document.getElementById('chart-form-intraday');
-//     const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
-//     const rangeSelect = intradayForm.querySelector("select[name='range']");
-//     const chartCanvas = document.getElementById('myChart2');
-//     let intradayChart = null;
-
-//     // Helper: Determine appropriate time unit for x-axis
-//     function getTimeUnit(data) {
-//         if (!data || data.length === 0) return 'day';
-//         const first = data[0].x;
-//         const last = data[data.length - 1].x;
-//         const diffMs = last - first;
-//         const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-//         if (diffDays <= 1) return 'hour';
-//         if (diffDays <= 7) return 'day';
-//         if (diffDays <= 60) return 'week';
-//         return 'month';
-//     }
-
-//     intradayForm.addEventListener('submit', async function (event) {
-//         event.preventDefault();
-
-//         const symbolValue = chartSymbolInput.value.trim();
-//         const rangeValue = rangeSelect.value;
-
-//         if (!symbolValue) {
-//             alert('Please enter a stock symbol.');
-//             return;
-//         }
-
-//         const now = new Date();
-//         let dateFrom = new Date();
-//         switch (rangeValue) {
-//             case '1d': dateFrom.setDate(now.getDate() - 1); break;
-//             case '1w': dateFrom.setDate(now.getDate() - 7); break;
-//             case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
-//             case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
-//             case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
-//             case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
-//             default: dateFrom.setDate(now.getDate() - 7);
-//         }
-
-//         const dateFromStr = dateFrom.toISOString().split('T')[0];
-//         const dateToStr = now.toISOString().split('T')[0];
-//         const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFromStr}&date_to=${dateToStr}`;
-
-//         try {
-//             const response = await fetch(apiUrl);
-//             if (!response.ok) {
-//                 const data = await response.json();
-//                 throw new Error(data.error || 'Failed to fetch OHLC data');
-//             }
-
-//             const ohlcData = await response.json();
-
-//             if (!Array.isArray(ohlcData) || ohlcData.length === 0) {
-//                 throw new Error('No OHLC data available for this symbol.');
-//             }
-
-//             // Convert to timestamp (ms) for Chart.js financial plugin
-//             const formattedData = ohlcData.map(item => ({
-//                 x: new Date(item.date).getTime(),  // <-- timestamp in ms
-//                 o: item.openPrice,
-//                 h: item.highPrice,
-//                 l: item.lowPrice,
-//                 c: item.closePrice
-//             })).sort((a, b) => a.x - b.x);
-
-//             const timeUnit = getTimeUnit(formattedData);
-
-//             if (intradayChart) intradayChart.destroy();
-
-//             intradayChart = new Chart(chartCanvas.getContext('2d'), {
-//                 type: 'candlestick',
-//                 data: {
-//                     datasets: [{
-//                         label: `${symbolValue} Candlestick`,
-//                         data: formattedData,
-//                         color: {
-//                             up: '#00c853',
-//                             down: '#d50000',
-//                             unchanged: '#999'
-//                         }
-//                     }]
-//                 },
-//                 options: {
-//                     responsive: true,
-//                     scales: {
-//                         x: {
-//                             type: 'time',
-//                             time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-//                             title: { display: true, text: 'Date', color: 'white' },
-//                             ticks: { color: 'white' },
-//                             grid: { color: 'rgba(255,255,255,0.2)' }
-//                         },
-//                         y: {
-//                             title: { display: true, text: 'Price', color: 'white' },
-//                             ticks: { color: 'white' },
-//                             grid: { color: 'rgba(255,255,255,0.2)' }
-//                         }
-//                     },
-//                     plugins: {
-//                         legend: { labels: { color: 'white' } },
-//                         zoom: {
-//                             pan: { enabled: true, mode: 'x' },
-//                             zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-//                         }
-//                     }
-//                 }
-//             });
-
-//             alert(`Candlestick chart created for ${symbolValue} (${rangeValue})!`);
-//         } catch (err) {
-//             console.error('Error creating candlestick chart:', err);
-//             alert(`Failed to create candlestick chart: ${err.message}`);
-//         }
-//     });
-// });
 
 
 // JSwindow.addEventListener('DOMContentLoaded', function () {
@@ -1371,6 +815,7 @@ window.addEventListener('DOMContentLoaded', function () {
   });
 
 
+//});
 
 
 
@@ -1378,20 +823,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+///////////////////////////////////////////////////
+/////////// WEBSOCKETS
+///////////////////////////////////////////////////
 
 
 
@@ -1419,27 +853,30 @@ window.addEventListener('DOMContentLoaded', function () {
   // ------------------------------
   // ===== PORTFOLIO DOM =====
   // ------------------------------
-  const portfolioContainer = document.querySelector('.trading-card2');
+  // const portfolioContainer = document.querySelector('.trading-card2');
+  // let portfolioChart = null;
 
-  socket.off('portfolioUpdate');
-  socket.on('portfolioUpdate', () => {
-    console.log('Portfolio update received via WebSocket');
-    fetchPortfolio();
-  });
+  // socket.off('portfolioUpdate');
+  // socket.on('portfolioUpdate', () => {
+  //   console.log('Portfolio update received via WebSocket');
+  //   fetchPortfolio();
+  // });
 
-  async function fetchPortfolio() {
-    try {
-      const response = await fetch(`/stocks/portfolio/${userId}`);
-      if (!response.ok) throw new Error('Failed to fetch portfolio');
-      const portfolio = await response.json();
-      renderPortfolio(portfolio);
-    } catch (err) {
-      console.error('Error fetching portfolio:', err);
-      portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
-    }
-  }
+  // async function fetchPortfolio() {
+  //   try {
+  //     const response = await fetch(`/stocks/portfolio/${userId}`);
+  //     if (!response.ok) throw new Error('Failed to fetch portfolio');
+  //     const portfolio = await response.json();
+  //     renderPortfolio(portfolio);
+  //   } catch (err) {
+  //     console.error('Error fetching portfolio:', err);
+  //     portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
+  //   }
+  // }
 
   // function renderPortfolio(portfolio) {
+  //   portfolioContainer.innerHTML = '';
+
   //   if (!portfolio || portfolio.length === 0) {
   //     portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
   //     return;
@@ -1457,23 +894,27 @@ window.addEventListener('DOMContentLoaded', function () {
   //   }).join('');
 
   //   portfolioContainer.innerHTML = `
-  //     <h2>Your Portfolio</h2>
+  //     <h1>Your Portfolio</h1>
   //     <div class="stock-grid">${stockColumns}</div>
-  //     <canvas id="portfolioPieChart"></canvas>
+  //     <div class="portfolio-chart-container">
+  //       <canvas id="portfolioPieChart"></canvas>
+  //     </div>
   //   `;
+
+  //   if (portfolioChart) portfolioChart.destroy();
 
   //   const labels = portfolio.map(stock => stock.symbol);
   //   const data = portfolio.map(stock => parseFloat(stock.totalAmount));
   //   const ctx = document.getElementById('portfolioPieChart').getContext('2d');
 
-  //   new Chart(ctx, {
+  //   portfolioChart = new Chart(ctx, {
   //     type: 'pie',
   //     data: {
   //       labels,
   //       datasets: [{
   //         data,
-  //         backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'],
-  //         hoverOffset: 4
+  //         backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+  //         hoverOffset: 6
   //       }]
   //     },
   //     options: {
@@ -1483,8 +924,8 @@ window.addEventListener('DOMContentLoaded', function () {
   //         legend: { position: 'top' },
   //         tooltip: {
   //           callbacks: {
-  //             label: function(context) {
-  //               const total = context.dataset.data.reduce((a,b) => a+b, 0);
+  //             label: function (context) {
+  //               const total = context.dataset.data.reduce((a, b) => a + b, 0);
   //               const percentage = ((context.raw / total) * 100).toFixed(2);
   //               return `${context.label}: $${context.raw} (${percentage}%)`;
   //             }
@@ -1492,327 +933,581 @@ window.addEventListener('DOMContentLoaded', function () {
   //         }
   //       }
   //     }
-//   let portfolioChart = null; // <- global reference
+  //   });
+  // }
 
-// function renderPortfolio(portfolio) {
-//   if (!portfolio || portfolio.length === 0) {
-//     portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
-//     return;
-//   }
+  // fetchPortfolio();
 
-//   const stockColumns = portfolio.map(stock => {
-//     const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
-//     return `
-//       <div class="stock-column">
-//         <h3>${stock.symbol} (${stock.companyName})</h3>
-//         <p><strong>Quantity:</strong> ${stock.quantity}</p>
-//         <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
-//       </div>
-//     `;
-//   }).join('');
+  const portfolioContainer = document.querySelector('.trading-card2');
+let portfolioChart = null;
 
-//   portfolioContainer.innerHTML = `
-//     <h2>Your Portfolio</h2>
-//     <div class="stock-grid">${stockColumns}</div>
-//     <canvas id="portfolioPieChart"></canvas>
-//   `;
+socket.off('portfolioUpdate');
+socket.on('portfolioUpdate', () => {
+  console.log('Portfolio update received via WebSocket');
+  fetchPortfolio();
+});
 
-//   const labels = portfolio.map(stock => stock.symbol);
-//   const data = portfolio.map(stock => parseFloat(stock.totalAmount));
-//   const ctx = document.getElementById('portfolioPieChart').getContext('2d');
-
-//   // Destroy old chart if it exists
-//   if (portfolioChart) {
-//     portfolioChart.destroy();
-//   }
-
-//   portfolioChart = new Chart(ctx, {
-//     type: 'pie',
-//     data: {
-//       labels,
-//       datasets: [{
-//         data,
-//         backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'], // monotone colors
-//         hoverOffset: 4
-//       }]
-//     },
-//     options: {
-//       responsive: true,
-//       maintainAspectRatio: false,
-//       plugins: {
-//         legend: { position: 'top' },
-//         tooltip: {
-//           callbacks: {
-//             label: function(context) {
-//               const total = context.dataset.data.reduce((a,b) => a+b, 0);
-//               const percentage = ((context.raw / total) * 100).toFixed(2);
-//               return `${context.label}: $${context.raw} (${percentage}%)`;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   });
-let portfolioChart = null; // global reference
+async function fetchPortfolio() {
+  try {
+    const response = await fetch(`/stocks/portfolio/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch portfolio');
+    const portfolio = await response.json();
+    renderPortfolio(portfolio);
+  } catch (err) {
+    console.error('Error fetching portfolio:', err);
+    portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
+  }
+}
 
 function renderPortfolio(portfolio) {
-  // Clear container first
   portfolioContainer.innerHTML = '';
 
-  // Handle empty portfolio
-  if (!portfolio || portfolio.length === 0) {
+  const { openPositions = [], closedPositions = [] } = portfolio;
+
+  if (openPositions.length === 0 && closedPositions.length === 0) {
     portfolioContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
     return;
   }
 
-  // Generate stock columns
-  const stockColumns = portfolio.map(stock => {
-    const totalAmountFormatted = parseFloat(stock.totalAmount).toFixed(2);
+  // Open Positions
+  const openColumns = openPositions.map(stock => {
     return `
       <div class="stock-column">
         <h3>${stock.symbol} (${stock.companyName})</h3>
         <p><strong>Quantity:</strong> ${stock.quantity}</p>
-        <p><strong>Total Amount Spent:</strong> $${totalAmountFormatted}</p>
+        <p><strong>Avg Buy Price:</strong> $${parseFloat(stock.avgBuyPrice).toFixed(2)}</p>
+        <p><strong>Current Price:</strong> $${parseFloat(stock.currentPrice).toFixed(2)}</p>
+        <p><strong>Total Invested:</strong> $${parseFloat(stock.totalInvested).toFixed(2)}</p>
+        <p><strong>Current Value:</strong> $${parseFloat(stock.currentValue).toFixed(2)}</p>
+        <p><strong>Unrealized P/L:</strong> $${parseFloat(stock.unrealizedProfitLoss).toFixed(2)} (${stock.unrealizedProfitLossPercent})</p>
+        <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
       </div>
     `;
   }).join('');
 
-  // Inject portfolio content
-  portfolioContainer.innerHTML = `
-    <h1>Your Portfolio</h1>
-    <div class="stock-grid">${stockColumns}</div>
-    <div class="portfolio-chart-container">
-      <canvas id="portfolioPieChart"></canvas>
+  // Closed Positions
+const closedColumns = closedPositions.map(stock => {
+  return `
+    <div class="stock-column closed">
+      <h3>${stock.symbol} (${stock.companyName})</h3>
+      <p><strong>Total Bought Qty:</strong> ${stock.totalBoughtQty}</p>
+      <p><strong>Total Bought Value:</strong> $${parseFloat(stock.totalBoughtValue).toFixed(2)}</p>
+      <p><strong>Total Sold Value:</strong> $${parseFloat(stock.totalSoldValue).toFixed(2)}</p>
+      <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
     </div>
   `;
+}).join('');
 
-  // Destroy previous chart if exists
-  if (portfolioChart) {
-    portfolioChart.destroy();
-  }
 
-  const labels = portfolio.map(stock => stock.symbol);
-  const data = portfolio.map(stock => parseFloat(stock.totalAmount));
-  const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+portfolioContainer.innerHTML = `
+  <h1>Your Portfolio</h1>
+  <div class="portfolio-layout">
+    <div class="positions-section">
+      ${openPositions.length ? `<h2>Open Positions</h2><div class="stock-grid">${openColumns}</div>` : ''}
+      ${closedPositions.length ? `<h2>Closed Positions</h2><div class="stock-grid">${closedColumns}</div>` : ''}
+    </div>
+    ${openPositions.length ? `
+      <div class="portfolio-chart-container">
+        <canvas id="portfolioPieChart"></canvas>
+      </div>` : ''}
+  </div>
+`;
 
-  // Create new chart
-  portfolioChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
-        hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top' },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const total = context.dataset.data.reduce((a,b) => a+b, 0);
-              const percentage = ((context.raw / total) * 100).toFixed(2);
-              return `${context.label}: $${context.raw} (${percentage}%)`;
+
+  // Pie chart only for open positions
+  if (openPositions.length > 0) {
+    if (portfolioChart) portfolioChart.destroy();
+
+    const labels = openPositions.map(stock => stock.symbol);
+    const data = openPositions.map(stock => parseFloat(stock.totalInvested));
+    const ctx = document.getElementById('portfolioPieChart').getContext('2d');
+
+    portfolioChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((context.raw / total) * 100).toFixed(2);
+                return `${context.label}: $${context.raw} (${percentage}%)`;
+              }
             }
           }
         }
       }
-    }
-  });
-
+    });
+  }
 }
 
+fetchPortfolio();
 
-  fetchPortfolio();
 
-  // ------------------------------
-  // ===== TRADE DOM =====
-  // ------------------------------
-  const priceInput = document.getElementById('price');
-  const quantityInput = document.getElementById('quantity');
-  const amountInput = document.getElementById('amount');
-  const symbolInput = document.querySelector("input[name='chartSymbol']");
-  const buyButton = document.getElementById('submit-buy');
-  const sellButton = document.getElementById('submit-sell');
-  const chartForm = document.getElementById('chart-form-intraday');
 
-  let currentStockId = null;
 
-  function calculateAmount() {
-    const price = parseFloat(priceInput.value) || 0;
-    const quantity = parseInt(quantityInput.value) || 0;
-    amountInput.value = (price * quantity).toFixed(2);
-  }
 
-  async function fetchStockId(symbol) {
-    const response = await fetch(`/stocks/id/${symbol}`);
-    if (!response.ok) throw new Error('Failed to fetch stock ID');
-    const data = await response.json();
-    return data.stock_id;
-  }
+// ------------------------------
+// ===== TRADE DOM =====
+// ------------------------------
+const tradingForm = document.getElementById('trading-form');
+const priceInput = document.getElementById('price');
+const quantityInput = document.getElementById('quantity');
+const amountInput = document.getElementById('amount');
+const errorEl = document.getElementById('buy-error');
 
-  async function fetchLatestPrice(stockId) {
-    const response = await fetch(`/stocks/price/${stockId}`);
-    if (!response.ok) throw new Error('Failed to fetch latest price');
-    const data = await response.json();
-    priceInput.value = data.price;
-    calculateAmount();
-  }
+let currentStockId = null; // Should be set when chart is generated
 
-  async function handleTrade(tradeType) {
-    const quantity = parseInt(quantityInput.value);
-    const errorEl = document.getElementById('buy-error');
-    errorEl.textContent = '';
+// Recalculate amount
+function calculateAmount() {
+  const price = parseFloat(priceInput.value) || 0;
+  const quantity = parseInt(quantityInput.value) || 0;
+  amountInput.value = (price * quantity).toFixed(2);
+}
+priceInput.addEventListener('input', calculateAmount);
+quantityInput.addEventListener('input', calculateAmount);
 
-    if (!currentStockId || !quantity || quantity <= 0) {
-      alert('Please enter valid trade details.');
-      return;
-    }
+// Trade form submit
+tradingForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
 
+  // Ensure stock ID is already set from chart form
+  if (!currentStockId) return;
+
+  const quantity = parseInt(quantityInput.value);
+  if (!quantity || quantity <= 0) return;
+
+  const side = tradingForm.querySelector("input[name='side']:checked").value;
+  const orderType = document.getElementById('order-type').value;
+  if (!orderType) return;
+
+  // Only submit if Market Order is selected
+  if (orderType === 'market') {
     try {
-      const response = await fetch(`/stocks/buytrade`, {
+      const res = await fetch(`/stocks/buytrade`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ userId: parseInt(userId), stockId: currentStockId, quantity, tradeType })
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          stockId: currentStockId,
+          quantity,
+          tradeType: side.toUpperCase() // BUY or SELL
+        })
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Trade failed');
       }
-
-      const result = await response.json();
-      alert(`${tradeType} trade successful!`);
+      const result = await res.json();
+      alert(`${side.toUpperCase()} market order successful!`);
       console.log('Trade result:', result);
     } catch (err) {
       console.error(err);
       errorEl.textContent = `Failed to complete trade: ${err.message}`;
     }
   }
+});
 
-  buyButton.addEventListener('click', () => handleTrade('BUY'));
-  sellButton.addEventListener('click', () => handleTrade('SELL'));
-
-  chartForm.addEventListener('submit', async function (e) {
+  // -------------------------
+  // Chart form: fetch stock ID and price
+  // -------------------------
+  const chartForm = document.getElementById('chart-form-intraday');
+  const symbolInput = chartForm.querySelector("input[name='chartSymbol']");
+  chartForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const symbol = symbolInput.value.trim();
     if (!symbol) return;
+
     try {
-      currentStockId = await fetchStockId(symbol);
-      await fetchLatestPrice(currentStockId);
+      // Fetch stock ID
+      const resId = await fetch(`/stocks/id/${symbol}`);
+      if (!resId.ok) throw new Error('Failed to fetch stock ID');
+      const dataId = await resId.json();
+      currentStockId = dataId.stock_id;
+      window.currentStockId = dataId.stock_id;
+
+
+      // Fetch latest price
+      const resPrice = await fetch(`/stocks/price/${currentStockId}`);
+      if (!resPrice.ok) throw new Error('Failed to fetch latest price');
+      const dataPrice = await resPrice.json();
+      priceInput.value = dataPrice.price;
+      calculateAmount();
     } catch (err) {
       console.error('Error fetching stock data:', err);
+      errorEl.textContent = `Failed to fetch stock info: ${err.message}`;
     }
   });
 
-  priceInput.addEventListener('input', calculateAmount);
-  quantityInput.addEventListener('input', calculateAmount);
 
   // ------------------------------
   // ===== TRADE HISTORY DOM =====
-  // ------------------------------
+  // // ------------------------------
+  // const tradesTableBody = document.getElementById('trades-table-body');
+  // const tradesErrorDisplay = document.getElementById('trades-error');
+
+  // socket.off('broadcastTradeHistoryUpdate');
+  // socket.on('broadcastTradeHistoryUpdate', () => {
+  //   console.log('Trade history update received');
+  //   loadUserTrades(userId);
+  // });
+
+  // function loadUserTrades(userId) {
+  //   fetch(`/trade/user-trades?userId=${encodeURIComponent(userId)}`)
+  //     .then(res => {
+  //       if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching trades'); });
+  //       return res.json();
+  //     })
+  //     .then(data => renderTrades(data.trades))
+  //     .catch(err => {
+  //       console.error('Error:', err);
+  //       tradesErrorDisplay.textContent = err.message;
+  //     });
+  // }
+
+  // function renderTrades(trades) {
+  //   tradesTableBody.innerHTML = '';
+  //   if (!trades || trades.length === 0) {
+  //     tradesTableBody.innerHTML = `<tr><td colspan="6">No trades found.</td></tr>`;
+  //     return;
+  //   }
+  //   trades.forEach(trade => {
+  //     const row = document.createElement('tr');
+  //     const tradeDate = new Date(trade.tradeDate).toLocaleString();
+  //     const symbol = trade.stock ? trade.stock.symbol : 'N/A';
+  //     row.innerHTML = `
+  //       <td>${tradeDate}</td>
+  //       <td>${symbol}</td>
+  //       <td>${trade.tradeType}</td>
+  //       <td>${trade.quantity}</td>
+  //       <td>${parseFloat(trade.price).toFixed(2)}</td>
+  //       <td>${parseFloat(trade.totalAmount).toFixed(2)}</td>
+  //     `;
+  //     tradesTableBody.appendChild(row);
+  //   });
+  // }
+
+  // loadUserTrades(userId);
   const tradesTableBody = document.getElementById('trades-table-body');
-  const tradesErrorDisplay = document.getElementById('trades-error');
+const tradesErrorDisplay = document.getElementById('trades-error');
+const tradesPaginationContainer = document.getElementById('trades-pagination');
 
-  socket.off('broadcastTradeHistoryUpdate');
-  socket.on('broadcastTradeHistoryUpdate', () => {
-    console.log('Trade history update received');
-    loadUserTrades(userId);
-  });
-
-  function loadUserTrades(userId) {
-    fetch(`/trade/user-trades?userId=${encodeURIComponent(userId)}`)
-      .then(res => {
-        if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching trades'); });
-        return res.json();
-      })
-      .then(data => renderTrades(data.trades))
-      .catch(err => {
-        console.error('Error:', err);
-        tradesErrorDisplay.textContent = err.message;
-      });
-  }
-
-  function renderTrades(trades) {
-    tradesTableBody.innerHTML = '';
-    if (!trades || trades.length === 0) {
-      tradesTableBody.innerHTML = `<tr><td colspan="6">No trades found.</td></tr>`;
-      return;
-    }
-    trades.forEach(trade => {
-      const row = document.createElement('tr');
-      const tradeDate = new Date(trade.tradeDate).toLocaleString();
-      const symbol = trade.stock ? trade.stock.symbol : 'N/A';
-      row.innerHTML = `
-        <td>${tradeDate}</td>
-        <td>${symbol}</td>
-        <td>${trade.tradeType}</td>
-        <td>${trade.quantity}</td>
-        <td>${parseFloat(trade.price).toFixed(2)}</td>
-        <td>${parseFloat(trade.totalAmount).toFixed(2)}</td>
-      `;
-      tradesTableBody.appendChild(row);
-    });
-  }
-
+socket.off('broadcastTradeHistoryUpdate');
+socket.on('broadcastTradeHistoryUpdate', () => {
+  console.log('Trade history update received');
   loadUserTrades(userId);
+});
+
+const pageSize = 10;  // show 10 rows per page
+let currentPage = 1;
+let allTrades = [];
+
+function loadUserTrades(userId) {
+  fetch(`/trade/user-trades?userId=${encodeURIComponent(userId)}`)
+    .then(res => {
+      if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching trades'); });
+      return res.json();
+    })
+    .then(data => {
+      allTrades = data.trades;
+      renderTradesPage(currentPage);
+      renderPaginationControls();
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      tradesErrorDisplay.textContent = err.message;
+    });
+}
+
+function renderTradesPage(page) {
+  tradesTableBody.innerHTML = '';
+  if (!allTrades || allTrades.length === 0) {
+    tradesTableBody.innerHTML = `<tr><td colspan="6">No trades found.</td></tr>`;
+    return;
+  }
+
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const tradesToShow = allTrades.slice(start, end);
+
+  tradesToShow.forEach(trade => {
+    const row = document.createElement('tr');
+    const tradeDate = new Date(trade.tradeDate).toLocaleString();
+    const symbol = trade.stock ? trade.stock.symbol : 'N/A';
+    row.innerHTML = `
+      <td>${tradeDate}</td>
+      <td>${symbol}</td>
+      <td>${trade.tradeType}</td>
+      <td>${trade.quantity}</td>
+      <td>${parseFloat(trade.price).toFixed(2)}</td>
+      <td>${parseFloat(trade.totalAmount).toFixed(2)}</td>
+    `;
+    tradesTableBody.appendChild(row);
+  });
+}
+
+function renderPaginationControls() {
+  tradesPaginationContainer.innerHTML = '';
+  const totalPages = Math.ceil(allTrades.length / pageSize);
+
+  if (currentPage > 1) {
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Previous';
+    prevBtn.addEventListener('click', () => {
+      currentPage--;
+      renderTradesPage(currentPage);
+      renderPaginationControls();
+    });
+    tradesPaginationContainer.appendChild(prevBtn);
+  }
+
+  if (currentPage < totalPages) {
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next →';
+    nextBtn.addEventListener('click', () => {
+      currentPage++;
+      renderTradesPage(currentPage);
+      renderPaginationControls();
+    });
+    tradesPaginationContainer.appendChild(nextBtn);
+  }
+
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = ` Page ${currentPage} of ${totalPages} `;
+  tradesPaginationContainer.appendChild(pageIndicator);
+}
+
+loadUserTrades(userId);
+
 
   // ------------------------------
   // ===== LIMIT ORDER HISTORY DOM =====
   // ------------------------------
-  const limitOrdersTableBody = document.getElementById('limit-orders-table-body');
-  const limitOrdersErrorDisplay = document.getElementById('limit-orders-error');
 
-  socket.off('broadcastLimitTradeHistoryUpdate');
-  socket.on('broadcastLimitTradeHistoryUpdate', () => {
-    console.log('Limit order history update received');
-    loadUserLimitOrders(userId);
+
+//   const limitOrdersTableBody = document.getElementById('limit-orders-table-body');
+// const limitOrdersErrorDisplay = document.getElementById('limit-orders-error');
+
+// socket.off('broadcastLimitTradeHistoryUpdate');
+// socket.on('broadcastLimitTradeHistoryUpdate', () => {
+//   console.log('Limit order history update received');
+//   loadUserLimitOrders(userId);
+// });
+
+// function loadUserLimitOrders(userId) {
+//   fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
+//     .then(res => {
+//       if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching limit orders'); });
+//       return res.json();
+//     })
+//     .then(data => renderLimitOrders(data.limitOrders))
+//     .catch(err => {
+//       console.error('Error:', err);
+//       limitOrdersErrorDisplay.textContent = err.message;
+//     });
+// }
+
+// function renderLimitOrders(limitOrders) {
+//   limitOrdersTableBody.innerHTML = '';
+//   if (!limitOrders || limitOrders.length === 0) {
+//     limitOrdersTableBody.innerHTML = `<tr><td colspan="8">No limit orders found.</td></tr>`;
+//     return;
+//   }
+
+//   limitOrders.forEach(order => {
+//     const orderDate = new Date(order.createdAt).toLocaleString();
+//     const symbol = order.stock ? order.stock.symbol : 'N/A';
+//     const row = document.createElement('tr');
+
+//     // Add cancel button only for PENDING or DAY orders
+//     const canCancel = order.status === 'PENDING' || order.status === 'DAY';
+//     const cancelButtonHTML = canCancel 
+//       ? `<button class="cancel-limit-btn" data-order-id="${order.id}">Cancel</button>` 
+//       : '';
+
+//     row.innerHTML = `
+//       <td>${orderDate}</td>
+//       <td>${symbol}</td>
+//       <td>${order.orderType}</td>
+//       <td>${order.quantity}</td>
+//       <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
+//       <td>${parseFloat(order.limitPrice * order.quantity).toFixed(2)}</td>
+//       <td>${order.status}</td>
+//       <td>${cancelButtonHTML}</td>
+//     `;
+
+//     limitOrdersTableBody.appendChild(row);
+//   });
+
+//   // Add click event for cancel buttons
+//   document.querySelectorAll('.cancel-limit-btn').forEach(btn => {
+//     btn.addEventListener('click', async (e) => {
+//       const orderId = btn.dataset.orderId;
+//       if (!orderId) return;
+
+//       try {
+//         const res = await fetch(`/limit/cancel/${orderId}`, {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({ userId })
+//         });
+
+//         const data = await res.json();
+//         if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
+
+//         alert(`Order ${orderId} cancelled successfully.`);
+//         loadUserLimitOrders(userId); // Refresh table
+//       } catch (err) {
+//         console.error('Error cancelling order:', err);
+//         alert(`Error: ${err.message}`);
+//       }
+//     });
+//   });
+// }
+
+// loadUserLimitOrders(userId);
+const limitOrdersTableBody = document.getElementById('limit-orders-table-body');
+const limitOrdersErrorDisplay = document.getElementById('limit-orders-error');
+const limitOrdersPaginationContainer = document.getElementById('limit-orders-pagination');
+
+socket.off('broadcastLimitTradeHistoryUpdate');
+socket.on('broadcastLimitTradeHistoryUpdate', () => {
+  console.log('Limit order history update received');
+  loadUserLimitOrders(userId);
+});
+
+// const pageSize = 10;  // 10 rows per page
+let currentLimitPage = 1;
+let allLimitOrders = [];
+
+function loadUserLimitOrders(userId) {
+  fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
+    .then(res => {
+      if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching limit orders'); });
+      return res.json();
+    })
+    .then(data => {
+      allLimitOrders = data.limitOrders;
+      renderLimitOrdersPage(currentLimitPage);
+      renderLimitOrdersPagination();
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      limitOrdersErrorDisplay.textContent = err.message;
+    });
+}
+
+function renderLimitOrdersPage(page) {
+  limitOrdersTableBody.innerHTML = '';
+  if (!allLimitOrders || allLimitOrders.length === 0) {
+    limitOrdersTableBody.innerHTML = `<tr><td colspan="8">No limit orders found.</td></tr>`;
+    return;
+  }
+
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const ordersToShow = allLimitOrders.slice(start, end);
+
+  ordersToShow.forEach(order => {
+    const orderDate = new Date(order.createdAt).toLocaleString();
+    const symbol = order.stock ? order.stock.symbol : 'N/A';
+    const row = document.createElement('tr');
+
+    // Add cancel button only for PENDING or DAY orders
+    const canCancel = order.status === 'PENDING' || order.status === 'DAY';
+    const cancelButtonHTML = canCancel 
+      ? `<button class="cancel-limit-btn" data-order-id="${order.id}">Cancel</button>` 
+      : '';
+
+    row.innerHTML = `
+      <td>${orderDate}</td>
+      <td>${symbol}</td>
+      <td>${order.orderType}</td>
+      <td>${order.quantity}</td>
+      <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
+      <td>${parseFloat(order.limitPrice * order.quantity).toFixed(2)}</td>
+      <td>${order.status}</td>
+      <td>${cancelButtonHTML}</td>
+    `;
+
+    limitOrdersTableBody.appendChild(row);
   });
 
-  function loadUserLimitOrders(userId) {
-    fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
-      .then(res => {
-        if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching limit orders'); });
-        return res.json();
-      })
-      .then(data => renderLimitOrders(data.limitOrders))
-      .catch(err => {
-        console.error('Error:', err);
-        limitOrdersErrorDisplay.textContent = err.message;
-      });
-  }
+  // Add click event for cancel buttons
+  document.querySelectorAll('.cancel-limit-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const orderId = btn.dataset.orderId;
+      if (!orderId) return;
 
-  function renderLimitOrders(limitOrders) {
-    limitOrdersTableBody.innerHTML = '';
-    if (!limitOrders || limitOrders.length === 0) {
-      limitOrdersTableBody.innerHTML = `<tr><td colspan="7">No limit orders found.</td></tr>`;
-      return;
-    }
-    limitOrders.forEach(order => {
-      const orderDate = new Date(order.createdAt).toLocaleString();
-      const symbol = order.stock ? order.stock.symbol : 'N/A';
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${orderDate}</td>
-        <td>${symbol}</td>
-        <td>${order.orderType}</td>
-        <td>${order.quantity}</td>
-        <td>${parseFloat(order.limitPrice).toFixed(2)}</td>
-        <td>${parseFloat(order.limitPrice * order.quantity).toFixed(2)}</td>
-        <td>${order.status}</td>
-      `;
-      limitOrdersTableBody.appendChild(row);
+      try {
+        const res = await fetch(`/limit/cancel/${orderId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
+
+        alert(`Order ${orderId} cancelled successfully.`);
+        loadUserLimitOrders(userId); // Refresh table
+      } catch (err) {
+        console.error('Error cancelling order:', err);
+        alert(`Error: ${err.message}`);
+      }
     });
+  });
+}
+
+function renderLimitOrdersPagination() {
+  limitOrdersPaginationContainer.innerHTML = '';
+  const totalPages = Math.ceil(allLimitOrders.length / pageSize);
+
+  if (currentLimitPage > 1) {
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Previous';
+    prevBtn.addEventListener('click', () => {
+      currentLimitPage--;
+      renderLimitOrdersPage(currentLimitPage);
+      renderLimitOrdersPagination();
+    });
+    limitOrdersPaginationContainer.appendChild(prevBtn);
   }
 
-  loadUserLimitOrders(userId);
+  if (currentLimitPage < totalPages) {
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next →';
+    nextBtn.addEventListener('click', () => {
+      currentLimitPage++;
+      renderLimitOrdersPage(currentLimitPage);
+      renderLimitOrdersPagination();
+    });
+    limitOrdersPaginationContainer.appendChild(nextBtn);
+  }
+
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = ` Page ${currentLimitPage} of ${totalPages} `;
+  limitOrdersPaginationContainer.appendChild(pageIndicator);
+}
+
+loadUserLimitOrders(userId);
+
+
 
   // ------------------------------
   // ===== FAVORITE STOCKS DOM =====
@@ -1896,6 +1591,21 @@ function renderPortfolio(portfolio) {
 
 
 
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+/////////// Company Detail Card
+//////////////////////////////////////////////////
+
+
+
+
 window.addEventListener('DOMContentLoaded', function () {
   const symbolInput = document.querySelector("input[name='chartSymbol']");
   const form = document.querySelector("form");
@@ -1930,11 +1640,9 @@ window.addEventListener('DOMContentLoaded', function () {
           <p><strong>Founded:</strong> ${company.founded || 'N/A'}</p>
           <p><strong>Market Cap:</strong> ${company.marketCapitalization ? '$' + company.marketCapitalization.toLocaleString() : 'N/A'}</p>
           <p><strong>Shares Outstanding:</strong> ${company.shareOutstanding ? company.shareOutstanding.toLocaleString() : 'N/A'}</p>
-          <p><strong>Phone:</strong> ${company.phone || 'N/A'}</p>
           <p><strong>Website:</strong> ${company.website ? `<a href="${company.website}" target="_blank">${company.website}</a>` : 'N/A'}</p>
         </div>
       `;
-      
       })
       .catch(error => {
         console.error('Error fetching company data:', error);
@@ -1951,19 +1659,24 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 
+// //////////////////////////////////////////////////
+// /////////// LIMIT ORDER REALTIME Functionality
+// //////////////////////////////////////////////////
 
-//////////  ////////////////////////////////////////
-/////////// LIMIT ORDER REALTIME Functionality
-//////////////////////////////////////////////////
 window.addEventListener('DOMContentLoaded', function () {
   const tradingForm = document.querySelector('#trading-form');
   const priceInput = document.querySelector('#price');
   const quantityInput = document.querySelector('#quantity');
   const amountInput = document.querySelector('#amount');
-  const symbolInput = document.querySelector("input[name='chartSymbol']"); // Updated
-  const submitBuyButton = document.querySelector('#limit-submit-buy');
-  const submitSellButton = document.querySelector('#limit-submit-sell');
-  const errorMessage = document.querySelector('#error-message');
+  const symbolInput = document.querySelector("input[name='chartSymbol']");
+  const orderTypeSelect = document.querySelector('#order-type');
+  const timeframeContainer = document.querySelector('#timeframe-container');
+  const timeframeSelect = document.querySelector('#timeframe');
+  const buyRadio = document.querySelector("input[name='side'][value='buy']");
+  const sellRadio = document.querySelector("input[name='side'][value='sell']");
+  const submitButton = document.querySelector('#submit-order');
+  const errorMessage = document.querySelector('#buy-error');
+
   let latestPrice = 0;
 
   // Fetch stock ID from backend
@@ -1990,26 +1703,28 @@ window.addEventListener('DOMContentLoaded', function () {
     amountInput.value = (price * quantity).toFixed(2);
   }
 
-  function decideTradeType(orderType) {
-    const price = parseFloat(priceInput.value);
-    if (isNaN(price) || price <= 0) {
-      alert('Invalid price entered.');
-      return;
+  // Show/hide timeframe dropdown for Limit Orders
+  orderTypeSelect.addEventListener('change', () => {
+    if (orderTypeSelect.value === 'limit') {
+      timeframeContainer.classList.remove('hidden');
+      document.querySelector('#stop-limit-container').classList.remove('hidden');
+      document.querySelector('#stop-loss-container').classList.add('hidden');
+    } else {
+      timeframeContainer.classList.add('hidden');
+      document.querySelector('#stop-limit-container').classList.add('hidden');
+      document.querySelector('#stop-loss-container').classList.add('hidden');
     }
+  });
 
-    if (price === latestPrice) {
-      alert('Limit order price must differ from the current market price.');
-      return;
-    }
-
-    createLimitOrder(orderType);
-  }
-
-  async function createLimitOrder(orderType) {
+  async function submitLimitOrder() {
     const userId = localStorage.getItem('userId');
     const symbol = symbolInput.value.trim();
     const price = parseFloat(priceInput.value);
     const quantity = parseInt(quantityInput.value);
+    const side = buyRadio.checked ? 'BUY' : 'SELL';
+    const timeframe = timeframeSelect.value; // gtc or day
+
+    errorMessage.textContent = '';
 
     if (!userId || !symbol) {
       errorMessage.textContent = 'User or stock symbol not selected.';
@@ -2021,81 +1736,59 @@ window.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    if (price === latestPrice) {
+      errorMessage.textContent = 'Limit order price must differ from the current market price.';
+      return;
+    }
+
     try {
       const stockId = await fetchStockId(symbol);
+
       const res = await fetch('/limit/limit-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, stockId, quantity, limitPrice: price, orderType }),
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          stockId,
+          quantity,
+          limitPrice: price,
+          orderType: side, // BUY or SELL
+          timeframe       // GTC or DAY
+        })
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || 'Error creating limit order');
+        throw new Error(data.message || 'Failed to create limit order');
       }
 
       const data = await res.json();
-      alert(`${orderType} limit order created successfully!`);
-      console.log('Limit order created:', data.limitOrder);
+      alert(`${side} limit order created successfully (${timeframe.toUpperCase()})`);
       tradingForm.reset();
       amountInput.value = '--';
+      timeframeContainer.classList.add('hidden');
+      document.querySelector('#stop-limit-container').classList.add('hidden');
+      document.querySelector('#stop-loss-container').classList.add('hidden');
     } catch (err) {
-      console.error('Error creating limit order:', err);
-      errorMessage.textContent = 'Error creating limit order. Please try again later.';
+      console.error(err);
+      errorMessage.textContent = err.message || 'Error creating limit order.';
     }
   }
 
-  async function processLimitOrders(manualPrice = null) {
-    const symbol = symbolInput.value.trim();
-    if (!symbol) return;
-
-    try {
-      const stockId = await fetchStockId(symbol);
-      const currentPrice = manualPrice !== null ? manualPrice : latestPrice;
-      const res = await fetch('/limit/process-limit-orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stockId, currentPrice }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Error processing limit orders');
-      }
-
-      const data = await res.json();
-      alert(`Processed limit orders: ${data.executedOrders.length}`);
-      console.log('Limit orders executed:', data.executedOrders);
-    } catch (err) {
-      console.error('Error processing limit orders:', err);
-      errorMessage.textContent = 'Error processing limit orders. Please try again later.';
+  // Submit button handling
+  submitButton.addEventListener('click', (e) => {
+    if (orderTypeSelect.value === 'limit') {
+      // Limit order → stop default and call custom function
+      e.preventDefault();
+      submitLimitOrder();
+    } else {
+      // Market order → let the form submit normally
+      // (no preventDefault here)
     }
-  }
+  });
 
-  function showManualPricePopup() {
-    const manualPrice = prompt('Enter the current price to overwrite limit orders:');
-    const enteredPrice = parseFloat(manualPrice);
-    if (isNaN(enteredPrice) || enteredPrice <= 0) {
-      alert('Please enter a valid price.');
-      return;
-    }
-    processLimitOrders(enteredPrice);
-  }
-
-  submitBuyButton.addEventListener('click', () => decideTradeType('BUY'));
-  submitSellButton.addEventListener('click', () => decideTradeType('SELL'));
-
-  const processOrdersButton = document.createElement('button');
-  processOrdersButton.textContent = 'Process Limit Orders';
-  processOrdersButton.classList.add('submit-button');
-  processOrdersButton.addEventListener('click', () => processLimitOrders());
-  document.body.appendChild(processOrdersButton);
-
-  // const overwriteOrdersButton = document.createElement('button');
-  // overwriteOrdersButton.textContent = 'Overwrite Limit Orders';
-  // overwriteOrdersButton.classList.add('submit-button');
-  // overwriteOrdersButton.addEventListener('click', showManualPricePopup);
-  // document.body.appendChild(overwriteOrdersButton);
+  priceInput.addEventListener('input', calculateAmount);
+  quantityInput.addEventListener('input', calculateAmount);
 
   // Update latest price when symbol changes
   symbolInput.addEventListener('input', () => {
@@ -2105,7 +1798,4 @@ window.addEventListener('DOMContentLoaded', function () {
       .then((stockId) => fetchLatestPrice(stockId))
       .catch((err) => console.error('Error fetching stock data:', err));
   });
-
-  priceInput.addEventListener('input', calculateAmount);
-  quantityInput.addEventListener('input', calculateAmount);
 });

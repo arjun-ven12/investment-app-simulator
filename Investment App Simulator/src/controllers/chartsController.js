@@ -1,4 +1,5 @@
 
+
 const chartsModel = require('../models/Charts');
 
 const { Parser } = require('json2csv');
@@ -397,16 +398,82 @@ exports.unfavoriteStockController = function (req, res) {
 
 
 
+// // Create limit order
+// exports.createLimitOrderController = async function (req, res) {
+//   const { userId, stockId, quantity, limitPrice, orderType } = req.body;
+
+//   if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
+//     return res.status(400).json({ message: "All fields are required." });
+//   }
+
+//   try {
+//     const userIdInt = parseInt(userId);
+
+//     // Create the limit order in DB
+//     const limitOrder = await chartsModel.createLimitOrder(
+//       userIdInt,
+//       stockId,
+//       quantity,
+//       limitPrice,
+//       orderType
+//     );
+
+//     // Emit websocket update AFTER the limit order is successfully created
+//     const io = req.app.get('io');
+//     io.to(`user_${userIdInt}`).emit('broadcastLimitTradeHistoryUpdate', limitOrder);
+
+//     return res
+//       .status(201)
+//       .json({ message: "Limit order created successfully", limitOrder });
+//   } catch (error) {
+//     console.error("Error creating limit order:", error);
+//     return res
+//       .status(500)
+//       .json({ message: "Error creating limit order", error });
+//   }
+// };
+
+
+
+
+
+
 // Create limit order
 exports.createLimitOrderController = async function (req, res) {
-  const { userId, stockId, quantity, limitPrice, orderType } = req.body;
+  const { userId, stockId, quantity, limitPrice, orderType, timeframe } = req.body;
 
-  if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
+  if (!userId || !stockId || !quantity || !limitPrice || !orderType || !timeframe) {
     return res.status(400).json({ message: "All fields are required." });
   }
 
   try {
     const userIdInt = parseInt(userId);
+
+    // Determine initial status
+    let status = "PENDING";
+    const now = new Date();
+    // const marketOpen = new Date(now);
+    // marketOpen.setHours(9, 15, 0, 0);
+    // const marketClose = new Date(now);
+    // marketClose.setHours(15, 30, 0, 0);
+    const sgTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+
+      const marketOpen = new Date(sgTime);
+      marketOpen.setHours(9, 15, 0, 0);
+
+      const marketClose = new Date(sgTime);
+      marketClose.setHours(18, 0, 0, 0);
+
+
+    if (timeframe === "GTC") {
+      status = "PENDING"; // GTC can stay PENDING until executed
+    } else if (timeframe === "day") {
+      // if (now >= marketOpen && now <= marketClose) {
+      //   status = "DAY ORDER"; // Market is open, start as day order
+      // } else {
+        status = "DAY ORDER"; // Outside market hours
+      //}
+    }
 
     // Create the limit order in DB
     const limitOrder = await chartsModel.createLimitOrder(
@@ -414,7 +481,9 @@ exports.createLimitOrderController = async function (req, res) {
       stockId,
       quantity,
       limitPrice,
-      orderType
+      orderType,
+      timeframe,
+      status
     );
 
     // Emit websocket update AFTER the limit order is successfully created
@@ -793,4 +862,28 @@ module.exports.getStockChartRealData = async function (req, res) {
         console.error(error);
         return res.status(500).json({ error: error.message });
     }
+};
+
+
+
+exports.cancelLimitOrderController = function (req, res) {
+  const orderId = parseInt(req.params.id);
+  const { userId } = req.body;
+
+  if (!orderId || !userId) {
+    return res.status(400).json({ message: "Order ID and User ID are required." });
+  }
+
+  return chartsModel
+    .cancelLimitOrder(orderId, parseInt(userId))
+    .then((cancelledOrder) => {
+      if (!cancelledOrder) {
+        return res.status(404).json({ message: "Order not found or cannot be cancelled" });
+      }
+      return res.status(200).json({ message: "Limit order cancelled successfully", order: cancelledOrder });
+    })
+    .catch((error) => {
+      console.error("Error cancelling limit order:", error);
+      return res.status(500).json({ message: "Error cancelling limit order", error });
+    });
 };

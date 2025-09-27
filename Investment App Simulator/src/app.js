@@ -10,6 +10,7 @@ const chartsRouter = require('./routers/Charts');
 const chartsInvestmentRouter = require('./routers/chartInvestment');
 const realtimeRouter = require('./routers/realtime');
 const realLimitRouter = require('./routers/realLimit');
+const leaderboardRouter = require('./routers/leaderboard');
 
 const stockRouter = require('./routers/stock');
 const tradeOrderRouter = require('./routers/tradeOrder');
@@ -78,6 +79,7 @@ app.use('/stop-limit', stopLimitRouter)
 
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
+app.use('/leaderboard', leaderboardRouter)
 
 
 app.use('/referral', referralRouter);
@@ -106,11 +108,6 @@ app.use((error, req, res, next) => {
 });
 
 module.exports = app;
-
-
-
-
-
 
 
 

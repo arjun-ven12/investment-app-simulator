@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", async () => {
     const usernameEl = document.getElementById("username");
     const walletEl = document.getElementById("wallet");
@@ -64,3 +65,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load user info
     renderUser();
 });
+
+
+
+/////////////////////////////////////////
+// LEADERBOARD
+/////////////////////////////////////////
+
+    window.addEventListener('DOMContentLoaded', function () {
+      const leaderboardBody = document.getElementById('leaderboard-body');
+
+      fetch('/leaderboard')
+        .then(response => {
+          if (response.ok) return response.json();
+          return response.json().then(data => {
+            throw new Error(`Error fetching leaderboard: ${data.error}`);
+          });
+        })
+        .then(data => {
+          const leaderboard = data.leaderboard || [];
+          leaderboardBody.innerHTML = '';
+
+          leaderboard.forEach(entry => {
+            const row = document.createElement('tr');
+
+            // Profit/Loss coloring
+            const profitLossClass = entry.profitLossPercent >= 0 ? 'positive' : 'negative';
+
+            row.innerHTML = `
+              <td>${entry.rank}</td>
+              <td>${entry.username}</td>
+              <td class="${profitLossClass}">${entry.profitLossPercent}%</td>
+              <td>${entry.lastTrade || 'N/A'}</td>
+            `;
+            leaderboardBody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching leaderboard:', error);
+          leaderboardBody.innerHTML = `<tr><td colspan="4">Error: ${error.message}</td></tr>`;
+        });
+    });

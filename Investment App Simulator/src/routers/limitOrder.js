@@ -1,5 +1,6 @@
 
 
+
 const express = require('express');
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.get('/export', chartsController.exportLimitOrderHistoryController);
 
 router.get('/recommendation', chartsController.getRecommendationsController);
 
-router.get('/:symbol', chartsController.getCompanyDetails);
+// router.get('/:symbol', chartsController.getCompanyDetails);
 
 router.post('/buytrade', chartsController.tradeStock);
 
@@ -20,7 +21,6 @@ router.post('/process-limit-orders', chartsController.processLimitOrdersControll
 
 router.get('/user-trades', chartsController.getUserTradesController);
 
-
-
+router.post('/cancel/:id', chartsController.cancelLimitOrderController);
 
 module.exports = router;

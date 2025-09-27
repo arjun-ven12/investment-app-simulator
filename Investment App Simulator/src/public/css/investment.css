@@ -1,4 +1,5 @@
 
+
    /* Import Outfit font */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
 
@@ -797,7 +798,7 @@ body {
 .trading-card2 {
   height: 100%;
   overflow-y: auto;
-  width: 300px
+  /* width: 300px */
 }
 
 /* Responsive: stack on smaller screens */
@@ -958,4 +959,20 @@ height:100%
   vertical-align: middle;
   display: inline-block; /* makes sure the span respects alignment */
   font-size: 13px;
+}
+
+
+.portfolio-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.positions-section {
+  flex: 2;
+}
+
+.portfolio-chart-container {
+  flex: 1;
+  /* max-width: 300px; */
 }
