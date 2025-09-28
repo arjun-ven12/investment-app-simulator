@@ -1830,6 +1830,58 @@ module.exports.tradeStock = async function tradeStock(userId, stockId, quantity,
 
 
 
+// module.exports.getCompanyDetails = async function getCompanyDetails(symbol) {
+//   if (!symbol || typeof symbol !== 'string') {
+//     throw new Error(`Invalid company symbol: ${symbol}`);
+//   }
+
+//   const upperSymbol = symbol.toUpperCase();
+
+//   try {
+//     const response = await fetch(
+//       `https://finnhub.io/api/v1/stock/profile2?symbol=${upperSymbol}&token=${FINNHUB_API_KEY}`
+//     );
+//     if (!response.ok) throw new Error(`Finnhub API error: ${response.status}`);
+//     const data = await response.json();
+
+//     if (!data || !data.name) {
+//       throw new Error(`Company data not found on Finnhub for symbol "${upperSymbol}"`);
+//     }
+
+//     const companyData = {
+//       symbol: data.ticker,
+//       name: data.name,
+//       country: data.country || null,
+//       currency: data.currency || null,
+//       exchange: data.exchange || null,
+//       founded: data.ipo ? parseInt(data.ipo.split('-')[0]) : null,
+//       phone: data.phone || null,
+//       website: data.weburl || null,
+//       industry: data.finnhubIndustry || null,
+//       marketCapitalization: data.marketCapitalization || null,
+//       shareOutstanding: data.shareOutstanding || null,
+//       logo: data.logo || null,
+//     };
+
+//     // Insert or update company record in Prisma
+//     const company = await prisma.company.upsert({
+//       where: { symbol: companyData.symbol },
+//       update: companyData,
+//       create: companyData,
+//     });
+
+//     return company;
+//   } catch (error) {
+//     console.error('Error fetching company details:', error);
+//     throw error;
+//   }
+// };
+
+
+
+
+
+
 module.exports.getCompanyDetails = async function getCompanyDetails(symbol) {
   if (!symbol || typeof symbol !== 'string') {
     throw new Error(`Invalid company symbol: ${symbol}`);
@@ -1863,23 +1915,33 @@ module.exports.getCompanyDetails = async function getCompanyDetails(symbol) {
       logo: data.logo || null,
     };
 
-    // Insert or update company record in Prisma
+    // First upsert the company
     const company = await prisma.company.upsert({
       where: { symbol: companyData.symbol },
       update: companyData,
       create: companyData,
     });
 
-    return company;
+    // Now upsert the stock linked to this company
+    const stock = await prisma.stock.upsert({
+      where: { symbol: upperSymbol },
+      update: {
+        company_id: company.id,
+        sector: companyData.industry || null,
+      },
+      create: {
+        symbol: upperSymbol,
+        company_id: company.id,
+        sector: companyData.industry || null,
+      },
+    });
+
+    return { company, stock };
   } catch (error) {
     console.error('Error fetching company details:', error);
     throw error;
   }
 };
-
-
-
-
 
 
 

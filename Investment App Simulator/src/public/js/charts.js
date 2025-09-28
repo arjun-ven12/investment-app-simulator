@@ -1606,6 +1606,55 @@ loadUserLimitOrders(userId);
 
 
 
+// window.addEventListener('DOMContentLoaded', function () {
+//   const symbolInput = document.querySelector("input[name='chartSymbol']");
+//   const form = document.querySelector("form");
+//   const companyCardContainer = document.querySelector('.company-card');
+
+//   form.addEventListener('submit', function (event) {
+//     event.preventDefault();
+
+//     const symbol = symbolInput.value.trim();
+//     if (!symbol) {
+//       alert('Please enter a stock symbol.');
+//       return;
+//     }
+
+//     fetch(`/stocks/${symbol}`)
+//       .then(response => {
+//         if (response.ok) return response.json();
+//         return response.json().then(data => {
+//           throw new Error(`Error fetching company data: ${data.error}`);
+//         });
+//       })
+//       .then(company => {
+//         companyCardContainer.innerHTML = `
+//         <div class="company-card-content">
+//           <div class="company-logo">
+//             ${company.logo ? `<img src="${company.logo}" alt="${company.name} logo" width="100">` : ''}
+//           </div>
+//           <h2>${company.name} (${company.symbol})</h2>
+//           <p><strong>Country:</strong> ${company.country || 'N/A'}</p>
+//           <p><strong>Exchange:</strong> ${company.exchange || 'N/A'}</p>
+//           <p><strong>Industry:</strong> ${company.industry || 'N/A'}</p>
+//           <p><strong>Founded:</strong> ${company.founded || 'N/A'}</p>
+//           <p><strong>Market Cap:</strong> ${company.marketCapitalization ? '$' + company.marketCapitalization.toLocaleString() : 'N/A'}</p>
+//           <p><strong>Shares Outstanding:</strong> ${company.shareOutstanding ? company.shareOutstanding.toLocaleString() : 'N/A'}</p>
+//           <p><strong>Website:</strong> ${company.website ? `<a href="${company.website}" target="_blank">${company.website}</a>` : 'N/A'}</p>
+//         </div>
+//       `;
+//       })
+//       .catch(error => {
+//         console.error('Error fetching company data:', error);
+//         companyCardContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+//       });
+//   });
+
+
+// });
+
+
+
 window.addEventListener('DOMContentLoaded', function () {
   const symbolInput = document.querySelector("input[name='chartSymbol']");
   const form = document.querySelector("form");
@@ -1624,36 +1673,48 @@ window.addEventListener('DOMContentLoaded', function () {
       .then(response => {
         if (response.ok) return response.json();
         return response.json().then(data => {
-          throw new Error(`Error fetching company data: ${data.error}`);
+          throw new Error(`Error fetching data: ${data.error}`);
         });
       })
-      .then(company => {
+      .then(data => {
+        const { company, stock } = data;
+
         companyCardContainer.innerHTML = `
-        <div class="company-card-content">
-          <div class="company-logo">
-            ${company.logo ? `<img src="${company.logo}" alt="${company.name} logo" width="100">` : ''}
+          <div class="company-card-content">
+            <div class="company-logo">
+              ${company.logo ? `<img src="${company.logo}" alt="${company.name} logo" width="100">` : ''}
+            </div>
+            <h2>${company.name} (${company.symbol})</h2>
+            <p><strong>Country:</strong> ${company.country || 'N/A'}</p>
+            <p><strong>Exchange:</strong> ${company.exchange || 'N/A'}</p>
+            <p><strong>Industry:</strong> ${company.industry || 'N/A'}</p>
+            <p><strong>Founded:</strong> ${company.founded || 'N/A'}</p>
+            <p><strong>Market Cap:</strong> ${
+              company.marketCapitalization
+                ? '$' + company.marketCapitalization.toLocaleString()
+                : 'N/A'
+            }</p>
+            <p><strong>Shares Outstanding:</strong> ${
+              company.shareOutstanding
+                ? company.shareOutstanding.toLocaleString()
+                : 'N/A'
+            }</p>
+            <p><strong>Website:</strong> ${
+              company.website
+                ? `<a href="${company.website}" target="_blank">${company.website}</a>`
+                : 'N/A'
+            }</p>
+
+
           </div>
-          <h2>${company.name} (${company.symbol})</h2>
-          <p><strong>Country:</strong> ${company.country || 'N/A'}</p>
-          <p><strong>Exchange:</strong> ${company.exchange || 'N/A'}</p>
-          <p><strong>Industry:</strong> ${company.industry || 'N/A'}</p>
-          <p><strong>Founded:</strong> ${company.founded || 'N/A'}</p>
-          <p><strong>Market Cap:</strong> ${company.marketCapitalization ? '$' + company.marketCapitalization.toLocaleString() : 'N/A'}</p>
-          <p><strong>Shares Outstanding:</strong> ${company.shareOutstanding ? company.shareOutstanding.toLocaleString() : 'N/A'}</p>
-          <p><strong>Website:</strong> ${company.website ? `<a href="${company.website}" target="_blank">${company.website}</a>` : 'N/A'}</p>
-        </div>
-      `;
+        `;
       })
       .catch(error => {
-        console.error('Error fetching company data:', error);
+        console.error('Error fetching stock/company data:', error);
         companyCardContainer.innerHTML = `<p>Error: ${error.message}</p>`;
       });
   });
-
-
 });
-
-
 
 
 
