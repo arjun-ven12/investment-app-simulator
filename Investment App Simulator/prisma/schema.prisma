@@ -42,39 +42,16 @@ model TaskAssignment {
 }
 
 
-model Company {
-  id                   Int       @id @default(autoincrement())
-  symbol               String    @unique
-  name                 String
-  country              String?
-  currency             String?
-  exchange             String?
-  founded              Int?
-  phone                String?
-  website              String?
-  industry             String?
-  marketCapitalization Float?
-  shareOutstanding     Float?
-  logo                 String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime? @updatedAt
-
-  stocks               Stock[]
-
-  @@index([symbol])
-}
-
-
 model Stock {
   stock_id       Int              @id @default(autoincrement())
   symbol         String           @unique @db.VarChar(10)
   sector         String?          @db.VarChar(100)
-  company_id     Int?
+  company_id     Int? 
   change         Int?
   favoriteStock  FavoriteStock[]
   hist_prices    HistPrice[]
   limitOrder     LimitOrder[]
-  company        Company?         @relation(fields: [company_id], references: [id])
+  company    Company?  @relation(fields: [company_id], references: [id])
   trading        Trade[]
   intradayPrice2 IntradayPrice2[]
   intradayPrice3 IntradayPrice3[]
@@ -429,4 +406,26 @@ model StopLimitOrder {
   stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
 
   @@index([stockId])
+}
+
+model Company {
+  id                   Int       @id @default(autoincrement())
+  symbol               String    @unique
+  name                 String
+  country              String?
+  currency             String?
+  exchange             String?
+  founded              Int?
+  phone                String?
+  website              String?
+  industry             String?
+  marketCapitalization Float?
+  shareOutstanding     Float?
+  logo                 String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime? @updatedAt
+  stock_id Int?  // <-- add this @unique @unique
+
+  stock  Stock[]
+  @@index([symbol])
 }
