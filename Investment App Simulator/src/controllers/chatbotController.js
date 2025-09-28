@@ -5,7 +5,7 @@ const prisma = require('../../prisma/prismaClient');
 //////////////////////////////////////////////////////
 
 module.exports.generateResponse = async (req, res) => {
-  const { prompt, model = "gpt-4o-mini", max_tokens = 200, userId } = req.body;
+  const { prompt, model = "gpt-3.5", max_tokens = 4000, userId } = req.body;
 
   if (!prompt) return res.status(400).json({ error: "Prompt is required." });
 
@@ -38,7 +38,7 @@ module.exports.getUserPortfolio = async function (req, res) {
     }
 
     try {
-        const portfolio = await chatModel.getUserPortfolio(userId);
+        const portfolio = await chatbotModel.getUserPortfolio(userId);
 
 
         return res.status(200).json(portfolio);
@@ -52,8 +52,6 @@ module.exports.getUserPortfolio = async function (req, res) {
         return res.status(500).json({ error: error.message || 'Server error' });
     }
 };
-
-
 
 /**
  * GET /api/chatbot/portfolio-advice/:userId
@@ -80,31 +78,44 @@ module.exports.getPortfolioAdvice = async (req, res) => {
     });
 
     const recentTrades = await Promise.all(
-      recentTradesRaw.map(async (t) => {
-        const stock = await prisma.stock.findUnique({
-          where: { stock_id: t.stockId },
+  recentTradesRaw.map(async (t) => {
+    const stock = await prisma.stock.findUnique({
+      where: { stock_id: t.stockId },
+      select: {
+        symbol: true,
+        company: {
           select: {
-            symbol: true,
-            company: {
-              select: {
-                name: true,
-                industry: true // get industry from Company table
-              }
-            }
+            name: true,
+            industry: true,
+            country: true,
+            currency: true,
+            exchange: true,
+            marketCapitalization: true,
+            website: true,
+            logo: true
           }
-        });
+        }
+      }
+    });
 
-        return {
-          symbol: stock?.symbol || "UNKNOWN",
-          companyName: stock?.company?.Name || "UNKNOWN",
-          industry: stock?.company?.Industry || "UNKNOWN", // replaced sector
-          quantity: t.quantity,
-          totalAmount: t.totalAmount,
-          tradeType: t.tradeType,
-          tradeDate: t.tradeDate
-        };
-      })
-    );
+    return {
+      symbol: stock?.symbol || "UNKNOWN",
+      companyName: stock?.company?.name || "UNKNOWN",
+      industry: stock?.company?.industry || "UNKNOWN",
+      country: stock?.company?.country || "UNKNOWN",
+      currency: stock?.company?.currency || "USD",
+      exchange: stock?.company?.exchange || "UNKNOWN",
+      marketCap: stock?.company?.marketCapitalization || 0,
+      website: stock?.company?.website || "",
+      logo: stock?.company?.logo || "",
+      quantity: t.quantity,
+      totalAmount: t.totalAmount,
+      tradeType: t.tradeType,
+      tradeDate: t.tradeDate
+    };
+  })
+);
+
 const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
@@ -113,69 +124,89 @@ const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
     const prompt = `
 SYSTEM:
 You are a friendly, mentor-style financial coach for paper traders. 
-Tone: constructive, encouraging, mentor-like. 
-Avoid alarmist words. Warn about risks but highlight positives and opportunities. 
+Tone: constructive, encouraging, mentor-like. Avoid alarmist words. Warn about risks but highlight positives and opportunities. 
 Do NOT give legal or tax advice. Always include: "This advice is for educational purposes only and is not financial advice."
 RULE: Recommend only individual stocks that exist in the portfolio or are commonly traded US stocks (no ETFs, crypto, or bonds).
 
 CONTEXT:
-You have access to:
-1) Portfolio summary (top holdings, sector allocation, current value, weight percentages)
-2) Precomputed metrics including:
-   - Risk score (0-100)
-   - Scenario simulations (multi-stock correlated moves)
-   - Suggested stop-loss & limit-buy prices
-   - Volatility, beta, Sharpe ratio, probability of drawdowns
-3) Last 5 trades (symbol, quantity, USD impact, trade type, trade date)
+You have access to the following data for the user:
+
+1️⃣ Portfolio summary (top holdings, sector allocation, current value, weight percentages):
+${JSON.stringify(summary)}
+
+2️⃣ Precomputed metrics including:
+- Risk score (0-100)
+- Scenario simulations (portfolio-level and individual stock-level changes)
+- Suggested stop-loss & limit-buy prices
+- Volatility, beta, Sharpe ratio, probability of drawdowns
+${JSON.stringify(precomputed)}
+
+3️⃣ Last 5 trades (symbol, quantity, USD impact, trade type, trade date):
+${JSON.stringify(recentTrades)}
+
 User risk profile: ${riskProfile}
-Portfolio summary: ${JSON.stringify(summary, null, 2)}
-Scenario analysis: ${JSON.stringify(scenarioAnalysis, null, 2)}
-Precomputed metrics: ${JSON.stringify(precomputed, null, 2)}
 
 TASK:
-Provide a detailed portfolio critique and actionable advice based on the data provided. 
+Provide a detailed, **personalized portfolio critique** and actionable advice based on the user’s holdings, precomputed metrics, and recent trades. Tie recommendations to recent trades (e.g., how AAPL purchase affects tech exposure) and portfolio history.
+ - Strengths
+   - Weaknesses (concentration, ROE, sector allocation, cash level)
+   - Scenario analysis (positive/neutral/negative outcomes in a table format)
 Use the GOALS and RULES below to guide your response.
+- Provide 3 specific stock recommendations for diversification. 
+- Each recommendation must include: sector, rationale, expected risk/return, and fit with the user’s risk profile. 
+- Do not recommend ETFs, bonds, or crypto.
+- **Important**: For recommended stocks, do NOT include exact stock prices. Use approximate shares or percentages instead, e.g., "~10 shares at current market price" or "invest 5% of portfolio".
+- Existing holdings, scenario analysis, and stop-loss/limit-buy guidance can remain exact numbers.
+- Provide stop-loss / limit-buy guidance for recommended stocks as a % buffer (e.g., 5-10% below/above current price).
+- Show numeric-backed reallocation recommendations (USD totals, % portfolio allocation).
+- Highlight concentration risks (>40%), sector diversification, and cash allocation.
+
 
 GOALS:
-- Critique the portfolio accurately but mentor-style; recognize strengths.
-- Personalize using exact percentages, USD impact, risk metrics (Sharpe, beta, volatility).
-- Provide **scenario analysis**:
-    * Portfolio-level impact of multi-stock or sector moves
-    * Expected return vs worst-case drawdown
-    * Probabilistic drawdowns (% chance of X% loss)
-- Give **actionable tips**:
+- Critique strengths and weaknesses using exact weights, USD values, and risk metrics.
+- Provide **balanced scenario analysis**: show potential upside, downside, and neutral outcomes.
+- Include **numeric-backed, actionable recommendations**:
+    * Suggest reallocation by sector and by exact USD/percentage.
+    * Highlight over-concentrated holdings (>40%).
+    * Include stop-loss/limit-buy prices with rationale and USD impact.
+    
+- For each recommended stock, provide:
+    * Short-term vs long-term suggested action
+    * Expected return
+    * Risk score (0-100)
+    * Fit with user risk profile
+- Make diversification actionable: which sectors to increase/decrease, effect on portfolio stability, expected return.
+- Include behavioral finance notes (e.g., concentration risk, emotional biases).
+- For each recommended stock, explain why it fits current market conditions or macro trends (e.g., oil prices, consumer spending, interest rates, global demand) in a concise 1-2 sentence rationale.
+- Include both sector rationale and macro trend narrative for recommended stocks.
+- Example format: "XOM: Energy sector exposure; benefits from rising oil prices and global demand.
+- Show cash allocation concretely: how much remains after reallocations.
+- Maintain short, clear, mentor-style sentences.
+
+
+  
+- Give actionable tips:
     * Stop-loss / limit-buy prices with rationale and USD impact
     * Rebalancing suggestions with expected effect on return & volatility
     * Sector diversification recommendations
     * Cash allocation advice for diversification
-- Include **behavioral finance notes** and optional tax/fees notes where relevant.
-- Format JSON strictly according to the existing schema.
+  
 
 RULES:
-- Mention recent trades and their effect on concentration or risk.
-- Highlight holdings >40% and their USD exposure.
-- Keep sentences short, mentor-style, and educational.
+- Reference recent trades explicitly and their effect on concentration or risk.
+- Only recommend traded US stocks (no ETFs, crypto, or bonds).
 - Provide multiple actionable recommendations with numeric justification.
-- Balance warnings with positive reinforcement.
-RULE: Recommend only individual stocks that exist in the portfolio or are commonly traded US stocks (no ETFs, crypto, or bonds).
-
-
-DATA:
---- RISK PROFILE ---
-${riskProfile.toUpperCase()}
---- PORTFOLIO SUMMARY ---
-${JSON.stringify(summary, null, 2)}
-
---- RECENT TRADES ---
-${JSON.stringify(recentTrades, null, 2)}
-
---- PRECOMPUTED METRICS ---
-${JSON.stringify(precomputed, null, 2)}
+- Do NOT invent exact numbers; only use values derivable from portfolio summary, trade history, and precomputed metrics.
+- Prefer cross-sector diversification (e.g., if Pharma is heavy, consider Energy, Industrials, Financials, Consumer Discretionary).
+- Use "~X shares at current market price" for stock recommendations.
+- STRICT RULE: Do NOT recommend any stock in a sector that already represents more than 40% of the portfolio (e.g., Pharmaceuticals, Technology). Only pick stocks from underrepresented sectors: Energy, Industrials, Financials, Consumer Discretionary, or Utilities. Ensure the sector allocation improves diversification.
+- Add in a disclaimer that this is only for educational purposes and not financial advice.
 END
 `;
 
+
     // 5️⃣ Call LLM
-    const advice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 600);
+    const advice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
 
     return res.status(200).json({ advice, portfolio: summary, recentTrades, riskProfile });
   } catch (error) {

@@ -1,14 +1,16 @@
-import prisma from '../../prisma/prismaClient.js';
+import prisma from "../../prisma/prismaClient.js";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-
-});
+const openai = new OpenAI({});
 
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
-const generateResponse = async (prompt, model = "gpt-4o-mini", max_tokens = 150) => {
+const generateResponse = async (
+  prompt,
+  model = "gpt-4o-mini",
+  max_tokens = 150
+) => {
   try {
     const completion = await openai.chat.completions.create({
       model,
@@ -25,148 +27,6 @@ const generateResponse = async (prompt, model = "gpt-4o-mini", max_tokens = 150)
  * Build user portfolio from trades (FIFO P/L). Returns { openPositions, closedPositions }.
  * Keeps your existing logic but consolidated here.
  */
-async function getUserPortfolio(userId) {
-  if (!userId || typeof userId !== "number") throw new Error("Invalid user ID");
-
-  const userTrades = await prisma.trade.findMany({
-    where: { userId },
-    orderBy: { tradeDate: "asc" },
-    select: {
-      stockId: true,
-      quantity: true,
-      totalAmount: true, // total of trade
-      tradeType: true,
-      tradeDate: true
-    }
-  });
-
-  if (!userTrades || userTrades.length === 0) {
-    return { openPositions: [], closedPositions: [] };
-  }
-
-  // FIFO grouping and P/L calculation
-  const stockMap = new Map();
-
-  for (const trade of userTrades) {
-    const { stockId, quantity, totalAmount } = trade;
-
-    if (!stockMap.has(stockId)) {
-      stockMap.set(stockId, {
-        buyQueue: [],
-        netQuantity: 0,
-        realizedProfitLoss: 0,
-        totalBoughtQty: 0,
-        totalBoughtValue: 0,
-        totalSoldValue: 0
-      });
-    }
-
-    const group = stockMap.get(stockId);
-
-    if (quantity > 0) {
-      // BUY
-      group.buyQueue.push({
-        quantity,
-        pricePerShare: Number(totalAmount) / quantity
-      });
-      group.netQuantity += quantity;
-      group.totalBoughtQty += quantity;
-      group.totalBoughtValue += Number(totalAmount);
-    } else if (quantity < 0) {
-      // SELL
-      let sellQty = -quantity;
-      const sellProceeds = Number(totalAmount);
-      group.totalSoldValue += sellProceeds;
-
-      // Allocate proceeds FIFO
-      while (sellQty > 0 && group.buyQueue.length > 0) {
-        const buy = group.buyQueue[0];
-        if (buy.quantity <= sellQty) {
-          // full lot consumed
-          const proceedsPortion = (buy.quantity / -quantity) * sellProceeds;
-          group.realizedProfitLoss += proceedsPortion - (buy.pricePerShare * buy.quantity);
-          sellQty -= buy.quantity;
-          group.buyQueue.shift();
-        } else {
-          // partial lot consumed
-          const proceedsPortion = (sellQty / -quantity) * sellProceeds;
-          group.realizedProfitLoss += proceedsPortion - (buy.pricePerShare * sellQty);
-          buy.quantity -= sellQty;
-          sellQty = 0;
-        }
-      }
-
-      group.netQuantity += quantity; // negative add
-    }
-  }
-
-  const openPositions = [];
-  const closedPositions = [];
-
-  for (const [stockId, group] of stockMap.entries()) {
-    const { buyQueue, netQuantity, realizedProfitLoss, totalBoughtQty, totalBoughtValue, totalSoldValue } = group;
-
-    // fetch stock details (symbol, company, sector)
-    const stockDetails = await prisma.stock.findUnique({
-      where: { stock_id: stockId },
-      select: {
-        symbol: true,
-        sector: true,
-        company: { select: { name: true } }
-      }
-    });
-
-
-  console.log("Fetching latest price for stockId:", stockId);
-const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-  where: { stockId },
-  orderBy: { createdAt: "desc" },
-  select: { closePrice: true }
-});
-console.log("Latest price record:", latestPriceRecord);
-    const latestPrice = Number(latestPriceRecord?.close ?? 0);
-
-    // open position
-    if (netQuantity > 0) {
-      const totalInvested = buyQueue.reduce((sum, b) => sum + b.quantity * b.pricePerShare, 0);
-      const avgBuyPrice = netQuantity > 0 ? totalInvested / netQuantity : 0;
-      const currentValue = latestPrice * netQuantity;
-      const unrealizedProfitLoss = currentValue - totalInvested;
-      const unrealizedProfitLossPercent = totalInvested > 0 ? (unrealizedProfitLoss / totalInvested) * 100 : 0;
-
-      openPositions.push({
-        stockId,
-        symbol: stockDetails?.symbol ?? "UNKNOWN",
-        companyName: stockDetails?.company?.name ?? "UNKNOWN",
-        sector: stockDetails?.sector ?? "UNKNOWN",
-        quantity: netQuantity,
-        avgBuyPrice: Number(avgBuyPrice.toFixed(2)),
-        currentPrice: Number(latestPrice.toFixed(2)),
-        totalInvested: Number(totalInvested.toFixed(2)),
-        currentValue: Number(currentValue.toFixed(2)),
-        unrealizedProfitLoss: Number(unrealizedProfitLoss.toFixed(2)),
-        unrealizedProfitLossPercent: Number(unrealizedProfitLossPercent.toFixed(2)),
-        realizedProfitLoss: Number(realizedProfitLoss.toFixed(2))
-      });
-    }
-
-    // closed / realized
-    if (realizedProfitLoss !== 0 || totalSoldValue > 0) {
-      closedPositions.push({
-        stockId,
-        symbol: stockDetails?.symbol ?? "UNKNOWN",
-        companyName: stockDetails?.company?.name ?? "UNKNOWN",
-        totalBoughtQty,
-        totalBoughtValue: Number(totalBoughtValue.toFixed(2)),
-        totalSoldValue: Number(totalSoldValue.toFixed(2)),
-        realizedProfitLoss: Number(realizedProfitLoss.toFixed(2))
-      });
-    }
-  }
-
-  return { openPositions, closedPositions };
-}
-
 
 /**
  * Build concise portfolio summary for LLM or UI.
@@ -175,13 +35,19 @@ console.log("Latest price record:", latestPriceRecord);
 function buildPortfolioSummary(portfolio, topN = 6) {
   const open = portfolio.openPositions || [];
   const totalValue = open.reduce((s, p) => s + (p.currentValue || 0), 0) || 0;
-  const totalUnrealizedPL = open.reduce((s, p) => s + (p.unrealizedProfitLoss || 0), 0);
-  const totalRealizedPL = open.reduce((s, p) => s + (p.realizedProfitLoss || 0), 0);
+  const totalUnrealizedPL = open.reduce(
+    (s, p) => s + (p.unrealizedProfitLoss || 0),
+    0
+  );
+  const totalRealizedPL = open.reduce(
+    (s, p) => s + (p.realizedProfitLoss || 0),
+    0
+  );
 
   const topHoldings = [...open]
     .sort((a, b) => (b.currentValue || 0) - (a.currentValue || 0))
     .slice(0, topN)
-    .map(h => ({
+    .map((h) => ({
       symbol: h.symbol,
       companyName: h.companyName || "UNKNOWN",
       sector: h.sector || "UNKNOWN",
@@ -193,7 +59,10 @@ function buildPortfolioSummary(portfolio, topN = 6) {
       unrealizedPL: h.unrealizedProfitLoss,
       unrealizedPLPercent: h.unrealizedProfitLossPercent,
       realizedPL: h.realizedProfitLoss,
-      weightPct: totalValue > 0 ? Number(((h.currentValue / totalValue) * 100).toFixed(2)) : 0
+      weightPct:
+        totalValue > 0
+          ? Number(((h.currentValue / totalValue) * 100).toFixed(2))
+          : 0,
     }));
 
   // sector exposure
@@ -206,7 +75,7 @@ function buildPortfolioSummary(portfolio, topN = 6) {
     .map(([sector, val]) => ({
       sector,
       value: Number(val.toFixed(2)),
-      pct: totalValue > 0 ? Number(((val / totalValue) * 100).toFixed(2)) : 0
+      pct: totalValue > 0 ? Number(((val / totalValue) * 100).toFixed(2)) : 0,
     }))
     .sort((a, b) => b.pct - a.pct);
 
@@ -225,8 +94,8 @@ function buildPortfolioSummary(portfolio, topN = 6) {
     riskHint: {
       topHoldingPct,
       highestSector,
-      highestSectorPct
-    }
+      highestSectorPct,
+    },
   };
 }
 
@@ -274,7 +143,11 @@ function buildScenarios(summary, pctList = [-10, -5, 5]) {
       const changeMult = 1 + pct / 100;
       const positionBefore = Number(h.currentValue || 0);
       const positionAfter = +(positionBefore * changeMult).toFixed(2);
-      const portfolioAfter = +(portfolioBefore - positionBefore + positionAfter).toFixed(2);
+      const portfolioAfter = +(
+        portfolioBefore -
+        positionBefore +
+        positionAfter
+      ).toFixed(2);
 
       scenarios.push({
         stock: h.symbol,
@@ -282,7 +155,7 @@ function buildScenarios(summary, pctList = [-10, -5, 5]) {
         positionValueBefore: +positionBefore,
         positionValueAfter: +positionAfter,
         portfolioValueBefore: +portfolioBefore,
-        portfolioValueAfter: +portfolioAfter
+        portfolioValueAfter: +portfolioAfter,
       });
     }
   }
@@ -298,7 +171,7 @@ function suggestStopsAndLimits(summary) {
     const current = Number(h.currentPrice || 0);
     const weight = Number(h.weightPct || 0);
 
-    const stopPct = weight >= 40 ? 0.08 : weight >= 20 ? 0.10 : 0.12; // 8%-12%
+    const stopPct = weight >= 40 ? 0.08 : weight >= 20 ? 0.1 : 0.12; // 8%-12%
     const suggestedStop = +(current * (1 - stopPct)).toFixed(2);
 
     const limitPct = 0.03;
@@ -310,7 +183,7 @@ function suggestStopsAndLimits(summary) {
       suggestedStopPrice: suggestedStop,
       suggestedLimitBuyPrice: suggestedLimitBuy,
       stopPct: +(stopPct * 100).toFixed(2),
-      weightPct: weight
+      weightPct: weight,
     });
   }
   return recs;
@@ -320,14 +193,18 @@ function suggestStopsAndLimits(summary) {
  * Build chart-friendly data (pie & bar)
  */
 function buildChartData(summary) {
-  const labels = (summary.topHoldings || []).map(h => h.symbol);
-  const values = (summary.topHoldings || []).map(h => Number(h.currentValue || 0));
-  const sectorLabels = (summary.sectorExposure || []).map(s => s.sector);
-  const sectorValues = (summary.sectorExposure || []).map(s => Number(s.value || 0));
+  const labels = (summary.topHoldings || []).map((h) => h.symbol);
+  const values = (summary.topHoldings || []).map((h) =>
+    Number(h.currentValue || 0)
+  );
+  const sectorLabels = (summary.sectorExposure || []).map((s) => s.sector);
+  const sectorValues = (summary.sectorExposure || []).map((s) =>
+    Number(s.value || 0)
+  );
   return {
     holdingsPie: { labels, values },
     topHoldingsBar: { labels, values },
-    sectorPie: { labels: sectorLabels, values: sectorValues }
+    sectorPie: { labels: sectorLabels, values: sectorValues },
   };
 }
 
@@ -344,7 +221,7 @@ function buildPrecomputed(summary) {
     riskScore,
     scenarios,
     orderSuggestions,
-    charts
+    charts,
   };
 }
 
@@ -355,9 +232,9 @@ function buildPrecomputed(summary) {
 async function getDailyReturns(stockId, days = 30) {
   const prices = await prisma.intradayPrice3.findMany({
     where: { stockId },
-    orderBy: { date: 'desc' },
+    orderBy: { date: "desc" },
     take: days,
-    select: { closePrice: true, date: true }
+    select: { closePrice: true, date: true },
   });
 
   const sorted = prices.reverse(); // oldest -> newest
@@ -377,7 +254,8 @@ async function getDailyReturns(stockId, days = 30) {
 function stdDev(arr) {
   if (!arr.length) return 0;
   const mean = arr.reduce((s, x) => s + x, 0) / arr.length;
-  const variance = arr.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / arr.length;
+  const variance =
+    arr.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / arr.length;
   return Math.sqrt(variance);
 }
 
@@ -392,7 +270,8 @@ function computeBeta(stockReturns, benchmarkReturns) {
   const meanStock = stockReturns.slice(-n).reduce((s, x) => s + x, 0) / n;
   const meanBench = benchmarkReturns.slice(-n).reduce((s, x) => s + x, 0) / n;
 
-  let cov = 0, varBench = 0;
+  let cov = 0,
+    varBench = 0;
   for (let i = 0; i < n; i++) {
     cov += (stockReturns[i] - meanStock) * (benchmarkReturns[i] - meanBench);
     varBench += Math.pow(benchmarkReturns[i] - meanBench, 2);
@@ -449,11 +328,183 @@ async function buildPrecomputedExtended(summary, benchmarkId = 0) {
       volatility: +vol.toFixed(4),
       beta: +beta.toFixed(4),
       sharpe: +sharpe.toFixed(4),
-      prob10PctDrawdown: +(drawdownProb * 100).toFixed(2)
+      prob10PctDrawdown: +(drawdownProb * 100).toFixed(2),
     });
   }
   return { ...base, extendedMetrics };
 }
+
+async function getUserPortfolio(userId) {
+  if (!userId || typeof userId !== "number") {
+    throw new Error(`Invalid user ID: ${userId}`);
+  }
+
+  // Fetch all trades for the user
+  const userTrades = await prisma.trade.findMany({
+    where: { userId },
+    orderBy: { tradeDate: "asc" },
+    select: {
+      stockId: true,
+      quantity: true, // + for buy, - for sell
+      totalAmount: true, // total value of trade
+      tradeType: true,
+    },
+  });
+
+  if (!userTrades || userTrades.length === 0) {
+    return { openPositions: [], closedPositions: [] };
+  }
+
+  const stockMap = new Map();
+
+  // Process trades
+  for (const trade of userTrades) {
+    const { stockId, quantity, totalAmount } = trade;
+
+    if (!stockMap.has(stockId)) {
+      stockMap.set(stockId, {
+        buyQueue: [],
+        netQuantity: 0,
+        realizedProfitLoss: 0,
+        totalBoughtQty: 0,
+        totalBoughtValue: 0,
+        totalSoldValue: 0,
+      });
+    }
+
+    const group = stockMap.get(stockId);
+
+    if (quantity > 0) {
+      // BUY
+      group.buyQueue.push({
+        quantity,
+        pricePerShare: Number(totalAmount) / quantity,
+      });
+      group.netQuantity += quantity;
+      group.totalBoughtQty += quantity;
+      group.totalBoughtValue += Number(totalAmount);
+    } else if (quantity < 0) {
+      // SELL
+      let sellQty = -quantity; // positive
+      const sellProceeds = Number(totalAmount);
+      group.totalSoldValue += sellProceeds;
+
+      // Allocate proceeds using FIFO
+      while (sellQty > 0 && group.buyQueue.length > 0) {
+        const buy = group.buyQueue[0];
+        if (buy.quantity <= sellQty) {
+          const proceedsPortion = (buy.quantity / -quantity) * sellProceeds;
+          group.realizedProfitLoss +=
+            proceedsPortion - buy.pricePerShare * buy.quantity;
+          sellQty -= buy.quantity;
+          group.buyQueue.shift();
+        } else {
+          const proceedsPortion = (sellQty / -quantity) * sellProceeds;
+          group.realizedProfitLoss +=
+            proceedsPortion - buy.pricePerShare * sellQty;
+          buy.quantity -= sellQty;
+          sellQty = 0;
+        }
+      }
+
+      group.netQuantity += quantity; // negative
+    }
+  }
+
+  const openPositions = [];
+  const closedPositions = [];
+
+  // Build positions
+  for (const [stockId, group] of stockMap.entries()) {
+    const {
+      buyQueue,
+      netQuantity,
+      realizedProfitLoss,
+      totalBoughtQty,
+      totalBoughtValue,
+      totalSoldValue,
+    } = group;
+
+    // Stock details
+    const stockDetails = await prisma.stock.findUnique({
+      where: { stock_id: stockId },
+      select: {
+        symbol: true,
+        sector: true,
+        company: {
+          select: {
+            name: true,
+            industry: true,
+            country: true,
+            currency: true,
+            exchange: true,
+            marketCapitalization: true,
+            website: true,
+            logo: true,
+          },
+        },
+      },
+    });
+
+    // Latest price
+    const latestPriceRecord = await prisma.intradayPrice3.findFirst({
+      where: { stockId },
+      orderBy: { date: "desc" },
+      select: { closePrice: true },
+    });
+    const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
+
+    // Open position (remaining shares)
+    if (netQuantity > 0) {
+      const totalInvested = buyQueue.reduce(
+        (sum, b) => sum + b.quantity * b.pricePerShare,
+        0
+      );
+      const avgBuyPrice = totalInvested / netQuantity;
+      const currentValue = latestPrice * netQuantity;
+      const unrealizedProfitLoss = currentValue - totalInvested;
+      const unrealizedProfitLossPercent =
+        totalInvested > 0 ? (unrealizedProfitLoss / totalInvested) * 100 : 0;
+
+      openPositions.push({
+        symbol: stockDetails?.symbol ?? "UNKNOWN",
+        companyName: stockDetails?.company?.name ?? "UNKNOWN",
+        sector:
+          stockDetails?.sector || stockDetails?.company?.industry || "UNKNOWN",
+        industry: stockDetails?.company?.industry ?? "UNKNOWN",
+        country: stockDetails?.company?.country ?? "UNKNOWN",
+        currency: stockDetails?.company?.currency ?? "USD",
+        exchange: stockDetails?.company?.exchange ?? "UNKNOWN",
+        marketCap: stockDetails?.company?.marketCapitalization ?? 0,
+        website: stockDetails?.company?.website ?? "",
+        logo: stockDetails?.company?.logo ?? "",
+        quantity: netQuantity,
+        avgBuyPrice: avgBuyPrice,
+        currentPrice: latestPrice,
+        totalInvested: totalInvested,
+        currentValue: currentValue,
+        unrealizedProfitLoss: unrealizedProfitLoss,
+        unrealizedProfitLossPercent: unrealizedProfitLossPercent,
+        realizedProfitLoss: realizedProfitLoss,
+      });
+    }
+
+    // Closed / realized portion
+    if (realizedProfitLoss !== 0 || totalSoldValue > 0) {
+      closedPositions.push({
+        symbol: stockDetails?.symbol ?? "UNKNOWN",
+        companyName: stockDetails?.company?.name ?? "UNKNOWN",
+        totalBoughtQty,
+        totalBoughtValue: totalBoughtValue.toFixed(2),
+        totalSoldValue: totalSoldValue.toFixed(2),
+        realizedProfitLoss: realizedProfitLoss.toFixed(2),
+      });
+    }
+  }
+
+  return { openPositions, closedPositions };
+}
+
 export {
   getUserPortfolio,
   buildPortfolioSummary,
@@ -468,5 +519,5 @@ export {
   stdDev,
   computeBeta,
   computeSharpe,
-  probDrawdown
+  probDrawdown,
 };
