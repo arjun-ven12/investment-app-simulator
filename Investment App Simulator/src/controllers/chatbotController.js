@@ -68,7 +68,9 @@ module.exports.getPortfolioAdvice = async (req, res) => {
     // 1️⃣ Fetch portfolio & summary
     const portfolio = await chatbotModel.getUserPortfolio(userId);
     const summary = chatbotModel.buildPortfolioSummary(portfolio);
-
+    const wallet = portfolio.wallet;
+   console.log("Portfolio object:", portfolio);
+console.log("Wallet value:", portfolio.wallet);
     // 2️⃣ Fetch last 5 trades with enriched stock info
     const recentTradesRaw = await prisma.trade.findMany({
       where: { userId },
@@ -119,6 +121,7 @@ module.exports.getPortfolioAdvice = async (req, res) => {
 const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
+    console.log(wallet)
 
     // 4️⃣ Construct LLM prompt
     const prompt = `
@@ -145,9 +148,9 @@ ${JSON.stringify(precomputed)}
 ${JSON.stringify(recentTrades)}
 
 User risk profile: ${riskProfile}
-
+️⃣ User wallet (cash available to invest): $${wallet}
 TASK:
-Provide a detailed, **personalized portfolio critique** and actionable advice based on the user’s holdings, precomputed metrics, and recent trades. Tie recommendations to recent trades (e.g., how AAPL purchase affects tech exposure) and portfolio history.
+Provide a detailed, **personalized portfolio critique** and actionable advice based on the user’s holdings, wallet (how much money they can invest), precomputed metrics, and recent trades. Tie recommendations to recent trades (e.g., how AAPL purchase affects tech exposure) and portfolio history.
  - Strengths
    - Weaknesses (concentration, ROE, sector allocation, cash level)
    - Scenario analysis (positive/neutral/negative outcomes in a table format)

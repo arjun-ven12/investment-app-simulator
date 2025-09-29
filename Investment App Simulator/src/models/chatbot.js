@@ -339,6 +339,16 @@ async function getUserPortfolio(userId) {
     throw new Error(`Invalid user ID: ${userId}`);
   }
 
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  select: {
+    wallet: true,
+  },
+});
+console.log(user)
+console.log(user.wallet)
+const wallet = user.wallet
+
   // Fetch all trades for the user
   const userTrades = await prisma.trade.findMany({
     where: { userId },
@@ -352,7 +362,7 @@ async function getUserPortfolio(userId) {
   });
 
   if (!userTrades || userTrades.length === 0) {
-    return { openPositions: [], closedPositions: [] };
+    return { openPositions: [], closedPositions: [], wallet  };
   }
 
   const stockMap = new Map();
@@ -502,8 +512,10 @@ async function getUserPortfolio(userId) {
     }
   }
 
-  return { openPositions, closedPositions };
+  return { openPositions, closedPositions, wallet}
 }
+
+
 
 export {
   getUserPortfolio,
