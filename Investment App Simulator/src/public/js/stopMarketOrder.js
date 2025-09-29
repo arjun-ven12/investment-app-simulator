@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const userId = localStorage.getItem('userId');
   // ===== Element references =====
   const tradingForm = document.getElementById("trading-form");
   const orderTypeSelect = document.getElementById("order-type");
@@ -30,6 +31,54 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  function attachCancelHandlers() {
+    const cancelButtons = document.querySelectorAll(".cancel-btn");
+
+    cancelButtons.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const orderId = btn.dataset.id;
+        const orderType = btn.dataset.type;
+
+        if (!confirm("Are you sure you want to cancel this order?")) return;
+
+        try {
+          const res = await fetch(`/${orderType}/cancel/${orderId}`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Failed to cancel order");
+
+          alert("Order cancelled successfully!");
+
+          // Refresh tables
+          if (orderType === "stop-limit") fetchStopLimitOrders();
+          else if (orderType === "stop-market") fetchStopMarketOrders();
+        } catch (err) {
+          console.error(err);
+          alert(err.message || "Error cancelling order");
+        }
+      });
+    });
+  }
+  function formatToSGT(utcString) {
+    if (!utcString) return "N/A";
+    const date = new Date(utcString);
+    // Convert to Singapore time
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Singapore",
+    };
+    return new Intl.DateTimeFormat("en-SG", options).format(date);
+  }
   // ===== Disclaimers (kept from your original code) =====
   const stopLimitDisclaimer = document.createElement("small");
   stopLimitDisclaimer.id = "stop-limit-disclaimer";
@@ -167,6 +216,43 @@ document.addEventListener("DOMContentLoaded", () => {
   // initialize visibility to nothing selected (or whatever the select default is)
   setVisibilityForOrderType(orderTypeSelect.value || "");
 
+  async function fetchStopMarketOrders() {
+    try {
+      const res = await fetch(`/stop-market/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        renderStopMarketTable(data.orders || []);
+      } else {
+        console.error("Failed to fetch stop-market orders:", data);
+      }
+    } catch (err) {
+      console.error("Error fetching stop-market orders:", err);
+    }
+  }
+
+  async function fetchStopLimitOrders() {
+    try {
+      const res = await fetch(`/stop-limit/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        renderStopLimitTable(data.orders || []);
+      } else {
+        console.error("Failed to fetch stop-limit orders:", data);
+      }
+    } catch (err) {
+      console.error("Error fetching stop-limit orders:", err);
+    }
+  }
+
+
   // ===== Form submit (keeps your logic, with small protections) =====
   tradingForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -258,6 +344,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function renderStopMarketTable(orders = []) {
+    const tableBody = document.getElementById("stop-market-table-body");
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+
+    orders.forEach((order) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+      <td>${formatToSGT(order.createdAt)}</td>
+      <td>${order.stock?.symbol || "N/A"}</td>
+      <td>${order.tradeType}</td>
+      <td>${order.quantity}</td>
+      <td>${order.triggerPrice}</td>
+      <td>${order.status}</td>
+         <td>
+                ${order.status === "PENDING" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>` : ""}
+            </td>
+    `;
+      tableBody.appendChild(tr);
+    });
+      attachCancelHandlers();
+  }
+
+  function renderStopLimitTable(orders = []) {
+    const tableBody = document.getElementById("stop-limit-table-body");
+    if (!tableBody) return;
+
+    tableBody.innerHTML = "";
+    orders.forEach((order) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+      <td>${formatToSGT(order.createdAt)}</td>
+      <td>${order.stock?.symbol || "N/A"}</td>
+      <td>${order.tradeType}</td>
+      <td>${order.quantity}</td>
+      <td>${order.triggerPrice}</td>
+      <td>${order.limitPrice}</td>
+      <td>${order.status}</td>
+         <td>
+                ${order.status === "PENDING" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-limit">Cancel</button>` : ""}
+            </td>
+    `;
+      tableBody.appendChild(tr);
+    });
+      attachCancelHandlers();
+  }
+
   // ===== (Optionally) socket + fetch logic from your original file =====
   // Keep the server fetch/socket code below or in other modules as you had before.
   // I intentionally separated UI logic from network calls above for clarity.
@@ -283,4 +416,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderStopLimitTable([]);
   renderStopMarketTable([]);
+
 });
