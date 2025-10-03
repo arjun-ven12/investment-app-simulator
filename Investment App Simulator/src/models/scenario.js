@@ -443,6 +443,40 @@ module.exports.getParticipantId = async function getParticipantId(scenarioId, us
   return participant.id;
 }
 
+
+// Save replay progress
+module.exports.saveReplayProgress = async (userId, scenarioId, symbol, currentIndex, speed) => {
+  return prisma.scenarioReplayProgress.upsert({
+    where: { userId_scenarioId_symbol: { userId, scenarioId: Number(scenarioId), symbol } },
+    update: { currentIndex, speed, updatedAt: new Date() },
+    create: { userId, scenarioId: Number(scenarioId), symbol, currentIndex, speed },
+  });
+};
+
+// Get replay progress
+module.exports.getReplayProgress = async (userId, scenarioId, symbol) => {
+  const progress = await prisma.scenarioReplayProgress.findUnique({
+    where: { userId_scenarioId_symbol: { userId, scenarioId: Number(scenarioId), symbol } },
+  });
+  return progress || { currentIndex: 0, speed: 1 };
+};
+
+
+module.exports.loadProgress = async (scenarioId, userId, symbol) => {
+  if (symbol) {
+    // Load by symbol (composite key)
+    const progress = await prisma.scenarioReplayProgress.findUnique({
+      where: { userId_scenarioId_symbol: { userId, scenarioId: Number(scenarioId), symbol } },
+    });
+    return progress ? { lastIndex: progress.lastIndex, speed: progress.speed, symbol: progress.symbol } : null;
+  } else {
+    // Load all progress entries for this scenario/user
+    const progresses = await prisma.scenarioReplayProgress.findMany({
+      where: { userId, scenarioId: Number(scenarioId) },
+    });
+    return progresses.map(p => ({ lastIndex: p.lastIndex, speed: p.speed, symbol: p.symbol }));
+  }
+};
 // module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
 //   // 1. Get participant
 //   const participant = await prisma.scenarioParticipant.findFirst({

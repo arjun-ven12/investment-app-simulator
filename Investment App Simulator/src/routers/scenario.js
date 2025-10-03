@@ -26,7 +26,7 @@ router.get('/:id/leaderboard', jwtMiddleware.verifyToken, scenarioController.get
 
 
 // Replay routes
-router.get('/:scenarioId/stocks/:symbol/replay', jwtMiddleware.verifyToken,scenarioController.getReplayDataController);
+router.get('/:scenarioId/stocks/:symbol/replay', jwtMiddleware.verifyToken, scenarioController.getReplayDataController);
 router.get('/:scenarioId/stocks/:symbol/replay/progress/:userId', jwtMiddleware.verifyToken, scenarioController.getReplayProgressController);
 router.post('/:scenarioId/stocks/:symbol/replay/save', jwtMiddleware.verifyToken, scenarioController.saveReplayProgressController);
 
@@ -43,6 +43,12 @@ router.get("/:scenarioId/wallet", jwtMiddleware.verifyToken, scenarioController.
 
 router.get("/:scenarioId/orders", jwtMiddleware.verifyToken, scenarioController.getOrderHistoryController);
 router.get("/:scenarioId/portfolio", jwtMiddleware.verifyToken, scenarioController.getPortfolioController);
+
+// Replay routes
+router.get('/:scenarioId/stocks/:symbol/replay/progress',jwtMiddleware.verifyToken, scenarioController.getReplayProgressController);
+
+router.post('/:scenarioId/save-progress',jwtMiddleware.verifyToken,scenarioController.saveReplayProgressController);
+router.get("/:scenarioId/load-progress", jwtMiddleware.verifyToken, scenarioController.loadProgress);
 // // GET scenario portfolio by participant ID
 // router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
 module.exports = router;

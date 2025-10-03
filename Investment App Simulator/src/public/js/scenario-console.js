@@ -1,5 +1,42 @@
 let currentSymbol = null; // global
 let isPaused = true; // track pause state globally
+   let scenarioChart = null;
+    let fullData = [];
+    let currentIndex = 0;
+    let replayInterval = null;
+    let countdownInterval = null;
+    let currentSpeed = 3;
+    const VISIBLE_POINTS = 20;
+    let currentChartType = "line";
+
+function pauseReplay() {
+    isPaused = true;
+    if (replayInterval) clearInterval(replayInterval);
+    if (countdownInterval) clearInterval(countdownInterval);
+}
+
+function startReplay() {
+    if (!fullData.length) return alert("Generate the chart first!");
+    pauseReplay();
+    isPaused = false;
+    let intervalMs = 20000 / currentSpeed;
+    let remainingTime = intervalMs / 1000;
+
+    countdownInterval = setInterval(() => {
+        remainingTime--;
+        document.getElementById("next-update-timer").textContent = `Next update in: ${remainingTime}s`;
+    }, 1000);
+
+    replayInterval = setInterval(() => {
+        if (currentIndex >= fullData.length) {
+            pauseReplay();
+            document.getElementById("next-update-timer").textContent = "Replay finished!";
+            return;
+        }
+        plotNextDataPoint();
+        remainingTime = intervalMs / 1000;
+    }, intervalMs);
+}
 
 async function fetchOwnedQuantity(symbol) {
     try {
@@ -69,15 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const speedSelect = document.getElementById("speed-select");
     const currentTimeDiv = document.getElementById("currentTime");
 
-    let scenarioChart = null;
-    let fullData = [];
-    let currentIndex = 0;
-    let replayInterval = null;
-    let countdownInterval = null;
-    let currentSpeed = 3;
-    const VISIBLE_POINTS = 20;
-    let currentSymbol = null;
-    let currentChartType = "line";
 
     priceInput.readOnly = true;
     let allSymbolsData = {}; // { symbol: [{x, c}, ...] }
@@ -418,4 +446,78 @@ document.addEventListener("DOMContentLoaded", () => {
     exportTradesBtn.addEventListener("click", () => exportToCSV(marketOrders, "market_orders.csv"));
     exportLimitOrdersBtn.addEventListener("click", () => exportToCSV(limitOrders, "limit_orders.csv"));
     fetchOrderHistory();
+});
+
+// ===== SAVE & LOAD REPLAY PROGRESS =====
+async function saveReplayProgress() {
+    if (!currentSymbol) return;
+    try {
+        const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+        const token = localStorage.getItem("token");
+        await fetch(`/scenarios/${scenarioId}/save-progress`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                symbol: currentSymbol,
+                currentIndex,
+                currentSpeed,
+            }),
+        });
+        console.log("Progress saved:", { currentSymbol, currentIndex, currentSpeed });
+    } catch (err) {
+        console.error("Failed to save progress:", err);
+    }
+}
+
+async function loadReplayProgress() {
+    try {
+        const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/scenarios/${scenarioId}/load-progress`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.symbol) {
+            currentSymbol = data.symbol;
+            currentIndex = data.currentIndex || 0;
+            currentSpeed = data.currentSpeed || 3;
+            console.log("Progress loaded:", data);
+            if (currentSymbol) await fetchScenarioData(currentSymbol);
+        }
+    } catch (err) {
+        console.error("Failed to load progress:", err);
+    }
+}
+
+// ===== HOOK INTO YOUR EXISTING EVENTS =====
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadReplayProgress(); // restore saved progress on page load
+
+    // Save on pause button click
+    document.getElementById("btn-pause").addEventListener("click", () => {
+        pauseReplay();
+        saveReplayProgress();
+    });
+
+    // Save on page exit/refresh
+    window.addEventListener("beforeunload", () => {
+        saveReplayProgress();
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const saveBtn = document.getElementById("btn-save");
+
+    saveBtn.addEventListener("click", async () => {
+        // Pause replay, but don't auto-save on pause
+        pauseReplay(); 
+
+        // Save explicitly for Save & Exit
+        await saveReplayProgress(); 
+        alert("Progress saved! You can now exit.");
+        window.location.href = "/html/scenarios.html"; // optional redirect
+    });
 });

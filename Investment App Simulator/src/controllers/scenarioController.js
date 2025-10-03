@@ -273,3 +273,49 @@ module.exports.getPortfolioController = async (req, res) => {
   }
 };
 
+
+// Save replay progress controller
+module.exports.saveReplayProgressController = async (req, res) => {
+  try {
+    const { scenarioId, symbol, currentIndex, speed } = req.body;
+    const userId = req.user.id;
+
+    const progress = await scenarioModel.saveReplayProgress(userId, scenarioId, symbol, currentIndex, speed);
+
+    return res.status(200).json({ success: true, progress });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Get replay progress controller
+module.exports.getReplayProgressController = async (req, res) => {
+  try {
+    const { scenarioId, symbol } = req.params;
+    const userId = req.user.id;
+
+    const progress = await scenarioModel.getReplayProgress(userId, scenarioId, symbol);
+
+    return res.status(200).json({ success: true, ...progress });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Load progress
+module.exports.loadProgress = async (req, res) => {
+  const { scenarioId } = req.params;
+  const userId = req.user.id;
+  const { symbol } = req.query; // optional: load by symbol
+
+  try {
+    const data = await scenarioModel.loadProgress(scenarioId, userId, symbol);
+    if (!data) return res.status(404).json({ success: false, message: "No saved progress found" });
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
