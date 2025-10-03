@@ -1,0 +1,391 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  background-color: #121212;
+  color: #fff;
+}
+a { text-decoration: none; color: inherit; }
+
+/* Dashboard Layout */
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 2fr 1fr;
+  height: calc(100vh - 80px);
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #53596B;
+}
+
+h1{
+  text-align: center;
+}
+/* Panels */
+.sidebar, .middle-panel, .right-panel {
+  background: #000;
+  border: 1px solid #53596B;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Sidebar */
+.sidebar h1 { font-size: 1.5rem; color: #E0EBFF; margin-bottom: 20px; }
+.sidebar ul { list-style: none; padding: 0; }
+.sidebar li a { display: block; padding: 6px 8px; border-radius: 4px; transition: 0.3s; }
+.sidebar li a:hover { background-color: #1a1a1a; }
+
+/* Middle Panel */
+.middle-panel h2 { color: #E0EBFF; }
+.ongoing-card {
+  background: #121212;
+  border: 1px solid #53596B;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  font-family: 'Outfit', sans-serif;
+}
+.ongoing-card h3 { color: #E0EBFF; margin-top: 0; }
+.btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: #E0EBFF;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: 'Outfit', sans-serif;
+}
+.btn:hover { background: #c6d7ff; }
+
+/* Right Panel */
+.right-panel h3 { color: #E0EBFF; }
+.right-panel ul { list-style: none; padding: 0; }
+.right-panel li { padding: 10px 0; border-bottom: 1px solid #333; }
+
+/* Tabs */
+.tabs { margin-bottom: 1rem; }
+.tab-btn {
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  border: none;
+  background: #333;
+  color: #fff;
+  border-radius: 5px;
+  font-family: 'Outfit', sans-serif;
+}
+.tab-btn.active { background: #007bff; color: white; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Responsive */
+@media (max-width: 1024px) { .dashboard { grid-template-columns: 1fr; } }
+
+   body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background-color: #121212;
+      color: #fff;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #53596B;
+    }
+    header h1 { font-size: 1.8rem; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 250px 2fr 1fr;
+      height: calc(100vh - 80px);
+      gap: 20px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .sidebar, .middle-panel, .right-panel {
+      background: #000;
+      border: 1px solid #53596B;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar h1 { font-size: 1.5rem; margin-bottom: 20px; color: #E0EBFF; }
+    .sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar li a {
+      display: block;
+      padding: 6px 8px;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    .sidebar li a:hover { background-color: #1a1a1a; }
+
+    .middle-panel h2 { margin: 0 0 10px 0; color: #E0EBFF; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 10px; margin-bottom: 1rem; }
+    .tab-button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: #53596B;
+      color: white;
+      font-weight: 500;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .tab-button.active { background: #007bff; color: white; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .ongoing-card {
+      background: #121212;
+      border: 1px solid #53596B;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+    .ongoing-card h3 { margin-top: 0; color: #E0EBFF; }
+    .ongoing-card p { margin: 8px 0; }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 6px;
+      background: #E0EBFF;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    .btn:hover { background: #c6d7ff; }
+
+    .right-panel h3 { margin-top: 0; color: #E0EBFF; }
+    .right-panel ul { list-style: none; padding: 0; margin: 0; }
+    .right-panel li { padding: 10px 0; border-bottom: 1px solid #333; }
+    .right-panel li:last-child { border-bottom: none; }
+
+    @media (max-width: 1024px) {
+      .dashboard { grid-template-columns: 1fr; }
+    }
+
+    /* Sidebar active highlight */
+.sidebar ul li {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.sidebar ul li:hover {
+  background: #f0f0f0;
+}
+
+.sidebar ul li.active-sidebar {
+  background: #0077ff;
+  color: white;
+  font-weight: 600;
+}
+
+
+
+.sidebar ul li {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #E0EBFF;
+  transition: all 0.2s;
+  margin-bottom: 5px;
+  background: #000000;
+}
+
+.sidebar ul li:hover {
+  background: #E0EBFF;
+  color: #000;
+}
+
+.sidebar ul li.active-sidebar {
+  background: #ffffff; /* White when selected */
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Middle Panel */
+.middle-panel {
+  flex: 1;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #000000;
+  font-weight: 500;
+  color: #E0EBFF;
+  transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+  border-bottom: #E0EBFF 2px;
+}
+
+.tab-button.active {
+  background: #ffffff; /* White when selected */
+  color: #000000;
+}
+
+/* Cards */
+.ongoing-card {
+  background: #000000;
+  color: #E0EBFF;
+  border: 1px solid #53596B;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+
+
+/* Card Buttons */
+.ongoing-card .btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #E0EBFF;
+  color: #000000;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.ongoing-card .btn:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+.ongoing-card .btn:disabled {
+  background: #53596B;
+  color: #E0EBFF;
+  cursor: not-allowed;
+}
+
+.right-panel ul li {
+  margin-bottom: 5px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #000000;
+  color: #E0EBFF;
+  transition: all 0.2s;
+}
+
+.right-panel ul li:hover,
+.right-panel ul li.active-right {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Remove sidebar styling */
+.sidebar {
+  display: none;
+}
+
+/* Adjust dashboard grid now to 2:1 only */
+.dashboard {
+  grid-template-columns: 2fr 1fr; /* Middle:Right */
+}
+
+/* Right Panel Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #000000;
+  font-weight: 500;
+  color: #E0EBFF;
+  transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+
+.tab-button.active {
+  background: #ffffff; /* White when selected */
+  color: #000000;
+}
+
+/* Tab content in right panel */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.ongoing-card {
+  background: #000000;        /* Card background */
+  border: 1px solid #53596B;  /* Card outline */
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: #E0EBFF;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* Hover effect */
+.ongoing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* Button styles */
+.ongoing-card .btn {
+  background: #E0EBFF;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.ongoing-card .btn:hover {
+  background: #c6d7ff;
+}
+
+.ongoing-card .btn:disabled {
+  background: #53596B;
+  color: #E0EBFF;
+  cursor: not-allowed;
+}

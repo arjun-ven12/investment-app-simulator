@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenario Dashboard</title>
+  <link rel="stylesheet" href="../css/scenarios.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+  <header>
+    <h1>Scenario Dashboard</h1>
+  </header>
+
+  <div class="dashboard">
+    <!-- Middle Panel -->
+    <div class="middle-panel">
+      <h2>Play the Scenarios!</h2>
+      <div id="scenario-list">
+        <!-- JS will populate all scenarios here -->
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <h3>My Scenarios</h3>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-button active" data-tab="not-started">Not Started</button>
+        <button class="tab-button" data-tab="in-progress">In Progress</button>
+        <button class="tab-button" data-tab="completed">Completed</button>
+      </div>
+
+      <!-- Tab Content -->
+      <div id="not-started" class="tab-content active">
+        <ul id="my-not-started"></ul>
+      </div>
+      <div id="in-progress" class="tab-content">
+        <ul id="my-in-progress"></ul>
+      </div>
+      <div id="completed" class="tab-content">
+        <ul id="my-completed"></ul>
+      </div>
+    </div>
+
+
+    <script src="../js/navbar.js"></script>
+    <script src="../js/allScenarios.js"></script>
+</body>
+
+</html>

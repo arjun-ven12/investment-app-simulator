@@ -1,0 +1,48 @@
+const express = require('express');
+const router = express.Router();
+const scenarioController = require('../controllers/scenarioController');
+const jwtMiddleware = require('../middlewares/jwtMiddleware');
+
+// -------------------- Admin Routes --------------------
+// Create a scenario
+router.post('/', jwtMiddleware.verifyToken, scenarioController.createScenarioController);
+// Update a scenario
+router.put('/:id', jwtMiddleware.verifyToken, scenarioController.updateScenarioController);
+// Delete a scenario
+router.delete('/:id', jwtMiddleware.verifyToken, scenarioController.deleteScenarioController);
+router.get('/joined', jwtMiddleware.verifyToken, scenarioController.getJoinedScenariosController);
+
+// -------------------- User Routes --------------------
+// Get all scenarios
+router.get('/all', jwtMiddleware.verifyToken, scenarioController.getAllScenariosController);
+// Get Stock Data
+router.get("/:id/stocks/:symbol/data", scenarioController.getScenarioStockData);
+// Get scenario by ID
+router.get('/:id', jwtMiddleware.verifyToken, scenarioController.getScenarioByIdController);
+// Join a scenario
+router.post('/:id/join', jwtMiddleware.verifyToken, scenarioController.joinScenarioController);
+// Get leaderboard for a scenario
+router.get('/:id/leaderboard', jwtMiddleware.verifyToken, scenarioController.getLeaderboardController);
+
+
+// Replay routes
+router.get('/:scenarioId/stocks/:symbol/replay', jwtMiddleware.verifyToken,scenarioController.getReplayDataController);
+router.get('/:scenarioId/stocks/:symbol/replay/progress/:userId', jwtMiddleware.verifyToken, scenarioController.getReplayProgressController);
+router.post('/:scenarioId/stocks/:symbol/replay/save', jwtMiddleware.verifyToken, scenarioController.saveReplayProgressController);
+
+
+// Submit market order
+router.post('/:scenarioId/market-order', jwtMiddleware.verifyToken, scenarioController.submitMarketOrder);
+// Limit orders
+router.post('/:scenarioId/limit-orders', jwtMiddleware.verifyToken, scenarioController.createLimitOrderController);
+// Process limit orders (admin / cron job)
+router.post('/limit/process', jwtMiddleware.verifyToken, scenarioController.processLimitOrdersController);
+// Get User Wallet
+router.get("/:scenarioId/wallet", jwtMiddleware.verifyToken, scenarioController.getWalletController);
+
+
+router.get("/:scenarioId/orders", jwtMiddleware.verifyToken, scenarioController.getOrderHistoryController);
+router.get("/:scenarioId/portfolio", jwtMiddleware.verifyToken, scenarioController.getPortfolioController);
+// // GET scenario portfolio by participant ID
+// router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
+module.exports = router;
