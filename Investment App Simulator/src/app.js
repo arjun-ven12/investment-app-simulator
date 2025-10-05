@@ -34,7 +34,7 @@ const chatbotRouter = require("./routers/chatbot");
 const newsRouter = require("./routers/news")
 const guideRouter = require("./routers/guide")
 const stopMarketRouter = require("./routers/stopMarket");
-
+const scenarioRouter = require("./routers/scenario")
 const stopLimitRouter = require("./routers/stopLimit");
 
 const app = express();
@@ -76,7 +76,7 @@ app.use('/settings', settingRouter);
 app.use('/api/news', newsRouter)
 app.use('/stop-market', stopMarketRouter)
 app.use('/stop-limit', stopLimitRouter)
-
+app.use('/scenarios', scenarioRouter)
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
 app.use('/leaderboard', leaderboardRouter)
