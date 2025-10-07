@@ -619,3 +619,21 @@ module.exports.getScenarioIntradayDataWithProgress = async (scenarioId, symbol, 
     speed: progress?.speed || 1,
   };
 };
+
+module.exports.getScenarioDetails = async (scenarioId) => {
+    const scenario = await prisma.scenario.findUnique({
+      where: { id: Number(scenarioId) },
+      include: {
+        // Include related info if needed, e.g., participants, orders
+        participants: true,
+        marketOrders: true,
+        limitOrders: true,
+      },
+    });
+
+    if (!scenario) {
+      throw new Error('Scenario not found');
+    }
+
+    return scenario;
+  }

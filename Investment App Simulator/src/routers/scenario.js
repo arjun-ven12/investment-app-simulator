@@ -24,7 +24,7 @@ router.post('/:id/join', jwtMiddleware.verifyToken, scenarioController.joinScena
 // Get leaderboard for a scenario
 router.get('/:id/leaderboard', jwtMiddleware.verifyToken, scenarioController.getLeaderboardController);
 router.get('/:scenarioId/intraday/:symbol', jwtMiddleware.verifyToken, scenarioController.getScenarioIntradayController);
-
+router.get('/getDetails/:scenarioId', jwtMiddleware.verifyToken, scenarioController.getScenarioDetailsController)
 
 // Replay routes
 router.get('/:scenarioId/stocks/:symbol/replay', jwtMiddleware.verifyToken, scenarioController.getReplayDataController);

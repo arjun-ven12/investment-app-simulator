@@ -228,6 +228,17 @@ module.exports.getOrderHistoryController = async (req, res) => {
   }
 };
 
+module.exports.getScenarioDetailsController = async (req, res) => {
+  const { scenarioId } = req.params;
+
+  try {
+    const scenario = await scenarioModel.getScenarioDetails(scenarioId);
+    res.json({ success: true, scenario });
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ success: false, message: err.message });
+  }
+};
 
 // Save replay progress controller
 module.exports.saveReplayProgressController = async (req, res) => {

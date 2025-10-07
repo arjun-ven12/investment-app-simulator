@@ -13,6 +13,27 @@ const amountInput = document.getElementById("amount");
 const priceInput = document.getElementById("price");
 const qtyInput = document.getElementById("quantity");
 const orderTypeSelect = document.getElementById("order-type");
+
+
+function updateReplayProgress() {
+    let totalLength = fullData.length;
+    
+    // If fullData is an object of arrays for symbols
+    if (typeof fullData === 'object' && !Array.isArray(fullData)) {
+        totalLength = Object.values(fullData).reduce((sum, arr) => sum + arr.length, 0);
+    }
+
+    if (!totalLength) return; // avoid divide by 0
+
+    const progressPercent = Math.min((currentIndex / totalLength) * 100, 100).toFixed(0);
+    
+    const progressBar = document.getElementById("replay-progress");
+    const progressText = document.getElementById("replay-progress-text");
+    
+    if (progressBar) progressBar.style.width = `${progressPercent}%`;
+    if (progressText) progressText.textContent = `${progressPercent}%`;
+}
+
 function plotNextDataPoint() {
     // stop if we've reached the end of all datasets
     const maxLength = Math.max(...Object.values(allSymbolsData).map(d => d.length));
@@ -49,13 +70,15 @@ function plotNextDataPoint() {
     scenarioChart.update();
 
     currentIndex++;
-
+updateReplayProgress();
     // update displayed price and process limit orders
     if (latestForCurrent) {
         priceInput.value = latestForCurrent.c.toFixed(2);
         updateAmount();
         processLimitOrders(activeSymbol, latestForCurrent.c);
     }
+    // Update progress bar and percentage
+
     // Update current update time on UI
     const currentUpdateTimeDiv = document.getElementById("current-update-time");
     if (latestForCurrent && currentUpdateTimeDiv) {
@@ -257,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         scenarioChart.update();
 
         currentIndex++;
-
+ updateReplayProgress();
         // update displayed price and process limit orders
         if (latestForCurrent) {
             priceInput.value = latestForCurrent.c.toFixed(2);
@@ -312,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //     priceInput.value = first.c.toFixed(2);
             //     updateAmount();
             // }
-
+ updateReplayProgress();
             if (currentIndex > 0) {
                 ds.data = fullData.slice(0, currentIndex).map(item => item.c);
                 scenarioChart.update();
@@ -323,6 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             populateTradeDropdown();
+           
         } catch (err) {
             console.error(err);
             alert(err.message);
@@ -404,6 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     // Call this whenever a new symbol is added to the chart
     populateTradeDropdown();
+     updateReplayProgress();
     tradingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         buyErrorDiv.textContent = "";
@@ -671,6 +696,7 @@ async function loadReplayProgress() {
         }
 
         scenarioChart.update();
+         updateReplayProgress();
         console.log("Replay progress loaded for symbols:", symbols, "Index:", currentIndex, "Speed:", currentSpeed);
     } catch (err) {
         console.error("Failed to load progress:", err);
@@ -757,3 +783,37 @@ document.querySelectorAll(".speed-buttons button").forEach(btn => {
 window.addEventListener('resize', () => {
     if (scenarioChart) scenarioChart.resize();
 });
+
+
+const scenarioNameEl = document.getElementById("scenario-name");
+const startDateEl = document.getElementById("scenario-start-date");
+const endDateEl = document.getElementById("scenario-end-date");
+const initialWalletEl = document.getElementById("scenario-initial-wallet");
+const descriptionEl = document.getElementById("scenario-description");
+
+// Fetch scenario details from backend
+async function loadScenarioDetails() {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch scenario details");
+
+    const data = await res.json();
+
+    // Populate the card
+    scenarioNameEl.textContent = data.name || "--";
+    startDateEl.textContent = data.startDate || "--";
+    endDateEl.textContent = data.endDate || "--";
+    initialWalletEl.textContent = data.initialWallet?.toFixed(2) || "0.00";
+    descriptionEl.textContent = data.description || "--";
+
+  } catch (err) {
+    console.error("Error loading scenario details:", err);
+  }
+}
+
+// Call the function
+loadScenarioDetails();

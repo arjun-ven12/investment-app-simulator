@@ -85,3 +85,32 @@
   font-size: 30px;
 }
 
+/* Flex container for wallet and scenario */
+.wallet-scenario-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Scenario card styling */
+.scenario-card {
+  flex: 10;
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px; /* optional: keeps the card from getting too wide */
+}
+
+/* Optional: make wrapper responsive */
+@media (max-width: 900px) {
+  .wallet-scenario-wrapper {
+    flex-direction: column;
+  }
+  .scenario-card {
+    max-width: 100%;
+  }
+}
+
