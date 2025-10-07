@@ -23,6 +23,7 @@ router.get('/:id', jwtMiddleware.verifyToken, scenarioController.getScenarioById
 router.post('/:id/join', jwtMiddleware.verifyToken, scenarioController.joinScenarioController);
 // Get leaderboard for a scenario
 router.get('/:id/leaderboard', jwtMiddleware.verifyToken, scenarioController.getLeaderboardController);
+router.get('/:scenarioId/intraday/:symbol', jwtMiddleware.verifyToken, scenarioController.getScenarioIntradayController);
 
 
 // Replay routes
@@ -42,13 +43,20 @@ router.get("/:scenarioId/wallet", jwtMiddleware.verifyToken, scenarioController.
 
 
 router.get("/:scenarioId/orders", jwtMiddleware.verifyToken, scenarioController.getOrderHistoryController);
-router.get("/:scenarioId/portfolio", jwtMiddleware.verifyToken, scenarioController.getPortfolioController);
+// router.get("/:scenarioId/portfolio", jwtMiddleware.verifyToken, scenarioController.getPortfolioController);
 
 // Replay routes
 router.get('/:scenarioId/stocks/:symbol/replay/progress',jwtMiddleware.verifyToken, scenarioController.getReplayProgressController);
 
-router.post('/:scenarioId/save-progress',jwtMiddleware.verifyToken,scenarioController.saveReplayProgressController);
-router.get("/:scenarioId/load-progress", jwtMiddleware.verifyToken, scenarioController.loadProgress);
+// Save progress
+router.post('/:scenarioId/save-progress', jwtMiddleware.verifyToken, scenarioController.saveReplayProgressController);
+
+// Get progress for a symbol
+router.get('/:scenarioId/replay-progress', jwtMiddleware.verifyToken, scenarioController.getReplayProgressController);
+
+// Load progress (optional symbol query)
+router.get('/:scenarioId/load-progress', jwtMiddleware.verifyToken, scenarioController.loadProgressController);
+
 // // GET scenario portfolio by participant ID
 // router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
 module.exports = router;

@@ -1,13 +1,116 @@
 let currentSymbol = null; // global
 let isPaused = true; // track pause state globally
-   let scenarioChart = null;
-    let fullData = [];
-    let currentIndex = 0;
-    let replayInterval = null;
-    let countdownInterval = null;
-    let currentSpeed = 3;
-    const VISIBLE_POINTS = 20;
-    let currentChartType = "line";
+let scenarioChart = null;
+let fullData = [];
+let currentIndex = 0;
+let replayInterval = null;
+let countdownInterval = null;
+let currentSpeed = 3;
+const VISIBLE_POINTS = 20;
+let currentChartType = "line";
+let allSymbolsData = {};
+const amountInput = document.getElementById("amount");
+const priceInput = document.getElementById("price");
+const qtyInput = document.getElementById("quantity");
+const orderTypeSelect = document.getElementById("order-type");
+function plotNextDataPoint() {
+    // stop if we've reached the end of all datasets
+    const maxLength = Math.max(...Object.values(allSymbolsData).map(d => d.length));
+    if (currentIndex >= maxLength) return;
+
+    // use currentSymbol if available, otherwise default to first symbol
+    const activeSymbol = currentSymbol || Object.keys(allSymbolsData)[0];
+    const currentData = allSymbolsData[activeSymbol];
+
+    if (!currentData) {
+        console.warn("No data found for any symbol.");
+        return;
+    }
+
+    if (currentIndex >= currentData.length) {
+        console.warn("Index out of bounds:", currentIndex, "for", activeSymbol);
+        return;
+    }
+
+    let latestForCurrent = null;
+
+    // plot each symbol’s data for this index
+    for (const [symbol, data] of Object.entries(allSymbolsData)) {
+        const item = data[currentIndex];
+        const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
+        if (item && ds) {
+            ds.data.push(item.c);
+            if (symbol === activeSymbol) latestForCurrent = item;
+        }
+    }
+
+    // update chart labels using whichever symbol we used
+    scenarioChart.data.labels.push(currentData[currentIndex].x);
+    scenarioChart.update();
+
+    currentIndex++;
+
+    // update displayed price and process limit orders
+    if (latestForCurrent) {
+        priceInput.value = latestForCurrent.c.toFixed(2);
+        updateAmount();
+        processLimitOrders(activeSymbol, latestForCurrent.c);
+    }
+    // Update current update time on UI
+    const currentUpdateTimeDiv = document.getElementById("current-update-time");
+    if (latestForCurrent && currentUpdateTimeDiv) {
+        const formattedTime = latestForCurrent.x.toLocaleString();
+        currentUpdateTimeDiv.textContent = `Current update: ${formattedTime}`;
+    }
+}
+const tradeSymbolSelect = document.getElementById("trade-symbol");
+function updateAmount() {
+    const qty = parseFloat(qtyInput.value) || 0;
+    let priceToUse = parseFloat(priceInput.value) || 0;
+    if (orderTypeSelect.value === "limit") priceToUse = parseFloat(limitPriceInput.value) || 0;
+    amountInput.value = (priceToUse * qty).toFixed(2);
+}
+function populateTradeDropdown() {
+    tradeSymbolSelect.innerHTML = '<option value="" disabled>Select stock</option>';
+    Object.keys(allSymbolsData).forEach(symbol => {
+        const option = document.createElement("option");
+        option.value = symbol;
+        option.textContent = symbol;
+        tradeSymbolSelect.appendChild(option);
+    });
+
+    // Auto-select current symbol if available
+    if (currentSymbol) tradeSymbolSelect.value = currentSymbol;
+}
+
+tradeSymbolSelect.addEventListener("change", async (e) => {
+    const selectedSymbol = e.target.value;
+    currentSymbol = selectedSymbol; // update global
+
+    // Update price input to latest for selected symbol
+    const data = allSymbolsData[selectedSymbol];
+    if (data && data.length > 0) {
+        const latestPrice = data[currentIndex - 1] || data[data.length - 1];
+        document.getElementById("price").value = latestPrice.c.toFixed(2);
+        updateAmount();
+    }
+});
+
+function initializeChart(chartType = "line") {
+    const ctx = document.getElementById("myChart2").getContext("2d");
+    if (scenarioChart) scenarioChart.destroy();
+    scenarioChart = new Chart(ctx, {
+        type: chartType,
+        maintainAspectRatio: true,
+        data: { labels: [], datasets: [] },
+        options: { responsive: true, scales: { x: { type: "time" }, y: {} } }
+    });
+
+}
+
+function getRandomColor() {
+    return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
+}
 
 function pauseReplay() {
     isPaused = true;
@@ -108,8 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     priceInput.readOnly = true;
-    let allSymbolsData = {}; // { symbol: [{x, c}, ...] }
-
     function initializeChart(chartType = "line") {
         const ctx = document.getElementById("myChart2").getContext("2d");
         if (scenarioChart) scenarioChart.destroy();
@@ -121,23 +222,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function plotNextDataPoint() {
-        if (currentIndex >= Math.max(...Object.values(allSymbolsData).map(d => d.length))) return;
+        // stop if we've reached the end of all datasets
+        const maxLength = Math.max(...Object.values(allSymbolsData).map(d => d.length));
+        if (currentIndex >= maxLength) return;
+
+        // use currentSymbol if available, otherwise default to first symbol
+        const activeSymbol = currentSymbol || Object.keys(allSymbolsData)[0];
+        const currentData = allSymbolsData[activeSymbol];
+
+        if (!currentData) {
+            console.warn("No data found for any symbol.");
+            return;
+        }
+
+        if (currentIndex >= currentData.length) {
+            console.warn("Index out of bounds:", currentIndex, "for", activeSymbol);
+            return;
+        }
+
         let latestForCurrent = null;
+
+        // plot each symbol’s data for this index
         for (const [symbol, data] of Object.entries(allSymbolsData)) {
             const item = data[currentIndex];
             const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
-            if (item) {
+            if (item && ds) {
                 ds.data.push(item.c);
-                if (symbol === currentSymbol) latestForCurrent = item;
+                if (symbol === activeSymbol) latestForCurrent = item;
             }
         }
-        scenarioChart.data.labels.push(allSymbolsData[currentSymbol][currentIndex].x);
+
+        // update chart labels using whichever symbol we used
+        scenarioChart.data.labels.push(currentData[currentIndex].x);
         scenarioChart.update();
+
         currentIndex++;
+
+        // update displayed price and process limit orders
         if (latestForCurrent) {
             priceInput.value = latestForCurrent.c.toFixed(2);
             updateAmount();
-            processLimitOrders(currentSymbol, latestForCurrent.c);
+            processLimitOrders(activeSymbol, latestForCurrent.c);
+        }
+        // Update current update time on UI
+        const currentUpdateTimeDiv = document.getElementById("current-update-time");
+        if (latestForCurrent && currentUpdateTimeDiv) {
+            const formattedTime = latestForCurrent.x.toLocaleString();
+            currentUpdateTimeDiv.textContent = `Current update: ${formattedTime}`;
         }
     }
 
@@ -155,6 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             allSymbolsData[symbol] = data.chartData.map(item => ({ x: new Date(item.date), c: item.closePrice }));
             fullData = allSymbolsData[symbol];
+
 
             if (!scenarioChart) initializeChart(currentChartType);
 
@@ -190,6 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     updateAmount();
                 }
             }
+            populateTradeDropdown();
         } catch (err) {
             console.error(err);
             alert(err.message);
@@ -197,32 +330,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function startReplay() {
-    if (!fullData.length) return alert("Generate the chart first!");
-    
-    // Prompt user before starting
-    if (!confirm("Replay will start now. Are you ready?")) return;
+        if (!fullData.length) return alert("Generate the chart first!");
 
-    pauseReplay();
-    isPaused = false;
-    currentSpeed = parseFloat(speedSelect.value) || 3;
-    let intervalMs = 20000 / currentSpeed;
-    let remainingTime = intervalMs / 1000;
+        // Prompt user before starting
+        if (!confirm("Replay will start now. Are you ready?")) return;
 
-    countdownInterval = setInterval(() => {
-        remainingTime--;
-        document.getElementById("next-update-timer").textContent = `Next update in: ${remainingTime}s`;
-    }, 1000);
+        pauseReplay();
+        isPaused = false;
+        currentSpeed = parseFloat(speedSelect.value) || 3;
+        let intervalMs = 20000 / currentSpeed;
+        let remainingTime = intervalMs / 1000;
 
-    replayInterval = setInterval(() => {
-        if (currentIndex >= fullData.length) {
-            pauseReplay();
-            document.getElementById("next-update-timer").textContent = "Replay finished!";
-            return;
-        }
-        plotNextDataPoint();
-        remainingTime = intervalMs / 1000;
-    }, intervalMs);
-}
+        countdownInterval = setInterval(() => {
+            remainingTime--;
+            document.getElementById("next-update-timer").textContent = `Next update in: ${remainingTime}s`;
+        }, 1000);
+
+        replayInterval = setInterval(() => {
+            if (currentIndex >= fullData.length) {
+                pauseReplay();
+                document.getElementById("next-update-timer").textContent = "Replay finished!";
+                return;
+            }
+            plotNextDataPoint();
+            remainingTime = intervalMs / 1000;
+        }, intervalMs);
+    }
     function pauseReplay() {
         isPaused = true;
         if (replayInterval) clearInterval(replayInterval);
@@ -269,7 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (orderTypeSelect.value === "limit") limitPriceContainer.style.display = "block";
         else { limitPriceContainer.style.display = "none"; limitPriceInput.value = ""; }
     });
-
+    // Call this whenever a new symbol is added to the chart
+    populateTradeDropdown();
     tradingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         buyErrorDiv.textContent = "";
@@ -277,10 +411,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const sideInput = document.querySelector('input[name="side"]:checked');
         const side = sideInput ? sideInput.value.toLowerCase() : null;
         const orderType = orderTypeSelect.value;
-        const symbol = currentSymbol;
+
         const quantity = Number(qtyInput.value);
         const limitPrice = parseFloat(limitPriceInput.value);
 
+        const symbol = currentSymbol || tradeSymbolSelect.value;
         if (!symbol) return (buyErrorDiv.textContent = "Please generate a chart / select a symbol first.");
         if (!side || !orderType || !quantity || quantity <= 0) {
             return (buyErrorDiv.textContent = "Please fill in all required fields.");
@@ -450,10 +585,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== SAVE & LOAD REPLAY PROGRESS =====
 async function saveReplayProgress() {
-    if (!currentSymbol) return;
+    if (!Object.keys(allSymbolsData).length) return; // nothing to save
     try {
         const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
         const token = localStorage.getItem("token");
+
+        const symbols = Object.keys(allSymbolsData); // all symbols on chart
+
         await fetch(`/scenarios/${scenarioId}/save-progress`, {
             method: "POST",
             headers: {
@@ -461,12 +599,13 @@ async function saveReplayProgress() {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                symbol: currentSymbol,
+                symbols,
                 currentIndex,
                 currentSpeed,
             }),
         });
-        console.log("Progress saved:", { currentSymbol, currentIndex, currentSpeed });
+
+        console.log("Progress saved for symbols:", symbols, "Index:", currentIndex, "Speed:", currentSpeed);
     } catch (err) {
         console.error("Failed to save progress:", err);
     }
@@ -474,28 +613,77 @@ async function saveReplayProgress() {
 
 async function loadReplayProgress() {
     try {
+        if (!scenarioChart) {
+            console.warn("Scenario chart not initialized yet.");
+            return;
+        }
+
         const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
         const token = localStorage.getItem("token");
         const res = await fetch(`/scenarios/${scenarioId}/load-progress`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (res.ok && data.symbol) {
-            currentSymbol = data.symbol;
-            currentIndex = data.currentIndex || 0;
-            currentSpeed = data.currentSpeed || 3;
-            console.log("Progress loaded:", data);
-            if (currentSymbol) await fetchScenarioData(currentSymbol);
+
+        if (!res.ok || !data.success) {
+            console.warn("No saved progress found or error:", data.message);
+            return;
         }
+
+        const { symbols, currentIndex: savedIndex, currentSpeed: savedSpeed, data: symbolsData } = data;
+
+        currentIndex = savedIndex || 0;
+        currentSpeed = savedSpeed || 3;
+
+
+        // Load all symbols into chart data
+        for (const symbol of symbols) {
+            allSymbolsData[symbol] = (symbolsData[symbol] || []).map(item => ({
+                x: new Date(item.x),
+                c: Number(item.c)
+            }));
+
+            // Prevent index overflow
+            currentIndex = Math.min(currentIndex, allSymbolsData[symbol].length - 1);
+
+            let ds = scenarioChart.data.datasets.find(d => d.label === symbol);
+            if (!ds) {
+                scenarioChart.data.datasets.push({
+                    label: symbol,
+                    data: allSymbolsData[symbol].slice(0, currentIndex).map(d => d.c),
+                    borderWidth: 2,
+                    borderColor: getRandomColor(),
+                    fill: false,
+                    tension: 0.1
+                });
+            } else {
+                ds.data = allSymbolsData[symbol].slice(0, currentIndex).map(d => d.c);
+            }
+        }
+        // Use first symbol for labels
+        if (symbols.length > 0 && allSymbolsData[symbols[0]]) {
+            fullData = allSymbolsData[symbols[0]];
+            scenarioChart.data.labels = fullData.slice(0, currentIndex).map(d => d.x);
+
+            // Update price input to last known
+            const latest = fullData[currentIndex - 1];
+            if (latest) document.getElementById("price").value = latest.c.toFixed(2);
+        }
+
+        scenarioChart.update();
+        console.log("Replay progress loaded for symbols:", symbols, "Index:", currentIndex, "Speed:", currentSpeed);
     } catch (err) {
         console.error("Failed to load progress:", err);
     }
 }
 
+
+
 // ===== HOOK INTO YOUR EXISTING EVENTS =====
 document.addEventListener("DOMContentLoaded", async () => {
+    initializeChart(currentChartType);
     await loadReplayProgress(); // restore saved progress on page load
-
+    populateTradeDropdown();
     // Save on pause button click
     document.getElementById("btn-pause").addEventListener("click", () => {
         pauseReplay();
@@ -513,11 +701,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveBtn.addEventListener("click", async () => {
         // Pause replay, but don't auto-save on pause
-        pauseReplay(); 
+        pauseReplay();
 
         // Save explicitly for Save & Exit
-        await saveReplayProgress(); 
+        await saveReplayProgress();
         alert("Progress saved! You can now exit.");
         window.location.href = "/html/scenarios.html"; // optional redirect
     });
+});
+
+
+document.querySelectorAll(".speed-buttons button").forEach(btn => {
+    btn.addEventListener("click", () => {
+        // Remove active from all buttons
+        document.querySelectorAll(".speed-buttons button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // Update select value for your existing JS
+        const speedSelect = document.getElementById("speed-select");
+        speedSelect.value = btn.dataset.value;
+
+        // Update global speed
+        currentSpeed = Number(btn.dataset.value);
+
+        // If replay is running, adjust intervals immediately
+        if (!isPaused && replayInterval) {
+            // Clear existing intervals
+            clearInterval(replayInterval);
+            clearInterval(countdownInterval);
+
+            // Calculate new interval
+            let intervalMs = 20000 / currentSpeed;
+            let remainingTime = intervalMs / 1000;
+
+            // Countdown interval
+            countdownInterval = setInterval(() => {
+                remainingTime--;
+                document.getElementById("next-update-timer").textContent = `Next update in: ${remainingTime}s`;
+            }, 1000);
+
+            // Replay interval
+            replayInterval = setInterval(() => {
+                if (currentIndex >= fullData.length) {
+                    pauseReplay();
+                    document.getElementById("next-update-timer").textContent = "Replay finished!";
+                    return;
+                }
+                plotNextDataPoint();
+                remainingTime = intervalMs / 1000;
+            }, intervalMs);
+        }
+    });
+});
+
+window.addEventListener('resize', () => {
+    if (scenarioChart) scenarioChart.resize();
 });

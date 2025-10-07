@@ -67,12 +67,11 @@
               <option value="6m">Last 6 Months</option>
               <option value="1y">Last 1 Year</option>
             </select> -->
-          <div class="select-wrapper">
+          <!-- <div class="select-wrapper">
             <select name="chartType" id="chartType">
               <option value="line">Line (Close Price)</option>
-              <option value="candlestick">Candlestick</option>
             </select>
-          </div>
+          </div> -->
           <button type="submit">Generate Chart</button>
         </form>
         <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
@@ -81,6 +80,12 @@
       <div class="trading-card">
         <form id="trading-form">
           <h2>Trade Stock</h2>
+          <div class="form-group">
+            <label for="trade-symbol">Select Stock</label>
+            <select id="trade-symbol" name="trade-symbol">
+              <option value="" disabled selected>Select stock</option>
+            </select>
+          </div>
           <div class="form-group-radio">
             <label class="pretty-radio">
               <input type="radio" name="side" value="BUY" checked />
@@ -142,77 +147,85 @@
           <button type="button" id="btn-reset">Reset</button>
           <label for="speed-select" style="color:#fff; margin-left:10px;">
             Speed:
-            <select id="speed-select">
-              <option value="0.5">0.5x</option>
-              <option value="1">1x</option>
-              <option value="2">2x</option>
-              <option value="3" selected>3x</option>
-              <option value="5">5x</option>
-            </select>
+            <div class="speed-bar-wrapper">
+              <select id="speed-select">
+                <option value="1" selected>1x</option>
+                <option value="2">2x</option>
+                <option value="4">4x</option>
+                <option value="5">5x</option>
+                <option value="10">10x</option>
+              </select>
+              <div class="speed-buttons">
+                <button data-value="1">1x</button>
+                <button data-value="2">2x</button>
+                <button data-value="4">4x</button>
+                <button data-value="5" class="active">5x</button>
+                <button data-value="10">10x</button>
+              </div>
+            </div>
           </label>
         </div>
+        </div>
 
+        <!-- <div class="company-card"></div> -->
       </div>
-
-      <!-- <div class="company-card"></div> -->
-    </div>
-    <!-- Market Status Banner
+      <!-- Market Status Banner
       <div id="market-status-banner">
         <span id="market-status">Loading market status...</span>
       </div> -->
 
-<div id="portfolioContainer" class="portfolio-container">
-</div>
-    <!-- Trade History + Limit Orders -->
-    <div class="history-container">
-      <div class="history-column">
-        <h1>Your Trade History</h1>
-        <div id="trades-error" class="error-message"></div>
-        <button id="export-trades" class="submit-button">
-          Export Trade History
-        </button>
-        <table id="trades-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Stock Symbol</th>
-              <th>Trade Type</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Total Amount</th>
-            </tr>
-          </thead>
-          <tbody id="trades-table-body"></tbody>
-        </table>
-        <div id="trades-pagination" style="margin-top: 10px"></div>
+      <div id="portfolioContainer" class="portfolio-container">
       </div>
-      <div class="history-column">
-        <h1>Your Limit Order History</h1>
-        <div id="limit-orders-error" class="error-message"></div>
-        <button id="export-limit-orders" class="submit-button">
-          Export Limit Order History
-        </button>
-        <table id="limit-orders-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Stock Symbol</th>
-              <th>Order Type</th>
-              <th>Quantity</th>
-              <th>Limit Price</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="limit-orders-table-body"></tbody>
-        </table>
-        <div id="limit-orders-pagination" style="margin-top: 10px"></div>
+      <!-- Trade History + Limit Orders -->
+      <div class="history-container">
+        <div class="history-column">
+          <h1>Your Trade History</h1>
+          <div id="trades-error" class="error-message"></div>
+          <button id="export-trades" class="submit-button">
+            Export Trade History
+          </button>
+          <table id="trades-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Stock Symbol</th>
+                <th>Trade Type</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total Amount</th>
+              </tr>
+            </thead>
+            <tbody id="trades-table-body"></tbody>
+          </table>
+          <div id="trades-pagination" style="margin-top: 10px"></div>
+        </div>
+        <div class="history-column">
+          <h1>Your Limit Order History</h1>
+          <div id="limit-orders-error" class="error-message"></div>
+          <button id="export-limit-orders" class="submit-button">
+            Export Limit Order History
+          </button>
+          <table id="limit-orders-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Stock Symbol</th>
+                <th>Order Type</th>
+                <th>Quantity</th>
+                <th>Limit Price</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="limit-orders-table-body"></tbody>
+          </table>
+          <div id="limit-orders-pagination" style="margin-top: 10px"></div>
+        </div>
       </div>
-    </div>
 
-    <div class="chart-container">
-      <div class="content trading-card2"></div>
-    </div>
+      <div class="chart-container">
+        <div class="content trading-card2"></div>
+      </div>
 
 
 

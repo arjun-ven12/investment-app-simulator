@@ -102,7 +102,7 @@ module.exports.getScenarioStockData = async function (req, res) {
 
     console.log("Fetching intraday data for", symbol, "from", from, "to", to);
 
-    const chartData = await chartsModel.getIntradayData(symbol, from, to);
+    const chartData = await scenarioModel.getScenarioIntradayDataFromAPI(scenarioId, symbol, from, to);
 
     return res.status(200).json({
       scenario: scenario.title,
@@ -138,17 +138,7 @@ module.exports.getReplayProgressController = async (req, res) => {
   }
 };
 
-module.exports.saveReplayProgressController = async (req, res) => {
-  try {
-    const { scenarioId, symbol } = req.params;
-    const { userId, lastIndex, speed } = req.body;
-    await scenarioModel.saveReplayProgress(Number(userId), Number(scenarioId), symbol, lastIndex, speed);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-};
+
 
 
 module.exports.submitMarketOrder = async (req, res) => {
@@ -238,84 +228,75 @@ module.exports.getOrderHistoryController = async (req, res) => {
   }
 };
 
-// module.exports.getScenarioPortfolioController = async (req, res) => {
-//   try {
-//     const scenarioId = Number(req.params.scenarioId);
-//     const userId = req.user.id; // From JWT middleware
-
-//     if (!Number.isInteger(scenarioId)) {
-//       return res.status(400).json({ error: "Invalid scenario ID" });
-//     }
-
-//     // Let model resolve participantId
-//     const participantId = await scenarioModel.getParticipantId(scenarioId, userId);
-
-//     const portfolio = await scenarioModel.getScenarioPortfolio(participantId);
-//     return res.status(200).json(portfolio);
-
-//   } catch (error) {
-//     console.error("Error fetching scenario portfolio:", error);
-//     return res.status(500).json({ error: error.message || "Server error" });
-//   }
-// };
-
-
-module.exports.getPortfolioController = async (req, res) => {
-  const { scenarioId } = req.params;
-  const userId = req.user.id;
-
-  try {
-    const portfolio = await scenarioModel.getScenarioPortfolio(scenarioId, userId);
-    res.json({ success: true, portfolio });
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
-
 
 // Save replay progress controller
 module.exports.saveReplayProgressController = async (req, res) => {
   try {
-    const { scenarioId, symbol, currentIndex, speed } = req.body;
+    const { scenarioId } = req.params;
+    const { symbols, currentIndex, currentSpeed } = req.body;
     const userId = req.user.id;
 
-    const progress = await scenarioModel.saveReplayProgress(userId, scenarioId, symbol, currentIndex, speed);
+    if (!Array.isArray(symbols) || symbols.length === 0 || isNaN(Number(scenarioId))) {
+      return res.status(400).json({ success: false, message: "Missing or invalid parameters" });
+    }
 
-    return res.status(200).json({ success: true, progress });
+    console.log("Saving replay progress for user:", userId, "scenario:", scenarioId);
+    console.log("Symbols:", symbols, "lastIndex:", currentIndex, "speed:", currentSpeed);
+
+    const results = [];
+    for (const symbol of symbols) {
+      const progress = await scenarioModel.saveReplayProgress(userId, Number(scenarioId), symbol, currentIndex, currentSpeed);
+      results.push(progress);
+      console.log(`Saved progress for symbol ${symbol}:`, progress);
+    }
+
+    return res.status(200).json({ success: true, progress: results });
   } catch (err) {
-    console.error(err);
+    console.error("Error saving replay progress:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Get replay progress controller
-module.exports.getReplayProgressController = async (req, res) => {
+module.exports.loadProgressController = async (req, res) => {
   try {
-    const { scenarioId, symbol } = req.params;
+    const { scenarioId } = req.params;
     const userId = req.user.id;
+    const { symbol } = req.query; // optional single symbol
 
-    const progress = await scenarioModel.getReplayProgress(userId, scenarioId, symbol);
+    // Fetch saved progress from DB
+    const progress = await scenarioModel.loadProgress(Number(scenarioId), userId, symbol);
 
-    return res.status(200).json({ success: true, ...progress });
+    if (!progress || progress.length === 0) {
+      return res.status(404).json({ success: false, message: "No saved progress found" });
+    }
+
+    // Fetch intraday chart data
+    const symbols = Array.isArray(progress) ? progress.map(p => p.symbol) : [progress.symbol];
+    const symbolsData = await scenarioModel.loadIntradayData(Number(scenarioId), symbols);
+
+    return res.status(200).json({
+      success: true,
+      symbols,
+      currentIndex: progress[0]?.lastIndex || 0,
+      currentSpeed: progress[0]?.speed || 3,
+      data: symbolsData
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error loading replay progress:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Load progress
-module.exports.loadProgress = async (req, res) => {
-  const { scenarioId } = req.params;
-  const userId = req.user.id;
-  const { symbol } = req.query; // optional: load by symbol
+module.exports.getScenarioIntradayController = async (req, res) => {
+  const { scenarioId, symbol } = req.params;
+  const userId = req.user.id; // make sure req.user exists
+  if (!userId) return res.status(400).json({ success: false, message: "Missing user ID" });
 
   try {
-    const data = await scenarioModel.loadProgress(scenarioId, userId, symbol);
-    if (!data) return res.status(404).json({ success: false, message: "No saved progress found" });
-    res.json({ success: true, data });
+    const data = await scenarioModel.getScenarioIntradayDataWithProgress(scenarioId, symbol, userId);
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

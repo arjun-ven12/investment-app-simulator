@@ -45,3 +45,43 @@
     margin-top: 20px; /* spacing from chart */
     clear: both; /* if floats are used */
 }
+.speed-bar-wrapper {
+  display: inline-block;
+  position: relative;
+  margin: 20px;
+  border-color: #E0EBFF;
+}
+
+#speed-select {
+  display: none; /* hide the dropdown itself */
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 30px;
+}
+
+.speed-buttons button.active,
+.speed-buttons button:hover {
+  background: #E0EBFF;
+  color: #000000 ;
+  border: 2px solid #E0EBFF
+}
+
+.speed-buttons button {
+  padding: 4px 8px;
+  background: #000000;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 0.1px solid #E0EBFF
+}
+
+.speed-buttons button p{
+  font-size: 30px;
+}
+
