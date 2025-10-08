@@ -311,3 +311,17 @@ module.exports.getScenarioIntradayController = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+module.exports.getScenarioPortfolioController = async (req, res) => {
+  try {
+    const { scenarioId } = req.params;
+    const userId = req.user.id;
+
+    const portfolio = await scenarioModel.getScenarioPortfolio(scenarioId, userId);
+
+    return res.json({ success: true, ...portfolio });
+  } catch (err) {
+    console.error("Error fetching portfolio:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

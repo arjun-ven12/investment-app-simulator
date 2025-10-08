@@ -97,7 +97,7 @@ module.exports.getReplayData = async (scenarioId, symbol) => {
   if (!symbol) throw new Error("Stock symbol is required");
 
   const data = await prisma.scenarioIntradayPrice.findMany({
-    where: { 
+    where: {
       scenarioId: scenarioId,
       symbol: symbol
     },
@@ -621,19 +621,42 @@ module.exports.getScenarioIntradayDataWithProgress = async (scenarioId, symbol, 
 };
 
 module.exports.getScenarioDetails = async (scenarioId) => {
-    const scenario = await prisma.scenario.findUnique({
-      where: { id: Number(scenarioId) },
-      include: {
-        // Include related info if needed, e.g., participants, orders
-        participants: true,
-        marketOrders: true,
-        limitOrders: true,
-      },
-    });
+  const scenario = await prisma.scenario.findUnique({
+    where: { id: Number(scenarioId) },
+    include: {
+      // Include related info if needed, e.g., participants, orders
+      participants: true,
+      marketOrders: true,
+      limitOrders: true,
+    },
+  });
 
-    if (!scenario) {
-      throw new Error('Scenario not found');
-    }
-
-    return scenario;
+  if (!scenario) {
+    throw new Error('Scenario not found');
   }
+
+  return scenario;
+}
+
+
+module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
+  // 1. Get participant
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { scenarioId: Number(scenarioId), userId },
+  });
+  if (!participant) throw new Error("Participant not found");
+
+  const cashBalance = Number(participant.cashBalance);
+
+  // 2. Get holdings
+  const holdings = await prisma.scenarioHolding.findMany({
+    where: { participantId: participant.id },
+    select: {
+      symbol: true,
+      quantity: true
+    },
+  });
+
+  // 3. Return raw holdings + cash balance
+  return { cashBalance, holdings };
+};

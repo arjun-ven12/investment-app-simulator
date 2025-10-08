@@ -14,6 +14,7 @@
   <!-- Socket.IO + Chart libraries -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -203,8 +204,10 @@
         <span id="market-status">Loading market status...</span>
       </div> -->
 
-    <div id="portfolioContainer" class="portfolio-container">
-    </div>
+    <div class="portfolio-chart-container">
+  <h3>Portfolio</h3>
+  <canvas id="portfolioChart" width="400" height="400"></canvas>
+</div>
     <!-- Trade History + Limit Orders -->
     <div class="history-container">
       <div class="history-column">

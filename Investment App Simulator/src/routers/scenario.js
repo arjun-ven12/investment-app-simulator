@@ -57,6 +57,8 @@ router.get('/:scenarioId/replay-progress', jwtMiddleware.verifyToken, scenarioCo
 // Load progress (optional symbol query)
 router.get('/:scenarioId/load-progress', jwtMiddleware.verifyToken, scenarioController.loadProgressController);
 
+router.get('/:scenarioId/portfolio', jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
+
 // // GET scenario portfolio by participant ID
 // router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
 module.exports = router;
