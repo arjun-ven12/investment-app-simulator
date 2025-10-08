@@ -506,8 +506,9 @@ model Scenario {
 
   participants ScenarioParticipant[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now()) @updatedAt
+  ScenarioIntradayPrice ScenarioIntradayPrice[]
 }
 
 model ScenarioParticipant {
@@ -516,7 +517,7 @@ model ScenarioParticipant {
   userId      Int
   joinedAt    DateTime @default(now())
   finalRank   Int?
-  cashBalance Decimal @db.Decimal(10, 2) @default(0)
+  cashBalance Decimal  @default(0) @db.Decimal(10, 2)
 
   scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -540,17 +541,17 @@ model ScenarioMarketOrder {
 }
 
 model ScenarioLimitOrder {
-  id             Int                  @id @default(autoincrement())
-  participantId  Int                  // foreign key
-  participant    ScenarioParticipant  @relation(fields: [participantId], references: [id])
-  side           String
-  symbol         String
-  quantity       Int
-  limitPrice     Float
-  orderType      String
-  status         String
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  id            Int                 @id @default(autoincrement())
+  participantId Int // foreign key
+  participant   ScenarioParticipant @relation(fields: [participantId], references: [id])
+  side          String
+  symbol        String
+  quantity      Int
+  limitPrice    Float
+  orderType     String
+  status        String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 }
 
 model ScenarioReplayProgress {
@@ -564,6 +565,25 @@ model ScenarioReplayProgress {
   createdAt  DateTime @default(now())
 
   @@unique([userId, scenarioId, symbol])
+}
+
+model ScenarioIntradayPrice {
+  id         Int      @id @default(autoincrement())
+  scenarioId Int
+  symbol     String
+  date       DateTime
+  openPrice  Decimal? @db.Decimal(10, 2)
+  highPrice  Decimal? @db.Decimal(10, 2)
+  lowPrice   Decimal? @db.Decimal(10, 2)
+  closePrice Decimal  @db.Decimal(10, 2)
+  volume     BigInt?
+  createdAt  DateTime @default(now())
+
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioId, symbol, date]) // one row per symbol per date per scenario
+  @@index([scenarioId])
+  @@index([symbol])
 }
 
 model ScenarioHolding {
