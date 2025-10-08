@@ -13,11 +13,11 @@ const amountInput = document.getElementById("amount");
 const priceInput = document.getElementById("price");
 const qtyInput = document.getElementById("quantity");
 const orderTypeSelect = document.getElementById("order-type");
-
+const usedHues = [];
 
 function updateReplayProgress() {
     let totalLength = fullData.length;
-    
+
     // If fullData is an object of arrays for symbols
     if (typeof fullData === 'object' && !Array.isArray(fullData)) {
         totalLength = Object.values(fullData).reduce((sum, arr) => sum + arr.length, 0);
@@ -26,10 +26,10 @@ function updateReplayProgress() {
     if (!totalLength) return; // avoid divide by 0
 
     const progressPercent = Math.min((currentIndex / totalLength) * 100, 100).toFixed(0);
-    
+
     const progressBar = document.getElementById("replay-progress");
     const progressText = document.getElementById("replay-progress-text");
-    
+
     if (progressBar) progressBar.style.width = `${progressPercent}%`;
     if (progressText) progressText.textContent = `${progressPercent}%`;
 }
@@ -70,7 +70,7 @@ function plotNextDataPoint() {
     scenarioChart.update();
 
     currentIndex++;
-updateReplayProgress();
+    updateReplayProgress();
     // update displayed price and process limit orders
     if (latestForCurrent) {
         priceInput.value = latestForCurrent.c.toFixed(2);
@@ -118,21 +118,65 @@ tradeSymbolSelect.addEventListener("change", async (e) => {
         updateAmount();
     }
 });
-
 function initializeChart(chartType = "line") {
     const ctx = document.getElementById("myChart2").getContext("2d");
+
+    // Destroy previous chart if exists
     if (scenarioChart) scenarioChart.destroy();
+
+    // Register the zoom plugin (make sure ChartZoom is loaded globally)
+    if (typeof ChartZoom !== "undefined") Chart.register(ChartZoom);
+
     scenarioChart = new Chart(ctx, {
         type: chartType,
-        maintainAspectRatio: true,
-        data: { labels: [], datasets: [] },
-        options: { responsive: true, scales: { x: { type: "time" }, y: {} } }
+        data: {
+            labels: [],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: { unit: 'minute' } // adjust as needed
+                },
+                y: {
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'xy',
+                        threshold: 5
+                    },
+                    zoom: {
+                        wheel: { enabled: true },
+                        pinch: { enabled: true },
+                        mode: 'xy'
+                    }
+                }
+            }
+        }
     });
-
 }
 
+
+
 function getRandomColor() {
-    return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
+    let hue;
+    do {
+        hue = Math.floor(Math.random() * 360);
+    } while (usedHues.some(h => Math.abs(h - hue) < 30)); // Ensure hues differ by at least 30°
+
+    usedHues.push(hue);
+
+    const saturation = Math.floor(Math.random() * 30) + 30; // 30-60% saturation
+    const lightness = Math.floor(Math.random() * 20) + 70;  // 70-90% lightness
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 function pauseReplay() {
@@ -234,13 +278,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     priceInput.readOnly = true;
-    function initializeChart(chartType = "line") {
-        const ctx = document.getElementById("myChart2").getContext("2d");
-        if (scenarioChart) scenarioChart.destroy();
-        scenarioChart = new Chart(ctx, {
-            type: chartType,
-            data: { labels: [], datasets: [] },
-            options: { responsive: true, scales: { x: { type: "time" }, y: {} } }
+
+    function initializeChart(ctx, data) {
+        Chart.register(ChartZoom); // register plugin
+
+        return new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                            threshold: 5
+                        },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'xy'
+                        }
+                    }
+                },
+                scales: {
+                    x: { type: 'time', time: { unit: 'minute' } },
+                    y: { beginAtZero: false }
+                }
+            }
         });
     }
 
@@ -280,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
         scenarioChart.update();
 
         currentIndex++;
- updateReplayProgress();
+        updateReplayProgress();
         // update displayed price and process limit orders
         if (latestForCurrent) {
             priceInput.value = latestForCurrent.c.toFixed(2);
@@ -295,8 +360,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
     function getRandomColor() {
-        return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
+        let hue;
+        do {
+            hue = Math.floor(Math.random() * 360);
+        } while (usedHues.some(h => Math.abs(h - hue) < 30)); // Ensure hues differ by at least 30°
+
+        usedHues.push(hue);
+
+        const saturation = Math.floor(Math.random() * 30) + 30; // 30-60% saturation
+        const lightness = Math.floor(Math.random() * 20) + 70;  // 70-90% lightness
+
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
 
     async function fetchScenarioData(symbol) {
@@ -335,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //     priceInput.value = first.c.toFixed(2);
             //     updateAmount();
             // }
- updateReplayProgress();
+            updateReplayProgress();
             if (currentIndex > 0) {
                 ds.data = fullData.slice(0, currentIndex).map(item => item.c);
                 scenarioChart.update();
@@ -346,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             populateTradeDropdown();
-           
+
         } catch (err) {
             console.error(err);
             alert(err.message);
@@ -428,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     // Call this whenever a new symbol is added to the chart
     populateTradeDropdown();
-     updateReplayProgress();
+    updateReplayProgress();
     tradingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         buyErrorDiv.textContent = "";
@@ -496,7 +572,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("chart-form-intraday").addEventListener("submit", async e => {
         e.preventDefault();
         const symbol = e.target.chartSymbol.value.trim().toUpperCase();
-        currentChartType = document.getElementById("chartType").value;
+        const chartTypeElement = document.getElementById("chartType");
+        currentChartType = chartTypeElement ? chartTypeElement.value : "line";
         await fetchScenarioData(symbol);
     });
 
@@ -696,7 +773,7 @@ async function loadReplayProgress() {
         }
 
         scenarioChart.update();
-         updateReplayProgress();
+        updateReplayProgress();
         console.log("Replay progress loaded for symbols:", symbols, "Index:", currentIndex, "Speed:", currentSpeed);
     } catch (err) {
         console.error("Failed to load progress:", err);
@@ -793,27 +870,31 @@ const descriptionEl = document.getElementById("scenario-description");
 
 // Fetch scenario details from backend
 async function loadScenarioDetails() {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
-    if (!res.ok) throw new Error("Failed to fetch scenario details");
+        if (!res.ok) throw new Error("Failed to fetch scenario details");
 
-    const data = await res.json();
+        const data = await res.json();
 
-    // Populate the card
-    scenarioNameEl.textContent = data.name || "--";
-    startDateEl.textContent = data.startDate || "--";
-    endDateEl.textContent = data.endDate || "--";
-    initialWalletEl.textContent = data.initialWallet?.toFixed(2) || "0.00";
-    descriptionEl.textContent = data.description || "--";
+        // Populate the card
+        scenarioNameEl.textContent = data.name || "--";
+        startDateEl.textContent = data.startDate || "--";
+        endDateEl.textContent = data.endDate || "--";
+        initialWalletEl.textContent = data.initialWallet?.toFixed(2) || "0.00";
+        descriptionEl.textContent = data.description || "--";
 
-  } catch (err) {
-    console.error("Error loading scenario details:", err);
-  }
+    } catch (err) {
+        console.error("Error loading scenario details:", err);
+    }
 }
-
+document.getElementById("reset-zoom").addEventListener("click", () => {
+    if (scenarioChart) {
+        scenarioChart.resetZoom(); // works with chartjs-plugin-zoom
+    }
+});
 // Call the function
 loadScenarioDetails();

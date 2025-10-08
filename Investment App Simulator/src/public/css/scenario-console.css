@@ -114,3 +114,17 @@
   }
 }
 
+
+
+#reset-zoom {
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#reset-zoom:hover {
+    color: #9ec6f0;
+}
