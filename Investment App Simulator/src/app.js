@@ -21,7 +21,7 @@ const limitOrderRouter = require('./routers/limitOrder');
 const loginRegisterRouter = require('./routers/Login.register.router');
 const referralRouter = require('./routers/referral');
 const dashboardRouter = require('./routers/Dashboard');
-
+const optionsRouter = require('./routers/options');
 // const chatHandler = require('./routers/chat');
 const profileRouter = require('./routers/Profile');
 // const userRoutes = require('./routers/user.router');
@@ -80,7 +80,7 @@ app.use('/scenarios', scenarioRouter)
 app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
 app.use('/leaderboard', leaderboardRouter)
-
+app.use('/options', optionsRouter)
 
 app.use('/referral', referralRouter);
 app.use('/dashboard', dashboardRouter);

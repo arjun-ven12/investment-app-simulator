@@ -1,5 +1,6 @@
 
 
+
    /* Import Outfit font */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
 
@@ -975,4 +976,62 @@ height:100%
 .portfolio-chart-container {
   flex: 1;
   /* max-width: 300px; */
+}
+
+
+.tab-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 5px;
+  margin-top: 60px;
+}
+
+.tab-button {
+  background-color: #1c1c28;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: background 0.3s, border 0.3s;
+}
+
+.tab-button.active {
+  background-color: #2a2a3d;
+  border-bottom: 2px solid #A3C1FD; /* highlight matches your chart scheme */
+  color: #A3C1FD;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+
+.options-card {
+  background-color: #000000;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  margin: 20px 0;
+  outline: 1px solid #53596B;
+
+}
+
+.options-container {
+  margin-top: 15px;
+  background-color: #1c1c28;
+  border-radius: 8px;
+  padding: 15px;
+  overflow-x: auto;
+  outline: 1px solid #333;
+
+}
+
+
+.ohlc-body {
+  padding: 20px
 }
