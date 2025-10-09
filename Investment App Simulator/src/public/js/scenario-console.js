@@ -1,3 +1,5 @@
+
+const limitPriceInput = document.getElementById("limitPrice");
 let currentSymbol = null; // global
 let isPaused = true; // track pause state globally
 let scenarioChart = null;
@@ -34,12 +36,10 @@ function updateReplayProgress() {
     if (progressText) progressText.textContent = `${progressPercent}%`;
 }
 
-function plotNextDataPoint() {
-    // stop if we've reached the end of all datasets
+async function plotNextDataPoint() {
     const maxLength = Math.max(...Object.values(allSymbolsData).map(d => d.length));
     if (currentIndex >= maxLength) return;
 
-    // use currentSymbol if available, otherwise default to first symbol
     const activeSymbol = currentSymbol || Object.keys(allSymbolsData)[0];
     const currentData = allSymbolsData[activeSymbol];
 
@@ -55,7 +55,6 @@ function plotNextDataPoint() {
 
     let latestForCurrent = null;
 
-    // plot each symbol’s data for this index
     for (const [symbol, data] of Object.entries(allSymbolsData)) {
         const item = data[currentIndex];
         const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
@@ -65,27 +64,42 @@ function plotNextDataPoint() {
         }
     }
 
-    // update chart labels using whichever symbol we used
     scenarioChart.data.labels.push(currentData[currentIndex].x);
     scenarioChart.update();
 
     currentIndex++;
     updateReplayProgress();
-    // update displayed price and process limit orders
+
     if (latestForCurrent) {
         priceInput.value = latestForCurrent.c.toFixed(2);
         updateAmount();
         processLimitOrders(activeSymbol, latestForCurrent.c);
     }
-    // Update progress bar and percentage
 
-    // Update current update time on UI
     const currentUpdateTimeDiv = document.getElementById("current-update-time");
     if (latestForCurrent && currentUpdateTimeDiv) {
         const formattedTime = latestForCurrent.x.toLocaleString();
         currentUpdateTimeDiv.textContent = `Current update: ${formattedTime}`;
     }
+
+    // ✅ Save progress
+    try {
+        await saveReplayProgress();
+
+        // ✅ After 1 second, re-fetch portfolio to update pie chart + cards
+        setTimeout(() => {
+            if (typeof fetchPortfolio === 'function') {
+                fetchPortfolio();
+            } else {
+                console.warn("fetchPortfolio not found in global scope.");
+            }
+        }, 1000);
+    } catch (err) {
+        console.error("Error saving replay progress:", err);
+    }
 }
+
+
 const tradeSymbolSelect = document.getElementById("trade-symbol");
 function updateAmount() {
     const qty = parseFloat(qtyInput.value) || 0;
@@ -247,7 +261,7 @@ async function processLimitOrders(symbol, currentPrice) {
         const res = await fetch(`/scenarios/limit/process`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ symbol, currentPrice })
+            body: JSON.stringify({ symbol, currentPrice, currentIndex })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to process limit orders");
@@ -403,14 +417,14 @@ document.addEventListener("DOMContentLoaded", () => {
             currentSymbol = symbol;
             const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
 
-            // if (currentIndex === 0 && fullData.length > 0) {
-            //     const first = fullData[0];
-            //     ds.data.push(first.c);
-            //     scenarioChart.data.labels.push(first.x);
-            //     scenarioChart.update();
-            //     priceInput.value = first.c.toFixed(2);
-            //     updateAmount();
-            // }
+            if (currentIndex === 0 && fullData.length > 0) {
+                const first = fullData[0];
+                ds.data.push(first.c);
+                scenarioChart.data.labels.push(first.x);
+                scenarioChart.update();
+                priceInput.value = first.c.toFixed(2);
+                updateAmount();
+            }
             updateReplayProgress();
             if (currentIndex > 0) {
                 ds.data = fullData.slice(0, currentIndex).map(item => item.c);
@@ -465,10 +479,35 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetReplay() {
         pauseReplay();
         currentIndex = 0;
-        if (scenarioChart) {
-            scenarioChart.data.datasets[0].data = [];
+
+        if (scenarioChart && Object.keys(allSymbolsData).length > 0) {
+            // Clear all datasets
+            scenarioChart.data.datasets.forEach(ds => ds.data = []);
             scenarioChart.data.labels = [];
+
+            // Add first point for each symbol
+            for (const [symbol, data] of Object.entries(allSymbolsData)) {
+                const first = data[0];
+                const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
+                if (first && ds) {
+                    ds.data.push(first.c);
+                }
+            }
+
+            // Add first label using the first active symbol
+            const firstSymbol = currentSymbol || Object.keys(allSymbolsData)[0];
+            scenarioChart.data.labels.push(allSymbolsData[firstSymbol][0].x);
+
+            // Update chart
             scenarioChart.update();
+
+            // Make next plot start from index 1
+            currentIndex = 1;
+
+            // Update displayed price if needed
+            const latestForCurrent = allSymbolsData[firstSymbol][0];
+            if (priceInput) priceInput.value = latestForCurrent.c.toFixed(2);
+            if (amountInput) updateAmount();
         }
     }
 
@@ -535,11 +574,11 @@ document.addEventListener("DOMContentLoaded", () => {
             let payload, endpoint;
             if (orderType === "market") {
                 endpoint = `/scenarios/${scenarioId}/market-order`;
-                payload = { side, symbol, quantity, price: latestPrice };
+                payload = { side, symbol, quantity, price: latestPrice, currentIndex };
             } else if (orderType === "limit") {
                 if (!isFinite(limitPrice)) return (buyErrorDiv.textContent = "Please enter a valid limit price.");
                 endpoint = `/scenarios/${scenarioId}/limit-orders`;
-                payload = { side, symbol, quantity, limitPrice, price: latestPrice };
+                payload = { side, symbol, quantity, limitPrice, price: latestPrice, currentIndex };
             } else {
                 throw new Error("Invalid order type");
             }
@@ -898,3 +937,238 @@ document.getElementById("reset-zoom").addEventListener("click", () => {
 });
 // Call the function
 loadScenarioDetails();
+
+
+
+
+
+
+
+
+
+
+// window.addEventListener('DOMContentLoaded', function () {
+//   const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+//   const userId = localStorage.getItem('userId');
+
+//   const stockCardsContainer = document.getElementById('stockCardsContainer');
+//   const ctx = document.getElementById('portfolioChart').getContext('2d');
+//   let portfolioChart = null;
+
+//   if (!scenarioId || !userId) return console.error('Missing scenarioId or userId');
+
+//   async function fetchPortfolio() {
+//     try {
+//       const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`);
+//       if (!res.ok) throw new Error('Failed to fetch portfolio');
+//       const data = await res.json();
+//       renderStockCards(data.positions);
+//       renderPortfolioChart(data.positions);
+//     } catch (err) {
+//       console.error(err);
+//       stockCardsContainer.innerHTML = '<p style="color:#888;">Error loading portfolio</p>';
+//     }
+//   }
+
+// function renderStockCards(positions) {
+//   stockCardsContainer.innerHTML = '';
+
+//   if (!positions || positions.length === 0) {
+//     stockCardsContainer.innerHTML = '<p style="color:#888;">No stocks in portfolio.</p>';
+//     return;
+//   }
+
+//   // Grid wrapper with left alignment
+//   const gridWrapper = document.createElement('div');
+//   gridWrapper.style.display = 'grid';
+//   gridWrapper.style.gridTemplateColumns = 'repeat(2, auto)'; // two columns with auto width
+//   gridWrapper.style.justifyContent = 'start'; // align to left
+//   gridWrapper.style.gap = '10px 15px'; // 10px row gap, 15px column gap
+
+//   positions.forEach(pos => {
+//     const card = document.createElement('div');
+//     card.className = 'company-card-content animate-slideup';
+//     card.style.padding = '12px';
+//     card.style.border = '1px solid #636363ff';
+//     card.style.borderRadius = '10px';
+//     card.style.backgroundColor = '#000000ff';
+//     card.style.color = '#fff';
+//     card.style.width = '220px'; // fixed width for consistent layout
+
+//     card.innerHTML = `
+//       <h2>${pos.symbol}</h2>
+//       <p><strong>Quantity:</strong> ${pos.quantity}</p>
+//       <p><strong>Total Shares:</strong> ${pos.totalShares}</p>
+//       <p><strong>Avg Buy Price:</strong> $${pos.avgBuyPrice}</p>
+//       <p><strong>Current Price:</strong> $${pos.currentPrice}</p>
+//       <p><strong>Total Invested:</strong> $${pos.totalInvested}</p>
+//       <p><strong>Current Value:</strong> $${pos.currentValue}</p>
+//       <p><strong>Unrealized P&L:</strong> <span style="color:${pos.unrealizedPnL>=0?'#0f0':'#f00'};">$${pos.unrealizedPnL}</span></p>
+//       <p><strong>Realized P&L:</strong> <span style="color:${pos.realizedPnL>=0?'#0f0':'#f00'};">$${pos.realizedPnL}</span></p>
+//     `;
+//     gridWrapper.appendChild(card);
+//   });
+
+//   stockCardsContainer.appendChild(gridWrapper);
+// }
+
+
+//   function renderPortfolioChart(positions) {
+//     if (!positions || positions.length === 0) return;
+//     const labels = positions.map(p => p.symbol);
+//     const data = positions.map(p => parseFloat(p.currentValue));
+
+//     if (portfolioChart) portfolioChart.destroy();
+//     portfolioChart = new Chart(ctx, {
+//       type: 'pie',
+//       data: {
+//         labels,
+//         datasets: [{
+//           data,
+//           backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+//           borderWidth: 1
+//         }]
+//       },
+//       options: {
+//         responsive: true,
+//         plugins: {
+//           legend: { position: 'bottom', labels:{color:'#fff'} },
+//           title: { display:true, text:'Portfolio Distribution', color:'#E0EBFF', font:{size:18} },
+//           tooltip: {
+//             callbacks: {
+//               label: context => `${context.label}: $${context.parsed.toFixed(2)}`
+//             }
+//           }
+//         }
+//       }
+//     });
+//   }
+
+//   function generateColors(count) {
+//     const colors = [];
+//     for (let i = 0; i < count; i++) {
+//       const hue = Math.floor((360 / count) * i);
+//       colors.push(`hsl(${hue}, 70%, 60%)`);
+//     }
+//     return colors;
+//   }
+
+//   fetchPortfolio();
+
+//     // At the end of your DOMContentLoaded block:
+//   window.fetchPortfolio = fetchPortfolio;
+
+// });
+window.addEventListener('DOMContentLoaded', function () {
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const userId = localStorage.getItem('userId');
+
+    const stockCardsContainer = document.getElementById('stockCardsContainer');
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    let portfolioChart = null;
+
+    if (!scenarioId || !userId) return console.error('Missing scenarioId or userId');
+
+    // ====== Layout styling for cards (2 per row, aligned left) ======
+    stockCardsContainer.style.display = 'grid';
+    stockCardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+    stockCardsContainer.style.justifyContent = 'start';
+    stockCardsContainer.style.alignItems = 'start';
+    stockCardsContainer.style.gap = '10px';
+    stockCardsContainer.style.marginTop = '10px';
+
+    async function refreshPortfolioData() {
+        try {
+            const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`);
+            if (!res.ok) throw new Error('Failed to fetch portfolio');
+            const data = await res.json();
+            updatePortfolioUI(data.positions);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function updatePortfolioUI(positions) {
+        if (!positions || positions.length === 0) {
+            stockCardsContainer.innerHTML = '<p style="color:#888;">No stocks in portfolio.</p>';
+            return;
+        }
+
+        // Clear removed symbols smoothly
+        const existingCards = Array.from(stockCardsContainer.children);
+        const currentSymbols = positions.map(p => p.symbol);
+        existingCards.forEach(card => {
+            if (!currentSymbols.includes(card.dataset.symbol)) {
+                card.classList.add('fade-out');
+                setTimeout(() => card.remove(), 300);
+            }
+        });
+
+        // Update or create cards
+        positions.forEach(pos => {
+            let card = document.querySelector(`[data-symbol="${pos.symbol}"]`);
+            if (!card) {
+                card = document.createElement('div');
+                card.className = 'company-card-content animate-slideup';
+                card.dataset.symbol = pos.symbol;
+                card.style.padding = '12px';
+                card.style.border = '1px solid #636363ff';
+                card.style.borderRadius = '10px';
+                card.style.backgroundColor = '#000';
+                card.style.color = '#fff';
+                card.style.width = '100%';
+                card.style.transition = 'all 0.3s ease';
+                stockCardsContainer.appendChild(card);
+            }
+
+            card.innerHTML = `
+        <h2 style="margin-bottom:4px;">${pos.symbol}</h2>
+        <p><strong>Quantity:</strong> ${pos.quantity}</p>
+        <p><strong>Total Shares:</strong> ${pos.totalShares}</p>
+        <p><strong>Avg Buy Price:</strong> $${pos.avgBuyPrice}</p>
+        <p><strong>Current Price:</strong> $${pos.currentPrice}</p>
+        <p><strong>Total Invested:</strong> $${pos.totalInvested}</p>
+        <p><strong>Current Value:</strong> $${pos.currentValue}</p>
+        <p><strong>Unrealized P&L:</strong>
+          <span style="color:${pos.unrealizedPnL >= 0 ? '#0f0' : '#f00'};">
+          $${pos.unrealizedPnL}</span></p>
+        <p><strong>Realized P&L:</strong>
+          <span style="color:${pos.realizedPnL >= 0 ? '#0f0' : '#f00'};">
+          $${pos.realizedPnL}</span></p>
+      `;
+        });
+
+        // ===== Smooth Chart Update =====
+        if (!portfolioChart) {
+            portfolioChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: positions.map(p => p.symbol),
+                    datasets: [{
+                        data: positions.map(p => parseFloat(p.currentValue)),
+                        backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 500 },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff' } },
+                        title: { display: true, text: 'Portfolio Distribution', color: '#E0EBFF', font: { size: 18 } }
+                    }
+                }
+            });
+        } else {
+            portfolioChart.data.labels = positions.map(p => p.symbol);
+            portfolioChart.data.datasets[0].data = positions.map(p => parseFloat(p.currentValue));
+            portfolioChart.update('active');
+        }
+    }
+
+    // Initial render
+    refreshPortfolioData();
+
+    // Expose refresh globally
+    window.fetchPortfolio = refreshPortfolioData;
+});

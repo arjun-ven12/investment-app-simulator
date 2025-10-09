@@ -141,7 +141,7 @@ module.exports.saveReplayProgress = async (userId, scenarioId, symbol, currentIn
   });
 };
 
-module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, quantity, price }) => {
+module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, quantity, price, currentIndex }) => {
   const totalCost = quantity * price;
 
   return await prisma.$transaction(async (tx) => {
@@ -200,6 +200,7 @@ module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, q
         symbol,
         quantity,
         executedPrice: price,
+        currentIndex
       },
     });
 
@@ -242,7 +243,7 @@ async function getAvailableShares(participantId, symbol) {
 }
 
 
-module.exports.createLimitOrder = async (scenarioId, userId, { side, symbol, quantity, limitPrice, price }) => {
+module.exports.createLimitOrder = async (scenarioId, userId, { side, symbol, quantity, limitPrice, price, currentIndex }) => {
   const participant = await prisma.scenarioParticipant.findFirst({
     where: { scenarioId: Number(scenarioId), userId },
   });
@@ -286,6 +287,7 @@ module.exports.createLimitOrder = async (scenarioId, userId, { side, symbol, qua
       limitPrice,
       orderType: 'LIMIT',
       status: 'PENDING',
+      currentIndex
     },
   });
 };
@@ -309,7 +311,7 @@ function toNumber(value) {
   return Number(value);
 }
 
-module.exports.processLimitOrders = async (symbol, latestPrice) => {
+module.exports.processLimitOrders = async (symbol, latestPrice, currentIndex) => {
   // ensure latestPrice is a Number
   latestPrice = Number(latestPrice);
   const pendingOrders = await prisma.scenarioLimitOrder.findMany({
@@ -397,20 +399,21 @@ module.exports.processLimitOrders = async (symbol, latestPrice) => {
         // Mark limit order executed
         await tx.scenarioLimitOrder.update({
           where: { id },
-          data: { status: 'EXECUTED', updatedAt: new Date() },
+          data: { status: 'EXECUTED', executedIndex: currentIndex, updatedAt: new Date() },
         });
 
-        // Create scenario market order record (record executed trade)
-        await tx.scenarioMarketOrder.create({
-          data: {
-            participantId: participantTx.id,
-            side,
-            symbol,
-            quantity: qty,
-            executedPrice: latestPrice,
-            status: 'EXECUTED',
-          },
-        });
+        // // Create scenario market order record (record executed trade)
+        // await tx.scenarioMarketOrder.create({
+        //   data: {
+        //     participantId: participantTx.id,
+        //     side,
+        //     symbol,
+        //     quantity: qty,
+        //     executedPrice: latestPrice,
+        //     status: 'EXECUTED',
+        //     currentIndex
+        //   },
+        // });
         console.log(newCash)
         executedOrders.push({ id, side, symbol, quantity: qty, executedPrice: latestPrice });
       });
@@ -659,4 +662,333 @@ module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
 
   // 3. Return raw holdings + cash balance
   return { cashBalance, holdings };
+};
+
+
+module.exports.getUserScenarioPortfolio = async function getUserScenarioPortfolio(userId, scenarioId) {
+  if (!userId || !scenarioId) {
+    throw new Error("User ID and Scenario ID are required.");
+  }
+
+  // --- Confirm user belongs to scenario ---
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId },
+    select: { id: true },
+  });
+
+  if (!participant) {
+    throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  }
+
+  const participantId = participant.id;
+
+  // --- Fetch all executed trades (Market + Limit) ---
+  const [marketOrders, limitOrders] = await Promise.all([
+    prisma.scenarioMarketOrder.findMany({
+      where: { participantId, status: "EXECUTED" },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.scenarioLimitOrder.findMany({
+      where: { participantId, status: "EXECUTED" },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
+  // --- Combine all executed trades ---
+  const allTrades = [
+    ...marketOrders.map(t => ({
+      symbol: t.symbol,
+      side: t.side.toUpperCase(),
+      quantity: parseFloat(t.quantity),
+      price: parseFloat(t.executedPrice),
+      createdAt: t.createdAt,
+    })),
+    ...limitOrders.map(t => ({
+      symbol: t.symbol,
+      side: t.side.toUpperCase(),
+      quantity: parseFloat(t.quantity),
+      price: parseFloat(t.limitPrice),
+      createdAt: t.createdAt,
+    })),
+  ];
+
+  if (allTrades.length === 0) {
+    return {
+      summary: { openShares: 0, totalShares: 0, totalInvested: 0, unrealizedPnL: 0, realizedPnL: 0 },
+      positions: [],
+    };
+  }
+
+  // --- Group trades by stock symbol ---
+  const stockMap = new Map();
+
+  for (const trade of allTrades) {
+    const { symbol, side, quantity, price } = trade;
+
+    if (!stockMap.has(symbol)) {
+      stockMap.set(symbol, {
+        buyQueue: [],
+        netQuantity: 0,
+        totalBoughtQty: 0,
+        totalBoughtValue: 0,
+        totalSoldValue: 0,
+        realizedPnL: 0,
+      });
+    }
+
+    const stock = stockMap.get(symbol);
+
+    if (side === "BUY") {
+      stock.buyQueue.push({ quantity, price });
+      stock.netQuantity += quantity;
+      stock.totalBoughtQty += quantity;
+      stock.totalBoughtValue += quantity * price;
+    } else if (side === "SELL") {
+      let sellQty = quantity;
+      const sellProceeds = quantity * price;
+      stock.totalSoldValue += sellProceeds;
+
+      // FIFO logic for realized P&L
+      while (sellQty > 0 && stock.buyQueue.length > 0) {
+        const buy = stock.buyQueue[0];
+        if (buy.quantity <= sellQty) {
+          stock.realizedPnL += (price - buy.price) * buy.quantity;
+          sellQty -= buy.quantity;
+          stock.buyQueue.shift();
+        } else {
+          stock.realizedPnL += (price - buy.price) * sellQty;
+          buy.quantity -= sellQty;
+          sellQty = 0;
+        }
+      }
+
+      stock.netQuantity -= quantity;
+    }
+  }
+
+  // --- Preload replay progress + all intraday prices for all symbols ---
+  const symbols = Array.from(stockMap.keys());
+
+  const [replayProgress, intradayPrices] = await Promise.all([
+    prisma.scenarioReplayProgress.findMany({
+      where: { userId, scenarioId, symbol: { in: symbols } },
+      select: { symbol: true, lastIndex: true },
+    }),
+    prisma.scenarioIntradayPrice.findMany({
+      where: { scenarioId, symbol: { in: symbols } },
+      orderBy: { date: "asc" },
+      select: { symbol: true, closePrice: true },
+    }),
+  ]);
+
+  // Organize data for quick lookup
+  const replayMap = new Map(replayProgress.map(r => [r.symbol, r.lastIndex]));
+  const priceMap = new Map();
+
+  for (const sym of symbols) {
+    priceMap.set(sym, intradayPrices.filter(p => p.symbol === sym).map(p => parseFloat(p.closePrice)));
+  }
+
+  // --- Compute portfolio metrics ---
+  // --- Compute portfolio metrics ---
+  const positions = [];
+  let totalOpenShares = 0;
+  let totalShares = 0;
+  let totalInvested = 0;
+  let totalUnrealizedPnL = 0;
+  let totalRealizedPnL = 0;
+
+  for (const [symbol, stock] of stockMap.entries()) {
+    const { buyQueue, netQuantity, realizedPnL, totalBoughtQty, totalBoughtValue } = stock;
+
+    // Determine latest price based on replay progress
+    const allPrices = priceMap.get(symbol) || [];
+    const lastIndex = replayMap.get(symbol);
+
+    // ✅ FIX: if lastIndex exists, use that candle’s close price (not the next one)
+    // fallback to last available price if not found
+    const priceIndex =
+      lastIndex !== undefined
+        ? Math.max(0, Math.min(lastIndex - 1, allPrices.length - 1))
+        : allPrices.length - 1;
+
+    const latestPrice = allPrices[priceIndex] || 0;
+
+    const investedOpen = buyQueue.reduce((sum, b) => sum + b.quantity * b.price, 0);
+    const currentValue = latestPrice * netQuantity;
+    const unrealizedPnL = currentValue - investedOpen;
+
+    totalOpenShares += netQuantity;
+    totalShares += totalBoughtQty;
+    totalInvested += totalBoughtValue;
+    totalUnrealizedPnL += unrealizedPnL;
+    totalRealizedPnL += realizedPnL;
+
+    positions.push({
+      symbol,
+      quantity: netQuantity.toFixed(6),
+      totalShares: totalBoughtQty.toFixed(6),
+      avgBuyPrice: totalBoughtQty ? (totalBoughtValue / totalBoughtQty).toFixed(2) : "0.00",
+      currentPrice: latestPrice.toFixed(2),
+      totalInvested: totalBoughtValue.toFixed(2),
+      currentValue: currentValue.toFixed(2),
+      unrealizedPnL: unrealizedPnL.toFixed(2),
+      realizedPnL: realizedPnL.toFixed(2),
+    });
+  }
+
+
+  return {
+    summary: {
+      openShares: totalOpenShares.toFixed(6),
+      totalShares: totalShares.toFixed(6),
+      totalInvested: totalInvested.toFixed(2),
+      unrealizedPnL: totalUnrealizedPnL.toFixed(2),
+      realizedPnL: totalRealizedPnL.toFixed(2),
+    },
+    positions,
+  };
+};
+
+module.exports.getParticipantWallet = async function (userId, scenarioId) {
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId },
+    select: { cashBalance: true },
+  });
+  if (!participant) throw new Error("Participant not found");
+  return parseFloat(participant.cashBalance); // ensures it's a number
+};
+
+
+// --- Get all participants for a scenario ---
+module.exports.getScenarioParticipants = async function getScenarioParticipants(scenarioId) {
+  return prisma.scenarioParticipant.findMany({
+    where: { scenarioId },
+    select: { id: true, userId: true },
+  });
+};
+
+// --- End scenario for a participant ---
+module.exports.markScenarioEnded = async function markScenarioEnded(userId, scenarioId) {
+  // Ensure participant exists
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId },
+  });
+
+  if (!participant) {
+    throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  }
+
+  return prisma.scenarioParticipant.update({
+    where: { id: participant.id },
+    data: { ended: true }, // mark only this participant as done
+  });
+};
+
+function serializeBigInt(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(serializeBigInt);
+  } else if (obj && typeof obj === 'object') {
+    const newObj = {};
+    for (const key in obj) {
+      if (typeof obj[key] === 'bigint') {
+        newObj[key] = obj[key].toString(); // convert BigInt to string
+      } else {
+        newObj[key] = serializeBigInt(obj[key]);
+      }
+    }
+    return newObj;
+  } else {
+    return obj;
+  }
+}
+
+module.exports.fetchUserScenarioData = async (scenarioId, userId) => {
+  // 1. Get participant
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { scenarioId, userId },
+  });
+  if (!participant) throw new Error("Participant not found");
+
+  // 2. Get holdings
+  const holdings = await prisma.scenarioHolding.findMany({
+    where: { participantId: participant.id },
+  });
+
+  // 3. Get market orders
+  const marketOrders = await prisma.scenarioMarketOrder.findMany({
+    where: { participantId: participant.id },
+    orderBy: { currentIndex: 'asc' },
+  });
+
+  // 4. Get limit orders
+  const limitOrders = await prisma.scenarioLimitOrder.findMany({
+    where: { participantId: participant.id },
+    orderBy: { currentIndex: 'asc' },
+  });
+
+  // 5. Combine all symbols from holdings, marketOrders, and limitOrders
+  const symbols = [
+    ...holdings.map(h => h.symbol),
+    ...marketOrders.map(o => o.symbol),
+    ...limitOrders.map(o => o.symbol),
+  ];
+  const uniqueSymbols = [...new Set(symbols)];
+
+  // 6. Get intraday prices for all symbols
+  const intradayPrices = await prisma.scenarioIntradayPrice.findMany({
+    where: { scenarioId, symbol: { in: uniqueSymbols } },
+    orderBy: { date: 'asc' },
+  });
+
+  // 7. Add index to intraday prices
+  const intradayBySymbol = {};
+  uniqueSymbols.forEach(symbol => {
+    const prices = intradayPrices.filter(p => p.symbol === symbol);
+    intradayBySymbol[symbol] = prices.map((p, idx) => ({
+      ...p,
+      date: p.date.toISOString(),
+      createdAt: p.createdAt.toISOString(),
+      openPrice: p.openPrice !== null ? Number(p.openPrice) : null,
+      highPrice: p.highPrice !== null ? Number(p.highPrice) : null,
+      lowPrice: p.lowPrice !== null ? Number(p.lowPrice) : null,
+      closePrice: Number(p.closePrice),
+      volume: p.volume !== null ? Number(p.volume) : null,
+      index: idx
+    }));
+  });
+
+  // 8. Build data object indexed by symbol
+  const dataBySymbol = {};
+  uniqueSymbols.forEach(symbol => {
+    const holding = holdings.find(h => h.symbol === symbol);
+    dataBySymbol[symbol] = {
+      holding: holding
+        ? { ...holding, quantity: Number(holding.quantity) }
+        : { quantity: 0 },
+
+      marketOrders: marketOrders
+        .filter(o => o.symbol === symbol)
+        .map(o => ({
+          ...o,
+          quantity: Number(o.quantity),
+          executedPrice: Number(o.executedPrice),
+          createdAt: o.createdAt.toISOString()
+        })),
+
+      limitOrders: limitOrders
+        .filter(o => o.symbol === symbol)
+        .map(o => ({
+          ...o,
+          quantity: Number(o.quantity),
+          limitPrice: Number(o.limitPrice),
+          createdAt: o.createdAt.toISOString(),
+          updatedAt: o.updatedAt.toISOString()
+        })),
+
+      intraday: intradayBySymbol[symbol] || []
+    };
+  });
+
+  return serializeBigInt(dataBySymbol);
 };

@@ -204,9 +204,20 @@
         <span id="market-status">Loading market status...</span>
       </div> -->
 
+        <div class="chart-container">
+<div id="portfolioContainer">
+  <h1>My Portfolio</h1>
+  <div class="portfolio-layout">
+    <!-- Left: Stock Analytics -->
+    <div class="positions-section" id="stockCardsContainer"></div>
+
+    <!-- Right: Pie Chart -->
     <div class="portfolio-chart-container">
-  <h3>Portfolio</h3>
-  <canvas id="portfolioChart" width="400" height="400"></canvas>
+      <canvas id="portfolioChart" class="fullscreen-chart"></canvas>
+    </div>
+  </div>
+
+</div>
 </div>
     <!-- Trade History + Limit Orders -->
     <div class="history-container">
@@ -262,5 +273,5 @@
 
 
 </body>
-
+ <script src="/socket.io/socket.io.js"></script>
 </html>

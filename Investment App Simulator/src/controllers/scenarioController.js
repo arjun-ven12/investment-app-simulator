@@ -1,5 +1,6 @@
 const scenarioModel = require('../models/scenario');
 const chartsModel = require('../models/Charts');
+const { broadcastPortfolioUpdate } = require('../socketBroadcast');
 // --- CRUD Controllers ---
 module.exports.createScenarioController = async (req, res) => {
   try {
@@ -139,13 +140,11 @@ module.exports.getReplayProgressController = async (req, res) => {
 };
 
 
-
-
 module.exports.submitMarketOrder = async (req, res) => {
   try {
     const scenarioId = parseInt(req.params.scenarioId);
     const userId = req.user.id;
-    const { side, symbol, quantity, price } = req.body;
+    const { side, symbol, quantity, price, currentIndex } = req.body;
 
     if (!side || !symbol || !quantity || !price) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -156,6 +155,7 @@ module.exports.submitMarketOrder = async (req, res) => {
       symbol,
       quantity,
       price,
+      currentIndex
     });
 
     return res.status(200).json({ success: true, trade });
@@ -171,13 +171,13 @@ module.exports.createLimitOrderController = async (req, res) => {
   try {
     const { scenarioId } = req.params;
     const userId = req.user.id; // ✅ get from JWT middleware
-    const { side, symbol, quantity, limitPrice, price } = req.body;
+    const { side, symbol, quantity, limitPrice, price, currentIndex } = req.body;
 
     // Pass scenarioId and userId correctly
     const order = await scenarioModel.createLimitOrder(
       Number(scenarioId),
       Number(userId), // make sure it's a number
-      { side, symbol, quantity, limitPrice, price }
+      { side, symbol, quantity, limitPrice, price, currentIndex }
     );
 
     return res.status(201).json({ success: true, order });
@@ -190,7 +190,7 @@ module.exports.createLimitOrderController = async (req, res) => {
 
 module.exports.getWalletController = async (req, res) => {
   const { scenarioId } = req.params;
-  const userId = req.user.id; 
+  const userId = req.user.id;
 
   try {
     const balance = await scenarioModel.getWalletBalance(scenarioId, userId);
@@ -203,8 +203,8 @@ module.exports.getWalletController = async (req, res) => {
 
 module.exports.processLimitOrdersController = async (req, res) => {
   try {
-    const { symbol, currentPrice } = req.body;
-    const executedOrders = await scenarioModel.processLimitOrders(symbol, currentPrice);
+    const { symbol, currentPrice, currentIndex } = req.body;
+    const executedOrders = await scenarioModel.processLimitOrders(symbol, currentPrice, currentIndex);
     return res.status(200).json({ success: true, executedOrders });
   } catch (err) {
     console.error(err);
@@ -312,16 +312,109 @@ module.exports.getScenarioIntradayController = async (req, res) => {
   }
 };
 
-module.exports.getScenarioPortfolioController = async (req, res) => {
+
+
+module.exports.getUserScenarioPortfolio = async function (req, res) {
+  const userId = Number(req.query.userId);
+  const scenarioId = Number(req.params.scenarioId);
+
+  if (!Number.isInteger(userId) || !Number.isInteger(scenarioId)) {
+    return res.status(400).json({ error: "Invalid user ID or scenario ID." });
+  }
+
   try {
-    const { scenarioId } = req.params;
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    return res.status(200).json(portfolio);
+  } catch (error) {
+    console.error("Error fetching user scenario portfolio:", error);
+    if (error.message?.includes("not a participant")) {
+      return res.status(404).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message || "Server error" });
+  }
+};
+
+
+module.exports.endScenarioController = async function (req, res) {
+  const scenarioId = Number(req.params.scenarioId);
+  if (!scenarioId) return res.status(400).json({ error: "Scenario ID is required" });
+
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    // Mark this participant as ended
+    await scenarioModel.markScenarioEnded(userId, scenarioId);
+
+    // Fetch this participant’s portfolio
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    const wallet = parseFloat(await scenarioModel.getParticipantWallet(userId, scenarioId));
+
+
+    // Combine wallet + portfolio total
+    const totalPortfolioValue =
+      wallet +
+      parseFloat(portfolio.summary.totalInvested) +
+      parseFloat(portfolio.summary.unrealizedPnL) +
+      parseFloat(portfolio.summary.realizedPnL);
+
+    // Fetch other participants
+    const otherParticipants = await scenarioModel.getScenarioParticipants(scenarioId);
+    const otherEndedParticipants = otherParticipants.filter(p => p.userId !== userId && p.ended);
+
+    const finalPortfolios = await Promise.all(
+      otherEndedParticipants.map(async (p) => {
+        const pPortfolio = await scenarioModel.getUserScenarioPortfolio(p.userId, scenarioId);
+        const pWallet = parseFloat(await scenarioModel.getParticipantWallet(p.userId, scenarioId));
+
+
+        const pTotalPortfolioValue =
+          pWallet +
+          parseFloat(pPortfolio.summary.totalInvested) +
+          parseFloat(pPortfolio.summary.unrealizedPnL) +
+          parseFloat(pPortfolio.summary.realizedPnL);
+
+        return {
+          userId: p.userId,
+          wallet: pWallet.toFixed(2),
+          portfolio: pPortfolio,
+          totalPortfolioValue: pTotalPortfolioValue.toFixed(2)
+        };
+      })
+    );
+
+    return res.status(200).json({
+      message: `Scenario ${scenarioId} ended for user ${userId}.`,
+      finalPortfolios: [
+        {
+          userId,
+          wallet: wallet.toFixed(2),
+          portfolio,
+          totalPortfolioValue: totalPortfolioValue.toFixed(2),
+        },
+        ...finalPortfolios
+      ],
+    });
+  } catch (error) {
+    console.error("Error ending scenario:", error);
+    return res.status(500).json({ error: error.message || "Server error" });
+  }
+};
+
+module.exports.getUserScenarioData = async (req, res) => {
+  try {
+    const scenarioId = parseInt(req.params.scenarioId);
     const userId = req.user.id;
 
-    const portfolio = await scenarioModel.getScenarioPortfolio(scenarioId, userId);
+    if (!scenarioId) {
+      return res.status(400).json({ success: false, message: 'Missing scenarioId' });
+    }
 
-    return res.json({ success: true, ...portfolio });
+    const data = await scenarioModel.fetchUserScenarioData(scenarioId, userId);
+
+    return res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error("Error fetching portfolio:", err);
+    console.error(err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };
