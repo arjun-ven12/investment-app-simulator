@@ -1,231 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Portfolio Advisor</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<!-- include in your <head> -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Advisor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- include in your <head> -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<style>
-  body {
-    font-family: "Outfit", sans-serif;
-    background: #f5f6fa;
-    margin: 0;
-    padding: 2rem;
-    color: #333;
-  }
-  h1 { text-align: center; margin-bottom: 2rem; font-weight: 700; }
-  .controls { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-  input, select, button { padding: 0.6rem 1rem; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; }
-  button { background-color: #4e73df; color: #fff; border: none; cursor: pointer; transition: 0.2s; }
-  button:hover { background-color: #2e59d9; }
-  .error { text-align: center; color: red; margin-bottom: 1rem; }
-  .section, .advice-box { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
-  h2 { margin-top: 0; margin-bottom: 1rem; color: #2e59d9; }
-  table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-  th, td { border: 1px solid #eee; padding: 0.6rem; text-align: center; }
-  th { background-color: #f1f3f6; font-weight: 600; }
-  td.negative { color: #e74a3b; font-weight: 600; }
-  td.positive { color: #1cc88a; font-weight: 600; }
-  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
-  li { margin-bottom: 0.4rem; }
-  .tip-category { margin-top: 0.8rem; font-weight: 600; color: #4e73df; }
-  .behavioral-note { margin-top: 1rem; background: #f8f9fc; padding: 0.8rem; border-left: 4px solid #f6c23e; border-radius: 6px; }
-</style>
+  <style>
+    body {
+      font-family: "Outfit", sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    input,
+    select,
+    button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4e73df;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #2e59d9;
+    }
+
+    .error {
+      text-align: center;
+      color: red;
+      margin-bottom: 1rem;
+    }
+
+    .section,
+    .advice-box {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #2e59d9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #eee;
+      padding: 0.6rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f1f3f6;
+      font-weight: 600;
+    }
+
+    td.negative {
+      color: #e74a3b;
+      font-weight: 600;
+    }
+
+    td.positive {
+      color: #1cc88a;
+      font-weight: 600;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    .tip-category {
+      margin-top: 0.8rem;
+      font-weight: 600;
+      color: #4e73df;
+    }
+
+    .behavioral-note {
+      margin-top: 1rem;
+      background: #f8f9fc;
+      padding: 0.8rem;
+      border-left: 4px solid #f6c23e;
+      border-radius: 6px;
+    }
+  </style>
 </head>
+
 <body>
-<h1>Portfolio Advisor</h1>
+  <h1>Portfolio Advisor</h1>
 
-<div class="controls">
-  <input type="number" id="userId" placeholder="Enter User ID" />
-  <select id="riskProfile">
-    <option value="conservative">Conservative</option>
-    <option value="moderate" selected>Moderate</option>
-    <option value="aggressive">Aggressive</option>
-  </select>
-  <button onclick="getAdvice()">Get Advice</button>
-</div>
-<div class="section" id="scenarioDiv" style="display:none;">
-  <h2>Scenario Analysis</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Stock</th>
-        <th>Change</th>
-        <th>Portfolio Value</th>
-      </tr>
-    </thead>
-    <tbody id="scenarioTableBody"></tbody>
-  </table>
-</div>
-<div id="error" class="error"></div>
-<div id="adviceContainer"></div>
+  <div class="controls">
+    <input type="number" id="userId" placeholder="Enter User ID" />
+    <select id="riskProfile">
+      <option value="conservative">Conservative</option>
+      <option value="moderate" selected>Moderate</option>
+      <option value="aggressive">Aggressive</option>
+    </select>
+    <input type="text" id="followUp" placeholder="Enter follow-up question (optional)" style="flex:1" />
+    <button onclick="getAdvice()">Get Advice</button>
+  </div>
+  <div class="section" id="scenarioDiv" style="display:none;">
+    <h2>Scenario Analysis</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Change</th>
+          <th>Portfolio Value</th>
+        </tr>
+      </thead>
+      <tbody id="scenarioTableBody"></tbody>
+    </table>
+  </div>
+  <div id="error" class="error"></div>
+  <div id="adviceContainer"></div>
 
-<script>
-  
-async function getAdvice() {
-  const userId = document.getElementById("userId").value;
-  const riskProfile = document.getElementById("riskProfile").value;
-  const errorDiv = document.getElementById("error");
-  const container = document.getElementById("adviceContainer");
-  errorDiv.textContent = "";
-  container.innerHTML = "";
+  <script>
+const session = req.body.session || []; 
+    async function getAdvice() {
+      const userId = document.getElementById("userId").value;
+      const riskProfile = document.getElementById("riskProfile").value;
+      const errorDiv = document.getElementById("error");
+      const container = document.getElementById("adviceContainer");
+      errorDiv.textContent = "";
+      container.innerHTML = "";
 
-  if (!userId) { errorDiv.textContent = "Please enter a User ID."; return; }
+      if (!userId) { errorDiv.textContent = "Please enter a User ID."; return; }
 
-  try {
-    const res = await fetch(`/api/chatbot/portfolio-advice/${userId}?riskProfile=${riskProfile}`);
-    if (!res.ok) throw new Error("Failed to fetch advice.");
-    const data = await res.json();
+      try {
+        let url = `/api/chatbot/portfolio-advice/${userId}?riskProfile=${riskProfile}`;
+        if (followUp) url += `&followUp=${encodeURIComponent(followUp)}`;
 
-    const portfolio = data.portfolio || {};
-    const trades = data.recentTrades || [];
-    let adviceObj = null;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch advice.");
+        const data = await res.json();
 
 
-    if (data.advice) {
-      let cleaned = data.advice.replace(/```(?:json)?\s*([\s\S]*?)```/g, "$1").trim();
-      try { adviceObj = JSON.parse(cleaned); } 
-      catch { adviceObj = { rawText: cleaned }; }
-    }
+        const portfolio = data.portfolio || {};
+        const trades = data.recentTrades || [];
+        let adviceObj = null;
 
-    const safeNum = val => typeof val==="number"? val.toFixed(2) : Number(val||0).toFixed(2);
 
-    // Portfolio Summary
-    if (portfolio) {
-      const summaryDiv = document.createElement("div");
-      summaryDiv.className = "section";
-      summaryDiv.innerHTML = `<h2>Portfolio Summary</h2>
+        if (data.advice) {
+          let cleaned = data.advice.replace(/```(?:json)?\s*([\s\S]*?)```/g, "$1").trim();
+          try { adviceObj = JSON.parse(cleaned); }
+          catch { adviceObj = { rawText: cleaned }; }
+        }
+
+        const safeNum = val => typeof val === "number" ? val.toFixed(2) : Number(val || 0).toFixed(2);
+
+        // Portfolio Summary
+        if (portfolio) {
+          const summaryDiv = document.createElement("div");
+          summaryDiv.className = "section";
+          summaryDiv.innerHTML = `<h2>Portfolio Summary</h2>
         <p><strong>Total Value:</strong> $${safeNum(portfolio.totalValue)}</p>
-        <p><strong>Total Unrealized P/L:</strong> <span class="${(portfolio.totalUnrealizedPL||0)>=0?"positive":"negative"}">$${safeNum(portfolio.totalUnrealizedPL)}</span></p>
+        <p><strong>Total Unrealized P/L:</strong> <span class="${(portfolio.totalUnrealizedPL || 0) >= 0 ? "positive" : "negative"}">$${safeNum(portfolio.totalUnrealizedPL)}</span></p>
         <p><strong>Total Realized P/L:</strong> $${safeNum(portfolio.totalRealizedPL)}</p>
-        <p><strong>Number of Holdings:</strong> ${portfolio.numHoldings||0}</p>`;
-      container.appendChild(summaryDiv);
-    }
-// Example scenario table rendering
-if (adviceObj.scenarios?.length) {
-  const scenarioDiv = document.getElementById("scenarioDiv");
-  const tbody = document.getElementById("scenarioTableBody");
-  tbody.innerHTML = "";
-  adviceObj.scenarios.forEach(s => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${s.stock}</td><td>${s.change}%</td><td>$${safeNum(s.portfolioValue)}</td>`;
-    tbody.appendChild(tr);
-  });
-  scenarioDiv.style.display = "block";
-  container.appendChild(scenarioDiv);
-}
+        <p><strong>Number of Holdings:</strong> ${portfolio.numHoldings || 0}</p>`;
+          container.appendChild(summaryDiv);
+        }
+        // Example scenario table rendering
+        if (adviceObj.scenarios?.length) {
+          const scenarioDiv = document.getElementById("scenarioDiv");
+          const tbody = document.getElementById("scenarioTableBody");
+          tbody.innerHTML = "";
+          adviceObj.scenarios.forEach(s => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${s.stock}</td><td>${s.change}%</td><td>$${safeNum(s.portfolioValue)}</td>`;
+            tbody.appendChild(tr);
+          });
+          scenarioDiv.style.display = "block";
+          container.appendChild(scenarioDiv);
+        }
 
-    // Top Holdings
-    if (portfolio.topHoldings?.length) {
-      const holdingsDiv = document.createElement("div");
-      holdingsDiv.className = "section";
-      let tableHTML = `<h2>Top Holdings</h2><table>
+        // Top Holdings
+        if (portfolio.topHoldings?.length) {
+          const holdingsDiv = document.createElement("div");
+          holdingsDiv.className = "section";
+          let tableHTML = `<h2>Top Holdings</h2><table>
         <tr><th>Symbol</th><th>Company</th><th>Sector</th><th>Qty</th><th>Avg Buy</th><th>Current</th><th>Invested</th><th>Current Value</th><th>Unrealized P/L</th><th>Realized P/L</th><th>Weight %</th></tr>`;
-      portfolio.topHoldings.forEach(h => {
-        tableHTML += `<tr>
-          <td>${h.symbol||"UNKNOWN"}</td>
-          <td>${h.companyName||"UNKNOWN"}</td>
-          <td>${h.sector||"UNKNOWN"}</td>
-          <td>${h.quantity||0}</td>
+          portfolio.topHoldings.forEach(h => {
+            tableHTML += `<tr>
+          <td>${h.symbol || "UNKNOWN"}</td>
+          <td>${h.companyName || "UNKNOWN"}</td>
+          <td>${h.sector || "UNKNOWN"}</td>
+          <td>${h.quantity || 0}</td>
           <td>$${safeNum(h.avgBuyPrice)}</td>
           <td>$${safeNum(h.currentPrice)}</td>
           <td>$${safeNum(h.totalInvested)}</td>
           <td>$${safeNum(h.currentValue)}</td>
-          <td class="${(h.unrealizedPL||0)>=0?"positive":"negative"}">$${safeNum(h.unrealizedPL)} (${h.unrealizedPLPercent||0}%)</td>
+          <td class="${(h.unrealizedPL || 0) >= 0 ? "positive" : "negative"}">$${safeNum(h.unrealizedPL)} (${h.unrealizedPLPercent || 0}%)</td>
           <td>$${safeNum(h.realizedPL)}</td>
-          <td>${h.weightPct||0}%</td>
+          <td>${h.weightPct || 0}%</td>
         </tr>`;
-      });
-      tableHTML += "</table>";
-      holdingsDiv.innerHTML = tableHTML;
-      container.appendChild(holdingsDiv);
-    }
+          });
+          tableHTML += "</table>";
+          holdingsDiv.innerHTML = tableHTML;
+          container.appendChild(holdingsDiv);
+        }
 
-    // Sector Exposure
-    if (portfolio.sectorExposure?.length) {
-      const sectorDiv = document.createElement("div");
-      sectorDiv.className = "section";
-      let sectorHTML = `<h2>Sector Exposure</h2><ul>`;
-      portfolio.sectorExposure.forEach(s => {
-        sectorHTML += `<li>${s.sector||"UNKNOWN"}: $${safeNum(s.value)} (${s.pct||0}%)</li>`;
-      });
-      sectorHTML += `</ul>`;
-      sectorDiv.innerHTML = sectorHTML;
-      container.appendChild(sectorDiv);
-    }
+        // Sector Exposure
+        if (portfolio.sectorExposure?.length) {
+          const sectorDiv = document.createElement("div");
+          sectorDiv.className = "section";
+          let sectorHTML = `<h2>Sector Exposure</h2><ul>`;
+          portfolio.sectorExposure.forEach(s => {
+            sectorHTML += `<li>${s.sector || "UNKNOWN"}: $${safeNum(s.value)} (${s.pct || 0}%)</li>`;
+          });
+          sectorHTML += `</ul>`;
+          sectorDiv.innerHTML = sectorHTML;
+          container.appendChild(sectorDiv);
+        }
 
-    // Recent Trades
-    if (trades.length) {
-      const tradesDiv = document.createElement("div");
-      tradesDiv.className = "section";
-      let tradesHTML = `<h2>Recent Trades</h2><table>
+        // Recent Trades
+        if (trades.length) {
+          const tradesDiv = document.createElement("div");
+          tradesDiv.className = "section";
+          let tradesHTML = `<h2>Recent Trades</h2><table>
         <tr><th>Symbol</th><th>Company</th><th>Industry</th><th>Qty</th><th>Total Amount</th><th>Type</th><th>Date</th></tr>`;
-      trades.forEach(t => {
-        tradesHTML += `<tr>
-          <td>${t.symbol||"UNKNOWN"}</td>
-          <td>${t.companyName||"UNKNOWN"}</td>
-          <td>${t.industry||"UNKNOWN"}</td>
-          <td>${t.quantity||0}</td>
+          trades.forEach(t => {
+            tradesHTML += `<tr>
+          <td>${t.symbol || "UNKNOWN"}</td>
+          <td>${t.companyName || "UNKNOWN"}</td>
+          <td>${t.industry || "UNKNOWN"}</td>
+          <td>${t.quantity || 0}</td>
           <td>$${safeNum(t.totalAmount)}</td>
-          <td>${t.tradeType||"N/A"}</td>
-          <td>${t.tradeDate?new Date(t.tradeDate).toLocaleString():"N/A"}</td>
+          <td>${t.tradeType || "N/A"}</td>
+          <td>${t.tradeDate ? new Date(t.tradeDate).toLocaleString() : "N/A"}</td>
         </tr>`;
-      });
-      tradesHTML += "</table>";
-      tradesDiv.innerHTML = tradesHTML;
-      container.appendChild(tradesDiv);
-    }
-
-    // AI Advice
-    if (adviceObj) {
-      const adviceDiv = document.createElement("div");
-      adviceDiv.className = "advice-box";
-      adviceDiv.innerHTML = `<h2>AI Advice</h2>`;
-
-      if (adviceObj.summary?.portfolioCritique) adviceDiv.innerHTML += `<p><strong>Critique:</strong> ${adviceObj.summary.portfolioCritique}</p>`;
-      if (adviceObj.summary?.strengths) adviceDiv.innerHTML += `<p><strong>Strengths:</strong> ${adviceObj.summary.strengths}</p>`;
-
-      if (adviceObj.actionableRecommendations) {
-        const { stopLoss, rebalanceSuggestions, cashAllocation } = adviceObj.actionableRecommendations;
-
-        if (stopLoss?.suggestedStopLoss) {
-          adviceDiv.innerHTML += `<div class="tip-category">Stop-Loss Recommendations</div><ul>`;
-          for (const sym in stopLoss.suggestedStopLoss) {
-            const s = stopLoss.suggestedStopLoss[sym];
-            adviceDiv.innerHTML += `<li><strong>${sym}:</strong> $${safeNum(s.price)} — ${s.rationale}</li>`;
-          }
-          adviceDiv.innerHTML += `</ul>`;
+          });
+          tradesHTML += "</table>";
+          tradesDiv.innerHTML = tradesHTML;
+          container.appendChild(tradesDiv);
         }
 
-        if (rebalanceSuggestions) {
-          adviceDiv.innerHTML += `<div class="tip-category">Rebalance Suggestions</div><p>${rebalanceSuggestions.diversificationOpportunity||""}</p>`;
-          if (rebalanceSuggestions.potentialStocks?.length) {
-            adviceDiv.innerHTML += `<ul>`;
-            rebalanceSuggestions.potentialStocks.forEach(s => { adviceDiv.innerHTML += `<li>${s.symbol}: ${s.rationale}</li>`; });
-            adviceDiv.innerHTML += `</ul>`;
+        // AI Advice
+        if (adviceObj) {
+          const adviceDiv = document.createElement("div");
+          adviceDiv.className = "advice-box";
+          adviceDiv.innerHTML = `<h2>AI Advice</h2>`;
+
+          if (adviceObj.summary?.portfolioCritique) adviceDiv.innerHTML += `<p><strong>Critique:</strong> ${adviceObj.summary.portfolioCritique}</p>`;
+          if (adviceObj.summary?.strengths) adviceDiv.innerHTML += `<p><strong>Strengths:</strong> ${adviceObj.summary.strengths}</p>`;
+
+          if (adviceObj.actionableRecommendations) {
+            const { stopLoss, rebalanceSuggestions, cashAllocation } = adviceObj.actionableRecommendations;
+
+            if (stopLoss?.suggestedStopLoss) {
+              adviceDiv.innerHTML += `<div class="tip-category">Stop-Loss Recommendations</div><ul>`;
+              for (const sym in stopLoss.suggestedStopLoss) {
+                const s = stopLoss.suggestedStopLoss[sym];
+                adviceDiv.innerHTML += `<li><strong>${sym}:</strong> $${safeNum(s.price)} — ${s.rationale}</li>`;
+              }
+              adviceDiv.innerHTML += `</ul>`;
+            }
+
+            if (rebalanceSuggestions) {
+              adviceDiv.innerHTML += `<div class="tip-category">Rebalance Suggestions</div><p>${rebalanceSuggestions.diversificationOpportunity || ""}</p>`;
+              if (rebalanceSuggestions.potentialStocks?.length) {
+                adviceDiv.innerHTML += `<ul>`;
+                rebalanceSuggestions.potentialStocks.forEach(s => { adviceDiv.innerHTML += `<li>${s.symbol}: ${s.rationale}</li>`; });
+                adviceDiv.innerHTML += `</ul>`;
+              }
+            }
+
+            if (cashAllocation?.suggestion) adviceDiv.innerHTML += `<div class="tip-category">Cash Allocation</div><p>${cashAllocation.suggestion}</p>`;
           }
+
+          if (adviceObj.behavioralFinanceNotes?.emotionalInvestment) {
+            adviceDiv.innerHTML += `<div class="behavioral-note"><strong>Behavioral Note:</strong> ${adviceObj.behavioralFinanceNotes.emotionalInvestment}</div>`;
+          }
+
+          if (adviceObj.rawText) adviceDiv.innerHTML += `<pre>${adviceObj.rawText}</pre>`;
+
+          container.appendChild(adviceDiv);
         }
 
-        if (cashAllocation?.suggestion) adviceDiv.innerHTML += `<div class="tip-category">Cash Allocation</div><p>${cashAllocation.suggestion}</p>`;
+      } catch (err) {
+        console.error(err);
+        errorDiv.textContent = err.message || "Something went wrong.";
       }
-
-      if (adviceObj.behavioralFinanceNotes?.emotionalInvestment) {
-        adviceDiv.innerHTML += `<div class="behavioral-note"><strong>Behavioral Note:</strong> ${adviceObj.behavioralFinanceNotes.emotionalInvestment}</div>`;
-      }
-
-      if (adviceObj.rawText) adviceDiv.innerHTML += `<pre>${adviceObj.rawText}</pre>`;
-
-      container.appendChild(adviceDiv);
     }
-
-  } catch (err) {
-    console.error(err);
-    errorDiv.textContent = err.message || "Something went wrong.";
-  }
-}
-</script>
+  </script>
 </body>
+
 </html>

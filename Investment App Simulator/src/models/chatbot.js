@@ -6,6 +6,24 @@ const openai = new OpenAI({});
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
+
+const generateResponseForChatbot = async (
+  prompt,
+  model = "gpt-4o-mini",
+  max_tokens = 150
+) => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens,
+    });
+    return completion.choices[0].message.content;
+  } catch (error) {
+    throw new Error("Error generating AI response: " + error.message);
+  }
+};
+
 const generateResponse = async (
   prompt,
   model = "gpt-4o-mini",
@@ -532,4 +550,5 @@ export {
   computeBeta,
   computeSharpe,
   probDrawdown,
+  generateResponseForChatbot
 };

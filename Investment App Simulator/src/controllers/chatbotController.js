@@ -28,6 +28,20 @@ module.exports.generateResponse = async (req, res) => {
   }
 };
 
+module.exports.generateResponseForChatbot = async (req, res) => {
+  const { prompt, model = "gpt-4", max_tokens = 4000 } = req.body;
+
+  if (!prompt) return res.status(400).json({ error: "Prompt is required." });
+
+  try {
+    const aiText = await chatbotModel.generateResponseForChatbot(prompt, model, max_tokens);
+    console.log("AI Response:", aiText);
+    return res.status(200).json({ response: aiText });
+  } catch (error) {
+    console.error("Controller.generateResponse error:", error);
+    return res.status(500).json({ error: error.message || "Failed to generate response." });
+  }
+};
 
 
 module.exports.getUserPortfolio = async function (req, res) {
