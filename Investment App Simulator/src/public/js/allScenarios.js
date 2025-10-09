@@ -91,7 +91,7 @@ async function renderScenarios(scenarios) {
 
     <div style="display: flex; gap: 20px; margin: 0 0 15px 0;">
       <span><strong>Starting Balance:</strong> $${s.startingBalance?.toLocaleString() || "N/A"}</span>
-      <span><strong>Allowed Stocks:</strong> ${s.allowedStocks?.join(", ") || "N/A"}</span>
+      <span><strong>Recommended Stocks:</strong> ${s.allowedStocks?.join(", ") || "N/A"}</span>
     </div>
 
     <p style="color: red; margin-top: 10px;">

@@ -315,7 +315,7 @@ module.exports.getScenarioIntradayController = async (req, res) => {
 
 
 module.exports.getUserScenarioPortfolio = async function (req, res) {
-  const userId = Number(req.query.userId);
+  const userId = req.user.id; 
   const scenarioId = Number(req.params.scenarioId);
 
   if (!Number.isInteger(userId) || !Number.isInteger(scenarioId)) {
@@ -416,5 +416,55 @@ module.exports.getUserScenarioData = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports.getScenarioEndingSummary = async (req, res) => {
+  try {
+    const scenarioId = Number(req.params.scenarioId);
+    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // 1️⃣ Mark participant ended
+    await scenarioModel.markScenarioEnded(userId, scenarioId);
+
+    // 2️⃣ Fetch portfolio & wallet
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
+
+    // 3️⃣ Flatten trades from portfolio positions
+    const trades = portfolio.positions.map(p => ({
+      symbol: p.symbol,
+      netQty: Number(p.quantity),
+      totalBought: Number(p.totalInvested),
+      realizedPnL: Number(p.realizedPnL),
+      currentValue: Number(p.currentValue),
+      unrealizedPnL: Number(p.unrealizedPnL),
+      avgBuyPrice: Number(p.avgBuyPrice),
+      currentPrice: Number(p.currentPrice),
+    }));
+
+    // 4️⃣ Extract symbols and intraday data
+    const symbols = trades.map(t => t.symbol);
+    const intradayData = await scenarioModel.fetchUserScenarioData(scenarioId, userId);
+
+    // 5️⃣ Compute total portfolio value
+    const totalPortfolioValue = trades.reduce(
+      (acc, t) => acc + t.currentValue + t.realizedPnL,
+      wallet
+    );
+
+    return res.status(200).json({
+      wallet,
+      trades,
+      intraday: intradayData,
+      totalPortfolioValue,
+      summary: portfolio.summary,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 };

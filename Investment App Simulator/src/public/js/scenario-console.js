@@ -938,127 +938,6 @@ document.getElementById("reset-zoom").addEventListener("click", () => {
 // Call the function
 loadScenarioDetails();
 
-
-
-
-
-
-
-
-
-
-// window.addEventListener('DOMContentLoaded', function () {
-//   const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-//   const userId = localStorage.getItem('userId');
-
-//   const stockCardsContainer = document.getElementById('stockCardsContainer');
-//   const ctx = document.getElementById('portfolioChart').getContext('2d');
-//   let portfolioChart = null;
-
-//   if (!scenarioId || !userId) return console.error('Missing scenarioId or userId');
-
-//   async function fetchPortfolio() {
-//     try {
-//       const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`);
-//       if (!res.ok) throw new Error('Failed to fetch portfolio');
-//       const data = await res.json();
-//       renderStockCards(data.positions);
-//       renderPortfolioChart(data.positions);
-//     } catch (err) {
-//       console.error(err);
-//       stockCardsContainer.innerHTML = '<p style="color:#888;">Error loading portfolio</p>';
-//     }
-//   }
-
-// function renderStockCards(positions) {
-//   stockCardsContainer.innerHTML = '';
-
-//   if (!positions || positions.length === 0) {
-//     stockCardsContainer.innerHTML = '<p style="color:#888;">No stocks in portfolio.</p>';
-//     return;
-//   }
-
-//   // Grid wrapper with left alignment
-//   const gridWrapper = document.createElement('div');
-//   gridWrapper.style.display = 'grid';
-//   gridWrapper.style.gridTemplateColumns = 'repeat(2, auto)'; // two columns with auto width
-//   gridWrapper.style.justifyContent = 'start'; // align to left
-//   gridWrapper.style.gap = '10px 15px'; // 10px row gap, 15px column gap
-
-//   positions.forEach(pos => {
-//     const card = document.createElement('div');
-//     card.className = 'company-card-content animate-slideup';
-//     card.style.padding = '12px';
-//     card.style.border = '1px solid #636363ff';
-//     card.style.borderRadius = '10px';
-//     card.style.backgroundColor = '#000000ff';
-//     card.style.color = '#fff';
-//     card.style.width = '220px'; // fixed width for consistent layout
-
-//     card.innerHTML = `
-//       <h2>${pos.symbol}</h2>
-//       <p><strong>Quantity:</strong> ${pos.quantity}</p>
-//       <p><strong>Total Shares:</strong> ${pos.totalShares}</p>
-//       <p><strong>Avg Buy Price:</strong> $${pos.avgBuyPrice}</p>
-//       <p><strong>Current Price:</strong> $${pos.currentPrice}</p>
-//       <p><strong>Total Invested:</strong> $${pos.totalInvested}</p>
-//       <p><strong>Current Value:</strong> $${pos.currentValue}</p>
-//       <p><strong>Unrealized P&L:</strong> <span style="color:${pos.unrealizedPnL>=0?'#0f0':'#f00'};">$${pos.unrealizedPnL}</span></p>
-//       <p><strong>Realized P&L:</strong> <span style="color:${pos.realizedPnL>=0?'#0f0':'#f00'};">$${pos.realizedPnL}</span></p>
-//     `;
-//     gridWrapper.appendChild(card);
-//   });
-
-//   stockCardsContainer.appendChild(gridWrapper);
-// }
-
-
-//   function renderPortfolioChart(positions) {
-//     if (!positions || positions.length === 0) return;
-//     const labels = positions.map(p => p.symbol);
-//     const data = positions.map(p => parseFloat(p.currentValue));
-
-//     if (portfolioChart) portfolioChart.destroy();
-//     portfolioChart = new Chart(ctx, {
-//       type: 'pie',
-//       data: {
-//         labels,
-//         datasets: [{
-//           data,
-//           backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
-//           borderWidth: 1
-//         }]
-//       },
-//       options: {
-//         responsive: true,
-//         plugins: {
-//           legend: { position: 'bottom', labels:{color:'#fff'} },
-//           title: { display:true, text:'Portfolio Distribution', color:'#E0EBFF', font:{size:18} },
-//           tooltip: {
-//             callbacks: {
-//               label: context => `${context.label}: $${context.parsed.toFixed(2)}`
-//             }
-//           }
-//         }
-//       }
-//     });
-//   }
-
-//   function generateColors(count) {
-//     const colors = [];
-//     for (let i = 0; i < count; i++) {
-//       const hue = Math.floor((360 / count) * i);
-//       colors.push(`hsl(${hue}, 70%, 60%)`);
-//     }
-//     return colors;
-//   }
-
-//   fetchPortfolio();
-
-//     // At the end of your DOMContentLoaded block:
-//   window.fetchPortfolio = fetchPortfolio;
-
-// });
 window.addEventListener('DOMContentLoaded', function () {
     const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
     const userId = localStorage.getItem('userId');
@@ -1077,16 +956,23 @@ window.addEventListener('DOMContentLoaded', function () {
     stockCardsContainer.style.gap = '10px';
     stockCardsContainer.style.marginTop = '10px';
 
-    async function refreshPortfolioData() {
-        try {
-            const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`);
-            if (!res.ok) throw new Error('Failed to fetch portfolio');
-            const data = await res.json();
-            updatePortfolioUI(data.positions);
-        } catch (err) {
-            console.error(err);
-        }
+async function refreshPortfolioData() {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch portfolio');
+        
+        const data = await res.json();
+        updatePortfolioUI(data.positions);
+    } catch (err) {
+        console.error(err);
     }
+}
 
     function updatePortfolioUI(positions) {
         if (!positions || positions.length === 0) {

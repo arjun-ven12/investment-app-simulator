@@ -59,9 +59,11 @@ router.get('/:scenarioId/load-progress', jwtMiddleware.verifyToken, scenarioCont
 
 
 
-router.get("/portfolio/:scenarioId",scenarioController.getUserScenarioPortfolio);
+router.get("/portfolio/:scenarioId",jwtMiddleware.verifyToken, scenarioController.getUserScenarioPortfolio);
 router.get('/:scenarioId/user-data', jwtMiddleware.verifyToken, scenarioController.getUserScenarioData);
 router.post("/end/:scenarioId",  jwtMiddleware.verifyToken, scenarioController.endScenarioController);
+
+router.post('/:scenarioId/end-summary', jwtMiddleware.verifyToken, scenarioController.getScenarioEndingSummary);
 // // GET scenario portfolio by participant ID
 // router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
 module.exports = router;

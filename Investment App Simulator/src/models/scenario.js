@@ -859,6 +859,12 @@ module.exports.getParticipantWallet = async function (userId, scenarioId) {
   return parseFloat(participant.cashBalance); // ensures it's a number
 };
 
+module.exports.getParticipantWallet  = async function getScenarioParticipants(scenarioId) {
+  return prisma.scenarioParticipant.findMany({
+    where: { scenarioId },
+    select: { id: true, userId: true, ended: true },
+  });
+}
 
 // --- Get all participants for a scenario ---
 module.exports.getScenarioParticipants = async function getScenarioParticipants(scenarioId) {

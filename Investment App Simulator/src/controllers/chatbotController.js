@@ -1,4 +1,6 @@
 const chatbotModel = require("../models/chatbot");
+const scenarioModel = require("../models/scenario");
+const scenarioController = require("./scenarioController");
 const prisma = require('../../prisma/prismaClient');
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
@@ -17,7 +19,7 @@ module.exports.generateResponse = async (req, res) => {
       const summary = chatbotModel.buildPortfolioSummary(portfolio);
       fullPrompt += `\n\nUser portfolio summary (auto-generated):\n${JSON.stringify(summary, null, 2)}\n\nUse this information to adapt your answer if relevant.`;
     }
-    
+
 
     const aiText = await chatbotModel.generateResponse(fullPrompt, model, max_tokens);
     console.log("AI Response:", aiText);
@@ -45,26 +47,26 @@ module.exports.generateResponseForChatbot = async (req, res) => {
 
 
 module.exports.getUserPortfolio = async function (req, res) {
-    const userId = Number(req.params.userId);
+  const userId = Number(req.params.userId);
 
-    if (!Number.isInteger(userId)) {
-        return res.status(400).json({ error: 'Invalid user ID.' });
+  if (!Number.isInteger(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID.' });
+  }
+
+  try {
+    const portfolio = await chatbotModel.getUserPortfolio(userId);
+
+
+    return res.status(200).json(portfolio);
+  } catch (error) {
+    console.error('Error fetching user portfolio:', error);
+
+    if (error.message?.includes('not found')) {
+      return res.status(404).json({ error: error.message });
     }
 
-    try {
-        const portfolio = await chatbotModel.getUserPortfolio(userId);
-
-
-        return res.status(200).json(portfolio);
-    } catch (error) {
-        console.error('Error fetching user portfolio:', error);
-
-        if (error.message?.includes('not found')) {
-            return res.status(404).json({ error: error.message });
-        }
-
-        return res.status(500).json({ error: error.message || 'Server error' });
-    }
+    return res.status(500).json({ error: error.message || 'Server error' });
+  }
 };
 
 /**
@@ -83,8 +85,8 @@ module.exports.getPortfolioAdvice = async (req, res) => {
     const portfolio = await chatbotModel.getUserPortfolio(userId);
     const summary = chatbotModel.buildPortfolioSummary(portfolio);
     const wallet = portfolio.wallet;
-   console.log("Portfolio object:", portfolio);
-console.log("Wallet value:", portfolio.wallet);
+    console.log("Portfolio object:", portfolio);
+    console.log("Wallet value:", portfolio.wallet);
     // 2️⃣ Fetch last 5 trades with enriched stock info
     const recentTradesRaw = await prisma.trade.findMany({
       where: { userId },
@@ -94,45 +96,45 @@ console.log("Wallet value:", portfolio.wallet);
     });
 
     const recentTrades = await Promise.all(
-  recentTradesRaw.map(async (t) => {
-    const stock = await prisma.stock.findUnique({
-      where: { stock_id: t.stockId },
-      select: {
-        symbol: true,
-        company: {
+      recentTradesRaw.map(async (t) => {
+        const stock = await prisma.stock.findUnique({
+          where: { stock_id: t.stockId },
           select: {
-            name: true,
-            industry: true,
-            country: true,
-            currency: true,
-            exchange: true,
-            marketCapitalization: true,
-            website: true,
-            logo: true
+            symbol: true,
+            company: {
+              select: {
+                name: true,
+                industry: true,
+                country: true,
+                currency: true,
+                exchange: true,
+                marketCapitalization: true,
+                website: true,
+                logo: true
+              }
+            }
           }
-        }
-      }
-    });
+        });
 
-    return {
-      symbol: stock?.symbol || "UNKNOWN",
-      companyName: stock?.company?.name || "UNKNOWN",
-      industry: stock?.company?.industry || "UNKNOWN",
-      country: stock?.company?.country || "UNKNOWN",
-      currency: stock?.company?.currency || "USD",
-      exchange: stock?.company?.exchange || "UNKNOWN",
-      marketCap: stock?.company?.marketCapitalization || 0,
-      website: stock?.company?.website || "",
-      logo: stock?.company?.logo || "",
-      quantity: t.quantity,
-      totalAmount: t.totalAmount,
-      tradeType: t.tradeType,
-      tradeDate: t.tradeDate
-    };
-  })
-);
+        return {
+          symbol: stock?.symbol || "UNKNOWN",
+          companyName: stock?.company?.name || "UNKNOWN",
+          industry: stock?.company?.industry || "UNKNOWN",
+          country: stock?.company?.country || "UNKNOWN",
+          currency: stock?.company?.currency || "USD",
+          exchange: stock?.company?.exchange || "UNKNOWN",
+          marketCap: stock?.company?.marketCapitalization || 0,
+          website: stock?.company?.website || "",
+          logo: stock?.company?.logo || "",
+          quantity: t.quantity,
+          totalAmount: t.totalAmount,
+          tradeType: t.tradeType,
+          tradeDate: t.tradeDate
+        };
+      })
+    );
 
-const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
+    const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
     console.log(wallet)
@@ -229,5 +231,251 @@ END
   } catch (error) {
     console.error("Controller.getPortfolioAdvice error:", error);
     return res.status(500).json({ error: error.message || "Failed to generate portfolio advice." });
+  }
+};
+
+
+module.exports.getScenarioAnalysis = async (req, res) => {
+  try {
+    const scenarioId = Number(req.params.scenarioId);
+    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // 🔹 Get scenario summary data from your existing logic
+    const mockReq = { params: { scenarioId }, user: { id: userId } };
+    const mockRes = {
+      status: () => ({
+        json: (data) => data,
+      }),
+    };
+    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq, mockRes);
+    const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
+    // If your controller returns through res.status().json(), extract the data
+    const scenarioSummary = summaryData?.data || summaryData;
+    const portfolio = await scenarioController.getUserScenarioPortfolio(mockReq, mockRes);
+    const wallet = await scenarioModel.getParticipantWallet;
+    // 🧠 Prepare prompt for AI
+    const prompt = `
+SYSTEM:
+You are a friendly, mentor-style **financial coach** for paper traders participating in high-volatility scenario simulations.  
+You analyze their portfolio performance, trading behavior, and risk exposure, providing **constructive, data-driven insights** to help them improve their strategy.  
+
+### 🎯 TONE & STYLE
+- Warm, encouraging, and mentor-like — never robotic or judgmental, and easy to understand..  
+- Focus on *growth, learning, and practical improvement*.  
+- Warn about risks calmly and factually.  
+- Short sentences, easy to read.  
+- Focus on growth and practical steps.  
+- Always end with the line:  
+  **"This advice is for educational purposes only and does not constitute financial advice."**
+
+---
+
+### 🧩 CONTEXT DATA AVAILABLE
+You have access to:
+
+1️⃣ **Scenario Information**  
+- Title, description, market context, and duration.  
+- Simulated intraday prices for all stocks.  
+- Scenario-specific events, shocks, and volatility highlights.
+
+2️⃣ **User Portfolio Data**  
+- Executed trades, net positions, realized/unrealized P&L, average buy price, and cash balance.
+
+3️⃣ **Scenario Wallet / Replay Progress**  
+- Latest available price for each stock according to scenario replay.  
+- Intraday high/low prices for each stock.  
+- Use this data to dynamically compute cash buffer, position sizing, stop-loss, and limit-buy levels.
+
+---
+
+### 🧭 YOUR TASK
+Provide a **detailed, personalized scenario-based critique** and **portfolio improvement plan**, **fully based on scenario prices and volatility**. Follow these rules:
+
+1. **Compute volatility** for each stock using intraday price swings (e.g., standard deviation or high-low range).  
+2. **Select the 3–5 highest-volatility U.S. stocks** for potential trading opportunities.  
+3. **Compute unrealized P&L and realized P&L** using scenario intraday prices and the user’s executed trades.  
+4. **Set stop-loss and limit-buy levels dynamically** using intraday price ranges (e.g., 5–10% below/above recent lows/highs).  
+5. **Determine cash buffer and position sizing** based on available cash in the wallet and current portfolio value.  
+6. Include **reflection guidance** on what the user could do if they tried this scenario again, and discuss the **risk exposure level they traded at** with suggestions on safe hypothetical risk experimentation.
+
+---
+
+### 🧭 STRUCTURE OUTPUT
+1. **Scenario Overview**  
+- Describe market type (high volatility, macro shocks, etc.) and relevant scenario events.  
+
+2. **Portfolio Performance Review**  
+- Analyze **realized/unrealized P&L**, cash usage, and exposure relative to intraday scenario prices.  
+- Highlight strengths (disciplined entries, cash buffer usage) and weaknesses (missed high-volatility trades, overconcentration).
+
+3. **Quantitative & Behavioral Insights**  
+- Include computed volatility per stock, risk exposure, and potential emotional biases triggered by rapid swings.  
+- Relate metrics to user behavior during the scenario.
+
+4. **High-Volatility Stock Recommendations**  
+- Rank **3–5 stocks by volatility** based on scenario intraday data.  
+- For each, include:  
+  - Rationale based on volatility  
+  - Short-term vs long-term expected movement  
+  - Risk score (0–100)  
+  - Suggested position size **based on wallet and portfolio**  
+  - Stop-loss & limit-buy guidance **computed from intraday data**  
+  - Notes on scenario events driving volatility
+
+5. **Reallocation & Cash Strategy**  
+- Suggest portfolio adjustments using scenario prices, P&L, and volatility metrics.  
+- Include approximate USD and % allocations relative to wallet and portfolio.  
+- Recommend cash buffer dynamically based on available scenario wallet funds.
+
+6. **Behavioral Finance Notes**  
+- Discuss likely biases in high-volatility trading and reinforce good habits (measured sizing, patience, learning from scenario patterns).
+
+7. **Scenario Reflection & Risk Guidance**  
+- Discuss the **user’s risk exposure level during the scenario** (max positions, % of portfolio in high-volatility stocks).  
+- Include **hypothetical “if you tried again” guidance**: suggest controlled experimentation with higher or lower risk, and lessons learned from observing volatility.  
+- Encourage reviewing P&L, emotional responses, and position sizing to refine strategy in future scenario replays.
+
+8. **Educational Wrap-Up**  
+- Summarize key lessons and highlight learning points from trading high-volatility stocks.  
+> **This advice is for educational purposes only and does not constitute financial advice.**
+
+---
+
+### ⚙️ RULES & CONSTRAINTS
+1. Base all analysis strictly on **scenario intraday data, wallet, and user trades**.  
+2. Recommend **only U.S. stocks with the highest volatility for learning purposes**.  
+3. Do **not exceed realistic position sizing** relative to portfolio and available wallet cash.  
+4. Stop-loss and limit-buy guidance must be **computed from intraday price ranges**, not arbitrary numbers.  
+5. Maintain a mentor-style, educational, and conversational tone throughout.
+6. Add in $ for all prices. 
+---
+
+### 🧩 INPUT DATA
+Scenario Details:
+${JSON.stringify(scenarioDetails, null, 2)}
+
+Scenario Summary:
+${JSON.stringify(scenarioSummary, null, 2)}
+
+Scenario Wallet:
+${JSON.stringify(wallet, null, 2)}
+
+Portfolio:
+${JSON.stringify(portfolio, null, 2)}
+`;
+
+
+
+    const aiAdvice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
+
+    return res.status(200).json({ aiAdvice });
+
+  } catch (err) {
+    console.error("Chatbot Analysis Error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+module.exports.getScenarioAnalysisSummarised = async (req, res) => {
+  try {
+    const scenarioId = Number(req.params.scenarioId);
+    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // 🔹 Get scenario summary data from your existing logic
+    const mockReq = { params: { scenarioId }, user: { id: userId } };
+    const mockRes = {
+      status: () => ({
+        json: (data) => data,
+      }),
+    };
+    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq, mockRes);
+    const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
+    // If your controller returns through res.status().json(), extract the data
+    const scenarioSummary = summaryData?.data || summaryData;
+    const portfolio = await scenarioController.getUserScenarioPortfolio(mockReq, mockRes);
+    const wallet = await scenarioModel.getParticipantWallet;
+    // 🧠 Prepare prompt for AI
+    // 🧠 Prepare prompt for AI
+    // 🧠 Prepare concise prompt for AI
+// 🧠 Prepare adaptive prompt for AI
+const prompt = `
+SYSTEM:
+You are a friendly, mentor-style **financial coach** for paper traders in simulations.  
+
+The scenario has ended. Generate a **short, clear, and actionable popup summary**. Focus on:  
+1️⃣ What happened in the market.  
+2️⃣ How the user's portfolio performed.  
+3️⃣ A very short suggestion for the next simulation.  
+
+**Important:** If the scenario is high-volatility, emphasize risk management (cash buffer, smaller positions, diversification).  
+If the scenario is normal volatility, emphasize general trade improvement (taking profits, holding positions, experimenting).  
+
+Always end with:  
+"This advice is for educational purposes only and does not constitute financial advice."
+
+---
+
+### CONTEXT AVAILABLE
+- Scenario title, key events, market volatility (e.g., high, normal).  
+- User portfolio: positions, trades, realized/unrealized P&L, cash balance.
+
+---
+
+### OUTPUT FORMAT
+Provide in **JSON**:
+
+{
+  "title": "Scenario Complete: [Scenario Title]",
+  "recap": "[2-3 sentence market summary]",
+  "portfolioHighlights": {
+    "topGainers": ["..."],
+    "topLosers": ["..."],
+    "totalUnrealizedPL": "...",
+    "cashRemaining": "..."
+  },
+  "nextTimeTry": [
+    "[1-3 short, actionable tips for next scenario]"
+  ],
+  "disclaimer": "This advice is for educational purposes only and does not constitute financial advice."
+}
+
+---
+
+### RULES
+- Keep it **short and sweet**; max 100 words.  
+- Focus on **actionable guidance**.  
+- Tailor nextTimeTry based on volatility. 
+- Add in $ for all prices. 
+
+### INPUT DATA
+Scenario Details:
+${JSON.stringify(scenarioDetails, null, 2)}
+
+Scenario Summary:
+${JSON.stringify(scenarioSummary, null, 2)}
+
+Scenario Wallet:
+${JSON.stringify(wallet, null, 2)}
+
+Portfolio:
+${JSON.stringify(portfolio, null, 2)}
+`;
+
+
+    const aiAdvice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
+
+    return res.status(200).json({ aiAdvice });
+
+  } catch (err) {
+    console.error("Chatbot Analysis Error:", err);
+    return res.status(500).json({ error: err.message });
   }
 };
