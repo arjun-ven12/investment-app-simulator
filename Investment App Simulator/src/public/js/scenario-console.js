@@ -16,6 +16,8 @@ const priceInput = document.getElementById("price");
 const qtyInput = document.getElementById("quantity");
 const orderTypeSelect = document.getElementById("order-type");
 const usedHues = [];
+let hasShownEndScreen = false;
+let hasReplayStarted = false; // ✅ new flag
 
 function updateReplayProgress() {
     let totalLength = fullData.length;
@@ -34,6 +36,7 @@ function updateReplayProgress() {
 
     if (progressBar) progressBar.style.width = `${progressPercent}%`;
     if (progressText) progressText.textContent = `${progressPercent}%`;
+    checkEndOfScenario();
 }
 
 async function plotNextDataPoint() {
@@ -205,9 +208,9 @@ function startReplay() {
     isPaused = false;
     let intervalMs = 20000 / currentSpeed;
     let remainingTime = intervalMs / 1000;
-
+    hasShownEndScreen = false;
     countdownInterval = setInterval(() => {
-        remainingTime--;
+        remainingTime--
         document.getElementById("next-update-timer").textContent = `Next update in: ${remainingTime}s`;
     }, 1000);
 
@@ -956,23 +959,23 @@ window.addEventListener('DOMContentLoaded', function () {
     stockCardsContainer.style.gap = '10px';
     stockCardsContainer.style.marginTop = '10px';
 
-async function refreshPortfolioData() {
-    const token = localStorage.getItem("token");
-    try {
-        const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+    async function refreshPortfolioData() {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        if (!res.ok) throw new Error('Failed to fetch portfolio');
-        
-        const data = await res.json();
-        updatePortfolioUI(data.positions);
-    } catch (err) {
-        console.error(err);
+            if (!res.ok) throw new Error('Failed to fetch portfolio');
+
+            const data = await res.json();
+            updatePortfolioUI(data.positions);
+        } catch (err) {
+            console.error(err);
+        }
     }
-}
 
     function updatePortfolioUI(positions) {
         if (!positions || positions.length === 0) {
@@ -1057,4 +1060,78 @@ async function refreshPortfolioData() {
 
     // Expose refresh globally
     window.fetchPortfolio = refreshPortfolioData;
+});
+
+function checkEndOfScenario() {
+    // Only trigger if replay has started this session
+    if (!fullData || fullData.length === 0) return false;
+
+    // Only show end screen if we reach the last index **and haven't shown it this session**
+    if (currentIndex >= fullData.length && !hasShownEndScreen) {
+        hasShownEndScreen = true; // mark it as shown for this session
+        pauseReplay();
+        document.getElementById("next-update-timer").textContent = "Replay finished!";
+        showEndScreen();
+        return true;
+    }
+    return false;
+}
+
+// Example: only start checking **after first step of replay**
+function replayStep() {
+    if (currentIndex >= fullData.length) return;
+
+    // update chart / stats
+    updateChart(fullData[currentIndex]);
+
+    currentIndex++;
+
+    checkEndOfScenario();
+}
+
+
+// Show end screen modal
+function showEndScreen() {
+    const modal = document.getElementById("endScreenModal");
+    if (!modal) return console.error("❌ End screen modal not found!");
+
+    modal.style.display = "flex"; // show modal
+    console.log("✅ End screen displayed!");
+}
+
+// Hide end screen modal
+function hideEndScreen() {
+    const modal = document.getElementById("endScreenModal");
+    if (!modal) return;
+    modal.style.display = "none";
+    console.log("✅ End screen closed");
+}
+
+// Setup modal event listeners
+function setupEndScreen() {
+    const modal = document.getElementById("endScreenModal");
+    if (!modal) return;
+
+    const closeBtn = document.getElementById("closeEndScreen");
+    const restartBtn = document.getElementById("restartScenario");
+
+    // Close button hides modal
+    if (closeBtn) closeBtn.addEventListener("click", hideEndScreen);
+
+    // Restart button hides modal and resets scenario
+    if (restartBtn) restartBtn.addEventListener("click", () => {
+        hideEndScreen();
+        console.log("✅ Scenario restarted");
+        resetScenario(); // make sure you have this function to reset the replay
+    });
+
+    // Click outside modal content closes modal
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) hideEndScreen();
+    });
+}
+
+// Initialize when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    setupEndScreen();
 });

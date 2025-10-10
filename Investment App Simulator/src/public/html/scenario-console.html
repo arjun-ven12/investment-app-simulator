@@ -72,7 +72,7 @@
         <div id="replay-progress"
           style="height: 100%; width: 0%; background: #fff; border-radius: 4px; transition: width 0.2s;"></div>
       </div>
-      
+
     </div>
 
     <!-- Chart + Trading Form -->
@@ -97,11 +97,11 @@
         </form>
 
         <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
-        
+
         <div id="next-update-timer" style="color: #fff; margin-top: 10px;">Next update in: --s</div>
-<span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
-    Reset Zoom
-</span>
+        <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
+          Reset Zoom
+        </span>
       </div>
 
       <div class="trading-card">
@@ -204,21 +204,20 @@
         <span id="market-status">Loading market status...</span>
       </div> -->
 
-        <div class="chart-container">
-<div id="portfolioContainer">
-  <h1>My Portfolio</h1>
-  <div class="portfolio-layout">
-    <!-- Left: Stock Analytics -->
-    <div class="positions-section" id="stockCardsContainer"></div>
+    <div class="chart-container">
+      <div id="portfolioContainer">
+        <h1>My Portfolio</h1>
+        <div class="portfolio-layout">
+          <!-- Left: Stock Analytics -->
+          <div class="positions-section" id="stockCardsContainer"></div>
 
-    <!-- Right: Pie Chart -->
-    <div class="portfolio-chart-container">
-      <canvas id="portfolioChart" class="fullscreen-chart"></canvas>
+          <!-- Right: Pie Chart -->
+          <div class="portfolio-chart-container">
+            <canvas id="portfolioChart" class="fullscreen-chart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-
-</div>
-</div>
     <!-- Trade History + Limit Orders -->
     <div class="history-container">
       <div class="history-column">
@@ -270,8 +269,18 @@
       <div class="content trading-card2"></div>
     </div>
 
-
-
+<div id="endScreenModal" class="modal">
+  <div class="modal-content endgame">
+    <h1>Scenario Complete!</h1>
+    <canvas id="endPortfolioChart" style="width:100%; max-height:400px;"></canvas>
+    <div id="endStockCards" style="margin-top: 15px;"></div>
+    <div class="buttons">
+      <button id="closeEndScreen">Close</button>
+      <button id="restartScenario">Restart</button>
+    </div>
+  </div>
+</div>
 </body>
- <script src="/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
 </html>
