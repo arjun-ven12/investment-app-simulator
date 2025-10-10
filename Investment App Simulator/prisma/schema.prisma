@@ -164,37 +164,38 @@ model BlogComment {
 }
 
 model User {
-  id                  Int                   @id @default(autoincrement())
-  email               String                @unique
-  password            String
-  wallet              Int                   @default(100000)
-  createdAt           DateTime              @default(now())
-  referredById        Int?
-  status              String                @default("Sufficient Money")
-  userReferralLink    String?               @unique
-  username            String                @unique
-  updatedAt           DateTime              @updatedAt
-  name                String?
-  phoneNumber         Int?
-  BlogComment         BlogComment[]
-  BlogPost            BlogPost[]
-  Comment             Comment[]
-  FavoriteApi         FavoriteApi[]
-  favoriteStocks      FavoriteStock[]
-  Goal                Goal[]
-  limitOrders         LimitOrder[]
-  RedeemBy            RedeemBy[]
-  referrals           Referral[]            @relation("UserReferrals")
-  referralUsages      ReferralUsage[]
-  trading             Trade[]
-  referredBy          Referral?             @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
-  bookmarks           Bookmark[]
-  NewsComment         NewsComment[]
-  NewsLike            NewsLike[]
-  StopMarketOrder     StopMarketOrder[]
-  StopLimitOrder      StopLimitOrder[]
-  OptionTrade         OptionTrade[]
-  ScenarioParticipant ScenarioParticipant[]
+  id                       Int                        @id @default(autoincrement())
+  email                    String                     @unique
+  password                 String
+  wallet                   Int                        @default(100000)
+  createdAt                DateTime                   @default(now())
+  referredById             Int?
+  status                   String                     @default("Sufficient Money")
+  userReferralLink         String?                    @unique
+  username                 String                     @unique
+  updatedAt                DateTime                   @updatedAt
+  name                     String?
+  phoneNumber              Int?
+  BlogComment              BlogComment[]
+  BlogPost                 BlogPost[]
+  Comment                  Comment[]
+  FavoriteApi              FavoriteApi[]
+  favoriteStocks           FavoriteStock[]
+  Goal                     Goal[]
+  limitOrders              LimitOrder[]
+  RedeemBy                 RedeemBy[]
+  referrals                Referral[]                 @relation("UserReferrals")
+  referralUsages           ReferralUsage[]
+  trading                  Trade[]
+  referredBy               Referral?                  @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
+  bookmarks                Bookmark[]
+  NewsComment              NewsComment[]
+  NewsLike                 NewsLike[]
+  StopMarketOrder          StopMarketOrder[]
+  StopLimitOrder           StopLimitOrder[]
+  OptionTrade              OptionTrade[]
+  ScenarioParticipant      ScenarioParticipant[]
+  ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
 }
 
 model Referral {
@@ -506,9 +507,10 @@ model Scenario {
 
   participants ScenarioParticipant[]
 
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @default(now()) @updatedAt
-  ScenarioIntradayPrice ScenarioIntradayPrice[]
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @default(now()) @updatedAt
+  ScenarioIntradayPrice    ScenarioIntradayPrice[]
+  ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
 }
 
 model ScenarioParticipant {
@@ -518,6 +520,7 @@ model ScenarioParticipant {
   joinedAt    DateTime @default(now())
   finalRank   Int?
   cashBalance Decimal  @default(0) @db.Decimal(10, 2)
+  ended       Boolean  @default(false)
 
   scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -536,13 +539,14 @@ model ScenarioMarketOrder {
   executedPrice Decimal
   status        String   @default("EXECUTED")
   createdAt     DateTime @default(now())
+  currentIndex   Int?  
 
   participant ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 }
 
 model ScenarioLimitOrder {
   id            Int                 @id @default(autoincrement())
-  participantId Int // foreign key
+  participantId Int
   participant   ScenarioParticipant @relation(fields: [participantId], references: [id])
   side          String
   symbol        String
@@ -552,6 +556,9 @@ model ScenarioLimitOrder {
   status        String
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+  currentIndex   Int?                 // <-- the index when user placed the order
+  executedIndex  Int?                 // <-- the index when order executed (if executed)
+
 }
 
 model ScenarioReplayProgress {
@@ -597,4 +604,21 @@ model ScenarioHolding {
   @@unique([participantId, symbol]) // ensures one row per participant per stock
   @@index([participantId])
   @@index([symbol])
+}
+
+model ScenarioAttemptAnalytics {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  scenarioId    Int
+  attemptNumber Int
+  summary       Json // {openShares, totalShares, invested, unrealizedPnL, realizedPnL, totalPnL}
+  positions     Json // array of position snapshots
+  createdAt     DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scenarioId, attemptNumber])
+  @@index([scenarioId])
+  @@index([userId])
 }
