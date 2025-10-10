@@ -18,7 +18,7 @@ const orderTypeSelect = document.getElementById("order-type");
 const usedHues = [];
 let hasShownEndScreen = false;
 let hasReplayStarted = false; // ✅ new flag
-
+const userId = localStorage.getItem('userId');
 function updateReplayProgress() {
     let totalLength = fullData.length;
 
@@ -1090,14 +1090,138 @@ function replayStep() {
 }
 
 
-// Show end screen modal
-function showEndScreen() {
+let endPortfolioChart = null; // global chart instance
+
+async function showEndScreen() {
     const modal = document.getElementById("endScreenModal");
     if (!modal) return console.error("❌ End screen modal not found!");
 
-    modal.style.display = "flex"; // show modal
-    console.log("✅ End screen displayed!");
+    modal.style.display = "flex";
+
+    // Give the browser a tiny moment to render the modal
+    await new Promise(r => setTimeout(r, 50));
+
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const token = localStorage.getItem("token");
+    const stockCardsContainer = document.getElementById("endStockCards");
+    const ctx = document.getElementById("endPortfolioChart").getContext("2d");
+
+    try {
+        // 🔹 Fetch portfolio
+        const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const portfolioData = await portfolioRes.json();
+        const positions = portfolioData.positions || [];
+
+        // 🔹 Show portfolio chart & stock cards
+        updatePortfolioUI(positions, ctx, stockCardsContainer);
+
+        // 🔹 Add AI loading placeholder
+        let aiAdviceContainer = document.getElementById("aiAdviceContainer");
+        if (!aiAdviceContainer) {
+            aiAdviceContainer = document.createElement("div");
+            aiAdviceContainer.id = "aiAdviceContainer";
+            aiAdviceContainer.innerHTML = `<p style="color:#888; margin-top:12px;">Generating AI advice... <span class="loading-dots">...</span></p>`;
+            stockCardsContainer.appendChild(aiAdviceContainer);
+        }
+
+        // 🔹 Fetch AI advice
+        const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const aiData = await aiRes.json();
+        if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
+
+        // Clean AI JSON
+        const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
+        const aiAdvice = JSON.parse(cleaned);
+
+        // 🔹 Display AI advice
+        aiAdviceContainer.innerHTML = `
+            <hr style="border-color:#555;margin:12px 0;">
+            <h2>AI Advice</h2>
+            <p><strong>${aiAdvice.recap}</strong></p>
+            <ul>
+                <li><b>Top Gainers:</b> ${aiAdvice.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
+                <li><b>Top Losers:</b> ${aiAdvice.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
+                <li><b>Total Unrealized P/L:</b> ${aiAdvice.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
+                <li><b>Cash Remaining:</b> ${aiAdvice.portfolioHighlights?.cashRemaining || "-"}</li>
+            </ul>
+            <h3>Next Time, Try:</h3>
+            <ul>${aiAdvice.nextTimeTry?.map(tip => `<li>${tip}</li>`).join("") || ""}</ul>
+            <p style="font-size: 12px; color: #aaa;">${aiAdvice.disclaimer}</p>
+        `;
+
+    } catch (err) {
+        console.error("❌ Failed to load end screen data:", err);
+        stockCardsContainer.innerHTML += `<p>Unable to load portfolio or AI advice. Please try again later.</p>`;
+    }
 }
+
+
+function updatePortfolioUI(positions, ctx, container) {
+    if (!positions || positions.length === 0) {
+        container.innerHTML = '<p style="color:#888;">No stocks in portfolio.</p>';
+        return;
+    }
+
+    container.innerHTML = "";
+
+    positions.forEach(pos => {
+        const card = document.createElement('div');
+        card.className = 'company-card-content animate-slideup';
+        card.style.padding = '12px';
+        card.style.border = '1px solid #636363ff';
+        card.style.borderRadius = '10px';
+        card.style.backgroundColor = '#000';
+        card.style.color = '#fff';
+        card.style.width = '100%';
+        card.style.marginBottom = '8px';
+        card.innerHTML = `
+            <h2>${pos.symbol}</h2>
+            <p><strong>Quantity:</strong> ${pos.quantity}</p>
+            <p><strong>Total Shares:</strong> ${pos.totalShares}</p>
+            <p><strong>Avg Buy Price:</strong> $${pos.avgBuyPrice}</p>
+            <p><strong>Current Price:</strong> $${pos.currentPrice}</p>
+            <p><strong>Total Invested:</strong> $${pos.totalInvested}</p>
+            <p><strong>Current Value:</strong> $${pos.currentValue}</p>
+            <p><strong>Unrealized P&L:</strong> <span style="color:${pos.unrealizedPnL >= 0 ? '#0f0' : '#f00'};">$${pos.unrealizedPnL}</span></p>
+            <p><strong>Realized P&L:</strong> <span style="color:${pos.realizedPnL >= 0 ? '#0f0' : '#f00'};">$${pos.realizedPnL}</span></p>
+        `;
+        container.appendChild(card);
+    });
+
+    const chartData = {
+        labels: positions.map(p => p.symbol),
+        datasets: [{
+            data: positions.map(p => parseFloat(p.currentValue)),
+            backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+            borderWidth: 1
+        }]
+    };
+
+    if (!endPortfolioChart) {
+        endPortfolioChart = new Chart(ctx, {
+            type: 'pie',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 500 },
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#fff' } },
+                    title: { display: true, text: 'Portfolio Distribution', color: '#E0EBFF', font: { size: 18 } }
+                }
+            }
+        });
+    } else {
+        endPortfolioChart.data = chartData;
+        endPortfolioChart.update();
+    }
+}
+
+
 
 // Hide end screen modal
 function hideEndScreen() {
@@ -1114,7 +1238,7 @@ function setupEndScreen() {
 
     const closeBtn = document.getElementById("closeEndScreen");
     const restartBtn = document.getElementById("restartScenario");
-
+    const moreBtn = document.getElementById("generateMoreInsights");
     // Close button hides modal
     if (closeBtn) closeBtn.addEventListener("click", hideEndScreen);
 
@@ -1135,3 +1259,14 @@ function setupEndScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     setupEndScreen();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const moreBtn = document.getElementById("generateMoreInsights");
+    if (moreBtn) {
+        moreBtn.addEventListener("click", () => {
+            const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+            // Navigate to a new page, passing scenarioId in query params
+            window.location.href = `/detailed-insights.html?scenarioId=${scenarioId}`;
+        });
+    }
+})

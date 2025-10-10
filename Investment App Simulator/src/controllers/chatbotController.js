@@ -472,7 +472,7 @@ ${JSON.stringify(portfolio, null, 2)}
 
     const aiAdvice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
 
-    return res.status(200).json({ aiAdvice });
+    return res.status(200).json({ aiAdvice , portfolio});
 
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
