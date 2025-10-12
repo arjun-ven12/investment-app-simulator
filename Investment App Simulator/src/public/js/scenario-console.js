@@ -232,7 +232,7 @@ async function fetchOwnedQuantity(symbol) {
             headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch portfolio");
-        const portfolio = await res.json();
+        const portfolio = await res.json()
         const position = (portfolio.openPositions || []).find(p => p.symbol === symbol);
         return position ? Number(position.quantity) : 0;
     } catch (err) {
@@ -1266,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         moreBtn.addEventListener("click", () => {
             const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
             // Navigate to a new page, passing scenarioId in query params
-            window.location.href = `/detailed-insights.html?scenarioId=${scenarioId}`;
+            window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}`;
         });
     }
 })

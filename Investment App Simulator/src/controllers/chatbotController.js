@@ -510,8 +510,6 @@ ${JSON.stringify(wallet, null, 2)}
 Portfolio:
 ${JSON.stringify(portfolio, null, 2)}
 
-Intraday Data:
-${JSON.stringify(intradayData, null, 2)}
 `;
 
     const aiAdvice = await chatbotModel.generateResponse(
