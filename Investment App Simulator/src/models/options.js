@@ -1,4 +1,5 @@
 
+
 const API_KEY= "PK60NYDKHQH512R4Q7SH"
 const API_SECRET= "Oi4N2rq28YKLnti1lsRuFldwOhtwStQ1pJ56eURs"
 
@@ -145,7 +146,7 @@ module.exports.getContractsBySymbol = async function getContractsBySymbol(symbol
           name: contract.name,
           underlyingSymbol: contract.underlying_symbol,
           rootSymbol: contract.root_symbol,
-          type: contract.type,
+          type: contract.type ? contract.type.toUpperCase() : null,
           style: contract.style || null,
           strikePrice,
           expirationDate,
@@ -161,7 +162,7 @@ module.exports.getContractsBySymbol = async function getContractsBySymbol(symbol
           name: contract.name,
           underlyingSymbol: contract.underlying_symbol,
           rootSymbol: contract.root_symbol,
-          type: contract.type,
+          type: contract.type ? contract.type.toUpperCase() : null,
           style: contract.style || null,
           strikePrice,
           expirationDate,
@@ -1386,14 +1387,19 @@ exports.getUserOptionTrades = function getUserOptionTrades(userId) {
 
 //   return { portfolio: Object.values(portfolio) };
 // };
-
 module.exports.getUserOptionPortfolio = async function (userId) {
-  if (!userId) throw new Error('Missing userId');
+  if (!userId) throw new Error("Missing userId");
   const now = new Date();
 
-  // 1. Get all trades + contract + stock info
+  console.log("============== 🧾 OPTION PORTFOLIO CALCULATION STARTED ==============");
+  console.log("User ID:", userId);
+  console.log("Current Time:", now.toISOString());
+
   const trades = await prisma.optionTrade.findMany({
-    where: { userId },
+    where: {
+      userId,
+      orderType: "MARKET", // Only MARKET trades
+    },
     include: {
       contract: {
         include: { stock: true },
@@ -1401,104 +1407,132 @@ module.exports.getUserOptionPortfolio = async function (userId) {
     },
   });
 
-  if (trades.length === 0) return { portfolio: [] };
+  console.log(`Fetched ${trades.length} MARKET trades for user ${userId}`);
+
+  if (trades.length === 0) {
+    console.log("⚠️ No option trades found. Returning empty portfolio.");
+    return { portfolio: [] };
+  }
 
   const portfolio = {};
 
-  for (const trade of trades) {
+  for (const [index, trade] of trades.entries()) {
+    console.log("\n=====================================================");
+    console.log(`📄 Processing Trade #${index + 1}: ${trade.id}`);
+    console.log("Contract Symbol:", trade.contract.symbol);
+    console.log("Underlying:", trade.contract.underlyingSymbol);
+    console.log("Trade Type:", trade.tradeType);
+    console.log("Order Type:", trade.orderType);
+    console.log("Quantity:", trade.quantity);
+    console.log("Trade Price:", trade.price);
+    console.log("Strike Price:", trade.contract.strikePrice);
+    console.log("Expiration Date:", trade.contract.expirationDate);
+
     const { contract, price, quantity, tradeType } = trade;
     const symbol = contract.underlyingSymbol;
     const strike = contract.strikePrice;
     const contractSize = contract.size || 100;
     const isExpired = new Date(contract.expirationDate) <= now;
 
+    console.log("Contract Size:", contractSize);
+    console.log("Is Expired?:", isExpired);
+
     let unrealizedPnL = 0;
     let realizedPnL = 0;
     let underlyingPrice = null;
 
+    // ====================== EXPIRED OPTION ======================
+    if (isExpired) {
+      console.log("\n--- ⚰️ Expired Option Detected ---");
 
+      const expirationDateTime = new Date(contract.expirationDate.getTime());
+      expirationDateTime.setUTCHours(20, 0, 0, 0);
 
-if (isExpired) {
-  console.log('--- Expired Option ---');
-  console.log(`Contract Symbol: ${contract.symbol}`);
-  console.log(`Trade Type: ${tradeType}`);
-  console.log(`Quantity: ${quantity}`);
-  console.log(`Contract Size: ${contractSize}`);
-  console.log(`Strike Price: ${strike}`);
-  console.log(`Price Paid / Received: ${price}`);
-  console.log(`Original contract.expirationDate: ${contract.expirationDate}`);
+      console.log(`Adjusted Expiration Time (20:00 UTC): ${expirationDateTime.toISOString()}`);
 
-  // Clone the expiration date
-  const expirationDateTime = new Date(contract.expirationDate.getTime());
+      const expirationPriceRecord = await prisma.intradayPrice3.findFirst({
+        where: {
+          stockId: contract.stockId,
+          date: { lte: expirationDateTime },
+        },
+        orderBy: { date: "desc" },
+      });
 
-  // Set expiration time to 20:00 UTC
-  expirationDateTime.setUTCHours(20, 0, 0, 0);
-  console.log(`Expiration date set to 20:00 UTC: ${expirationDateTime.toISOString()}`);
+      if (expirationPriceRecord) {
+        console.log(`Found Underlying Price Record at Expiry: ${expirationPriceRecord.date}`);
+        console.log(`Underlying Price at Expiry: ${expirationPriceRecord.closePrice}`);
+      } else {
+        console.log("⚠️ No underlying price found before expiry (20:00 UTC). Setting to 0.");
+      }
 
-  // Fetch the underlying price closest to or before 20:00 UTC
-  const expirationPriceRecord = await prisma.intradayPrice3.findFirst({
-    where: {
-      stockId: contract.stockId,
-      date: { lte: expirationDateTime },
-    },
-    orderBy: { date: 'desc' },
-  });
+      const underlyingPriceAtExpiry = expirationPriceRecord
+        ? parseFloat(expirationPriceRecord.closePrice)
+        : 0;
 
-  if (expirationPriceRecord) {
-    console.log(`Found underlying price record at expiry: ${expirationPriceRecord.date}`);
-    console.log(`Underlying price at expiry: ${expirationPriceRecord.closePrice}`);
-  } else {
-    console.log('No underlying price record found before expiration 20:00 UTC.');
-  }
+      console.log("Underlying Price Used for Expiry:", underlyingPriceAtExpiry);
 
-  const underlyingPriceAtExpiry = expirationPriceRecord
-    ? parseFloat(expirationPriceRecord.closePrice)
-    : 0;
+      // --- Intrinsic Value Calculation ---
+      let intrinsic = 0;
+      if (contract.type === "CALL" || contract.type === "call") {
+        intrinsic = Math.max(0, underlyingPriceAtExpiry - strike);
+      } else if (contract.type === "PUT" || contract.type === "put") {
+        intrinsic = Math.max(0, strike - underlyingPriceAtExpiry);
+      }
 
-  // Calculate intrinsic value
-  let intrinsic = 0;
-  if (contract.type === 'call') {
-    intrinsic = Math.max(0, underlyingPriceAtExpiry - strike);
-  } else if (contract.type === 'put') {
-    intrinsic = Math.max(0, strike - underlyingPriceAtExpiry);
-  }
+      console.log("Intrinsic Value:", intrinsic);
 
-  // Final option value
-  const finalValue = intrinsic * quantity * contractSize;
+      const finalValue = intrinsic * quantity * contractSize;
+      console.log("Final Option Value at Expiry:", finalValue);
 
-  // Compute realized PnL
-  if (tradeType === 'BUY') {
-    realizedPnL = finalValue - price * quantity * contractSize;
-  } else if (tradeType === 'SELL') {
-    realizedPnL = price * quantity * contractSize - finalValue;
-  }
-}
+      // --- Realized PnL ---
+      if (tradeType === "BUY") {
+        realizedPnL = finalValue - price * quantity * contractSize;
+      } else if (tradeType === "SELL") {
+        realizedPnL = price * quantity * contractSize - finalValue;
+      }
 
+      console.log("✅ Realized PnL:", realizedPnL);
+    }
 
+    // ====================== ACTIVE OPTION ======================
+    else {
+      console.log("\n--- 🟢 Active Option ---");
 
-else {
-      // Active → use latest price
       const latestPriceRecord = await prisma.intradayPrice3.findFirst({
         where: { stockId: contract.stockId },
-        orderBy: { date: 'desc' },
+        orderBy: { date: "desc" },
       });
-      underlyingPrice = latestPriceRecord ? parseFloat(latestPriceRecord.closePrice) : null;
+
+      if (latestPriceRecord) {
+        underlyingPrice = parseFloat(latestPriceRecord.closePrice);
+        console.log("Latest Underlying Price Record Date:", latestPriceRecord.date);
+        console.log("Underlying Latest Close Price:", underlyingPrice);
+      } else {
+        console.log("⚠️ No recent underlying price found. Skipping unrealized PnL calculation.");
+      }
 
       if (underlyingPrice !== null) {
         let intrinsic = 0;
-        if (contract.type === 'call') intrinsic = Math.max(0, underlyingPrice - strike);
-        if (contract.type === 'put') intrinsic = Math.max(0, strike - underlyingPrice);
+        if (contract.type === "CALL" || contract.type === "call") intrinsic = Math.max(0, underlyingPrice - strike);
+        if (contract.type === "PUT" || contract.type === "put") intrinsic = Math.max(0, strike - underlyingPrice);
+
+        console.log("Intrinsic Value (Active):", intrinsic);
 
         const optionValue = intrinsic * quantity * contractSize;
+        console.log("Option Market Value:", optionValue);
 
-        unrealizedPnL = tradeType === 'BUY'
-          ? optionValue - price * quantity * contractSize
-          : price * quantity * contractSize - optionValue;
+        unrealizedPnL =
+          tradeType === "BUY"
+            ? optionValue - price * quantity * contractSize
+            : price * quantity * contractSize - optionValue;
+
+        console.log("💹 Unrealized PnL:", unrealizedPnL);
       }
     }
 
-    // Aggregate to portfolio
+    // ====================== PORTFOLIO AGGREGATION ======================
     if (!portfolio[symbol]) {
+      console.log(`\n🧩 Initializing portfolio entry for ${symbol}`);
       portfolio[symbol] = {
         underlyingSymbol: symbol,
         totalContracts: 0,
@@ -1524,7 +1558,14 @@ else {
       portfolio[symbol].activeContracts += 1;
       portfolio[symbol].openPositions += 1;
     }
+
+    console.log(`📊 Updated Portfolio Entry for ${symbol}:`);
+    console.log(JSON.stringify(portfolio[symbol], null, 2));
   }
+
+  console.log("\n============== ✅ FINAL PORTFOLIO RESULT ==============");
+  console.log(JSON.stringify(Object.values(portfolio), null, 2));
+  console.log("=======================================================\n");
 
   return { portfolio: Object.values(portfolio) };
 };
@@ -1534,3 +1575,52 @@ else {
 
 
 
+
+
+
+//////////////////////////////////////////////////////////////////
+////// CANCEL LIMIT ORDER OPTIONS
+//////////////////////////////////////////////////////////////////
+
+
+exports.cancelOptionLimitOrder = async function cancelOptionLimitOrder(orderId, userId) {
+  try {
+    console.log("🔍 Attempting to cancel limit order:", { orderId, userId });
+
+    // Find the order
+    const order = await prisma.optionTrade.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      console.log("❌ Order not found");
+      return null;
+    }
+
+    // Verify ownership
+    if (order.userId !== userId) {
+      console.log("❌ Order does not belong to this user");
+      return null;
+    }
+
+    // Ensure order is still a pending LIMIT order
+    if (order.orderType !== "LIMIT") {
+      console.log(`❌ Cannot cancel — orderType is '${order.orderType}'`);
+      return null;
+    }
+
+    // Update the order type to CANCELLED
+    const cancelledOrder = await prisma.optionTrade.update({
+      where: { id: orderId },
+      data: {
+        orderType: "CANCELLED",
+      },
+    });
+
+    console.log("✅ Limit order cancelled successfully:", cancelledOrder);
+    return cancelledOrder;
+  } catch (error) {
+    console.error("💥 cancelOptionLimitOrder error:", error);
+    throw error;
+  }
+};

@@ -646,6 +646,10 @@ window.addEventListener('DOMContentLoaded', function () {
       });
   }
 
+
+
+
+  
   const exportLimitOrdersButton = document.getElementById('export-limit-orders');
   if (exportLimitOrdersButton) {
       exportLimitOrdersButton.addEventListener('click', function () {
@@ -716,6 +720,9 @@ window.addEventListener('DOMContentLoaded', function () {
       if (!response.ok) throw new Error('Failed to fetch OHLC data');
       const ohlcData = await response.json();
       if (!Array.isArray(ohlcData) || ohlcData.length === 0) throw new Error('No OHLC data');
+      // Wait 2 seconds before fetching stock ID to allow DB upsert
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
 
       const formattedData = ohlcData.map(item => ({
         x: new Date(item.date).getTime(),
@@ -767,25 +774,44 @@ window.addEventListener('DOMContentLoaded', function () {
               }
             }]
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                type: 'time',
-                time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-                ticks: { color: 'white' },
-                grid: { color: 'rgba(255,255,255,0.2)' },
-                title: { display: true, text: 'Date', color: 'white' }
-              },
-              y: {
-                ticks: { color: 'white' },
-                grid: { color: 'rgba(255,255,255,0.2)' },
-                title: { display: true, text: 'Price', color: 'white' }
-              }
-            },
-            plugins: { legend: { labels: { color: 'white' } } }
-          }
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      type: 'time',
+      time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+      ticks: { color: 'white' },
+      grid: { color: 'rgba(255,255,255,0.2)' },
+      title: { display: true, text: 'Date', color: 'white' }
+    },
+    y: {
+      ticks: { color: 'white' },
+      grid: { color: 'rgba(255,255,255,0.2)' },
+      title: { display: true, text: 'Price', color: 'white' }
+    }
+  },
+  plugins: {
+    legend: { labels: { color: 'white' } },
+    zoom: {
+      pan: {
+        enabled: true,
+        mode: 'xy', // allow panning both X & Y
+        modifierKey: 'ctrl' // optional: require Ctrl key
+      },
+      zoom: {
+        wheel: {
+          enabled: true
+        },
+        pinch: {
+          enabled: true
+        },
+        mode: 'xy'
+      }
+    }
+  }
+}
+
         };
       }
       
@@ -818,8 +844,27 @@ window.addEventListener('DOMContentLoaded', function () {
                 title: { display: true, text: 'Price', color: 'white' }
               }
             },
-            plugins: { legend: { labels: { color: 'white' } } }
+            plugins: {
+              legend: { labels: { color: 'white' } },
+              zoom: {
+                pan: {
+                  enabled: true,
+                  mode: 'xy', // allow panning both X & Y
+                  modifierKey: 'ctrl' // optional: require Ctrl key
+                },
+                zoom: {
+                  wheel: {
+                    enabled: true
+                  },
+                  pinch: {
+                    enabled: true
+                  },
+                  mode: 'xy'
+                }
+              }
+            }
           }
+
         };
       }
 
@@ -1075,6 +1120,107 @@ fetchPortfolio();
 
 
 
+// // ------------------------------
+// // ===== TRADE DOM =====
+// // ------------------------------
+// const tradingForm = document.getElementById('trading-form');
+// const priceInput = document.getElementById('price');
+// const quantityInput = document.getElementById('quantity');
+// const amountInput = document.getElementById('amount');
+// const errorEl = document.getElementById('buy-error');
+
+// let currentStockId = null; // Should be set when chart is generated
+
+// // Recalculate amount
+// function calculateAmount() {
+//   const price = parseFloat(priceInput.value) || 0;
+//   const quantity = parseInt(quantityInput.value) || 0;
+//   amountInput.value = (price * quantity).toFixed(2);
+// }
+// priceInput.addEventListener('input', calculateAmount);
+// quantityInput.addEventListener('input', calculateAmount);
+
+// // Trade form submit
+// tradingForm.addEventListener('submit', async (e) => {
+//   e.preventDefault();
+//   errorEl.textContent = '';
+
+//   // Ensure stock ID is already set from chart form
+//   if (!currentStockId) return;
+
+//   const quantity = parseInt(quantityInput.value);
+//   if (!quantity || quantity <= 0) return;
+
+//   const side = tradingForm.querySelector("input[name='side']:checked").value;
+//   const orderType = document.getElementById('order-type').value;
+//   if (!orderType) return;
+
+//   // Only submit if Market Order is selected
+//   if (orderType === 'market') {
+//     try {
+//       const res = await fetch(`/stocks/buytrade`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`
+//         },
+//         body: JSON.stringify({
+//           userId: parseInt(userId),
+//           stockId: currentStockId,
+//           quantity,
+//           tradeType: side.toUpperCase() // BUY or SELL
+//         })
+//       });
+//       if (!res.ok) {
+//         const data = await res.json();
+//         throw new Error(data.error || 'Trade failed');
+//       }
+//       const result = await res.json();
+//       alert(`${side.toUpperCase()} market order successful!`);
+//       console.log('Trade result:', result);
+//     } catch (err) {
+//       console.error(err);
+//       errorEl.textContent = `Failed to complete trade: ${err.message}`;
+//     }
+//   }
+// });
+
+//   // -------------------------
+//   // Chart form: fetch stock ID and price
+//   // -------------------------
+//   const chartForm = document.getElementById('chart-form-intraday');
+//   const symbolInput = chartForm.querySelector("input[name='chartSymbol']");
+// chartForm.addEventListener('submit', async (e) => {
+//   e.preventDefault();
+//   errorEl.textContent = '';
+
+//   const rawSymbol = symbolInput.value.trim();
+//   const symbol = rawSymbol.split('/')[0]; // avoid accidental /1 or similar
+//   if (!symbol) return;
+
+//   console.log('Fetching stock:', symbol);
+
+//   try {
+//     // Fetch stock ID
+//     const resId = await fetch(`/stocks/id/${encodeURIComponent(symbol)}`);
+//   //  if (!resId.ok) throw new Error(`Failed to fetch stock ID for ${symbol}`);
+//     const dataId = await resId.json();
+//     currentStockId = dataId.stock_id;
+//     window.currentStockId = dataId.stock_id;
+
+//     // Fetch latest price
+//     const resPrice = await fetch(`/stocks/price/${encodeURIComponent(symbol)}`);
+//     if (!resPrice.ok) throw new Error('Failed to fetch latest price');
+//     const dataPrice = await resPrice.json();
+//     priceInput.value = dataPrice.price;
+//     calculateAmount();
+
+//   } catch (err) {
+//     console.error('Error fetching stock data:', err);
+//     errorEl.textContent = `Failed to fetch stock info: ${err.message}`;
+//   }
+// });
+
 // ------------------------------
 // ===== TRADE DOM =====
 // ------------------------------
@@ -1083,10 +1229,14 @@ const priceInput = document.getElementById('price');
 const quantityInput = document.getElementById('quantity');
 const amountInput = document.getElementById('amount');
 const errorEl = document.getElementById('buy-error');
+const chartForm = document.getElementById('chart-form-intraday');
+const symbolInput = chartForm.querySelector("input[name='chartSymbol']");
 
-let currentStockId = null; // Should be set when chart is generated
+let currentSymbol = null;
 
-// Recalculate amount
+// ------------------------------
+// Calculate amount when typing
+// ------------------------------
 function calculateAmount() {
   const price = parseFloat(priceInput.value) || 0;
   const quantity = parseInt(quantityInput.value) || 0;
@@ -1095,24 +1245,77 @@ function calculateAmount() {
 priceInput.addEventListener('input', calculateAmount);
 quantityInput.addEventListener('input', calculateAmount);
 
-// Trade form submit
+// ------------------------------
+// Generate Chart button: fetch latest price
+// ------------------------------
+chartForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
+
+  const rawSymbol = symbolInput.value.trim();
+  const symbol = rawSymbol.split('/')[0];
+  if (!symbol) return;
+
+  currentSymbol = symbol; // remember for trading
+
+  console.log('Fetching latest price for:', symbol);
+
+  try {
+    // Fetch latest price only
+    const resPrice = await fetch(`/stocks/price/${encodeURIComponent(symbol)}`);
+    if (!resPrice.ok) throw new Error('Failed to fetch latest price');
+    const dataPrice = await resPrice.json();
+
+    // Fill the price input
+    priceInput.value = dataPrice.price;
+    calculateAmount();
+
+    // You can also trigger your chart rendering here if needed
+    console.log(`Updated priceInput for ${symbol}:`, dataPrice.price);
+
+  } catch (err) {
+    console.error('Error fetching stock price:', err);
+    errorEl.textContent = `Failed to fetch stock price: ${err.message}`;
+  }
+});
+
+// ------------------------------
+// Submit Order button: fetch stock ID on click
+// ------------------------------
 tradingForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorEl.textContent = '';
 
-  // Ensure stock ID is already set from chart form
-  if (!currentStockId) return;
+  const symbol = currentSymbol || symbolInput.value.trim();
+  if (!symbol) {
+    errorEl.textContent = 'Please enter a stock symbol and generate the chart first.';
+    return;
+  }
 
-  const quantity = parseInt(quantityInput.value);
-  if (!quantity || quantity <= 0) return;
+  try {
+    // 1️⃣ Fetch stock ID when submitting
+    const resId = await fetch(`/stocks/id/${encodeURIComponent(symbol)}`);
+    if (!resId.ok) throw new Error(`Failed to fetch stock ID for ${symbol}`);
+    const dataId = await resId.json();
+    const stockId = dataId.stock_id;
+    if (!stockId) throw new Error(`Stock ID not found for ${symbol}`);
 
-  const side = tradingForm.querySelector("input[name='side']:checked").value;
-  const orderType = document.getElementById('order-type').value;
-  if (!orderType) return;
+    // 2️⃣ Validate trade inputs
+    const quantity = parseInt(quantityInput.value);
+    if (!quantity || quantity <= 0) {
+      errorEl.textContent = 'Please enter a valid quantity.';
+      return;
+    }
 
-  // Only submit if Market Order is selected
-  if (orderType === 'market') {
-    try {
+    const side = tradingForm.querySelector("input[name='side']:checked").value;
+    const orderType = document.getElementById('order-type').value;
+    if (!orderType) {
+      errorEl.textContent = 'Please select an order type.';
+      return;
+    }
+
+    // 3️⃣ Submit trade
+    if (orderType === 'market') {
       const res = await fetch(`/stocks/buytrade`, {
         method: 'POST',
         headers: {
@@ -1121,55 +1324,32 @@ tradingForm.addEventListener('submit', async (e) => {
         },
         body: JSON.stringify({
           userId: parseInt(userId),
-          stockId: currentStockId,
+          stockId,
           quantity,
           tradeType: side.toUpperCase() // BUY or SELL
         })
       });
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Trade failed');
       }
+
       const result = await res.json();
       alert(`${side.toUpperCase()} market order successful!`);
       console.log('Trade result:', result);
-    } catch (err) {
-      console.error(err);
-      errorEl.textContent = `Failed to complete trade: ${err.message}`;
+    } else {
+      alert('Only market orders are supported for now.');
     }
+
+  } catch (err) {
+    console.error(err);
+    errorEl.textContent = `Trade failed: ${err.message}`;
   }
 });
 
-  // -------------------------
-  // Chart form: fetch stock ID and price
-  // -------------------------
-  const chartForm = document.getElementById('chart-form-intraday');
-  const symbolInput = chartForm.querySelector("input[name='chartSymbol']");
-  chartForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const symbol = symbolInput.value.trim();
-    if (!symbol) return;
-
-    try {
-      // Fetch stock ID
-      const resId = await fetch(`/stocks/id/${symbol}`);
-      if (!resId.ok) throw new Error('Failed to fetch stock ID');
-      const dataId = await resId.json();
-      currentStockId = dataId.stock_id;
-      window.currentStockId = dataId.stock_id;
 
 
-      // Fetch latest price
-      const resPrice = await fetch(`/stocks/price/${currentStockId}`);
-      if (!resPrice.ok) throw new Error('Failed to fetch latest price');
-      const dataPrice = await resPrice.json();
-      priceInput.value = dataPrice.price;
-      calculateAmount();
-    } catch (err) {
-      console.error('Error fetching stock data:', err);
-      errorEl.textContent = `Failed to fetch stock info: ${err.message}`;
-    }
-  });
 
 
   // ------------------------------
@@ -1766,8 +1946,8 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Fetch latest intraday price using stock ID
-  async function fetchLatestPrice(stockId) {
-    const res = await fetch(`/stocks/price/${stockId}`);
+  async function fetchLatestPrice(symbol) {
+    const res = await fetch(`/stocks/price/${symbol}`);
     if (!res.ok) throw new Error('Failed to fetch latest price');
     const data = await res.json();
     latestPrice = parseFloat(data.price);

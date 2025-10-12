@@ -1,7 +1,7 @@
 
 
 const { parse } = require('path');
-const prisma = require('./prismaClient');
+const prisma = require('../../prisma/prismaClient');
 
 const fetch = require("node-fetch");
 const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
@@ -297,40 +297,37 @@ module.exports.getStockChartData = function getStockChartData(symbol, timeFrame)
 
 
 
+module.exports.getLatestPrice = async function (symbol) {
+  if (!symbol) throw new Error('Stock symbol is required.');
 
-module.exports.getLatestPrice = function getLatestPrice(stockId) {
-    if (!stockId) {
-        throw new Error('Stock ID is required.');
+  try {
+    // Fetch the latest intraday data (limit 1, sorted descending)
+    const params = new URLSearchParams({
+      access_key: API_KEY,
+      symbols: symbol,
+      limit: 1,
+      sort: 'DESC'
+    });
+
+    const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
+
+    const data = await response.json();
+    if (!data.data || data.data.length === 0) {
+      throw new Error('No intraday data found for this symbol.');
     }
 
-    return prisma.intradayPrice3
-        .findFirst({
-            where: { stockId },
-            orderBy: { date: 'desc' },
-            select: { closePrice: true },
-        })
-        .then(function (latestPrice) {
-            if (!latestPrice) {
-                throw new Error('No intraday price data available for this stock');
-            }
+    // Return the latest close price
+    return data.data[0].close;
 
-            return latestPrice.closePrice;
-        })
-        .catch(function (error) {
-            console.error('Error fetching latest intraday price:', error);
-            throw error;
-        });
+  } catch (err) {
+    console.error('Error fetching latest price:', err);
+    throw err;
+  }
+
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1277,6 +1274,7 @@ exports.favoriteStock = function favoriteStock(userId, symbol) {
 
 
 
+
 //////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
@@ -2173,6 +2171,7 @@ exports.cancelLimitOrder = async function cancelLimitOrder(orderId, userId) {
     data: { status: 'CANCELLED' },
   });
 };
+
 
 
 

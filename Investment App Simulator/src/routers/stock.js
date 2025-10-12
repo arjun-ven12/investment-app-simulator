@@ -1,5 +1,6 @@
 
 
+
 const express = require('express');
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get('/:symbol', chartsController.getCompanyDetails);
 router.post('/buytrade', chartsController.tradeStock);
 // router.get('/buytrade', chartsController.tradeStock);
 router.get('/id/:symbol', chartsController.getStockIdBySymbol)
-router.get('/price/:stock_id', chartsController.getLatestPrice);
+router.get('/price/:symbol', chartsController.getLatestPrice);
 router.get('/portfolio/:userId', chartsController.getUserPortfolio);
 router.post('/favorite-stock', chartsController.favoriteStockController);
 // router.get('/favorite-search-stocks', chartsController.favoriteStockController);

@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem('userId');
   // ===== Element references =====
@@ -332,9 +333,9 @@ document.addEventListener("DOMContentLoaded", () => {
         quantityInput.value = "";
         amountInput.value = "--";
         alert("Stop-Market order created successfully!");
-      } else if (orderType === "limit" || orderType === "market") {
-        // Implement your market/limit submission here if needed
-        alert("Market/Limit submit path - implement as needed.");
+      // } else if (orderType === "limit" || orderType === "market") {
+      //   // Implement your market/limit submission here if needed
+      //   alert("Market/Limit submit path - implement as needed.");
       } else {
         buyError.textContent = "Select an order type";
       }

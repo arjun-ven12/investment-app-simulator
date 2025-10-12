@@ -1,4 +1,5 @@
 
+
 const express = require('express');
 // const { getAllPersons } = require('../models/Person.model');
 const router = express.Router();
@@ -14,6 +15,7 @@ router.get('/trades', optionsController.getUserOptionTradesController);
 
 router.get('/portfolio', optionsController.getUserOptionPortfolio);
 
+router.post('/cancel/:id', optionsController.cancelOptionLimitOrderController);
 
 // Place a Buy Call order (Market or Limit)
 router.post('/buy-call', optionsController.placeBuyCallOrder);
@@ -48,5 +50,7 @@ router.post('/execute-sell-put-limit', optionsController.executeSellPutLimitOrde
 
 // Settle all expired Sell Put MARKET trades
 router.post('/settle-sell-put', optionsController.settleExpiredSellPutTrades);
+
+router.get('/export', optionsController.exportOptionTradeHistoryController);
 
 module.exports = router;

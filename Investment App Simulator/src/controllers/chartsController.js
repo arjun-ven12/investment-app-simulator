@@ -1,5 +1,6 @@
 
 
+
 const chartsModel = require('../models/Charts');
 
 const { Parser } = require('json2csv');
@@ -72,11 +73,11 @@ module.exports.tradeStock = async function (req, res) {
 
 
 module.exports.getLatestPrice = function (req, res) {
-    const  stockId  = req.params.stock_id;
+    const  symbol  = req.params.symbol;
 
 
     return chartsModel
-        .getLatestPrice(parseInt(stockId))
+        .getLatestPrice(symbol)
         .then(function (latestPrice) {
             return res.status(200).json({ price: latestPrice });
         })

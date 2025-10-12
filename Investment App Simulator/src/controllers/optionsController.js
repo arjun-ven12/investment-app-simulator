@@ -1,8 +1,10 @@
 
 
-const optionsModel = require('../models/Options');
 
-const { Parser } = require('json2csv');
+const optionsModel = require('../models/options');
+
+const { Parser } = require('json2csv'); // make sure json2csv is installed
+
 
 
 module.exports.getContractsBySymbol = async (req, res) => {
@@ -371,45 +373,55 @@ module.exports.settleExpiredSellPutTrades = async (req, res) => {
 ////////////////////////////////////////////////////////////////
 ////// RETRIEVE OPTION TRADE HISTORY
 ////////////////////////////////////////////////////////////////
-
-exports.getUserOptionTradesController = function (req, res) {
+exports.getUserOptionTradesController = async function (req, res) {
   const userId = req.query.userId;
 
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
   }
 
-  optionsModel.getUserOptionTrades(userId)
-    .then((trades) => {
-      // Transform result so frontend receives all relevant contract info
-      const formattedTrades = trades.map((t) => ({
-        id: t.id,
-        date: t.tradeDate,
-        contractSymbol: t.contract.symbol,
-        side: t.tradeType,
-        type: t.contract.type,
-        status:
-          t.orderType === "MARKET" && t.totalAmount > 0
-            ? "MARKET (Executed)"
-            : "LIMIT (Pending)",
-        quantity: t.quantity,
-        price: t.price,
-        totalAmount: t.totalAmount,
-        strikePrice: t.contract.strikePrice,
-        expirationDate: t.contract.expirationDate,
-        underlyingSymbol: t.contract.underlyingSymbol,
-      }));
+  try {
+    const trades = await optionsModel.getUserOptionTrades(userId);
 
-      return res.status(200).json({ trades: formattedTrades });
-    })
-    .catch((error) => {
-      console.error("Error fetching option trades:", error);
-      return res.status(500).json({
-        message: "Error fetching option trades",
-        error: error.message,
-      });
+    // Helper function to map orderType to display status
+    const mapOrderTypeToStatus = (trade) => {
+      switch (trade.orderType) {
+        case "MARKET":
+          return trade.totalAmount > 0 ? "MARKET (Executed)" : "MARKET";
+        case "LIMIT":
+          return "LIMIT (Pending)";
+        case "CANCELLED":
+          return "CANCELLED";
+        default:
+          return trade.orderType;
+      }
+    };
+
+    const formattedTrades = trades.map((t) => ({
+      id: t.id,
+      date: t.tradeDate,
+      contractSymbol: t.contract.symbol,
+      side: t.tradeType,
+      type: t.contract.type,
+      status: mapOrderTypeToStatus(t),
+      quantity: t.quantity,
+      price: t.price,
+      totalAmount: t.totalAmount,
+      strikePrice: t.contract.strikePrice,
+      expirationDate: t.contract.expirationDate,
+      underlyingSymbol: t.contract.underlyingSymbol,
+    }));
+
+    return res.status(200).json({ trades: formattedTrades });
+  } catch (error) {
+    console.error("Error fetching option trades:", error);
+    return res.status(500).json({
+      message: "Error fetching option trades",
+      error: error.message,
     });
+  }
 };
+
 
 
 
@@ -439,3 +451,109 @@ module.exports.getUserOptionPortfolio = async (req, res) => {
   }
 };
 
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+////// CANCEL LIMIT ORDER OPTIONS
+//////////////////////////////////////////////////////////////////
+
+exports.cancelOptionLimitOrderController = async function (req, res) {
+  try {
+    const orderId = parseInt(req.params.id);
+    const userId = parseInt(req.query.userId);
+
+    if (!orderId || !userId) {
+      return res.status(400).json({ message: "Order ID and User ID are required." });
+    }
+
+    console.log("📩 Cancel request received:", { orderId, userId });
+
+    const cancelledOrder = await optionsModel.cancelOptionLimitOrder(orderId, userId);
+
+    if (!cancelledOrder) {
+      return res.status(404).json({
+        message: "Order not found, not owned by user, or already executed/cancelled.",
+      });
+    }
+
+    return res.status(200).json({
+      message: "✅ Limit order cancelled successfully",
+      order: cancelledOrder,
+    });
+  } catch (error) {
+    console.error("❌ Error cancelling limit order:", error);
+    return res.status(500).json({
+      message: "Error cancelling limit order",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////
+////// EXPORT OPTION TRADE HISTORY TO CSV
+///////////////////////////////////////////////////////////////////////
+
+
+exports.exportOptionTradeHistoryController = async function (req, res) {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const trades = await optionsModel.getUserOptionTrades(userId);
+
+    if (!trades || trades.length === 0) {
+      return res.status(404).json({ message: "No option trades found" });
+    }
+
+    // Define the CSV fields, including nested contract info
+    const fields = [
+      'tradeDate',
+      'contract.symbol',
+      'contract.underlyingSymbol',
+      'side',
+      'type',
+      'status',
+      'quantity',
+      'price',
+      'totalAmount',
+      'contract.strikePrice',
+      'contract.expirationDate'
+    ];
+
+    // Add computed "status" if needed
+    const formattedTrades = trades.map(t => ({
+      tradeDate: t.tradeDate,
+      side: t.tradeType,
+      type: t.contract.type,
+      status: t.orderType === "MARKET" && t.totalAmount > 0 ? "MARKET (Executed)" : "LIMIT (Pending)",
+      quantity: t.quantity,
+      price: t.price,
+      totalAmount: t.totalAmount,
+      contract: {
+        symbol: t.contract.symbol,
+        underlyingSymbol: t.contract.underlyingSymbol,
+        strikePrice: t.contract.strikePrice,
+        expirationDate: t.contract.expirationDate
+      }
+    }));
+
+    const parser = new Parser({ fields });
+    const csv = parser.parse(formattedTrades);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`option_trade_history_user_${userId}.csv`);
+    return res.send(csv);
+  } catch (err) {
+    console.error("Error exporting option trades:", err);
+    return res.status(500).json({ message: "Error exporting option trade history", error: err.message });
+  }
+};
