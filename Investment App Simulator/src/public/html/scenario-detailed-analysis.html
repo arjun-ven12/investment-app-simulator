@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Dashboard</title>
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/investment.css" />
+  <link rel="stylesheet" href="../css/scenario-detailed-analysis.css" />
+  <!-- Socket.IO + Chart libraries -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+
+  <!-- App JS -->
+  <script src="../js/scenario-detailed-analysis.js" defer></script>
+  <script src="../js/navbar.js" defer></script>
+</head>
+
+<body>
+  <input type="hidden" id="current-stock-id" value="" />
+  <div class="sidebar">
+    <!-- <h1>WatchList</h1> -->
+
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+    <!-- Dashboard Header -->
+    <div class="content">
+      <br />
+      <h1>Scenario Detailed Insights</h1>
+    </div>
+    <div class="dashboard">
+  <!-- Left Column: Portfolio Pie Chart -->
+  <div class="left-column card">
+    <h2>Portfolio Allocation</h2>
+    <canvas id="portfolio-pie-chart" width="400" height="400"></canvas>
+  </div>
+
+  <!-- Right Column: Combined Intraday Chart -->
+  <div class="right-column card">
+    <h2>Intraday Chart</h2>
+    <canvas id="intraday-chart" width="600" height="300"></canvas>
+  </div>
+</div>
+
+<!-- AI Advice Section -->
+<div class="card" id="ai-advice">
+  <h2>AI Advice</h2>
+  <div id="ai-text"></div>
+</div>
+
+</body>
+<script src="/socket.io/socket.io.js"></script>
+
+</html>

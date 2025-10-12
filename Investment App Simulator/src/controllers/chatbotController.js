@@ -1,7 +1,7 @@
 const chatbotModel = require("../models/chatbot");
 const scenarioModel = require("../models/scenario");
 const scenarioController = require("./scenarioController");
-const prisma = require('../../prisma/prismaClient');
+const prisma = require("../../prisma/prismaClient");
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
@@ -17,16 +17,25 @@ module.exports.generateResponse = async (req, res) => {
     if (userId) {
       const portfolio = await chatbotModel.getUserPortfolio(Number(userId));
       const summary = chatbotModel.buildPortfolioSummary(portfolio);
-      fullPrompt += `\n\nUser portfolio summary (auto-generated):\n${JSON.stringify(summary, null, 2)}\n\nUse this information to adapt your answer if relevant.`;
+      fullPrompt += `\n\nUser portfolio summary (auto-generated):\n${JSON.stringify(
+        summary,
+        null,
+        2
+      )}\n\nUse this information to adapt your answer if relevant.`;
     }
 
-
-    const aiText = await chatbotModel.generateResponse(fullPrompt, model, max_tokens);
+    const aiText = await chatbotModel.generateResponse(
+      fullPrompt,
+      model,
+      max_tokens
+    );
     console.log("AI Response:", aiText);
     return res.status(200).json({ response: aiText });
   } catch (error) {
     console.error("Controller.generateResponse error:", error);
-    return res.status(500).json({ error: error.message || "Failed to generate response." });
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to generate response." });
   }
 };
 
@@ -36,36 +45,40 @@ module.exports.generateResponseForChatbot = async (req, res) => {
   if (!prompt) return res.status(400).json({ error: "Prompt is required." });
 
   try {
-    const aiText = await chatbotModel.generateResponseForChatbot(prompt, model, max_tokens);
+    const aiText = await chatbotModel.generateResponseForChatbot(
+      prompt,
+      model,
+      max_tokens
+    );
     console.log("AI Response:", aiText);
     return res.status(200).json({ response: aiText });
   } catch (error) {
     console.error("Controller.generateResponse error:", error);
-    return res.status(500).json({ error: error.message || "Failed to generate response." });
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to generate response." });
   }
 };
-
 
 module.exports.getUserPortfolio = async function (req, res) {
   const userId = Number(req.params.userId);
 
   if (!Number.isInteger(userId)) {
-    return res.status(400).json({ error: 'Invalid user ID.' });
+    return res.status(400).json({ error: "Invalid user ID." });
   }
 
   try {
     const portfolio = await chatbotModel.getUserPortfolio(userId);
 
-
     return res.status(200).json(portfolio);
   } catch (error) {
-    console.error('Error fetching user portfolio:', error);
+    console.error("Error fetching user portfolio:", error);
 
-    if (error.message?.includes('not found')) {
+    if (error.message?.includes("not found")) {
       return res.status(404).json({ error: error.message });
     }
 
-    return res.status(500).json({ error: error.message || 'Server error' });
+    return res.status(500).json({ error: error.message || "Server error" });
   }
 };
 
@@ -75,7 +88,8 @@ module.exports.getUserPortfolio = async function (req, res) {
  */
 module.exports.getPortfolioAdvice = async (req, res) => {
   const userId = Number(req.params.userId);
-  if (!Number.isInteger(userId)) return res.status(400).json({ error: "Invalid user ID." });
+  if (!Number.isInteger(userId))
+    return res.status(400).json({ error: "Invalid user ID." });
 
   // Accept user preferences (riskProfile: 'conservative'|'moderate'|'aggressive')
   const { riskProfile } = req.query;
@@ -92,7 +106,13 @@ module.exports.getPortfolioAdvice = async (req, res) => {
       where: { userId },
       orderBy: { tradeDate: "desc" },
       take: 5,
-      select: { stockId: true, quantity: true, totalAmount: true, tradeType: true, tradeDate: true }
+      select: {
+        stockId: true,
+        quantity: true,
+        totalAmount: true,
+        tradeType: true,
+        tradeDate: true,
+      },
     });
 
     const recentTrades = await Promise.all(
@@ -110,10 +130,10 @@ module.exports.getPortfolioAdvice = async (req, res) => {
                 exchange: true,
                 marketCapitalization: true,
                 website: true,
-                logo: true
-              }
-            }
-          }
+                logo: true,
+              },
+            },
+          },
         });
 
         return {
@@ -129,7 +149,7 @@ module.exports.getPortfolioAdvice = async (req, res) => {
           quantity: t.quantity,
           totalAmount: t.totalAmount,
           tradeType: t.tradeType,
-          tradeDate: t.tradeDate
+          tradeDate: t.tradeDate,
         };
       })
     );
@@ -137,7 +157,7 @@ module.exports.getPortfolioAdvice = async (req, res) => {
     const scenarioAnalysis = chatbotModel.buildScenarios(summary, [-10, -5, 5]);
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
-    console.log(wallet)
+    console.log(wallet);
 
     // 4️⃣ Construct LLM prompt
     const prompt = `
@@ -223,22 +243,29 @@ RULES:
 END
 `;
 
-
     // 5️⃣ Call LLM
-    const advice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
+    const advice = await chatbotModel.generateResponse(
+      prompt,
+      "gpt-4o-mini",
+      1500
+    );
 
-    return res.status(200).json({ advice, portfolio: summary, recentTrades, riskProfile });
+    return res
+      .status(200)
+      .json({ advice, portfolio: summary, recentTrades, riskProfile });
   } catch (error) {
     console.error("Controller.getPortfolioAdvice error:", error);
-    return res.status(500).json({ error: error.message || "Failed to generate portfolio advice." });
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to generate portfolio advice." });
   }
 };
-
 
 module.exports.getScenarioAnalysis = async (req, res) => {
   try {
     const scenarioId = Number(req.params.scenarioId);
-    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+    if (!scenarioId)
+      return res.status(400).json({ error: "Scenario ID required" });
 
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -250,11 +277,17 @@ module.exports.getScenarioAnalysis = async (req, res) => {
         json: (data) => data,
       }),
     };
-    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq, mockRes);
+    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq,null,true);
+
+    // Then extract intraday separately
+    const intradayData = summaryData.intraday;
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
     const scenarioSummary = summaryData?.data || summaryData;
-    const portfolio = await scenarioController.getUserScenarioPortfolio(mockReq, mockRes);
+    const portfolio = await scenarioController.getUserScenarioPortfolio(
+      mockReq,
+      mockRes
+    );
     const wallet = await scenarioModel.getParticipantWallet;
     // 🧠 Prepare prompt for AI
     const prompt = `
@@ -322,7 +355,7 @@ Provide a **detailed, personalized scenario-based critique** and **portfolio imp
   - Short-term vs long-term expected movement  
   - Risk score (0–100)  
   - Suggested position size **based on wallet and portfolio**  
-  - Stop-loss & limit-buy guidance **computed from intraday data**  
+  - Market Order & Limit Order guidance **computed from intraday data**  
   - Notes on scenario events driving volatility
 
 5. **Reallocation & Cash Strategy**  
@@ -351,6 +384,7 @@ Provide a **detailed, personalized scenario-based critique** and **portfolio imp
 4. Stop-loss and limit-buy guidance must be **computed from intraday price ranges**, not arbitrary numbers.  
 5. Maintain a mentor-style, educational, and conversational tone throughout.
 6. Add in $ for all prices. 
+7. Dont recommend other Trading types (Only Market order and Limit order)
 ---
 
 ### 🧩 INPUT DATA
@@ -365,26 +399,30 @@ ${JSON.stringify(wallet, null, 2)}
 
 Portfolio:
 ${JSON.stringify(portfolio, null, 2)}
+
+Intraday Data:
+${JSON.stringify(intradayData, null, 2)}
+
 `;
 
+    const aiAdvice = await chatbotModel.generateResponse(
+      prompt,
+      "gpt-4o-mini",
+      1500
+    );
 
-
-    const aiAdvice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
-
-    return res.status(200).json({ aiAdvice });
-
+    return res.status(200).json({ aiAdvice, portfolio, intradayData });
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
     return res.status(500).json({ error: err.message });
   }
 };
 
-
-
 module.exports.getScenarioAnalysisSummarised = async (req, res) => {
   try {
     const scenarioId = Number(req.params.scenarioId);
-    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+    if (!scenarioId)
+      return res.status(400).json({ error: "Scenario ID required" });
 
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -396,24 +434,28 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
         json: (data) => data,
       }),
     };
-    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq, mockRes);
+    const summaryData = await scenarioController.getScenarioEndingSummary(
+      mockReq,
+      mockRes
+    );
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
     const scenarioSummary = summaryData?.data || summaryData;
-    const portfolio = await scenarioController.getUserScenarioPortfolio(mockReq, mockRes);
+    const portfolio = await scenarioController.getUserScenarioPortfolio(
+      mockReq,
+      mockRes
+    );
     const wallet = await scenarioModel.getParticipantWallet;
-    // 🧠 Prepare prompt for AI
-    // 🧠 Prepare prompt for AI
-    // 🧠 Prepare concise prompt for AI
-// 🧠 Prepare adaptive prompt for AI
-const prompt = `
+
+    const prompt = `
 SYSTEM:
 You are a friendly, mentor-style **financial coach** for paper traders in simulations.  
 
 The scenario has ended. Generate a **short, clear, and actionable popup summary**. Focus on:  
 1️⃣ What happened in the market.  
 2️⃣ How the user's portfolio performed.  
-3️⃣ A very short suggestion for the next simulation.  
+3️⃣ A short suggestion for the next simulation.  
+4. Only recommend suggestions about market orders and limit orders (Other types of orders are not available)
 
 **Important:** If the scenario is high-volatility, emphasize risk management (cash buffer, smaller positions, diversification).  
 If the scenario is normal volatility, emphasize general trade improvement (taking profits, holding positions, experimenting).  
@@ -467,13 +509,18 @@ ${JSON.stringify(wallet, null, 2)}
 
 Portfolio:
 ${JSON.stringify(portfolio, null, 2)}
+
+Intraday Data:
+${JSON.stringify(intradayData, null, 2)}
 `;
 
+    const aiAdvice = await chatbotModel.generateResponse(
+      prompt,
+      "gpt-4o-mini",
+      1500
+    );
 
-    const aiAdvice = await chatbotModel.generateResponse(prompt, "gpt-4o-mini", 1500);
-
-    return res.status(200).json({ aiAdvice , portfolio});
-
+    return res.status(200).json({ aiAdvice, portfolio });
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
     return res.status(500).json({ error: err.message });

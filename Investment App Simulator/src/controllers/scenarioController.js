@@ -419,13 +419,19 @@ module.exports.getUserScenarioData = async (req, res) => {
   }
 };
 
-module.exports.getScenarioEndingSummary = async (req, res) => {
+module.exports.getScenarioEndingSummary = async (req, res = null, internal = false) => {
   try {
     const scenarioId = Number(req.params.scenarioId);
-    if (!scenarioId) return res.status(400).json({ error: "Scenario ID required" });
+    if (!scenarioId) {
+      if (!internal && res) return res.status(400).json({ error: "Scenario ID required" });
+      throw new Error("Scenario ID required");
+    }
 
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!userId) {
+      if (!internal && res) return res.status(401).json({ error: "Unauthorized" });
+      throw new Error("Unauthorized");
+    }
 
     // 1️⃣ Mark participant ended
     await scenarioModel.markScenarioEnded(userId, scenarioId);
@@ -446,8 +452,7 @@ module.exports.getScenarioEndingSummary = async (req, res) => {
       currentPrice: Number(p.currentPrice),
     }));
 
-    // 4️⃣ Extract symbols and intraday data
-    const symbols = trades.map(t => t.symbol);
+    // 4️⃣ Fetch intraday data
     const intradayData = await scenarioModel.fetchUserScenarioData(scenarioId, userId);
 
     // 5️⃣ Compute total portfolio value
@@ -456,15 +461,23 @@ module.exports.getScenarioEndingSummary = async (req, res) => {
       wallet
     );
 
-    return res.status(200).json({
+    const summaryPayload = {
       wallet,
       trades,
       intraday: intradayData,
       totalPortfolioValue,
       summary: portfolio.summary,
-    });
+    };
+
+    // 🧠 If called internally, just return the data
+    if (internal || !res) return summaryPayload;
+
+    // 🧩 Otherwise respond via Express
+    return res.status(200).json(summaryPayload);
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error in getScenarioEndingSummary:", err);
+    if (internal || !res) throw err; // when called internally
     return res.status(500).json({ error: err.message });
   }
 };

@@ -1,0 +1,215 @@
+/* ==============================
+   GENERAL STYLES
+============================== */
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: #0a0a0a; /* dark background */
+  color: #E0EBFF;
+  margin: 0;
+  padding: 2rem;
+  font-size: 20px; /* bigger body text */
+}
+
+h1 {
+  font-size: 2.5rem; /* keep the same */
+}
+
+h2 { font-size: 2rem; }
+h3 { font-size: 1.8rem; color: #ff6b81; }
+h4 { font-size: 1.6rem; color: #ff6b81; }
+h5 { font-size: 1.4rem; }
+h6 { font-size: 1.2rem; }
+
+button {
+  background-color: #E0EBFF;
+  color: #000;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.2rem; /* bigger button text */
+  transition: background 0.2s;
+}
+
+button:hover {
+  background-color: #c6dbf7;
+}
+
+/* ==============================
+   LAYOUT
+============================== */
+.sidebar {
+  width: 220px;
+  background-color: #000;
+  border-right: 1px solid #53596B;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  font-size: 1.2rem; /* bigger sidebar text */
+}
+
+.main-content {
+  margin-left: 220px;
+  padding: 2rem;
+}
+
+.dashboard {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.left-column {
+  flex: 1 1 300px;
+}
+
+.right-column {
+  flex: 2 1 600px;
+}
+
+/* ==============================
+   CARDS
+============================== */
+.card {
+  background-color: #000;
+  border: 1px solid #53596B;
+  border-radius: 10px;
+  padding: 1.8rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  font-size: 1.2rem; /* bigger card text */
+}
+
+/* ==============================
+   CHARTS
+============================== */
+canvas {
+  background-color: #000;
+  border-radius: 10px;
+}
+
+/* ==============================
+   AI ADVICE SECTION
+============================== */
+#ai-advice {
+  margin-top: 2rem;
+  font-size: 1.2rem; /* bigger AI section text */
+}
+
+#ai-text {
+  font-family: 'Outfit', sans-serif;
+  color: #E0EBFF;
+  line-height: 1.8;
+  padding-left: 1.5rem;
+  padding-right: 1rem;
+  font-size: 1.2rem; /* bigger AI text */
+}
+
+#ai-text h3, #ai-text h4 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+#ai-text ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.2rem; /* bigger list items */
+}
+
+#ai-text li {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+#ai-text hr {
+  border: 1px solid #53596B;
+  margin: 1.5rem 0;
+}
+
+#ai-text blockquote {
+  background-color: #1e1e1e;
+  border-left: 4px solid #ff6b81;
+  padding: 0.8rem 1.2rem;
+  margin: 1.2rem 0;
+  font-style: italic;
+  color: #C0C0C0;
+  border-radius: 4px;
+  font-size: 1.2rem; /* bigger quote text */
+}
+
+/* ==============================
+   AI TABLES
+============================== */
+.ai-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 1.2rem; /* bigger table text */
+}
+
+.ai-table th, .ai-table td {
+  border: 1px solid #53596B;
+  padding: 0.8rem;
+  text-align: center;
+}
+
+.ai-table .positive {
+  color: #2ed573;
+}
+
+.ai-table .negative {
+  color: #ff6b6b;
+}
+
+/* ==============================
+   BADGES
+============================== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 1.1rem; /* bigger badge text */
+  margin-left: 4px;
+}
+
+.badge.positive {
+  background-color: #2ed573;
+  color: #000;
+}
+
+.badge.negative {
+  background-color: #ff6b6b;
+  color: #fff;
+}
+
+.badge.risk {
+  background-color: #ffa502;
+  color: #000;
+}
+
+/* ==============================
+   RECOMMENDATIONS & AI SECTIONS
+============================== */
+.recommendation {
+  margin-bottom: 1rem;
+  font-size: 1.2rem; /* bigger recommendation text */
+}
+
+.ai-section {
+  background: #111;
+  border: 1px solid #53596B;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin-bottom: 1.8rem;
+  font-size: 1.2rem; /* bigger AI section text */
+}
+
+.ai-section h3 {
+  margin-bottom: 0.8rem;
+}
+
+.ai-section h4 {
+  margin-top: 1.2rem;
+}
