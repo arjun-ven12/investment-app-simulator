@@ -254,128 +254,315 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // ===== Form submit (keeps your logic, with small protections) =====
-  tradingForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    buyError.textContent = "";
-    const side = tradingForm.querySelector("input[name='side']:checked")?.value;
-    const orderType = orderTypeSelect.value;
-    const quantity = parseInt(quantityInput.value, 10);
+  // // ===== Form submit (keeps your logic, with small protections) =====
+  // tradingForm?.addEventListener("submit", async (e) => {
+  //   e.preventDefault();
+  //   buyError.textContent = "";
+  //   const side = tradingForm.querySelector("input[name='side']:checked")?.value;
+  //   const orderType = orderTypeSelect.value;
+  //   const quantity = parseInt(quantityInput.value, 10);
 
-    if (!quantity || quantity <= 0)
-      return (buyError.textContent = "Enter valid quantity");
+  //   if (!quantity || quantity <= 0)
+  //     return (buyError.textContent = "Enter valid quantity");
 
-    try {
-      if (orderType === "stop-limit") {
-        const triggerPrice = parseFloat(stopLimitTriggerInput.value);
-        const limitPrice = parseFloat(stopLimitPriceInput.value);
-        if (!triggerPrice || triggerPrice <= 0)
-          return (buyError.textContent = "Enter valid trigger price");
-        if (!limitPrice || limitPrice <= 0)
-          return (buyError.textContent = "Enter valid limit price");
+  //   try {
+  //     if (orderType === "stop-limit") {
+  //       const triggerPrice = parseFloat(stopLimitTriggerInput.value);
+  //       const limitPrice = parseFloat(stopLimitPriceInput.value);
+  //       if (!triggerPrice || triggerPrice <= 0)
+  //         return (buyError.textContent = "Enter valid trigger price");
+  //       if (!limitPrice || limitPrice <= 0)
+  //         return (buyError.textContent = "Enter valid limit price");
 
-        // Use your API call
-        console.log("Sending stop-limit order...");
-        const res = await fetch("/stop-limit/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            stockId: window.currentStockId || null, // ensure this is set in your app
-            quantity,
-            triggerPrice,
-            limitPrice,
-            tradeType: (side || "").toUpperCase(),
-          }),
-        });
+  //       // Use your API call
+  //       console.log("Sending stop-limit order...");
+  //       const res = await fetch("/stop-limit/create", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //         body: JSON.stringify({
+  //           stockId: window.currentStockId || null, // ensure this is set in your app
+  //           quantity,
+  //           triggerPrice,
+  //           limitPrice,
+  //           tradeType: (side || "").toUpperCase(),
+  //         }),
+  //       });
 
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(
-            data?.error || data?.message || "Failed to create stop-limit order"
-          );
+  //       const data = await res.json();
+  //       if (!res.ok)
+  //         throw new Error(
+  //           data?.error || data?.message || "Failed to create stop-limit order"
+  //         );
 
-        // clear inputs on success
-        stopLimitTriggerInput.value = "";
-        stopLimitPriceInput.value = "";
-        quantityInput.value = "";
-        amountInput.value = "--";
-        alert("Stop-Limit order created successfully!");
-      } else if (orderType === "stop-market") {
-        const triggerPrice = parseFloat(triggerInput.value);
-        if (!triggerPrice || triggerPrice <= 0)
-          return (buyError.textContent = "Enter valid trigger price");
+  //       // clear inputs on success
+  //       stopLimitTriggerInput.value = "";
+  //       stopLimitPriceInput.value = "";
+  //       quantityInput.value = "";
+  //       amountInput.value = "--";
+  //       alert("Stop-Limit order created successfully!");
+  //     } else if (orderType === "stop-market") {
+  //       const triggerPrice = parseFloat(triggerInput.value);
+  //       if (!triggerPrice || triggerPrice <= 0)
+  //         return (buyError.textContent = "Enter valid trigger price");
 
-        const res = await fetch("/stop-market/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            stockId: window.currentStockId || null,
-            quantity,
-            triggerPrice,
-            orderType: (side || "").toUpperCase(),
-          }),
-        });
+  //       const res = await fetch("/stop-market/create", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //         body: JSON.stringify({
+  //           stockId: window.currentStockId || null,
+  //           quantity,
+  //           triggerPrice,
+  //           orderType: (side || "").toUpperCase(),
+  //         }),
+  //       });
 
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(
-            data?.message || data?.error || "Failed to create stop-market order"
-          );
+  //       const data = await res.json();
+  //       if (!res.ok)
+  //         throw new Error(
+  //           data?.message || data?.error || "Failed to create stop-market order"
+  //         );
 
-        stopLimitTriggerInput.value = "";
-        stopLimitPriceInput.value = "";
-        quantityInput.value = "";
-        amountInput.value = "--";
-        alert("Stop-Market order created successfully!");
-      // } else if (orderType === "limit" || orderType === "market") {
-      //   // Implement your market/limit submission here if needed
-      //   alert("Market/Limit submit path - implement as needed.");
-      } else {
-        buyError.textContent = "Select an order type";
-      }
-    } catch (err) {
-      console.error(err);
-      buyError.textContent = err.message || "An error occurred";
+  //       stopLimitTriggerInput.value = "";
+  //       stopLimitPriceInput.value = "";
+  //       quantityInput.value = "";
+  //       amountInput.value = "--";
+  //       alert("Stop-Market order created successfully!");
+  //     // } else if (orderType === "limit" || orderType === "market") {
+  //     //   // Implement your market/limit submission here if needed
+  //     //   alert("Market/Limit submit path - implement as needed.");
+  //     } else {
+  //       buyError.textContent = "Select an order type";
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     buyError.textContent = err.message || "An error occurred";
+  //   }
+  // });
+
+  // ===== Form submit (with debug logs) =====
+
+  async function fetchStockId(symbol) {
+    const res = await fetch(`/stocks/id/${symbol}`);
+    if (!res.ok) throw new Error('Failed to fetch stock ID');
+    const data = await res.json();
+    return data.stock_id;
+  }
+
+  const symbolInput = document.querySelector("input[name='chartSymbol']");
+
+tradingForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  buyError.textContent = "";
+
+  const side = tradingForm.querySelector("input[name='side']:checked")?.value;
+  const orderType = orderTypeSelect.value;
+  const quantity = parseInt(quantityInput.value, 10);
+
+  console.log("---- FORM SUBMIT ----");
+  console.log("Side:", side);
+  console.log("Order Type:", orderType);
+  console.log("Quantity:", quantity);
+
+  if (!quantity || quantity <= 0)
+    return (buyError.textContent = "Enter valid quantity");
+
+  try {
+    if (orderType === "stop-limit") {
+      const symbol = symbolInput.value.trim();
+
+      const stockId = await fetchStockId(symbol);
+
+      const triggerPrice = parseFloat(stopLimitTriggerInput.value);
+      const limitPrice = parseFloat(stopLimitPriceInput.value);
+
+      console.log("Stop-Limit triggerPrice:", triggerPrice);
+      console.log("Stop-Limit limitPrice:", limitPrice);
+      console.log("Current stockId:", window.currentStockId);
+
+      if (!triggerPrice || triggerPrice <= 0)
+        return (buyError.textContent = "Enter valid trigger price");
+      if (!limitPrice || limitPrice <= 0)
+        return (buyError.textContent = "Enter valid limit price");
+
+      const bodyData = {
+        stockId,
+        quantity,
+        triggerPrice,
+        limitPrice,
+        tradeType: (side || "").toUpperCase(),
+      };
+      console.log("🟦 Stop-Limit Request Body:", bodyData);
+
+      const res = await fetch("/stop-limit/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+      console.log("🟩 Stop-Limit Response:", res.status, data);
+
+      if (!res.ok)
+        throw new Error(
+          data?.error || data?.message || "Failed to create stop-limit order"
+        );
+
+      stopLimitTriggerInput.value = "";
+      stopLimitPriceInput.value = "";
+      quantityInput.value = "";
+      amountInput.value = "--";
+      alert("Stop-Limit order created successfully!");
     }
-  });
 
-  function renderStopMarketTable(orders = []) {
-    const tableBody = document.getElementById("stop-market-table-body");
-    if (!tableBody) return;
-    tableBody.innerHTML = "";
+    else if (orderType === "stop-market") {
+      const triggerPrice = parseFloat(triggerInput.value);
 
-    orders.forEach((order) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
+      console.log("Stop-Market triggerPrice:", triggerPrice);
+      console.log("Current stockId:", window.currentStockId);
+
+      if (!triggerPrice || triggerPrice <= 0)
+        return (buyError.textContent = "Enter valid trigger price");
+
+        const symbol = symbolInput.value.trim();
+
+        const stockId = await fetchStockId(symbol);
+
+      const bodyData = {
+        stockId,
+        quantity,
+        triggerPrice,
+        orderType: (side || "").toUpperCase(),
+      };
+      console.log("🟦 Stop-Market Request Body:", bodyData);
+
+      const res = await fetch("/stop-market/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+      console.log("🟩 Stop-Market Response:", res.status, data);
+
+      if (!res.ok)
+        throw new Error(
+          data?.message || data?.error || "Failed to create stop-market order"
+        );
+
+      stopLimitTriggerInput.value = "";
+      stopLimitPriceInput.value = "";
+      quantityInput.value = "";
+      amountInput.value = "--";
+      alert("Stop-Market order created successfully!");
+    }
+
+    else {
+      console.warn("⚠️ Unknown order type selected:", orderType);
+      buyError.textContent = "Select an order type";
+    }
+
+  } catch (err) {
+    console.error("❌ Error submitting order:", err);
+    buyError.textContent = err.message || "An error occurred";
+  }
+});
+
+
+  const ROWS_PER_PAGE = 10;
+let stopMarketPage = 1;
+let stopLimitPage = 1;
+let stopMarketOrders = [];
+let stopLimitOrders = [];
+
+function renderStopMarketTable(orders = []) {
+  stopMarketOrders = orders;
+  renderStopMarketPage(stopMarketPage);
+}
+
+function renderStopMarketPage(page) {
+  const tableBody = document.getElementById("stop-market-table-body");
+  const pagination = document.getElementById("stop-market-pagination");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = "";
+  const start = (page - 1) * ROWS_PER_PAGE;
+  const end = start + ROWS_PER_PAGE;
+  const paginatedOrders = stopMarketOrders.slice(start, end);
+
+  paginatedOrders.forEach((order) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
       <td>${formatToSGT(order.createdAt)}</td>
       <td>${order.stock?.symbol || "N/A"}</td>
       <td>${order.tradeType}</td>
       <td>${order.quantity}</td>
       <td>${order.triggerPrice}</td>
       <td>${order.status}</td>
-         <td>
-                ${order.status === "PENDING" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>` : ""}
-            </td>
+      <td>
+        ${order.status === "PENDING"
+          ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>`
+          : ""}
+      </td>
     `;
-      tableBody.appendChild(tr);
-    });
-      attachCancelHandlers();
-  }
+    tableBody.appendChild(tr);
+  });
 
-  function renderStopLimitTable(orders = []) {
-    const tableBody = document.getElementById("stop-limit-table-body");
-    if (!tableBody) return;
+  // Pagination controls
+  const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
+  pagination.innerHTML = `
+    <button ${page <= 1 ? "disabled" : ""} id="stop-market-prev">Prev</button>
+    <span>Page ${page} of ${totalPages || 1}</span>
+    <button ${page >= totalPages ? "disabled" : ""} id="stop-market-next">Next</button>
+  `;
 
-    tableBody.innerHTML = "";
-    orders.forEach((order) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
+  document.getElementById("stop-market-prev")?.addEventListener("click", () => {
+    if (stopMarketPage > 1) {
+      stopMarketPage--;
+      renderStopMarketPage(stopMarketPage);
+    }
+  });
+
+  document.getElementById("stop-market-next")?.addEventListener("click", () => {
+    const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
+    if (stopMarketPage < totalPages) {
+      stopMarketPage++;
+      renderStopMarketPage(stopMarketPage);
+    }
+  });
+
+  attachCancelHandlers();
+}
+
+function renderStopLimitTable(orders = []) {
+  stopLimitOrders = orders;
+  renderStopLimitPage(stopLimitPage);
+}
+
+function renderStopLimitPage(page) {
+  const tableBody = document.getElementById("stop-limit-table-body");
+  const pagination = document.getElementById("stop-limit-pagination");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = "";
+  const start = (page - 1) * ROWS_PER_PAGE;
+  const end = start + ROWS_PER_PAGE;
+  const paginatedOrders = stopLimitOrders.slice(start, end);
+
+  paginatedOrders.forEach((order) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
       <td>${formatToSGT(order.createdAt)}</td>
       <td>${order.stock?.symbol || "N/A"}</td>
       <td>${order.tradeType}</td>
@@ -383,39 +570,87 @@ document.addEventListener("DOMContentLoaded", () => {
       <td>${order.triggerPrice}</td>
       <td>${order.limitPrice}</td>
       <td>${order.status}</td>
-         <td>
-                ${order.status === "PENDING" ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-limit">Cancel</button>` : ""}
-            </td>
+      <td>
+        ${order.status === "PENDING"
+          ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-limit">Cancel</button>`
+          : ""}
+      </td>
     `;
-      tableBody.appendChild(tr);
-    });
-      attachCancelHandlers();
+    tableBody.appendChild(tr);
+  });
+
+  // Pagination controls
+  const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
+  pagination.innerHTML = `
+    <button ${page <= 1 ? "disabled" : ""} id="stop-limit-prev">Prev</button>
+    <span>Page ${page} of ${totalPages || 1}</span>
+    <button ${page >= totalPages ? "disabled" : ""} id="stop-limit-next">Next</button>
+  `;
+
+  document.getElementById("stop-limit-prev")?.addEventListener("click", () => {
+    if (stopLimitPage > 1) {
+      stopLimitPage--;
+      renderStopLimitPage(stopLimitPage);
+    }
+  });
+
+  document.getElementById("stop-limit-next")?.addEventListener("click", () => {
+    const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
+    if (stopLimitPage < totalPages) {
+      stopLimitPage++;
+      renderStopLimitPage(stopLimitPage);
+    }
+  });
+
+  attachCancelHandlers();
+}
+
+// ===== SOCKET + FETCH =====
+if (typeof io !== "undefined") {
+  socket = io();
+
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+    socket.emit("join", { userId }, (ack) => console.log("Join ack:", ack));
+  });
+
+  socket.on("stopMarketUpdate", renderStopMarketTable);
+  socket.on("stopLimitUpdate", renderStopLimitTable);
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected. Reconnecting...");
+  });
+}
+
+// Initial fetch
+fetchStopMarketOrders();
+fetchStopLimitOrders();
+
+renderStopLimitTable([]);
+renderStopMarketTable([]);
+})
+
+document.getElementById("export-stop-market")?.addEventListener("click", () => {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("User not logged in — cannot export.");
+    return;
   }
 
-  // ===== (Optionally) socket + fetch logic from your original file =====
-  // Keep the server fetch/socket code below or in other modules as you had before.
-  // I intentionally separated UI logic from network calls above for clarity.
-  if (typeof io !== "undefined") {
-    socket = io();
+  const url = `/stop-market/export?userId=${encodeURIComponent(userId)}`;
+  window.open(url, "_blank");
+});
 
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-      socket.emit("join", { userId }, (ack) => console.log("Join ack:", ack));
-    });
 
-    // Listen for full table updates
-    socket.on("stopMarketUpdate", renderStopMarketTable);
-    socket.on("stopLimitUpdate", renderStopLimitTable);
+document.getElementById("export-stop-limit")?.addEventListener("click", () => {
+  const userId = localStorage.getItem("userId");
 
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected. Reconnecting...");
-    });
+  if (!userId) {
+    alert("User not logged in — cannot export.");
+    return;
   }
-  // Initial fetch
-  fetchStopMarketOrders();
-  fetchStopLimitOrders();
 
-  renderStopLimitTable([]);
-  renderStopMarketTable([]);
-
+  const url = `/stop-limit/export?userId=${encodeURIComponent(userId)}`;
+  window.open(url, "_blank");
 });

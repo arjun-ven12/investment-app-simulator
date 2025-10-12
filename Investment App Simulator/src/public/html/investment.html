@@ -284,8 +284,11 @@
       </div>
       <!-- Stop Orders -->
       <div class="history-container">
+
         <div class="history-column">
           <h1>Your Stop-Market Orders</h1>
+          <button id="export-stop-market" class="export-btn submit-button">Export Stop Market History</button>
+
           <div id="stop-market-error" class="error-message"></div>
           <table id="stop-market-table">
             <thead>
@@ -299,10 +302,15 @@
               </tr>
             </thead>
             <tbody id="stop-market-table-body"></tbody>
+
           </table>
+          <div id="stop-market-pagination" class="pagination"></div>
+
         </div>
         <div class="history-column">
           <h1>Your Stop-Limit Orders</h1>
+          <button id="export-stop-limit" class="export-btn submit-button">Export Stop Limit History</button>
+
           <div id="stop-limit-error" class="error-message"></div>
           <table id="stop-limit-table">
             <thead>
@@ -317,7 +325,10 @@
               </tr>
             </thead>
             <tbody id="stop-limit-table-body"></tbody>
+
           </table>
+          <div id="stop-limit-pagination" class="pagination"></div>
+
         </div>
       </div>
 
@@ -372,12 +383,13 @@
 
               
       </div>
-                <h1>Your Option Trades</h1>
-
-                <button id="export-option-trades" class="submit-button">Export Option Trades</button>
+               
 
       <div class="options-card">
+              <h1>Your Option Trades</h1>
 
+                <button id="export-option-trades" class="submit-button">Export Option Trades</button>
+                <br><br>
             <table id="options-trades-table">
             <thead>
               <tr>

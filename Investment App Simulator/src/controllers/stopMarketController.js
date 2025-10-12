@@ -132,3 +132,55 @@ exports.deleteStopMarketOrderController = async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: err.message });
     }
 };
+
+
+
+
+const { Parser } = require('json2csv');
+
+exports.exportStopMarketHistoryController = async function (req, res) {
+    let { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+  
+    userId = parseInt(userId, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid User ID" });
+    }
+  
+    try {
+      const orders = await stopMarketModel.getUserStopMarketOrders(userId);
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No stop market orders found for this user." });
+    }
+
+    // Define fields for CSV export
+    const fields = [
+      { label: "Date Created (SGT)", value: "createdAt" },
+      { label: "Stock Symbol", value: "stock.symbol" },
+      { label: "Trade Type", value: "tradeType" },
+      { label: "Quantity", value: "quantity" },
+      { label: "Trigger Price", value: "triggerPrice" },
+      { label: "Limit Price", value: "limitPrice" },
+      { label: "Status", value: "status" }
+    ];
+
+    const opts = { fields };
+    const parser = new Parser(opts);
+    const csv = parser.parse(orders);
+
+    // Set headers for download
+    res.header("Content-Type", "text/csv");
+    res.attachment(`stop_market_orders_user_${userId}.csv`);
+    return res.send(csv);
+
+  } catch (error) {
+    console.error("Error exporting stop market orders:", error);
+    return res.status(500).json({
+      message: "Error exporting stop market order history",
+      error: error.message
+    });
+  }
+};

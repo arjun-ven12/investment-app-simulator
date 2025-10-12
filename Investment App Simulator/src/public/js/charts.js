@@ -1338,9 +1338,10 @@ tradingForm.addEventListener('submit', async (e) => {
       const result = await res.json();
       alert(`${side.toUpperCase()} market order successful!`);
       console.log('Trade result:', result);
-    } else {
-      alert('Only market orders are supported for now.');
-    }
+    } 
+    // else {
+    //   alert('Only market orders are supported for now.');
+    // }
 
   } catch (err) {
     console.error(err);

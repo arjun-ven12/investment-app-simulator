@@ -87,3 +87,52 @@ exports.deleteStopLimitOrderController = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+
+const { Parser } = require("json2csv");
+
+exports.exportStopLimitHistoryController = async function (req, res) {
+  let { userId } = req.query;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  userId = parseInt(userId, 10);
+  if (isNaN(userId)) {
+    return res.status(400).json({ message: "Invalid User ID" });
+  }
+
+  try {
+    const orders = await stopLimitModel.getUserStopLimitOrders(userId);
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No stop limit orders found for this user." });
+    }
+
+    // Define CSV fields (customize labels as needed)
+    const fields = [
+      { label: "Date Created (SGT)", value: "createdAt" },
+      { label: "Stock Symbol", value: "stock.symbol" },
+      { label: "Trade Type", value: "tradeType" },
+      { label: "Quantity", value: "quantity" },
+      { label: "Trigger Price", value: "triggerPrice" },
+      { label: "Limit Price", value: "limitPrice" },
+      { label: "Status", value: "status" },
+    ];
+
+    const opts = { fields };
+    const parser = new Parser(opts);
+    const csv = parser.parse(orders);
+
+    // Set response headers for file download
+    res.header("Content-Type", "text/csv");
+    res.attachment(`stop_limit_orders_user_${userId}.csv`);
+    return res.send(csv);
+  } catch (error) {
+    console.error("Error exporting stop limit orders:", error);
+    return res.status(500).json({
+      message: "Error exporting stop limit order history",
+      error: error.message,
+    });
+  }
+};

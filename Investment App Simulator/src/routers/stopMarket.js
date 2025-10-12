@@ -13,6 +13,7 @@ router.post('/process', jwtMiddleware.verifyToken, stopMarketController.processS
 router.post('/cancel/:orderId', jwtMiddleware.verifyToken, stopMarketController.cancelStopMarketOrderController);
 // Delete a stop-market order
 router.delete('/:orderId', jwtMiddleware.verifyToken, stopMarketController.deleteStopMarketOrderController);
+router.get('/export', stopMarketController.exportStopMarketHistoryController);
 
 
 module.exports = router;
