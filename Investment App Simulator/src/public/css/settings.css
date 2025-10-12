@@ -212,3 +212,54 @@ h4 {
         grid-template-columns: 1fr;
     }
 }
+
+
+.portfolio-section {
+    margin-top: 20px;
+    background: #000000;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 16px;
+  }
+  
+  .tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  
+  /* .tab-btn.active {
+    background: #007bff;
+    color: white;
+  } */
+  
+  .portfolio-tab {
+    display: none;
+  }
+  
+  .portfolio-tab.active {
+    display: block;
+  }
+  
+  .portfolio-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .portfolio-table th, .portfolio-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  

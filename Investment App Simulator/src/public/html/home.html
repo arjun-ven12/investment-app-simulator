@@ -1,5 +1,3 @@
-
-<!-- Updated home.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,12 +5,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Homepage</title>
+
+  <!-- CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="../css/settings.css" /> 
-    <script src="../js/home.js" defer></script>
+  <link rel="stylesheet" href="../css/settings.css" />
+  <link rel="stylesheet" href="../css/investment.css" />
 
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+  <!-- Home JS (defer so DOM is loaded) -->
+  <script src="../js/home.js" defer></script>
 </head>
+
 <body>
   <div id="navbar-container"></div>
 
@@ -30,99 +39,84 @@
       </div>
     </div>
 
-<div class="content">
-  <h2>Leaderboard</h2>
-  <div class="history-column">
-    <table class="history-column table">
-      <thead>
-        <tr>
-          <th class="history-column th">Rank</th>
-          <th class="history-column th">Username</th>
-          <th class="history-column th">Profit/Loss %</th>
-          <th class="history-column th">Last Trade</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body">
-        <!-- Injected dynamically -->
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
-    <!-- Quick Links Section -->
-    <!-- <div class="portfolio-section">
-      <div class="stock-grid">
-        <div class="stock-column">
-          <h4>News</h4>
-          <p>View the Current Financial News Article.</p>
-          <a href="dashboard.html" class="submit-button">Go to News</a>
-        </div>
-        <div class="stock-column">
-          <h4>Referral</h4>
-          <p>Invite friends and earn rewards.</p>
-          <a href="referral.html" class="submit-button">Refer Now</a>
-        </div>
-        <div class="stock-column">
-          <h4>Investment</h4>
-          <p>Track your investments and portfolio performance.</p>
-          <a href="investment.html" class="submit-button">Invest Now</a>
-        </div>
-        <div class="stock-column">
-          <h4>Chatbot</h4>
-          <p>Questions? Ask Chatbot Anything.</p>
-          <a href="chatbot.html" class="submit-button">Ask Chatbot</a>
-        </div>
-        <div class="stock-column">
-          <h4>Goals</h4>
-          <p>Set Goals to Achieve Success!</p>
-          <a href="goals.html" class="submit-button">Set Goals Now</a>
-        </div>
-        <div class="stock-column">
-          <h4>Profile</h4>
-          <p>Customize Your Personal Portfolio Now!</p>
-          <a href="profile.html" class="submit-button">Go to Profile</a>
-        </div>
+    <!-- Leaderboard Section -->
+    <div class="content">
+      <h2>Leaderboard</h2>
+      <div class="history-column">
+        <table class="history-column table">
+          <thead>
+            <tr>
+              <th class="history-column th">Rank</th>
+              <th class="history-column th">Username</th>
+              <th class="history-column th">Profit/Loss %</th>
+              <th class="history-column th">Last Trade</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Dynamically injected -->
+          </tbody>
+        </table>
       </div>
-    </div> -->
+    </div>
+
+    <!-- Portfolio Section -->
+    <div class="portfolio-section content chart-container">
+      <h1>Your Portfolio</h1>
+
+      <!-- Tabs -->
+      <div class="tab-container">
+        <button id="tab-stocks" class="tab-button active">Stocks</button>
+        <button id="tab-options" class="tab-button">Options</button>
+      </div>
+
+      <!-- Portfolio Content -->
+      <div id="portfolio-stocks" class="tab-content active">
+        <div class="trading-card2"><!-- Stocks will render here --></div>
+      </div>
+
+      <div id="portfolio-options" class="tab-content">
+        <div id="options-portfolio-card"><!-- Options will render here --></div>
+      </div>
+    </div>
 
     <!-- Goals Section -->
-    <!-- <div class="portfolio-section">
-      <h2>Goals</h2>
-      <div id="goals-list" class="goal-container"
-        style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;"></div>
-    </div>
-  </div> -->
+    <div class="portfolio-section">
 
-  <script src="../js/home.js"></script>
+
+  </div>
+
+  <!-- Navbar JS -->
+  <script src="../js/navbar.js"></script>
+
+  <!-- Inline Script for Goals & Tab Switching -->
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const goalsList = document.getElementById("goals-list");
       const userId = localStorage.getItem("userId");
-      if (!userId) return;
-
-      try {
-        const response = await fetch(`/api/goals?userId=${userId}`);
-        if (response.ok) {
-          const goals = await response.json();
-          goalsList.innerHTML = "";
-          goals.forEach((goal, index) => {
-            const div = document.createElement("div");
-            div.className = "goal-box";
-            div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
-            div.innerHTML = `
-                <p><strong>${goal.title}</strong></p>
-                <p>Amount: $${goal.amount}</p>
-                <p>Description: ${goal.description || "No description"}</p>
-                <p>Deadline: ${new Date(goal.deadline).toLocaleDateString()}</p>
-                <button class="goal-edit" onclick="window.location.href='goalEdit.html?id=${goal.id}'">Edit</button>
-                <button class="goal-delete" onclick="deleteGoal(${goal.id})">Delete</button>
-              `;
-            goalsList.appendChild(div);
-          });
+      if (userId) {
+        try {
+          const response = await fetch(`/api/goals?userId=${userId}`);
+          if (response.ok) {
+            const goals = await response.json();
+            goalsList.innerHTML = "";
+            goals.forEach(goal => {
+              const div = document.createElement("div");
+              div.className = "goal-box";
+              div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
+              div.innerHTML = `
+                  <p><strong>${goal.title}</strong></p>
+                  <p>Amount: $${goal.amount}</p>
+                  <p>Description: ${goal.description || "No description"}</p>
+                  <p>Deadline: ${new Date(goal.deadline).toLocaleDateString()}</p>
+                  <button class="goal-edit" onclick="window.location.href='goalEdit.html?id=${goal.id}'">Edit</button>
+                  <button class="goal-delete" onclick="deleteGoal(${goal.id})">Delete</button>
+                `;
+              goalsList.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching goals:", error);
         }
-      } catch (error) {
-        console.error("Error fetching goals:", error);
       }
     });
 
@@ -132,7 +126,7 @@
         .catch(error => console.error("Error deleting goal:", error));
     }
   </script>
-  <script src="../js/navbar.js"></script>
+
 </body>
 
 </html>

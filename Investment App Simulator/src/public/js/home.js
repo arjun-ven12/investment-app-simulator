@@ -1,108 +1,328 @@
-
+// home.js
 document.addEventListener("DOMContentLoaded", async () => {
-    const usernameEl = document.getElementById("username");
-    const walletEl = document.getElementById("wallet");
-    const walletToggle = document.getElementById("walletToggle");
-    const logoutButton = document.getElementById("logoutButton");
+  // -------------------------------
+  // ELEMENTS
+  // -------------------------------
+  const usernameEl = document.getElementById("username");
+  const walletEl = document.getElementById("wallet");
+  const walletToggle = document.getElementById("walletToggle");
 
-    let isWalletVisible = false;
+  const leaderboardBody = document.getElementById("leaderboard-body");
 
-    // Fetch user details
-    async function fetchUserDetails() {
-        const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
-        if (!userId) return alert("User not logged in.");
-        if (!token) return null;
+  const tabStocksBtn = document.getElementById("tab-stocks");
+  const tabOptionsBtn = document.getElementById("tab-options");
+  const portfolioStocks = document.getElementById("portfolio-stocks");
+  const portfolioOptions = document.getElementById("portfolio-options");
 
-        try {
-            const res = await fetch(`/user/get/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const data = await res.json();
+  const stocksContainer = portfolioStocks.querySelector(".trading-card2");
+  const optionsContainer = document.getElementById("options-portfolio-card");
 
-            // Handle both formats: { user: {...} } or { success: true, user: {...} }
-            if (data.success === false) {
-                console.error("Failed to fetch user details:", data.message);
-                return null;
+  let isWalletVisible = false;
+  let portfolioChart = null;
+
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  // -------------------------------
+  // USER INFO
+  // -------------------------------
+  async function fetchUserDetails() {
+    if (!userId) return null;
+    if (!token) return null;
+
+    try {
+      const res = await fetch(`/user/get/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        console.error("Failed to fetch user details:", data.message);
+        return null;
+      }
+      return data.user || data;
+    } catch (err) {
+      console.error("Error fetching user details:", err);
+      return null;
+    }
+  }
+
+  async function renderUserInfo() {
+    const user = await fetchUserDetails();
+    if (!user) {
+      usernameEl.textContent = "Guest";
+      walletEl.textContent = "****";
+      return;
+    }
+
+    usernameEl.textContent = user.username;
+    walletEl.setAttribute("data-value", user.wallet);
+    walletEl.textContent = "****"; // hidden by default
+  }
+
+  walletToggle.addEventListener("click", () => {
+    const walletValue = walletEl.getAttribute("data-value");
+    if (isWalletVisible) {
+      walletEl.textContent = "****";
+      walletToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+      walletEl.textContent = `$${walletValue}`;
+      walletToggle.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+    isWalletVisible = !isWalletVisible;
+  });
+
+  // -------------------------------
+  // LEADERBOARD
+  // -------------------------------
+  async function renderLeaderboard() {
+    try {
+      const res = await fetch("/leaderboard");
+      const data = await res.json();
+      const leaderboard = data.leaderboard || [];
+      leaderboardBody.innerHTML = "";
+
+      leaderboard.forEach(entry => {
+        const row = document.createElement("tr");
+        const profitLossClass = entry.profitLossPercent >= 0 ? "positive" : "negative";
+
+        row.innerHTML = `
+          <td>${entry.rank}</td>
+          <td>${entry.username}</td>
+          <td class="${profitLossClass}">${entry.profitLossPercent}%</td>
+          <td>${entry.lastTrade || "N/A"}</td>
+        `;
+        leaderboardBody.appendChild(row);
+      });
+    } catch (err) {
+      console.error("Error fetching leaderboard:", err);
+      leaderboardBody.innerHTML = `<tr><td colspan="4">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  // -------------------------------
+  // STOCKS PORTFOLIO
+  // -------------------------------
+  async function fetchStocksPortfolio() {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/stocks/portfolio/${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch portfolio");
+      const portfolio = await res.json();
+      renderStocksPortfolio(portfolio);
+    } catch (err) {
+      console.error("Error fetching portfolio:", err);
+      stocksContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
+    }
+  }
+
+  function renderStocksPortfolio(portfolio) {
+    stocksContainer.innerHTML = "";
+
+    const { openPositions = [], closedPositions = [] } = portfolio;
+
+    if (openPositions.length === 0 && closedPositions.length === 0) {
+      stocksContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
+      return;
+    }
+
+    // Open Positions
+    const openColumns = openPositions.map(stock => `
+      <div class="stock-column">
+        <h3>${stock.symbol} (${stock.companyName})</h3>
+        <p><strong>Quantity:</strong> ${stock.quantity}</p>
+        <p><strong>Avg Buy Price:</strong> $${parseFloat(stock.avgBuyPrice).toFixed(2)}</p>
+        <p><strong>Current Price:</strong> $${parseFloat(stock.currentPrice).toFixed(2)}</p>
+        <p><strong>Total Invested:</strong> $${parseFloat(stock.totalInvested).toFixed(2)}</p>
+        <p><strong>Current Value:</strong> $${parseFloat(stock.currentValue).toFixed(2)}</p>
+        <p><strong>Unrealized P/L:</strong> $${parseFloat(stock.unrealizedProfitLoss).toFixed(2)} (${stock.unrealizedProfitLossPercent})</p>
+        <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
+      </div>
+    `).join("");
+
+    // Closed Positions
+    const closedColumns = closedPositions.map(stock => `
+      <div class="stock-column closed">
+        <h3>${stock.symbol} (${stock.companyName})</h3>
+        <p><strong>Total Bought Qty:</strong> ${stock.totalBoughtQty}</p>
+        <p><strong>Total Bought Value:</strong> $${parseFloat(stock.totalBoughtValue).toFixed(2)}</p>
+        <p><strong>Total Sold Value:</strong> $${parseFloat(stock.totalSoldValue).toFixed(2)}</p>
+        <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
+      </div>
+    `).join("");
+
+    stocksContainer.innerHTML = `
+      <div class="portfolio-layout">
+        <div class="positions-section">
+          ${openPositions.length ? `<h2>Open Positions</h2><div class="stock-grid">${openColumns}</div>` : ""}
+          ${closedPositions.length ? `<h2>Closed Positions</h2><div class="stock-grid">${closedColumns}</div>` : ""}
+        </div>
+        ${openPositions.length ? `<div class="portfolio-chart-container"><canvas id="portfolioPieChart"></canvas></div>` : ""}
+      </div>
+    `;
+
+    // Pie chart
+    if (openPositions.length > 0) {
+      if (portfolioChart) portfolioChart.destroy();
+
+      const labels = openPositions.map(stock => stock.symbol);
+      const data = openPositions.map(stock => parseFloat(stock.totalInvested));
+      const ctx = document.getElementById("portfolioPieChart").getContext("2d");
+
+      portfolioChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: ["#E0EBFF","#A3C1FF","#7993FF","#5368A6","#2A3C6B","#0D1A33"],
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "top" },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.raw / total) * 100).toFixed(2);
+                  return `${context.label}: $${context.raw} (${percentage}%)`;
+                }
+              }
             }
-
-            return data.user || data; // fallback if success not included
-        } catch (err) {
-            console.error("Error fetching user details:", err);
-            return null;
+          }
         }
+      });
+    }
+  }
+
+  // -------------------------------
+  // OPTIONS PORTFOLIO
+  // -------------------------------
+  async function fetchOptionsPortfolio() {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/options/portfolio?userId=${encodeURIComponent(userId)}`);
+      if (!res.ok) throw new Error("Failed to fetch options portfolio");
+      const data = await res.json();
+      const portfolio = data.portfolio || [];
+      renderOptionsPortfolio(portfolio);
+    } catch (err) {
+      console.error("Error loading options portfolio:", err);
+      optionsContainer.innerHTML = `<p style="color:red; text-align:center;">Error loading portfolio: ${err.message}</p>`;
+    }
+  }
+
+  function renderOptionsPortfolio(portfolio) {
+    optionsContainer.innerHTML = "";
+
+    if (portfolio.length === 0) {
+      optionsContainer.innerHTML = `<div style="text-align:center; padding:15px; color:#999;">No option positions found.</div>`;
+      return;
     }
 
-    // Render user info
-    async function renderUser() {
-        const user = await fetchUserDetails();
-        if (!user) {
-            usernameEl.textContent = "Guest";
-            walletEl.textContent = "****";
-            return;
-        }
+    const totalRealized = portfolio.reduce((a, b) => a + (b.realizedPnL || 0), 0);
+    const totalUnrealized = portfolio.reduce((a, b) => a + (b.unrealizedPnL || 0), 0);
 
-        usernameEl.textContent = user.username;
-        walletEl.setAttribute("data-value", user.wallet);
-        walletEl.textContent = "****"; // hidden by default
-    }
+    const summaryDiv = document.createElement("div");
+    summaryDiv.style = "margin-bottom:15px; display:flex; justify-content:center; gap:40px;";
+    summaryDiv.innerHTML = `
+      <div style="text-align:center;">
+        <strong>Total Realized PnL:</strong><br>
+        <span style="color:${totalRealized >= 0 ? 'limegreen':'red'};">${totalRealized.toFixed(2)}</span>
+      </div>
+      <div style="text-align:center;">
+        <strong>Total Unrealized PnL:</strong><br>
+        <span style="color:${totalUnrealized >= 0 ? 'limegreen':'red'};">${totalUnrealized.toFixed(2)}</span>
+      </div>
+    `;
 
-    // Toggle wallet visibility
-    walletToggle.addEventListener("click", () => {
-        const walletValue = walletEl.getAttribute("data-value");
-        if (isWalletVisible) {
-            walletEl.textContent = "****";
-            walletToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        } else {
-            walletEl.textContent = `$${walletValue}`;
-            walletToggle.innerHTML = '<i class="fas fa-eye"></i>';
-        }
-        isWalletVisible = !isWalletVisible;
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.marginTop = "10px";
+    table.innerHTML = `
+      <thead>
+        <tr style="background-color:#000000ff; color:#E0EBFF;">
+          <th style="padding:8px; border:1px solid #E0EBFF;">Underlying Stock</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Total Contracts</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Total Shares</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Active</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Expired</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Open</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Closed</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Realized PnL</th>
+          <th style="padding:8px; border:1px solid #E0EBFF;">Unrealized PnL</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector("tbody");
+    portfolio.forEach(item => {
+      const row = document.createElement("tr");
+      row.style.borderBottom = "1px solid #E0EBFF";
+      row.innerHTML = `
+        <td style="padding:8px; text-align:center;">${item.underlyingSymbol}</td>
+        <td style="padding:8px; text-align:center;">${item.totalContracts}</td>
+        <td style="padding:8px; text-align:center;">${item.totalShares}</td>
+        <td style="padding:8px; text-align:center;">${item.activeContracts}</td>
+        <td style="padding:8px; text-align:center;">${item.expiredContracts}</td>
+        <td style="padding:8px; text-align:center;">${item.openPositions}</td>
+        <td style="padding:8px; text-align:center;">${item.closedPositions}</td>
+        <td style="padding:8px; text-align:center; color:${item.realizedPnL >= 0 ? "limegreen":"red"};">${item.realizedPnL.toFixed(2)}</td>
+        <td style="padding:8px; text-align:center; color:${item.unrealizedPnL >= 0 ? "limegreen":"red"};">${item.unrealizedPnL.toFixed(2)}</td>
+      `;
+      tbody.appendChild(row);
     });
 
+    optionsContainer.appendChild(summaryDiv);
+    optionsContainer.appendChild(table);
+  }
 
+  // -------------------------------
+  // TAB LOGIC
+  // -------------------------------
+  let stocksLoaded = false;
+  let optionsLoaded = false;
 
-    // Load user info
-    renderUser();
+  tabStocksBtn.addEventListener("click", async () => {
+    tabStocksBtn.classList.add("active");
+    tabOptionsBtn.classList.remove("active");
+    portfolioStocks.classList.add("active");
+    portfolioOptions.classList.remove("active");
+
+    if (!stocksLoaded) {
+      await fetchStocksPortfolio();
+      stocksLoaded = true;
+    }
+  });
+
+  tabOptionsBtn.addEventListener("click", async () => {
+    tabOptionsBtn.classList.add("active");
+    tabStocksBtn.classList.remove("active");
+    portfolioOptions.classList.add("active");
+    portfolioStocks.classList.remove("active");
+
+    if (!optionsLoaded) {
+      await fetchOptionsPortfolio();
+      optionsLoaded = true;
+    }
+  });
+
+  // -------------------------------
+  // INITIAL LOAD
+  // -------------------------------
+  await renderUserInfo();
+  await renderLeaderboard();
+
+  // Load default active tab (Stocks)
+  if (tabStocksBtn.classList.contains("active") && !stocksLoaded) {
+    await fetchStocksPortfolio();
+    stocksLoaded = true;
+  }
 });
 
 
-
-/////////////////////////////////////////
-// LEADERBOARD
-/////////////////////////////////////////
-
-    window.addEventListener('DOMContentLoaded', function () {
-      const leaderboardBody = document.getElementById('leaderboard-body');
-
-      fetch('/leaderboard')
-        .then(response => {
-          if (response.ok) return response.json();
-          return response.json().then(data => {
-            throw new Error(`Error fetching leaderboard: ${data.error}`);
-          });
-        })
-        .then(data => {
-          const leaderboard = data.leaderboard || [];
-          leaderboardBody.innerHTML = '';
-
-          leaderboard.forEach(entry => {
-            const row = document.createElement('tr');
-
-            // Profit/Loss coloring
-            const profitLossClass = entry.profitLossPercent >= 0 ? 'positive' : 'negative';
-
-            row.innerHTML = `
-              <td>${entry.rank}</td>
-              <td>${entry.username}</td>
-              <td class="${profitLossClass}">${entry.profitLossPercent}%</td>
-              <td>${entry.lastTrade || 'N/A'}</td>
-            `;
-            leaderboardBody.appendChild(row);
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching leaderboard:', error);
-          leaderboardBody.innerHTML = `<tr><td colspan="4">Error: ${error.message}</td></tr>`;
-        });
-    });
