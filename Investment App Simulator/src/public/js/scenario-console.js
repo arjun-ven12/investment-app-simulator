@@ -1,5 +1,6 @@
 
 const limitPriceInput = document.getElementById("limitPrice");
+ const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
 let currentSymbol = null; // global
 let isPaused = true; // track pause state globally
 let scenarioChart = null;
@@ -7,7 +8,7 @@ let fullData = [];
 let currentIndex = 0;
 let replayInterval = null;
 let countdownInterval = null;
-let currentSpeed = 3;
+let currentSpeed = 3
 const VISIBLE_POINTS = 20;
 let currentChartType = "line";
 let allSymbolsData = {};
@@ -904,7 +905,6 @@ window.addEventListener('resize', () => {
 });
 
 
-const scenarioNameEl = document.getElementById("scenario-name");
 const startDateEl = document.getElementById("scenario-start-date");
 const endDateEl = document.getElementById("scenario-end-date");
 const initialWalletEl = document.getElementById("scenario-initial-wallet");
@@ -922,12 +922,8 @@ async function loadScenarioDetails() {
 
         const data = await res.json();
 
-        // Populate the card
-        scenarioNameEl.textContent = data.name || "--";
-        startDateEl.textContent = data.startDate || "--";
-        endDateEl.textContent = data.endDate || "--";
-        initialWalletEl.textContent = data.initialWallet?.toFixed(2) || "0.00";
-        descriptionEl.textContent = data.description || "--";
+
+
 
     } catch (err) {
         console.error("Error loading scenario details:", err);
@@ -1270,3 +1266,96 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 })
+
+// ----- helpers -----
+const fmtMoney = (n) => {
+  const x = (typeof n === 'string') ? Number(n) : (typeof n === 'bigint' ? Number(n.toString()) : n);
+  if (!isFinite(x)) return '—';
+  return x.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+};
+
+// "Tue, 9 Sep 2025 — 8am" / "8:15pm"
+const fmtDay = (d) =>
+  new Date(d).toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+
+const fmtTimeCompact = (d) => {
+  const s = new Date(d).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit', hour12:true });
+  // "8:00 AM" -> "8am", "8:15 PM" -> "8:15pm"
+  return s.replace(':00','').replace(' ','').toLowerCase();
+};
+
+const fmtDayTimeCompact = (d) => {
+  if (!d) return '—';
+  const dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt)) return '—';
+  return `${fmtDay(dt)} — ${fmtTimeCompact(dt)}`;
+};
+
+const fmtDuration = (start, end) => {
+  if (!start || !end) return '—';
+  const s = new Date(start), e = new Date(end);
+  if (isNaN(s) || isNaN(e)) return '—';
+  const ms = Math.max(0, e - s);
+  const days = Math.floor(ms / 86400000);
+  const hours = Math.floor((ms % 86400000) / 3600000);
+  return `${days}d ${hours}h`;
+};
+
+// Prisma BigInt/Decimal guard
+const deBigInt = (obj) => JSON.parse(JSON.stringify(obj, (_, v) => {
+  if (typeof v === 'bigint') return v.toString();
+  if (v && v.constructor && v.constructor.name === 'Decimal') return v.toString();
+  return v;
+}));
+
+// ----- main -----
+async function loadScenarioDetails() {
+  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+  if (!scenarioId) return;
+
+  const titleEl = document.getElementById("scenario-title");
+  const descEl  = document.getElementById("scenario-description");
+  const startEl = document.getElementById("scenario-start-date");
+  const endEl   = document.getElementById("scenario-end-date");
+  const durationEl = document.getElementById("scenario-duration");
+  const initialWalletEl = document.getElementById("scenario-initial-wallet");
+  const allowedWrap = document.getElementById("scenario-allowed"); // exists in your HTML
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.message || "Failed to fetch scenario details");
+
+    const scenario = deBigInt(payload.scenario || payload);
+
+    // Write fields
+    titleEl.textContent = scenario.title || '—';
+    descEl.textContent  = scenario.description || '—';
+
+    // ✅ pretty start/end (lowercase am/pm, no seconds)
+    startEl.textContent = fmtDayTimeCompact(scenario.startDate);
+    endEl.textContent   = fmtDayTimeCompact(scenario.endDate);
+
+    durationEl.textContent = fmtDuration(scenario.startDate, scenario.endDate);
+    initialWalletEl.textContent = fmtMoney(scenario.startingBalance);
+
+    // Chips for allowed/recommended symbols
+    if (allowedWrap) {
+      allowedWrap.innerHTML = '';
+      (Array.isArray(scenario.allowedStocks) ? scenario.allowedStocks : []).forEach(sym => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = sym;
+        allowedWrap.appendChild(chip);
+      });
+    }
+
+  } catch (err) {
+    console.error("Error loading scenario details:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadScenarioDetails);

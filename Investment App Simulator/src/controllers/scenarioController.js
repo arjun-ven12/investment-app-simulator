@@ -233,7 +233,17 @@ module.exports.getScenarioDetailsController = async (req, res) => {
 
   try {
     const scenario = await scenarioModel.getScenarioDetails(scenarioId);
-    res.json({ success: true, scenario });
+
+    // Convert BigInt and Prisma Decimal safely
+    const safeScenario = JSON.parse(
+      JSON.stringify(scenario, (_, v) => {
+        if (typeof v === 'bigint') return v.toString();
+        if (v && v.constructor && v.constructor.name === 'Decimal') return v.toString();
+        return v;
+      })
+    );
+
+    res.json({ success: true, scenario: safeScenario });
   } catch (err) {
     console.error(err);
     res.status(404).json({ success: false, message: err.message });

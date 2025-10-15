@@ -624,22 +624,30 @@ module.exports.getScenarioIntradayDataWithProgress = async (scenarioId, symbol, 
 };
 
 module.exports.getScenarioDetails = async (scenarioId) => {
+  const id = Number(scenarioId);
+
   const scenario = await prisma.scenario.findUnique({
-    where: { id: Number(scenarioId) },
+    where: { id },
     include: {
-      // Include related info if needed, e.g., participants, orders
-      participants: true,
-      marketOrders: true,
-      limitOrders: true,
+      // these ARE relations on Scenario
+      ScenarioIntradayPrice: true,
+      ScenarioAttemptAnalytics: true,
+
+      // orders hang off participants, not Scenario
+      participants: {
+        include: {
+          user: true, // if you want participant user details
+          ScenarioMarketOrder: true,
+          ScenarioLimitOrder: true,
+          ScenarioHolding: true,
+        },
+      },
     },
   });
 
-  if (!scenario) {
-    throw new Error('Scenario not found');
-  }
-
+  if (!scenario) throw new Error('Scenario not found');
   return scenario;
-}
+};
 
 
 module.exports.getScenarioPortfolio = async (scenarioId, userId) => {

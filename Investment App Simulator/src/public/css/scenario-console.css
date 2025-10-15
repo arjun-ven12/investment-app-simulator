@@ -453,3 +453,44 @@
     60% { content: '..'; }
     80%, 100% { content: '...'; }
 }
+
+/* Sidebar-safe layout */
+.scenario-details { max-width: 100%; }
+.scenario-details .kv{
+  display:grid;
+  gap:6px 10px;
+  align-items:baseline;
+  margin:4px 0;
+}
+
+
+/* Recommended symbols as wrapping chips */
+.chip-row{
+  display:flex;
+  flex-wrap:wrap;           /* wrap within sidebar width */
+  gap:6px;
+  max-width:100%;
+}
+.chip{
+  padding:2px 8px;
+  border:1px solid #444;
+  border-radius:999px;
+  color:#e0e0e0;
+  background:#111;
+  font-size:12px;
+  max-width:100%;
+}
+
+/* Optional: clamp long descriptions to 3 lines */
+#scenario-description{
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  white-space:normal;        /* allow multi-line, then clamp */
+}
+
+.scenario-details .k {
+  color: rgb(255, 255, 255);
+  font-weight: 600; /* semi-bold labels */
+}

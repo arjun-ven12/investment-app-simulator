@@ -29,19 +29,23 @@
   <input type="hidden" id="current-stock-id" value="" />
   <!-- Sidebar -->
   <div class="sidebar">
-    <h1>WatchList</h1>
-    <div class="search-container">
-      <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
-      <button id="search-button">Search</button>
-    </div>
-    <br />
-    <h4>Favorited Stocks</h4>
-    <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
-    <div id="favorites-error-message" class="error-message"></div>
-    <div id="error-message" class="error-message" style="margin-top: 8px"></div>
-    <div id="stocks-container" style="margin-top: 8px"></div>
-    <h3>Search Results</h3>
-    <ul id="stock-list"></ul>
+    <h1>Scenario Details</h1>
+    <div id="scenario-details" class="scenario-details">
+  <div class="kv"><span class="k">Title:</span> <span id="scenario-title" class="v">—</span></div>
+  <br>
+  <div class="kv"><span class="k">Description:</span> <span id="scenario-description" class="v">—</span></div>
+  <br>
+  <div class="kv"><span class="k">Start:</span> <span id="scenario-start-date" class="v">—</span></div>
+  <br>
+  <div class="kv"><span class="k">End:</span> <span id="scenario-end-date" class="v">—</span></div>
+  <br>
+  <div class="kv"><span class="k">Duration:</span> <span id="scenario-duration" class="v">—</span></div>
+  <br>
+  <div class="kv"><span class="k">Starting Balance:</span> <span id="scenario-initial-wallet" class="v">—</span></div>
+<br>
+  <div class="kv"><span class="k">Recommended Symbols:</span></div>
+  <div id="scenario-allowed" class="chip-row"></div>
+</div>
   </div>
 
   <!-- Main Content -->
