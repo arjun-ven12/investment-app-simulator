@@ -535,6 +535,93 @@ const wallet = user.wallet
 
 
 
+async function getUserOptionTradesWithPnL(userId) {
+  const now = new Date();
+
+  const trades = await prisma.optionTrade.findMany({
+    where: { userId },
+    include: {
+      contract: {
+        include: { stock: true },
+      },
+    },
+    orderBy: { tradeDate: 'desc' },
+  });
+
+  const results = [];
+
+  for (const t of trades) {
+    const c = t.contract;
+    const contractSize = c.size || 100;
+    const strike = Number(c.strikePrice);
+    const isCall = (c.type || '').toUpperCase() === 'CALL';
+    const side = (t.tradeType || '').toUpperCase(); // BUY or SELL
+    const expiration = new Date(c.expirationDate);
+
+    let pnl = 0;
+    let realized = false;
+
+    if (expiration <= now) {
+      // expired trade — use 20:00 UTC mark
+      const expiryMark = new Date(expiration.getTime());
+      expiryMark.setUTCHours(20, 0, 0, 0);
+
+      const expiryPx = await prisma.intradayPrice3.findFirst({
+        where: { stockId: c.stockId, date: { lte: expiryMark } },
+        orderBy: { date: 'desc' },
+        select: { closePrice: true },
+      });
+
+      const underAtExpiry = expiryPx ? Number(expiryPx.closePrice) : 0;
+      const intrinsic = isCall
+        ? Math.max(0, underAtExpiry - strike)
+        : Math.max(0, strike - underAtExpiry);
+
+      const finalValue = intrinsic * t.quantity * contractSize;
+
+      pnl =
+        side === 'BUY'
+          ? finalValue - t.price * t.quantity * contractSize
+          : t.price * t.quantity * contractSize - finalValue;
+
+      realized = true;
+    } else {
+      // active trade — mark to latest underlying
+      const latestPx = await prisma.intradayPrice3.findFirst({
+        where: { stockId: c.stockId },
+        orderBy: { date: 'desc' },
+        select: { closePrice: true },
+      });
+
+      if (latestPx) {
+        const under = Number(latestPx.closePrice);
+        const intrinsic = isCall
+          ? Math.max(0, under - strike)
+          : Math.max(0, strike - under);
+
+        const optionValue = intrinsic * t.quantity * contractSize;
+
+        pnl =
+          side === 'BUY'
+            ? optionValue - t.price * t.quantity * contractSize
+            : t.price * t.quantity * contractSize - optionValue;
+      }
+    }
+
+    results.push({
+      tradeId: t.id,
+      symbol: c.underlyingSymbol,
+      contractSymbol: c.symbol,
+      type: isCall ? 'CALL' : 'PUT',
+      side,
+      realized,
+      pnl,
+    });
+  }
+
+  return results;
+}
+
 export {
   getUserPortfolio,
   buildPortfolioSummary,
@@ -550,5 +637,7 @@ export {
   computeBeta,
   computeSharpe,
   probDrawdown,
-  generateResponseForChatbot
+  generateResponseForChatbot,
+  getUserOptionTradesWithPnL
 };
+

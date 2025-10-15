@@ -2,6 +2,8 @@ const chatbotModel = require("../models/chatbot");
 const scenarioModel = require("../models/scenario");
 const scenarioController = require("./scenarioController");
 const prisma = require("../../prisma/prismaClient");
+const optionsModel = require('../models/options');
+const optionsController = require('../controllers/optionsController');
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
@@ -522,5 +524,205 @@ ${JSON.stringify(portfolio, null, 2)}
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
     return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+module.exports.getUserOptionAdvice = async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId || isNaN(userId)) {
+    return res.status(400).json({ error: "Missing or invalid userId" });
+  }
+
+  try {
+    // A) Pull raw trades (counts, order types, holding days) + portfolio (authoritative P&L)
+    const trades = await optionsModel.getUserOptionTrades(userId);
+    if (!trades || trades.length === 0) {
+      return res.status(404).json({ message: "No option trades found for this user." });
+    }
+
+    const portfolioRes = await optionsModel.getUserOptionPortfolio(parseInt(userId, 10));
+    const portfolio = Array.isArray(portfolioRes?.portfolio) ? portfolioRes.portfolio : [];
+
+    // ---------- helpers ----------
+    const round2 = (n) => Number(n || 0).toFixed(2);
+    const dollar = (n) => `$${round2(n)}`;
+    const strip$ = (s) =>
+      typeof s === "string" ? s.replace(/[$,]/g, "") : `${s ?? 0}`;
+    const toDate = (d) => (d instanceof Date ? d : new Date(d));
+
+    // ---------- totals from portfolio ----------
+    const realizedTotal = portfolio.reduce(
+      (acc, p) => acc + Number(strip$(p.realizedPnL)),
+      0
+    );
+    const unrealizedTotal = portfolio.reduce(
+      (acc, p) => acc + Number(strip$(p.unrealizedPnL)),
+      0
+    );
+
+    // ---------- symbol-level aggregation ----------
+    const symbols = {};
+    for (const t of trades) {
+      const sym = t.contract?.underlyingSymbol || "UNKNOWN";
+      if (!symbols[sym]) symbols[sym] = { trades: 0, totalPnL: "$0.00" };
+      symbols[sym].trades += 1;
+    }
+    for (const p of portfolio) {
+      const sym = p.underlyingSymbol || "UNKNOWN";
+      const totalPnLNum =
+        Number(strip$(p.realizedPnL)) + Number(strip$(p.unrealizedPnL));
+      if (!symbols[sym]) symbols[sym] = { trades: 0, totalPnL: dollar(totalPnLNum) };
+      else symbols[sym].totalPnL = dollar(totalPnLNum);
+    }
+
+    // ---------- order-type and instrument-type counts ----------
+    const totalTrades = trades.length;
+    const totalCalls = trades.filter(
+      (t) => (t.contract?.type || "").toUpperCase() === "CALL"
+    ).length;
+    const totalPuts = trades.filter(
+      (t) => (t.contract?.type || "").toUpperCase() === "PUT"
+    ).length;
+
+    const totalMarketOrders = trades.filter(
+      (t) => (t.orderType || "").toUpperCase() === "MARKET"
+    ).length;
+    const totalLimitOrders = trades.filter(
+      (t) => (t.orderType || "").toUpperCase() === "LIMIT"
+    ).length;
+
+    // ---------- expirations (only 0–7 days used) ----------
+    const expirations = { "0–7 days": { trades: 0 } };
+    for (const t of trades) {
+      const exp = toDate(t.contract?.expirationDate);
+      const td = toDate(t.tradeDate);
+      const days = Math.max(0, (exp - td) / (1000 * 60 * 60 * 24));
+      const bucket = days <= 7 ? "0–7 days" : "0–7 days";
+      expirations[bucket].trades += 1;
+    }
+
+    // ---------- average holding days ----------
+    const avgHoldingDays = round2(
+      trades.reduce((acc, t) => {
+        const exp = toDate(t.contract?.expirationDate);
+        const td = toDate(t.tradeDate);
+        const d = Math.max(0, (exp - td) / (1000 * 60 * 60 * 24));
+        return acc + d;
+      }, 0) / Math.max(1, totalTrades)
+    );
+
+    // ---------- best & worst symbols ----------
+    const symbolEntries = Object.entries(symbols);
+    const bestSymbol = symbolEntries.length
+      ? symbolEntries.reduce((best, [sym, data]) => {
+          const val = Number(strip$(data.totalPnL));
+          const bestVal = best ? Number(strip$(best.data.totalPnL)) : -Infinity;
+          return val > bestVal ? { sym, data } : best;
+        }, null)
+      : null;
+
+    const worstSymbol = symbolEntries.length
+      ? symbolEntries.reduce((worst, [sym, data]) => {
+          const val = Number(strip$(data.totalPnL));
+          const worstVal = worst ? Number(strip$(worst.data.totalPnL)) : Infinity;
+          return val < worstVal ? { sym, data } : worst;
+        }, null)
+      : null;
+
+    // ---------- summary ----------
+    const summary = {
+      totalTrades,
+      totalCalls,
+      totalPuts,
+      realizedPnL: dollar(realizedTotal),
+      unrealizedPnL: dollar(unrealizedTotal),
+      avgHoldingDays,
+      totalMarketOrders,
+      totalLimitOrders,
+      symbols,
+      expirations,
+      bestSymbol: bestSymbol
+        ? { symbol: bestSymbol.sym, totalPnL: bestSymbol.data.totalPnL }
+        : null,
+      worstSymbol: worstSymbol
+        ? { symbol: worstSymbol.sym, totalPnL: worstSymbol.data.totalPnL }
+        : null,
+    };
+
+    // ---------- AI prompt ----------
+    const prompt = `
+SYSTEM:
+You are a quantitative options analyst.
+Write a concise, professional, and actionable assessment for an options trader.
+Assume only CALL/PUT instruments and MARKET/LIMIT order types are supported.
+Do not discuss changing expirations (user trades 0–7 days). Do not introduce strike-range "quality" commentary beyond the rules below.
+
+USER SUMMARY (JSON):
+${JSON.stringify(summary, null, 2)}
+
+REQUIREMENTS:
+- Tone: professional, precise, trustworthy (no emojis).
+- Use clear headings and short bullet points.
+- Always show monetary values with a "$" prefix.
+- Base all commentary strictly on provided metrics.
+- Focus on concrete next steps (entries, exits, sizing, order-type usage, symbol allocation).
+
+STRUCTURE:
+
+Scorecard
+- Performance: _/10
+- Risk: _/10
+- Timing: _/10
+- Consistency: _/10
+
+A. Performance Analysis
+- Summarize realized/unrealized P&L and average holding days.
+- Identify best and worst symbols by total P&L (use 'bestSymbol' and 'worstSymbol' if present).
+- Provide 2–3 specific, data-tied improvements.
+
+B. Trade Execution
+- Comment on MARKET vs LIMIT usage and propose a target of 30–40% LIMIT orders.
+- Outline 3 execution tactics to improve fills and reduce slippage.
+
+C. Risk Management
+- Identify high-risk patterns (e.g., symbol concentration, short holding periods).
+- Propose 2–3 controls:
+  - Cap position size to ≤5% of total account equity per symbol.
+  - Limit per-trade loss to ≤2% of account balance.
+  - Stop trading for the day once realized losses exceed 5% of account equity.
+
+D. Market Timing
+- Infer timing tendencies from average holding days and 0–7 day trading window.
+- Provide 2–3 steps to improve entries/exits without changing expirations.
+
+E. Behavioral Notes
+- List 2–3 habits to correct and 1–2 strengths to keep (based on the data).
+
+F. Priority Checklist (Next 7 Trading Days)
+- Provide a short, ordered checklist of immediate actions.
+
+G. Option Selection Guidance (Near-the-Money)
+- Recommend choosing near-the-money options (strike within ~0–2% of the underlying price) to balance probability and premium.
+- Keep examples strictly to the symbols listed in summary.symbols.
+- For each symbol, give one generic example setup, e.g.:
+  "Buy a near-ATM call at the strike closest above spot if price is above VWAP."
+- Always prefix any numeric or monetary value with "$".
+
+End with:
+"This assessment is for educational purposes only and is not financial advice."
+`.trim();
+
+    const aiAdvice = await chatbotModel.generateResponse(
+      prompt,
+      "gpt-4o-mini",
+      1500
+    );
+
+    return res.status(200).json({ summary, aiAdvice });
+  } catch (error) {
+    console.error("Error generating option advice:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
