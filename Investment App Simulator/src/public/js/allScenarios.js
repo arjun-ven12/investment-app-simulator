@@ -162,62 +162,19 @@ async function renderMyScenarios() {
     card.appendChild(desc);
     // Buttons container
     const btnContainer = document.createElement("div");
-    btnContainer.style.display = "flex";
-    btnContainer.style.gap = "10px";
-    btnContainer.style.marginTop = "8px";
-
-    // Open Console button
     const consoleBtn = document.createElement("button");
     consoleBtn.textContent = "Open Console";
-    Object.assign(consoleBtn.style, {
-      padding: "6px 12px",
-      fontSize: "0.85rem",
-      backgroundColor: "#E0EBFF",
-      color: "#000000",
-      border: "none",
-      borderRadius: "8px",
-      fontWeight: "normal",
-      fontFamily: "Outfit, sans-serif",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
-    });
-    consoleBtn.addEventListener("mouseenter", () => {
-      consoleBtn.style.backgroundColor = "#C6DBFF";
-    });
-    consoleBtn.addEventListener("mouseleave", () => {
-      consoleBtn.style.backgroundColor = "#E0EBFF";
-    });
+    consoleBtn.className = "my-scenario-btn";
     consoleBtn.addEventListener("click", () => {
-      // Pass scenario ID or title via query params if needed
-      window.open(`scenario-console.html?scenarioId=${s.id}`, "_blank")
+      window.open(`scenario-console.html?scenarioId=${s.id}`, "_blank");
     });
-    ;
 
-    // Remove button
     const removeBtn = document.createElement("button");
     removeBtn.textContent = "Remove";
-    Object.assign(removeBtn.style, {
-      padding: "6px 12px",
-      fontSize: "0.85rem",
-      backgroundColor: "#E0EBFF",
-      color: "#000000",
-      border: "none",
-      borderRadius: "8px",
-      fontWeight: "normal",
-      fontFamily: "Outfit, sans-serif",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
-    });
-    removeBtn.addEventListener("mouseenter", () => {
-      removeBtn.style.backgroundColor = "#C6DBFF";
-    });
-    removeBtn.addEventListener("mouseleave", () => {
-      removeBtn.style.backgroundColor = "#E0EBFF";
-    });
+    removeBtn.className = "my-scenario-btn";
     removeBtn.addEventListener("click", () => {
       myPanel.removeChild(card);
     });
-
     btnContainer.appendChild(consoleBtn);
     btnContainer.appendChild(removeBtn);
     card.appendChild(btnContainer);

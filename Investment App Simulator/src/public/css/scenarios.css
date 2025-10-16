@@ -389,3 +389,48 @@ h1{
   color: #E0EBFF;
   cursor: not-allowed;
 }
+
+/* 🎯 My Scenarios Buttons — Black Base Version */
+.my-scenario-btn {
+  background-color: #000000;       /* Solid black background */
+  color: #E0EBFF;                  /* Soft accent text */
+  border: 1.5px solid #53596B;     /* Subtle outline */
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Hover + Focus */
+.my-scenario-btn:hover,
+.my-scenario-btn:focus {
+  background-color: #E0EBFF;       /* Accent on hover */
+  color: #000000;                  /* Invert for contrast */
+  box-shadow: 0 0 12px rgba(224, 235, 255, 0.4);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+/* Active (Click) */
+.my-scenario-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 4px rgba(224, 235, 255, 0.25);
+}
+
+/* Disabled */
+.my-scenario-btn:disabled {
+  background-color: #53596B;
+  color: #E0EBFF;
+  border-color: #53596B;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+.my-scenario-btn + .my-scenario-btn {
+  margin-top: 6px;
+  margin-left: 12px; /* neat horizontal spacing */
+}
