@@ -279,7 +279,8 @@ module.exports.getScenarioAnalysis = async (req, res) => {
         json: (data) => data,
       }),
     };
-    const summaryData = await scenarioController.getScenarioEndingSummary(mockReq,null,true);
+    const summaryData = await scenarioController.getScenarioEndingSummary(req, null, true);
+
 
     // Then extract intraday separately
     const intradayData = summaryData.intraday;
@@ -407,13 +408,15 @@ ${JSON.stringify(intradayData, null, 2)}
 
 `;
 
-    const aiAdvice = await chatbotModel.generateResponse(
+    const aiAdvice = await chatbotModel.generateScenarioAIAdviceDetailed(
+      userId,
+      scenarioId,
       prompt,
       "gpt-4o-mini",
       1500
     );
 
-    return res.status(200).json({ aiAdvice, portfolio, intradayData });
+    return res.status(200).json({ aiAdvice});
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
     return res.status(500).json({ error: err.message });
@@ -617,18 +620,18 @@ module.exports.getUserOptionAdvice = async (req, res) => {
     const symbolEntries = Object.entries(symbols);
     const bestSymbol = symbolEntries.length
       ? symbolEntries.reduce((best, [sym, data]) => {
-          const val = Number(strip$(data.totalPnL));
-          const bestVal = best ? Number(strip$(best.data.totalPnL)) : -Infinity;
-          return val > bestVal ? { sym, data } : best;
-        }, null)
+        const val = Number(strip$(data.totalPnL));
+        const bestVal = best ? Number(strip$(best.data.totalPnL)) : -Infinity;
+        return val > bestVal ? { sym, data } : best;
+      }, null)
       : null;
 
     const worstSymbol = symbolEntries.length
       ? symbolEntries.reduce((worst, [sym, data]) => {
-          const val = Number(strip$(data.totalPnL));
-          const worstVal = worst ? Number(strip$(worst.data.totalPnL)) : Infinity;
-          return val < worstVal ? { sym, data } : worst;
-        }, null)
+        const val = Number(strip$(data.totalPnL));
+        const worstVal = worst ? Number(strip$(worst.data.totalPnL)) : Infinity;
+        return val < worstVal ? { sym, data } : worst;
+      }, null)
       : null;
 
     // ---------- summary ----------

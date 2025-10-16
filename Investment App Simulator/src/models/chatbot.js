@@ -1,6 +1,6 @@
 import prisma from "../../prisma/prismaClient.js";
 import OpenAI from "openai";
-
+import scenarioModel from "../models/scenario.js";
 const openai = new OpenAI({});
 
 //////////////////////////////////////////////////////
@@ -40,6 +40,32 @@ const generateResponse = async (
     throw new Error("Error generating AI response: " + error.message);
   }
 };
+
+const generateScenarioAIAdviceDetailed = async (
+  userId,
+  scenarioId,
+  prompt,
+  model = "gpt-4o-mini",
+  max_tokens = 1500
+) => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens,
+    });
+
+    const aiAdvice = completion.choices[0].message.content;
+
+    // 💾 Automatically store in the latest ScenarioAttempt
+    await scenarioModel.upsertAIAdvice(userId, scenarioId, aiAdvice);
+
+    return aiAdvice;
+  } catch (error) {
+    throw new Error("Error generating or saving AI response: " + error.message);
+  }
+};
+
 
 /**
  * Build user portfolio from trades (FIFO P/L). Returns { openPositions, closedPositions }.
@@ -638,6 +664,7 @@ export {
   computeSharpe,
   probDrawdown,
   generateResponseForChatbot,
-  getUserOptionTradesWithPnL
+  getUserOptionTradesWithPnL,
+  generateScenarioAIAdviceDetailed
 };
 

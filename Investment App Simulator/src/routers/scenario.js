@@ -72,7 +72,7 @@ router.get('/me/personal-bests',       jwtMiddleware.verifyToken, scenarioContro
 // attempts
 router.post('/:scenarioId/attempts/start',  jwtMiddleware.verifyToken, scenarioController.startAttempt);
 router.post('/:scenarioId/attempts/finish', jwtMiddleware.verifyToken, scenarioController.finishAttempt);
-router.get('/:scenarioId/attempts',         jwtMiddleware.verifyToken, scenarioController.listAttempts);
+router.get('/:scenarioId/attempts', jwtMiddleware.verifyToken, scenarioController.listAttempts);
 router.post( "/:scenarioId/attempts/ai-insights",jwtMiddleware.verifyToken,scenarioController.saveAIInsights);
-
+router.get( "/:scenarioId/getChartData",jwtMiddleware.verifyToken,scenarioController.scenarioEndingDetailsCharts);
 module.exports = router;

@@ -325,7 +325,7 @@ module.exports.getScenarioIntradayController = async (req, res) => {
 
 
 module.exports.getUserScenarioPortfolio = async function (req, res) {
-  const userId = req.user.id; 
+  const userId = req.user.id;
   const scenarioId = Number(req.params.scenarioId);
 
   if (!Number.isInteger(userId) || !Number.isInteger(scenarioId)) {
@@ -429,9 +429,10 @@ module.exports.getUserScenarioData = async (req, res) => {
   }
 };
 
+
 module.exports.getScenarioEndingSummary = async (req, res = null, internal = false) => {
   try {
-    const scenarioId = Number(req.params.scenarioId);
+    const scenarioId = Number(req.params?.scenarioId);
     if (!scenarioId) {
       if (!internal && res) return res.status(400).json({ error: "Scenario ID required" });
       throw new Error("Scenario ID required");
@@ -450,8 +451,8 @@ module.exports.getScenarioEndingSummary = async (req, res = null, internal = fal
     const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
     const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
 
-    // 3️⃣ Flatten trades from portfolio positions
-    const trades = portfolio.positions.map(p => ({
+    // 3️⃣ Flatten trades from portfolio positions (if any)
+    const trades = (portfolio.positions || []).map(p => ({
       symbol: p.symbol,
       netQty: Number(p.quantity),
       totalBought: Number(p.totalInvested),
@@ -466,11 +467,86 @@ module.exports.getScenarioEndingSummary = async (req, res = null, internal = fal
     const intradayData = await scenarioModel.fetchUserScenarioData(scenarioId, userId);
 
     // 5️⃣ Compute total portfolio value
-    const totalPortfolioValue = trades.reduce(
-      (acc, t) => acc + t.currentValue + t.realizedPnL,
-      wallet
-    );
+    const totalPortfolioValue =
+      Number(wallet || 0) + trades.reduce((acc, t) => acc + Number(t.currentValue || 0), 0);
 
+    // 6️⃣ Handle PB logic
+    const attemptNumber = (portfolio.summary?.attemptNumber ?? 1);
+    const pbResult = await scenarioModel.upsertPersonalBest({
+      userId,
+      scenarioId,
+      attemptNumber,
+      totalPortfolioValue,
+      realizedPnL: Number(portfolio.summary?.realizedPnL || 0),
+      unrealizedPnL: Number(portfolio.summary?.unrealizedPnL || 0),
+    });
+
+    // 7️⃣ Prepare return payload
+    const summaryPayload = {
+      wallet,
+      trades,
+      intraday: intradayData,
+      totalPortfolioValue,
+      summary: portfolio.summary,
+      isPersonalBest: pbResult.isNewPB,
+      personalBest: pbResult.record,
+    };
+
+    // ✅ If this was called internally (e.g., from chatbot), just return data
+    if (internal || !res) {
+      return summaryPayload;
+    }
+
+    // ✅ Otherwise respond normally via Express
+    return res.status(200).json(summaryPayload);
+
+  } catch (err) {
+    console.error("❌ Error in getScenarioEndingSummary:", err);
+    // 🔒 If called internally, throw instead of trying to res.status
+    if (internal || !res) throw err;
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+module.exports.scenarioEndingDetailsCharts = async (req, res = null, internal = false) => {
+  try {
+    const scenarioId = Number(req.params?.scenarioId);
+    if (!scenarioId) {
+      if (!internal && res) return res.status(400).json({ error: "Scenario ID required" });
+      throw new Error("Scenario ID required");
+    }
+
+    const userId = req.user?.id;
+    if (!userId) {
+      if (!internal && res) return res.status(401).json({ error: "Unauthorized" });
+      throw new Error("Unauthorized");
+    }
+
+    // 2️⃣ Fetch portfolio & wallet
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
+
+    // 3️⃣ Flatten trades from portfolio positions (if any)
+    const trades = (portfolio.positions || []).map(p => ({
+      symbol: p.symbol,
+      netQty: Number(p.quantity),
+      totalBought: Number(p.totalInvested),
+      realizedPnL: Number(p.realizedPnL),
+      currentValue: Number(p.currentValue),
+      unrealizedPnL: Number(p.unrealizedPnL),
+      avgBuyPrice: Number(p.avgBuyPrice),
+      currentPrice: Number(p.currentPrice),
+    }));
+
+    // 4️⃣ Fetch intraday data
+    const intradayData = await scenarioModel.fetchUserScenarioData(scenarioId, userId);
+
+    // 5️⃣ Compute total portfolio value
+    const totalPortfolioValue =
+      Number(wallet || 0) + trades.reduce((acc, t) => acc + Number(t.currentValue || 0), 0);
+
+    // 7️⃣ Prepare return payload
     const summaryPayload = {
       wallet,
       trades,
@@ -479,15 +555,212 @@ module.exports.getScenarioEndingSummary = async (req, res = null, internal = fal
       summary: portfolio.summary,
     };
 
-    // 🧠 If called internally, just return the data
-    if (internal || !res) return summaryPayload;
-
-    // 🧩 Otherwise respond via Express
+    // ✅ Otherwise respond normally via Express
     return res.status(200).json(summaryPayload);
 
   } catch (err) {
     console.error("❌ Error in getScenarioEndingSummary:", err);
-    if (internal || !res) throw err; // when called internally
+    // 🔒 If called internally, throw instead of trying to res.status
+    if (internal || !res) throw err;
     return res.status(500).json({ error: err.message });
+  }
+};
+
+function decToString(d) {
+  if (d === null || d === undefined) return null;
+  if (typeof d === 'object' && d.constructor?.name === 'Decimal') return d.toString();
+  return String(d);
+}
+
+/** GET /scenarios/:scenarioId/personal-best */
+module.exports.getPersonalBest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.scenarioId);
+    const pb = await scenarioModel.getPersonalBest(userId, scenarioId);
+
+    if (!pb) {
+      return res.status(404).json({ success: true, personalBest: null });
+    }
+
+    return res.json({
+      success: true,
+      personalBest: {
+        attemptNumber: pb.bestAttemptNumber,
+        totalValue: decToString(pb.bestTotalValue),
+        returnPct: decToString(pb.bestReturnPct),
+        realizedPnL: decToString(pb.bestRealizedPnL),
+        unrealizedPnL: decToString(pb.bestUnrealizedPnL),
+        achievedAt: pb.achievedAt,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+};
+
+/** GET /scenarios/me/personal-bests */
+module.exports.listPersonalBests = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const items = await scenarioModel.listPersonalBests(userId);
+
+    return res.json({
+      success: true,
+      items: items.map(pb => ({
+        scenarioId: pb.scenarioId,
+        scenarioTitle: pb.scenario.title,
+        attemptNumber: pb.bestAttemptNumber,
+        totalValue: decToString(pb.bestTotalValue),
+        returnPct: decToString(pb.bestReturnPct),
+        achievedAt: pb.achievedAt,
+      })),
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+};
+
+module.exports.startAttempt = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.scenarioId);
+
+    // Always fetch and AWAIT a numeric balance
+    const startingBalance = await scenarioModel.getScenarioStartBalance(scenarioId);
+    if (startingBalance == null || Number.isNaN(Number(startingBalance))) {
+      return res.status(500).json({ success: false, message: 'Invalid starting balance' });
+    }
+
+    const attemptNumber = await scenarioModel.startAttemptGuarded(
+      userId,
+      scenarioId,
+      Number(startingBalance)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'New attempt started.',
+      attemptNumber,
+      startingBalance: Number(startingBalance),
+    });
+  } catch (e) {
+    const status = e.status || 500;
+    return res.status(status).json({ success: false, message: e.message });
+  }
+};
+
+
+// FINISH attempt (idempotent; refuse if already finished)
+module.exports.finishAttempt = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.scenarioId);
+
+    // atomically flip ended=false -> ended=true; if already true, refuse
+    const flipped = await scenarioModel.finishAttemptOnce(userId, scenarioId);
+    if (!flipped) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'Attempt already finished. Start a new attempt to finish again.' });
+    }
+
+    // compute end summary after we successfully finished
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
+
+    const trades = (portfolio.positions || []).map(p => ({
+      symbol: p.symbol,
+      netQty: Number(p.quantity),
+      totalBought: Number(p.totalInvested),
+      realizedPnL: Number(p.realizedPnL),
+      currentValue: Number(p.currentValue),
+      unrealizedPnL: Number(p.unrealizedPnL),
+      avgBuyPrice: Number(p.avgBuyPrice),
+      currentPrice: Number(p.currentPrice),
+    }));
+
+    const totalPortfolioValue =
+      Number(wallet || 0) + trades.reduce((acc, t) => acc + Number(t.currentValue || 0), 0);
+
+    // attempt number = last + 1 (this run)
+    const attempts = await scenarioModel.listAttempts(userId, scenarioId);
+    const attemptNumber = (attempts?.[0]?.attemptNumber ?? 0) + 1;
+
+    // snapshot analytics
+    if (typeof scenarioModel.saveAttemptAnalytics === 'function') {
+      await scenarioModel.saveAttemptAnalytics({
+        userId,
+        scenarioId,
+        attemptNumber,
+        summary: portfolio.summary,
+        positions: portfolio.positions,
+      });
+    }
+
+    // PB upsert
+    const pb = await scenarioModel.upsertPersonalBest({
+      userId,
+      scenarioId,
+      attemptNumber,
+      totalPortfolioValue,
+      realizedPnL: Number(portfolio.summary?.realizedPnL || 0),
+      unrealizedPnL: Number(portfolio.summary?.unrealizedPnL || 0),
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Attempt finished.',
+      attemptNumber,
+      totalPortfolioValue,
+      wallet,
+      summary: portfolio.summary,
+      trades,
+      isPersonalBest: pb.isNewPB,
+      personalBest: pb.record,
+    });
+  } catch (e) {
+    const status = e.status || 500;
+    return res.status(status).json({ success: false, message: e.message });
+  }
+};
+
+/** GET /scenarios/:scenarioId/attempts */
+module.exports.listAttempts = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.scenarioId);
+    const items = await scenarioModel.listAttempts(userId, scenarioId);
+
+    return res.status(200).json({ success: true, items });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+};
+
+
+module.exports.saveAIInsights = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.scenarioId);
+    const { aiAdvice } = req.body;
+
+    if (!aiAdvice) {
+      return res.status(400).json({ success: false, message: "AI advice text is required." });
+    }
+
+    const result = await scenarioModel.saveAIInsights(userId, scenarioId, aiAdvice);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "No active attempt found for this user." });
+    }
+
+    res.json({ success: true, message: "AI insights saved successfully.", data: result });
+  } catch (err) {
+    console.error("Error in saveAIInsights controller:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };

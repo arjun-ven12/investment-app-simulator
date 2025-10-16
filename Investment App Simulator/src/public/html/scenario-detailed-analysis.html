@@ -27,10 +27,7 @@
 
 <body>
   <input type="hidden" id="current-stock-id" value="" />
-  <div class="sidebar">
-    <!-- <h1>WatchList</h1> -->
 
-  </div>
 
   <!-- Main Content -->
   <div class="main-content">
@@ -38,28 +35,31 @@
     <div id="navbar-container"></div>
     <!-- Dashboard Header -->
     <div class="content">
+      <button id="back-button" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Scenarios
+      </button>
       <br />
       <h1>Scenario Detailed Insights</h1>
     </div>
     <div class="dashboard">
-  <!-- Left Column: Portfolio Pie Chart -->
-  <div class="left-column card">
-    <h2>Portfolio Allocation</h2>
-    <canvas id="portfolio-pie-chart" width="400" height="400"></canvas>
-  </div>
+      <!-- Left Column: Portfolio Pie Chart -->
+      <div class="left-column card">
+        <h2>Portfolio Allocation</h2>
+        <canvas id="portfolio-pie-chart" width="400" height="400"></canvas>
+      </div>
 
-  <!-- Right Column: Combined Intraday Chart -->
-  <div class="right-column card">
-    <h2>Intraday Chart</h2>
-    <canvas id="intraday-chart" width="600" height="300"></canvas>
-  </div>
-</div>
+      <!-- Right Column: Combined Intraday Chart -->
+      <div class="right-column card">
+        <h2>Intraday Chart</h2>
+        <canvas id="intraday-chart" width="600" height="300"></canvas>
+      </div>
+    </div>
 
-<!-- AI Advice Section -->
-<div class="card" id="ai-advice">
-  <h2>AI Advice</h2>
-  <div id="ai-text"></div>
-</div>
+    <!-- AI Advice Section -->
+    <div class="card" id="ai-advice">
+      <h2>AI Advice</h2>
+      <div id="ai-text"></div>
+    </div>
 
 </body>
 <script src="/socket.io/socket.io.js"></script>

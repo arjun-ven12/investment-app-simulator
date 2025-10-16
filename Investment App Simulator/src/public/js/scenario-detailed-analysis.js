@@ -1,5 +1,5 @@
 const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-
+const userId = localStorage.getItem('userId');
 function renderAiAdviceMarkdown(aiTextString) {
   if (!aiTextString) return "";
 
@@ -56,118 +56,160 @@ function renderAiAdviceMarkdown(aiTextString) {
   return `<div class="ai-advice-content" style="color:#E0EBFF; padding-left:1rem;">${html}</div>`;
 }
 
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const aiText = document.getElementById("ai-text");
-  const portfolioTableBody = document.querySelector("#portfolio-table tbody");
   const intradayChartEl = document.getElementById("intraday-chart");
   const portfolioPieChartEl = document.getElementById("portfolio-pie-chart");
+  const token = localStorage.getItem("token");
+  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
 
+  if (!token) {
+    console.error("❌ No token found. Please log in.");
+    if (aiText) aiText.innerHTML = "<p style='color:red;'>Please log in first.</p>";
+    return;
+  }
+
+  if (!scenarioId) {
+    console.error("❌ No scenarioId found in URL.");
+    if (aiText) aiText.innerHTML = "<p style='color:red;'>Scenario not specified.</p>";
+    return;
+  }
+
+  /* ─────────────────────────────
+     1️⃣ LOAD & RENDER CHART DATA FIRST
+  ───────────────────────────── */
   try {
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis`, {
+    const chartRes = await fetch(`/scenarios/${scenarioId}/getChartData`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const chartData = await chartRes.json();
+    window.latestChartData = chartData;
+    console.log("📊 Chart Data from /scenarios:", chartData);
 
-    const data = await response.json();
+    // ✅ Render Portfolio Pie Chart
+    if (portfolioPieChartEl && chartData.trades?.length) {
+      const pieCtx = portfolioPieChartEl.getContext("2d");
+      const pieLabels = chartData.trades.map(t => t.symbol);
+      const pieValues = chartData.trades.map(t => Number(t.currentValue));
+      const pieColors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
 
-    // 1️⃣ Render AI advice nicely
-    if (aiText) {
-      aiText.innerHTML = renderAiAdviceMarkdown(data.aiAdvice);
+   new Chart(pieCtx, {
+  type: "pie",
+  data: {
+    labels: pieLabels,
+    datasets: [{
+      data: pieValues,
+      backgroundColor: pieColors,
+      borderColor: "#53596B",
+      borderWidth: 2,
+    }],
+  },
+  options: {
+    responsive: false,   // 🛑 disable dynamic resizing
+    maintainAspectRatio: false, // 🔒 keep fixed ratio
+    plugins: {
+      legend: { labels: { color: "#E0EBFF" }, position: "right" },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const total = pieValues.reduce((a, b) => a + b, 0);
+            const percent = ((context.raw / total) * 100).toFixed(1);
+            return `${context.label}: $${context.raw.toFixed(2)} (${percent}%)`;
+          },
+        },
+      },
+    },
+  },
+});
+
     } else {
-      console.warn("AI advice container not found!");
+      console.warn("⚠️ No portfolio data for pie chart.");
     }
 
-    // 2️⃣ Populate Portfolio Table if positions exist
-    if (portfolioTableBody && data.portfolio && Array.isArray(data.portfolio.positions)) {
-      portfolioTableBody.innerHTML = ""; // clear previous rows
-      data.portfolio.positions.forEach((pos) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${pos.symbol}</td>
-          <td>${Number(pos.quantity).toFixed(0)}</td>
-          <td>$${Number(pos.avgBuyPrice).toFixed(2)}</td>
-          <td>$${Number(pos.currentPrice).toFixed(2)}</td>
-          <td>$${Number(pos.totalInvested).toFixed(2)}</td>
-          <td>$${Number(pos.currentValue).toFixed(2)}</td>
-          <td>$${Number(pos.unrealizedPnL).toFixed(2)}</td>
-        `;
-        portfolioTableBody.appendChild(row);
-      });
-    } else if (!portfolioTableBody) {
-      console.warn("Portfolio table body not found!");
-    }
-
-    // 3️⃣ Render Intraday Line Chart
-    if (intradayChartEl && data.portfolio && data.portfolio.positions.length && data.intradayData) {
+    // ✅ Render Intraday Chart
+    if (intradayChartEl && chartData.intraday && Object.keys(chartData.intraday).length) {
       const ctx = intradayChartEl.getContext("2d");
-      const labels = data.intradayData[data.portfolio.positions[0].symbol].intraday.map(d => new Date(d.date));
-      const datasets = Object.keys(data.intradayData).map((symbol, idx) => {
-        const stockData = data.intradayData[symbol].intraday.map(d => d.closePrice);
+      const datasets = Object.entries(chartData.intraday).map(([symbol, stock], idx) => {
         const colors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
         return {
           label: symbol,
-          data: stockData,
+          data: (stock.intraday || []).map(d => ({ x: new Date(d.date), y: d.closePrice })),
           borderColor: colors[idx % colors.length],
-          backgroundColor: "transparent",
-          tension: 0.2,
+          borderWidth: 2,
+          fill: false,
+          tension: 0.25,
         };
       });
 
       new Chart(ctx, {
         type: "line",
-        data: { labels, datasets },
+        data: { datasets },
         options: {
           responsive: true,
           plugins: {
-            legend: { labels: { color: "#E0EBFF" }, position: "top" },
+            legend: { labels: { color: "#E0EBFF" } },
             zoom: {
               zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" },
               pan: { enabled: true, mode: "x" },
             },
           },
           scales: {
-            x: { type: "time", time: { unit: "hour" }, title: { display: true, text: "Time", color: "#E0EBFF" }, ticks: { color: "#E0EBFF" }, grid: { color: "#53596B" } },
-            y: { title: { display: true, text: "Price ($)", color: "#E0EBFF" }, ticks: { color: "#E0EBFF" }, grid: { color: "#53596B" } },
-          },
-        },
-      });
-    } else if (!intradayChartEl) {
-      console.warn("Intraday chart element not found!");
-    }
-
-    // 4️⃣ Render Portfolio Pie Chart
-    if (portfolioPieChartEl && data.portfolio && Array.isArray(data.portfolio.positions)) {
-      const pieCtx = portfolioPieChartEl.getContext("2d");
-      const pieLabels = data.portfolio.positions.map(pos => pos.symbol);
-      const pieValues = data.portfolio.positions.map(pos => Number(pos.currentValue));
-      const pieColors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
-
-      new Chart(pieCtx, {
-        type: "pie",
-        data: { labels: pieLabels, datasets: [{ data: pieValues, backgroundColor: pieColors, borderColor: "#53596B", borderWidth: 2 }] },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { labels: { color: "#E0EBFF" }, position: "right" },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const value = context.raw;
-                  const total = pieValues.reduce((a, b) => a + b, 0);
-                  const percent = ((value / total) * 100).toFixed(1);
-                  return `${context.label}: $${value.toFixed(2)} (${percent}%)`;
-                },
-              },
+            x: {
+              type: "time",
+              time: { unit: "hour" },
+              title: { display: true, text: "Time", color: "#E0EBFF" },
+              ticks: { color: "#E0EBFF" },
+              grid: { color: "#53596B" },
+            },
+            y: {
+              title: { display: true, text: "Price ($)", color: "#E0EBFF" },
+              ticks: { color: "#E0EBFF" },
+              grid: { color: "#53596B" },
             },
           },
         },
       });
-    } else if (!portfolioPieChartEl) {
-      console.warn("Portfolio pie chart element not found!");
+    } else {
+      console.warn("⚠️ No intraday data to render chart.");
     }
 
   } catch (err) {
-    console.error("Error fetching scenario data:", err);
+    console.error("❌ Error loading chart data:", err);
+  }
+
+  /* ─────────────────────────────
+     2️⃣ FETCH AI ADVICE AFTER CHARTS
+  ───────────────────────────── */
+  try {
+    if (aiText) aiText.innerHTML = "<p style='color:#aaa;'>Generating AI insights...</p>";
+
+    const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const aiData = await aiRes.json();
+    window.latestAiData = aiData;
+    console.log("🧠 AI Data from /api/chatbot:", aiData);
+
+    if (aiText && aiData.aiAdvice) {
+      aiText.innerHTML = renderAiAdviceMarkdown(aiData.aiAdvice);
+    } else if (aiText) {
+      aiText.innerHTML = "<p style='color:#aaa;'>No AI insights available yet.</p>";
+    }
+
+  } catch (err) {
+    console.error("❌ Error loading AI advice:", err);
+    if (aiText) aiText.innerHTML = `<p style='color:red;'>${err.message}</p>`;
+  }
+});
+
+// 🎯 Back Button Navigation
+document.addEventListener("DOMContentLoaded", () => {
+  const backBtn = document.getElementById("back-button");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      window.location.href = "/html/scenarios.html"; // redirect to your scenarios page
+    });
   }
 });
