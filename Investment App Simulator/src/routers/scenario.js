@@ -64,6 +64,15 @@ router.get('/:scenarioId/user-data', jwtMiddleware.verifyToken, scenarioControll
 router.post("/end/:scenarioId",  jwtMiddleware.verifyToken, scenarioController.endScenarioController);
 
 router.post('/:scenarioId/end-summary', jwtMiddleware.verifyToken, scenarioController.getScenarioEndingSummary);
-// // GET scenario portfolio by participant ID
-// router.get('/scenario-portfolio/:scenarioId',jwtMiddleware.verifyToken, scenarioController.getScenarioPortfolioController);
+
+// personal bests
+router.get('/:scenarioId/personal-best', jwtMiddleware.verifyToken, scenarioController.getPersonalBest);
+router.get('/me/personal-bests',       jwtMiddleware.verifyToken, scenarioController.listPersonalBests);
+
+// attempts
+router.post('/:scenarioId/attempts/start',  jwtMiddleware.verifyToken, scenarioController.startAttempt);
+router.post('/:scenarioId/attempts/finish', jwtMiddleware.verifyToken, scenarioController.finishAttempt);
+router.get('/:scenarioId/attempts',         jwtMiddleware.verifyToken, scenarioController.listAttempts);
+router.post( "/:scenarioId/attempts/ai-insights",jwtMiddleware.verifyToken,scenarioController.saveAIInsights);
+
 module.exports = router;

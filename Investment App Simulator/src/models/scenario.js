@@ -1,6 +1,6 @@
 const prisma = require('./prismaClient');
 const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
-
+const { Prisma } = require('@prisma/client'); 
 
 // --- SCENARIO CRUD ---
 module.exports.createScenario = async (data) => {
@@ -50,6 +50,24 @@ module.exports.updateScenario = async (id, data) => {
 module.exports.deleteScenario = async (id) => {
   return prisma.scenario.delete({ where: { id: Number(id) } });
 };
+
+
+module.exports.startScenarioAttempt = async (userId, scenarioId) => {
+  const last = await prisma.scenarioAttempt.findFirst({
+    where: { userId, scenarioId },
+    orderBy: { attemptNumber: "desc" },
+  });
+  const nextAttempt = (last?.attemptNumber ?? 0) + 1;
+
+  return await prisma.scenarioAttempt.create({
+    data: {
+      userId,
+      scenarioId,
+      attemptNumber: nextAttempt,
+    },
+  });
+};
+
 
 // --- JOIN SCENARIO ---
 module.exports.joinScenario = async (scenarioId, userId) => {
@@ -867,13 +885,6 @@ module.exports.getParticipantWallet = async function (userId, scenarioId) {
   return parseFloat(participant.cashBalance); // ensures it's a number
 };
 
-module.exports.getParticipantWallet  = async function getScenarioParticipants(scenarioId) {
-  return prisma.scenarioParticipant.findMany({
-    where: { scenarioId },
-    select: { id: true, userId: true, ended: true },
-  });
-}
-
 // --- Get all participants for a scenario ---
 module.exports.getScenarioParticipants = async function getScenarioParticipants(scenarioId) {
   return prisma.scenarioParticipant.findMany({
@@ -1005,4 +1016,407 @@ module.exports.fetchUserScenarioData = async (scenarioId, userId) => {
   });
 
   return serializeBigInt(dataBySymbol);
+};
+
+// === Idempotency / state helpers ===
+module.exports.getParticipantRow = async function getParticipantRow(userId, scenarioId) {
+  const p = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+    select: { id: true, ended: true, cashBalance: true },
+  });
+  if (!p) throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  return p;
+};
+
+/**
+ * Atomically mark an attempt finished (ended=true) if it's currently active (ended=false).
+ * Returns true if we flipped it, false if it was already ended.
+ */
+module.exports.finishAttemptOnce = async function finishAttemptOnce(userId, scenarioId) {
+  const p = await module.exports.getParticipantRow(userId, scenarioId);
+  // atomic guard to avoid double-finish races
+  const res = await prisma.scenarioParticipant.updateMany({
+    where: { id: p.id, ended: false },
+    data: { ended: true },
+  });
+  return res.count === 1; // true iff we actually flipped from false->true
+};
+
+/**
+ * Ensure you can't start a new attempt while one is active.
+ * Returns the next attempt number when it succeeds.
+ */
+module.exports.startAttemptGuarded = async function startAttemptGuarded(userId, scenarioId, startingBalance) {
+  const p = await module.exports.getParticipantRow(userId, scenarioId);
+
+  if (p.ended === false) {
+    const err = new Error('Attempt already in progress. Finish it before starting a new one.');
+    err.status = 409;
+    throw err;
+  }
+
+  // Validate + coerce to number first
+  const startNum = Number(startingBalance);
+  if (startNum == null || Number.isNaN(startNum)) {
+    throw new Error('startAttemptGuarded: startingBalance must be a number');
+  }
+
+  const last = await prisma.scenarioAttemptAnalytics.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+    orderBy: { attemptNumber: 'desc' },
+    select: { attemptNumber: true },
+  });
+  const nextAttempt = (last?.attemptNumber ?? 0) + 1;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.scenarioLimitOrder.deleteMany({
+      where: { participantId: p.id, status: 'PENDING' },
+    });
+    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: p.id } });
+    await tx.scenarioHolding.deleteMany({ where: { participantId: p.id } });
+
+    // Write a Decimal or a plain Number (both are OK). Using Decimal is safest:
+    await tx.scenarioParticipant.update({
+      where: { id: p.id },
+      data: {
+        cashBalance: new Prisma.Decimal(startNum), // ✅ correct
+        ended: false,
+      },
+    });
+  });
+
+  return nextAttempt;
+};
+
+
+/** ——— helpers ——— */
+async function getParticipant(userId, scenarioId) {
+  const p = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+  });
+  if (!p) throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  return p;
+}
+
+async function getScenarioStartBalance(scenarioId) {
+  const sc = await prisma.scenario.findUnique({
+    where: { id: Number(scenarioId) },
+    select: { startingBalance: true },
+  });
+  if (!sc) throw new Error('Scenario not found');
+  return Number(sc.startingBalance);
+}
+
+
+module.exports.getScenarioStartBalance = async function getScenarioStartBalance(scenarioId) {
+  const sc = await prisma.scenario.findUnique({
+    where: { id: Number(scenarioId) },
+    select: { startingBalance: true },
+  });
+  if (!sc) throw new Error('Scenario not found');
+  return Number(sc.startingBalance);
+};
+
+/** ——— start attempt ——— */
+module.exports.startAttempt = async function startAttempt(userId, scenarioId) {
+  const [participant, startingBalance] = await Promise.all([
+    getParticipant(userId, scenarioId),
+    getScenarioStartBalance(scenarioId),
+  ]);
+
+  // next attempt number
+  const last = await prisma.scenarioAttemptAnalytics.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+    orderBy: { attemptNumber: 'desc' },
+    select: { attemptNumber: true },
+  });
+  const nextAttempt = (last?.attemptNumber ?? 0) + 1;
+
+  // reset state for a fresh run
+  await prisma.$transaction(async (tx) => {
+    await tx.scenarioLimitOrder.deleteMany({
+      where: { participantId: participant.id, status: 'PENDING' },
+    });
+    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: participant.id } });
+    await tx.scenarioHolding.deleteMany({ where: { participantId: participant.id } });
+
+    await tx.scenarioParticipant.update({
+      where: { id: participant.id },
+      data: { cashBalance: startingBalance, ended: false },
+    });
+  });
+
+  return { attemptNumber: nextAttempt, startingBalance };
+};
+
+/** ——— finish attempt helpers you’ll call from controller ——— */
+module.exports.markScenarioEnded = async function markScenarioEnded(userId, scenarioId) {
+  const p = await getParticipant(userId, scenarioId);
+  return prisma.scenarioParticipant.update({
+    where: { id: p.id },
+    data: { ended: true },
+  });
+};
+
+module.exports.getParticipantWallet = async function getParticipantWallet(userId, scenarioId) {
+  const p = await getParticipant(userId, scenarioId);
+  return Number(p.cashBalance);
+};
+
+// if you already have these two in your model, keep your versions and delete these:
+/** minimal getUserScenarioPortfolio used by finishAttempt */
+module.exports.getUserScenarioPortfolio = async function getUserScenarioPortfolio(userId, scenarioId) {
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+    select: { id: true },
+  });
+  if (!participant) throw new Error('Participant not found');
+
+  const [marketOrders, limitOrders, prices] = await Promise.all([
+    prisma.scenarioMarketOrder.findMany({
+      where: { participantId: participant.id, status: 'EXECUTED' },
+      orderBy: { createdAt: 'asc' },
+    }),
+    prisma.scenarioLimitOrder.findMany({
+      where: { participantId: participant.id, status: 'EXECUTED' },
+      orderBy: { createdAt: 'asc' },
+    }),
+    prisma.scenarioIntradayPrice.findMany({
+      where: { scenarioId: Number(scenarioId) },
+      orderBy: { date: 'asc' },
+      select: { symbol: true, closePrice: true },
+    }),
+  ]);
+
+  const allTrades = [
+    ...marketOrders.map(o => ({ symbol: o.symbol, side: o.side.toUpperCase(), quantity: Number(o.quantity), price: Number(o.executedPrice) })),
+    ...limitOrders.map(o => ({ symbol: o.symbol, side: o.side.toUpperCase(), quantity: Number(o.quantity), price: Number(o.limitPrice) })),
+  ];
+
+  if (allTrades.length === 0) {
+    return { summary: { openShares: 0, totalShares: 0, totalInvested: 0, unrealizedPnL: 0, realizedPnL: 0 }, positions: [] };
+  }
+
+  const priceMap = new Map();
+  for (const p of prices) {
+    const arr = priceMap.get(p.symbol) || [];
+    arr.push(Number(p.closePrice));
+    priceMap.set(p.symbol, arr);
+  }
+
+  // aggregate FIFO
+  const buckets = new Map();
+  for (const t of allTrades) {
+    if (!buckets.has(t.symbol)) {
+      buckets.set(t.symbol, { buyQueue: [], net: 0, totalBuyQty: 0, totalBuyVal: 0, realized: 0 });
+    }
+    const b = buckets.get(t.symbol);
+    if (t.side === 'BUY') {
+      b.buyQueue.push({ q: t.quantity, p: t.price });
+      b.net += t.quantity;
+      b.totalBuyQty += t.quantity;
+      b.totalBuyVal += t.quantity * t.price;
+    } else {
+      let remain = t.quantity;
+      while (remain > 0 && b.buyQueue.length) {
+        const head = b.buyQueue[0];
+        const used = Math.min(head.q, remain);
+        b.realized += (t.price - head.p) * used;
+        head.q -= used;
+        remain -= used;
+        if (head.q === 0) b.buyQueue.shift();
+      }
+      b.net -= t.quantity;
+    }
+  }
+
+  const positions = [];
+  let sumInvested = 0, sumUnreal = 0, sumReal = 0, sumOpen = 0, sumTotalShares = 0;
+  for (const [symbol, b] of buckets.entries()) {
+    const latestPrices = priceMap.get(symbol) || [];
+    const lastPrice = latestPrices.at(-1) || 0;
+
+    const investedOpen = b.buyQueue.reduce((s, x) => s + x.q * x.p, 0);
+    const currentValue = b.net * lastPrice;
+    const unreal = currentValue - investedOpen;
+
+    positions.push({
+      symbol,
+      quantity: b.net.toFixed(6),
+      totalShares: b.totalBuyQty.toFixed(6),
+      avgBuyPrice: b.totalBuyQty ? (b.totalBuyVal / b.totalBuyQty).toFixed(2) : '0.00',
+      currentPrice: lastPrice.toFixed(2),
+      totalInvested: b.totalBuyVal.toFixed(2),
+      currentValue: currentValue.toFixed(2),
+      unrealizedPnL: unreal.toFixed(2),
+      realizedPnL: b.realized.toFixed(2),
+    });
+
+    sumInvested += b.totalBuyVal;
+    sumUnreal += unreal;
+    sumReal += b.realized;
+    sumOpen += b.net;
+    sumTotalShares += b.totalBuyQty;
+  }
+
+  return {
+    summary: {
+      openShares: sumOpen.toFixed(6),
+      totalShares: sumTotalShares.toFixed(6),
+      totalInvested: sumInvested.toFixed(2),
+      unrealizedPnL: sumUnreal.toFixed(2),
+      realizedPnL: sumReal.toFixed(2),
+    },
+    positions,
+  };
+};
+
+/** ——— analytics & attempts ——— */
+module.exports.saveAttemptAnalytics = async function saveAttemptAnalytics({ userId, scenarioId, attemptNumber, summary, positions }) {
+  return prisma.scenarioAttemptAnalytics.create({
+    data: {
+      userId,
+      scenarioId: Number(scenarioId),
+      attemptNumber,
+      summary,
+      positions,
+    },
+  });
+};
+
+module.exports.listAttempts = async function listAttempts(userId, scenarioId) {
+  return prisma.scenarioAttemptAnalytics.findMany({
+    where: { userId, scenarioId: Number(scenarioId) },
+    orderBy: { attemptNumber: 'desc' },
+  });
+};
+
+/** ——— personal bests ——— */
+module.exports.upsertPersonalBest = async function upsertPersonalBest({ userId, scenarioId, attemptNumber, totalPortfolioValue, realizedPnL, unrealizedPnL }) {
+  const start = await getScenarioStartBalance(scenarioId);
+  const retPct = start > 0 ? (Number(totalPortfolioValue) - start) / start : 0;
+
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.scenarioPersonalBest.findUnique({
+      where: { userId_scenarioId: { userId, scenarioId: Number(scenarioId) } },
+    });
+
+    if (!existing) {
+      const created = await tx.scenarioPersonalBest.create({
+        data: {
+          userId,
+          scenarioId: Number(scenarioId),
+          bestAttemptNumber: attemptNumber,
+          bestTotalValue: Number(totalPortfolioValue),
+          bestReturnPct: retPct,
+          bestRealizedPnL: Number(realizedPnL),
+          bestUnrealizedPnL: Number(unrealizedPnL),
+          achievedAt: new Date(),
+        },
+      });
+      return { record: created, isNewPB: true };
+    }
+
+    const isNewPB = Number(existing.bestTotalValue) < Number(totalPortfolioValue);
+    if (!isNewPB) return { record: existing, isNewPB: false };
+
+    const updated = await tx.scenarioPersonalBest.update({
+      where: { userId_scenarioId: { userId, scenarioId: Number(scenarioId) } },
+      data: {
+        bestAttemptNumber: attemptNumber,
+        bestTotalValue: Number(totalPortfolioValue),
+        bestReturnPct: retPct,
+        bestRealizedPnL: Number(realizedPnL),
+        bestUnrealizedPnL: Number(unrealizedPnL),
+        achievedAt: new Date(),
+      },
+    });
+    return { record: updated, isNewPB: true };
+  });
+};
+
+module.exports.getPersonalBest = async function getPersonalBest(userId, scenarioId) {
+  return prisma.scenarioPersonalBest.findUnique({
+    where: { userId_scenarioId: { userId, scenarioId: Number(scenarioId) } },
+  });
+};
+
+module.exports.listPersonalBests = async function listPersonalBests(userId) {
+  return prisma.scenarioPersonalBest.findMany({
+    where: { userId },
+    include: { scenario: { select: { id: true, title: true } } },
+    orderBy: { achievedAt: 'desc' },
+  });
+};
+
+
+
+module.exports.saveAIInsights = async (userId, scenarioId, aiAdvice) => {
+  try {
+    const latestAttempt = await prisma.scenarioAttempt.findFirst({
+      where: { userId, scenarioId },
+      orderBy: { attemptNumber: "desc" },
+    });
+
+    if (!latestAttempt) return null;
+
+    const updated = await prisma.scenarioAttempt.update({
+      where: { id: latestAttempt.id },
+      data: {
+        aiInsights: {
+          summary: aiAdvice,
+          generatedAt: new Date(),
+        },
+      },
+    });
+
+    return updated;
+  } catch (err) {
+    console.error("❌ saveAIInsights error:", err);
+    throw err;
+  }
+};
+
+module.exports.upsertAIAdvice = async (userId, scenarioId, aiAdvice) => {
+  try {
+    console.log("🧩 upsertAIAdvice received:", { userId, scenarioId, aiAdviceLength: aiAdvice?.length });
+
+    if (!userId || !scenarioId || isNaN(scenarioId)) {
+      throw new Error(`Invalid userId (${userId}) or scenarioId (${scenarioId})`);
+    }
+
+    // ✅ Step 1: find the latest attempt
+    const latestAttempt = await prisma.scenarioAttempt.findFirst({
+      where: { userId, scenarioId },
+      orderBy: { attemptNumber: "desc" },
+    });
+
+    if (!latestAttempt) {
+      console.log("🆕 Creating first attempt with AI insights...");
+      return await prisma.scenarioAttempt.create({
+        data: {
+          userId,
+          scenarioId,
+          attemptNumber: 1,
+          aiInsights: aiAdvice, // ✅ FIXED field name
+        },
+      });
+    }
+
+    console.log(`✏️ Updating attempt #${latestAttempt.attemptNumber}`);
+    return await prisma.scenarioAttempt.update({
+      where: {
+        scenarioId_userId_attemptNumber: {
+          scenarioId,
+          userId,
+          attemptNumber: latestAttempt.attemptNumber,
+        },
+      },
+      data: { aiInsights: aiAdvice }, // ✅ FIXED field name
+    });
+
+  } catch (err) {
+    console.error("❌ Error in upsertAIAdvice:", err);
+    throw err;
+  }
 };

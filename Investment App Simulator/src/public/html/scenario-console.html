@@ -273,36 +273,54 @@
       <div class="content trading-card2"></div>
     </div>
 
-    <div id="endScreenModal" class="modal">
-      <div class="modal-content endgame">
-        <h1>Scenario Complete!</h1>
+   <div id="endScreenModal" class="modal">
+  <div class="modal-content endgame">
+    <header class="end-header">
+      <h1>Scenario Complete</h1>
+      <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
+      <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready. 
+        <em>Each new run resets your balance and positions so you can try different strategies.</em>
+      </p>
+    </header>
 
-        <div class="portfolio-layout">
-          <div class="portfolio-chart-container">
-            <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
-          </div>
-
-          <div id="endStockCards" class="positions-section"></div>
-        </div>
-
-        <div id="aiAdviceContainer"></div>
-        <p style="color:#888; margin-top:12px;">Generating AI advice<span class="loading-dots"></span></p>
-
-        <div class="buttons">
-          <button id="closeEndScreen">Close</button>
-          <button id="restartScenario">Restart</button>
-          <button id="generateMoreInsights" style="
-    margin-top: 12px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    background-color: #444;
-    color: #fff;
-    cursor: pointer;
-">Generate More Insights</button>
-        </div>
+    <!-- Quick summary row -->
+    <div class="end-summary">
+      <div class="card kpi">
+        <div class="kpi-label">Final Portfolio Value</div>
+        <div id="kpi-total" class="kpi-value">—</div>
       </div>
+      <div class="card kpi">
+        <div class="kpi-label">Cash Remaining</div>
+        <div id="kpi-cash" class="kpi-value">—</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Return</div>
+        <div id="kpi-return" class="kpi-value">—</div>
+      </div>
+      <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
     </div>
+
+    <!-- Portfolio recap -->
+    <div class="portfolio-layout">
+      <div class="portfolio-chart-container">
+        <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
+      </div>
+      <div id="endStockCards" class="positions-section"></div>
+    </div>
+
+    <!-- AI insights -->
+    <div id="aiAdviceContainer" class="ai-block">
+      <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
+    </div>
+
+    <!-- Actions -->
+    <div class="buttons end-actions">
+      <button id="closeEndScreen" class="btn ghost">Close</button>
+      <button id="generateMoreInsights" class="btn secondary">Generate More Insights</button>
+    </div>
+  </div>
+</div>
+
 </body>
 <script src="/socket.io/socket.io.js"></script>
 

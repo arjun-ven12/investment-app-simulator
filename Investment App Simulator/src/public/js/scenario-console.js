@@ -1087,72 +1087,113 @@ function replayStep() {
 
 
 let endPortfolioChart = null; // global chart instance
+let scenarioEnded = false; // global flag
+
+function disableTradingUI() {
+  scenarioEnded = true;
+  const form = document.getElementById("trading-form");
+  if (!form) return;
+  [...form.querySelectorAll("input, select, button")].forEach(el => el.disabled = true);
+  const submitBtn = document.getElementById("submit-order");
+  if (submitBtn) submitBtn.textContent = "Scenario Completed";
+}
+
+function setKpis({ totalValue, cash, returnPct, isPB }) {
+  const fmt = (n, opts) => {
+    const x = typeof n === 'number' ? n : Number(n || 0);
+    return isFinite(x) ? x.toLocaleString(undefined, opts) : '—';
+  };
+  document.getElementById("kpi-total").textContent = fmt(totalValue, { style:'currency', currency:'USD' });
+  document.getElementById("kpi-cash").textContent  = fmt(cash, { style:'currency', currency:'USD' });
+  const retEl = document.getElementById("kpi-return");
+  retEl.textContent = isFinite(returnPct) ? (returnPct*100).toFixed(2) + "%" : "—";
+  retEl.style.color = returnPct >= 0 ? '#7CFC00' : '#FF6B6B';
+  const pbBadge = document.getElementById("pbBadge");
+  if (isPB) pbBadge.style.display = 'flex';
+}
+
 
 async function showEndScreen() {
-    const modal = document.getElementById("endScreenModal");
-    if (!modal) return console.error("❌ End screen modal not found!");
+  const modal = document.getElementById("endScreenModal");
+  if (!modal) return console.error("❌ End screen modal not found!");
 
-    modal.style.display = "flex";
+  modal.style.display = "flex";
+  await new Promise(r => setTimeout(r, 50));
 
-    // Give the browser a tiny moment to render the modal
-    await new Promise(r => setTimeout(r, 50));
+  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+  const token = localStorage.getItem("token");
+  const stockCardsContainer = document.getElementById("endStockCards");
+  const ctx = document.getElementById("endPortfolioChart").getContext("2d");
 
-    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-    const token = localStorage.getItem("token");
-    const stockCardsContainer = document.getElementById("endStockCards");
-    const ctx = document.getElementById("endPortfolioChart").getContext("2d");
-
+  try {
+    // 1) Tell backend we're done (idempotent)
+    let finishData = null;
     try {
-        // 🔹 Fetch portfolio
-        const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const portfolioData = await portfolioRes.json();
-        const positions = portfolioData.positions || [];
-
-        // 🔹 Show portfolio chart & stock cards
-        updatePortfolioUI(positions, ctx, stockCardsContainer);
-
-        // 🔹 Add AI loading placeholder
-        let aiAdviceContainer = document.getElementById("aiAdviceContainer");
-        if (!aiAdviceContainer) {
-            aiAdviceContainer = document.createElement("div");
-            aiAdviceContainer.id = "aiAdviceContainer";
-            aiAdviceContainer.innerHTML = `<p style="color:#888; margin-top:12px;">Generating AI advice... <span class="loading-dots">...</span></p>`;
-            stockCardsContainer.appendChild(aiAdviceContainer);
-        }
-
-        // 🔹 Fetch AI advice
-        const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const aiData = await aiRes.json();
-        if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
-
-        // Clean AI JSON
-        const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
-        const aiAdvice = JSON.parse(cleaned);
-
-        // 🔹 Display AI advice
-        aiAdviceContainer.innerHTML = `
-            <hr style="border-color:#555;margin:12px 0;">
-            <h2>AI Advice</h2>
-            <p><strong>${aiAdvice.recap}</strong></p>
-            <ul>
-                <li><b>Top Gainers:</b> ${aiAdvice.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
-                <li><b>Top Losers:</b> ${aiAdvice.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
-                <li><b>Total Unrealized P/L:</b> ${aiAdvice.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
-                <li><b>Cash Remaining:</b> ${aiAdvice.portfolioHighlights?.cashRemaining || "-"}</li>
-            </ul>
-            <h3>Next Time, Try:</h3>
-            <ul>${aiAdvice.nextTimeTry?.map(tip => `<li>${tip}</li>`).join("") || ""}</ul>
-            <p style="font-size: 12px; color: #aaa;">${aiAdvice.disclaimer}</p>
-        `;
-
-    } catch (err) {
-        console.error("❌ Failed to load end screen data:", err);
-        stockCardsContainer.innerHTML += `<p>Unable to load portfolio or AI advice. Please try again later.</p>`;
+      const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
+        method: "POST",
+        headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
+        body: JSON.stringify({})
+      });
+      finishData = await res.json().catch(() => ({}));
+      if (!res.ok) console.warn("finishAttempt:", finishData?.message || res.status);
+    } catch (e) {
+      console.warn("finishAttempt call failed, continuing:", e);
     }
+
+    // 2) Freeze trading on FE
+    disableTradingUI();
+
+    // 3) KPIs (if backend responded with totals)
+    if (finishData && finishData.success) {
+      const start = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+        headers: { Authorization:`Bearer ${token}` }
+      }).then(r => r.json()).catch(() => ({}));
+      const startBal = Number((start?.scenario || start)?.startingBalance || 0);
+      const totalVal = Number(finishData.totalPortfolioValue || 0);
+      const wallet   = Number(finishData.wallet || 0);
+      const retPct   = startBal > 0 ? (totalVal - startBal) / startBal : 0;
+      setKpis({ totalValue: totalVal, cash: wallet, returnPct: retPct, isPB: !!finishData.isPersonalBest });
+    }
+
+    // 4) Portfolio recap (your existing code)
+    const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const portfolioData = await portfolioRes.json();
+    const positions = portfolioData.positions || [];
+    updatePortfolioUI(positions, ctx, stockCardsContainer);
+
+    // 5) AI insights (your existing code)
+    const aiAdviceContainer = document.getElementById("aiAdviceContainer");
+    if (aiAdviceContainer) {
+      const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const aiData = await aiRes.json();
+      if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
+      const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
+      const ai = JSON.parse(cleaned);
+
+      aiAdviceContainer.innerHTML = `
+        <hr style="border-color:#555;margin:12px 0;">
+        <h2>AI Advice</h2>
+        <p><strong>${ai.recap}</strong></p>
+        <ul>
+          <li><b>Top Gainers:</b> ${ai.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
+          <li><b>Top Losers:</b> ${ai.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
+          <li><b>Total Unrealized P/L:</b> ${ai.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
+          <li><b>Cash Remaining:</b> ${ai.portfolioHighlights?.cashRemaining || "-"}</li>
+        </ul>
+        <h3>Next Time, Try:</h3>
+        <ul>${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
+        <p style="font-size:12px;color:#aaa;">${ai.disclaimer}</p>
+      `;
+    }
+  } catch (err) {
+    console.error("❌ Failed to load end screen:", err);
+    const stockCardsContainer = document.getElementById("endStockCards");
+    if (stockCardsContainer) stockCardsContainer.innerHTML += `<p>Unable to load end data.</p>`;
+  }
 }
 
 
@@ -1243,11 +1284,6 @@ function setupEndScreen() {
         hideEndScreen();
         console.log("✅ Scenario restarted");
         resetScenario(); // make sure you have this function to reset the replay
-    });
-
-    // Click outside modal content closes modal
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal) hideEndScreen();
     });
 }
 
