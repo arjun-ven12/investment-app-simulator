@@ -1051,35 +1051,40 @@ module.exports.finishAttemptOnce = async function finishAttemptOnce(userId, scen
 
   // ✅ Clean up transient attempt data in one atomic transaction
   await prisma.$transaction(async (tx) => {
-    // 1️⃣ Cancel all unexecuted limit orders
+    // 1️⃣ Cancel pending limit orders first (so they aren’t executed mid-cleanup)
     await tx.scenarioLimitOrder.updateMany({
       where: { participantId: p.id, status: "PENDING" },
       data: { status: "CANCELLED" },
     });
 
-    // 2️⃣ Remove all market orders (since they’re fully executed & no longer needed)
+    // 2️⃣ Delete ALL limit orders for this participant
+    await tx.scenarioLimitOrder.deleteMany({
+      where: { participantId: p.id },
+    });
+
+    // 3️⃣ Delete all market orders
     await tx.scenarioMarketOrder.deleteMany({
       where: { participantId: p.id },
     });
 
-    // 3️⃣ Remove all holdings (closing the participant’s portfolio)
+    // 4️⃣ Delete all holdings (close portfolio)
     await tx.scenarioHolding.deleteMany({
       where: { participantId: p.id },
     });
 
-    // 4️⃣ Remove replay state (reset progress, speed, etc.)
+    // 5️⃣ Delete replay progress
     await tx.scenarioReplayProgress.deleteMany({
       where: { userId, scenarioId },
     });
 
-    // 5️⃣ Close any open attempts
+    // 6️⃣ Mark all open attempts as ended
     await tx.scenarioAttempt.updateMany({
       where: { userId, scenarioId, endedAt: null },
       data: { endedAt: new Date() },
     });
   });
 
-  console.log(`✅ Cleaned up active trading + replay data for participant ${p.id}`);
+  console.log(`✅ Cleaned up active trading, limit orders, and replay data for participant ${p.id}`);
   return true;
 };
 

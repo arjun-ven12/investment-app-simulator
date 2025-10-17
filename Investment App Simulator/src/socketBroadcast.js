@@ -77,6 +77,27 @@ function broadcastStopLimitUpdate(userId, updatedTable) {
   ioInstance.to(room).emit('stopLimitUpdate', updatedTable);
 }
 
+
+function broadcastScenarioMarketUpdate(userId, scenarioId, trade) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `scenario_${scenarioId}_user_${userId}`;
+  console.log(`📊 Broadcasting Scenario Market Update → ${room}`, trade);
+  ioInstance.to(room).emit('scenarioMarketUpdate', trade);
+}
+
+function broadcastScenarioLimitUpdate(userId, scenarioId, order) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `scenario_${scenarioId}_user_${userId}`;
+  console.log(`📈 Broadcasting Scenario Limit Update → ${room}`, order);
+  ioInstance.to(room).emit('scenarioLimitUpdate', order);
+}
+
+function broadcastScenarioPortfolioUpdate(userId, scenarioId, portfolio) {
+  if (!ioInstance) return console.warn('Socket not initialized');
+  const room = `scenario_${scenarioId}_user_${userId}`;
+  console.log(`💼 Broadcasting Portfolio Update → ${room}`);
+  ioInstance.to(room).emit('scenarioPortfolioUpdate', portfolio);
+}
 module.exports = {
   setSocketIO,
   broadcastNewsView,
@@ -87,7 +108,10 @@ module.exports = {
   broadcastfavoriteStock,
   broadcastReferralHistoryUpdate,
   broadcastStopLimitUpdate,
-  broadcastStopMarketUpdate
+  broadcastStopMarketUpdate,
+  broadcastScenarioMarketUpdate,
+  broadcastScenarioLimitUpdate,
+  broadcastScenarioPortfolioUpdate
 };
 
 

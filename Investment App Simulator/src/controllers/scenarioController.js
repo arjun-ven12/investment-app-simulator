@@ -1,6 +1,6 @@
 const scenarioModel = require('../models/scenario');
 const chartsModel = require('../models/Charts');
-const { broadcastPortfolioUpdate } = require('../socketBroadcast');
+const { broadcastScenarioMarketUpdate, broadcastScenarioLimitUpdate, broadcastScenarioPortfolioUpdate } = require('../socketBroadcast');
 // --- CRUD Controllers ---
 module.exports.createScenarioController = async (req, res) => {
   try {
@@ -157,7 +157,11 @@ module.exports.submitMarketOrder = async (req, res) => {
       price,
       currentIndex
     });
+    // ✅ Broadcast trade to user’s scenario room
+    broadcastScenarioMarketUpdate(userId, scenarioId, trade);
 
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    broadcastScenarioPortfolioUpdate(userId, scenarioId, portfolio);
     return res.status(200).json({ success: true, trade });
   } catch (err) {
     console.error(err);
@@ -179,6 +183,7 @@ module.exports.createLimitOrderController = async (req, res) => {
       Number(userId), // make sure it's a number
       { side, symbol, quantity, limitPrice, price, currentIndex }
     );
+    broadcastScenarioLimitUpdate(userId, scenarioId, order);
 
     return res.status(201).json({ success: true, order });
   } catch (err) {
@@ -206,11 +211,16 @@ module.exports.processLimitOrdersController = async (req, res) => {
     const { symbol, currentPrice, currentIndex } = req.body;
     const executedOrders = await scenarioModel.processLimitOrders(symbol, currentPrice, currentIndex);
     return res.status(200).json({ success: true, executedOrders });
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: err.message });
+    console.error("💥 Error in processLimitOrdersController:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error while processing limit orders.",
+    });
   }
 };
+
 
 
 module.exports.getOrderHistoryController = async (req, res) => {

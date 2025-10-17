@@ -60,6 +60,26 @@ io.on('connection', (socket) => {
     ack && ack({ ok: true, room });
   });
 
+   // ✅ Handle explicit scenario join
+  socket.on('joinScenarioRoom', ({ room }) => {
+    if (!room) return console.warn('No room name provided for scenario join');
+    socket.join(room);
+    console.log(`✅ Socket ${socket.id} joined scenario room: ${room}`);
+    socket.emit('joinedScenario', { room });
+  });
+
+  // Allow explicit join via "join"
+  socket.on('join', ({ userId }, ack) => {
+    if (!userId) {
+      ack && ack({ ok: false, error: 'No userId provided' });
+      return;
+    }
+    const room = `user_${userId}`;
+    socket.join(room);
+    console.log(`Socket ${socket.id} joined room: ${room}`);
+    ack && ack({ ok: true, room });
+  });
+
   socket.on('disconnect', () => {
     console.log('Socket disconnected:', socket.id);
   });

@@ -248,12 +248,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-/* 🎯 Back Button */
+/* 🎯 Back Button with Finalization */
 document.addEventListener("DOMContentLoaded", () => {
   const backBtn = document.getElementById("back-button");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
+  if (!backBtn) return;
+
+  backBtn.addEventListener("click", async () => {
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const token = localStorage.getItem("token");
+
+    if (!scenarioId || !token) {
+      console.warn("⚠️ Missing scenarioId or token — skipping finish call.");
       window.location.href = "/html/scenarios.html";
-    });
-  }
+      return;
+    }
+
+    try {
+      console.log("🧾 Finalizing scenario attempt before going back...");
+      const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn("⚠️ Finish attempt failed:", data.message);
+      } else {
+        console.log("✅ Scenario finalized:", data);
+      }
+    } catch (err) {
+      console.error("❌ Error finalizing attempt:", err);
+    } finally {
+      // ✅ Clear local/session data so next attempt is fresh
+      sessionStorage.removeItem("scenarioPortfolioSnapshot");
+      sessionStorage.removeItem("scenarioId");
+      window.latestChartData = null;
+      window.latestAiData = null;
+
+      // ✅ Redirect
+      window.location.href = "/html/scenarios.html";
+    }
+  });
 });

@@ -522,7 +522,7 @@ ${JSON.stringify(portfolio, null, 2)}
       "gpt-4o-mini",
       1500
     );
-
+ await upsertAIAdvice(userId, scenarioId, aiAdvice);
     return res.status(200).json({ aiAdvice, portfolio });
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
@@ -722,10 +722,71 @@ End with:
       "gpt-4o-mini",
       1500
     );
-
+ // 🔹 Save AI insights into DB
+   
     return res.status(200).json({ summary, aiAdvice });
   } catch (error) {
     console.error("Error generating option advice:", error);
     return res.status(500).json({ error: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+async function upsertAIAdvice(userId, scenarioId, aiAdvice) {
+  try {
+    console.log("🧩 upsertAIAdvice received:", {
+      userId,
+      scenarioId,
+      aiAdviceLength: aiAdvice?.length,
+    });
+
+    if (!userId || !scenarioId || isNaN(scenarioId)) {
+      throw new Error(`Invalid userId (${userId}) or scenarioId (${scenarioId})`);
+    }
+
+    // ✅ Step 1: find the latest attempt
+    const latestAttempt = await prisma.scenarioAttempt.findFirst({
+      where: { userId, scenarioId },
+      orderBy: { attemptNumber: "desc" },
+    });
+
+    // ✅ Step 2: create if no attempt exists
+    if (!latestAttempt) {
+      console.log("🆕 Creating first attempt with AI insights...");
+      return await prisma.scenarioAttempt.create({
+        data: {
+          userId,
+          scenarioId,
+          attemptNumber: 1,
+          aiInsights: aiAdvice,
+        },
+      });
+    }
+
+    // ✅ Step 3: update latest attempt
+    console.log(`✏️ Updating attempt #${latestAttempt.attemptNumber}`);
+    return await prisma.scenarioAttempt.update({
+      where: {
+        scenarioId_userId_attemptNumber: {
+          scenarioId,
+          userId,
+          attemptNumber: latestAttempt.attemptNumber,
+        },
+      },
+      data: { aiInsights: aiAdvice },
+    });
+  } catch (err) {
+    console.error("❌ Error in upsertAIAdvice:", err);
+    throw err;
+  }
+}

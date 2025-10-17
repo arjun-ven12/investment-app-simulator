@@ -21,6 +21,116 @@ let hasShownEndScreen = false;
 let hasStartedAttempt = false;
 let hasReplayStarted = false; // ✅ new flag
 const userId = localStorage.getItem('userId');
+
+
+function resetScenario() {
+  console.log("🔁 Resetting scenario...");
+  
+  // 1️⃣ Reset replay state
+  pauseReplay();
+  currentIndex = 0;
+  hasShownEndScreen = false;
+  scenarioEnded = false;
+
+  // 2️⃣ Re-enable trading UI
+  const form = document.getElementById("trading-form");
+  if (form) {
+    [...form.querySelectorAll("input, select, button")].forEach(el => el.disabled = false);
+    const submitBtn = document.getElementById("submit-order");
+    if (submitBtn) submitBtn.textContent = "Submit Order";
+  }
+
+  // 3️⃣ Clear chart data
+  if (scenarioChart) {
+    scenarioChart.data.labels = [];
+    scenarioChart.data.datasets.forEach(ds => ds.data = []);
+    scenarioChart.update();
+  }
+
+  // 4️⃣ Clear portfolio and progress
+  const stockCardsContainer = document.getElementById("stockCardsContainer");
+  if (stockCardsContainer) stockCardsContainer.innerHTML = "";
+
+  // 5️⃣ Fetch fresh data or refresh UI
+  if (typeof fetchPortfolio === "function") fetchPortfolio();
+  if (typeof fetchWalletBalance === "function") fetchWalletBalance();
+
+  // 6️⃣ Log confirmation
+  console.log("✅ Scenario reset complete — ready for new replay.");
+}
+
+// ===== MAKE IT GLOBAL FIRST =====
+async function fetchPortfolio() {
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem("token");
+    const stockCardsContainer = document.getElementById('stockCardsContainer');
+    const ctx = document.getElementById('portfolioChart')?.getContext('2d');
+    if (!scenarioId || !userId) return console.error('Missing scenarioId or userId');
+
+    try {
+        const res = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch portfolio");
+        const data = await res.json();
+        updatePortfolioUI(data.positions, ctx, stockCardsContainer);
+    } catch (err) {
+        console.error("Error fetching portfolio:", err);
+    }
+}
+window.fetchPortfolio = fetchPortfolio;
+let socket = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const userId = localStorage.getItem('userId');
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+
+    if (!userId || !scenarioId) return;
+
+    // --- Initialize Socket ---
+    if (typeof io !== 'undefined') {
+        socket = io();
+
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+            const room = `scenario_${scenarioId}_user_${userId}`;
+            socket.emit('joinScenarioRoom', { room });
+        });
+
+        socket.on('joinedScenario', ({ room }) => {
+            console.log('✅ Joined scenario socket room:', room);
+        });
+
+        socket.on('scenarioMarketUpdate', (trade) => {
+            console.log('📥 Live Market Trade:', trade);
+
+            // Update wallet balance immediately
+            fetchWalletBalance();
+
+            // Refresh tables so you see the new trade appear
+            if (typeof fetchOrderHistory === 'function') {
+                fetchOrderHistory();
+            }
+        });
+
+        socket.on('scenarioLimitUpdate', (order) => {
+            console.log('📈 Live Limit Order Update:', order);
+            fetchOrderHistory()
+             window.fetchPortfolio();
+        });
+
+        socket.on('scenarioPortfolioUpdate', (portfolio) => {
+            console.log('💼 Live Portfolio Update:', portfolio);
+
+            // Refresh the portfolio UI
+            if (typeof fetchPortfolio === 'function') {
+                window.fetchPortfolio();
+            }
+        });
+    }
+});
+
 async function startScenarioAttempt() {
     const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
     const token = localStorage.getItem("token");
@@ -288,7 +398,7 @@ async function processLimitOrders(symbol, currentPrice) {
         const res = await fetch(`/scenarios/limit/process`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ symbol, currentPrice, currentIndex })
+            body: JSON.stringify({userId, symbol, currentPrice, currentIndex, scenarioId })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to process limit orders");
@@ -660,10 +770,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("btn-finish").addEventListener("click", async () => {
-  if (confirm("Are you sure you want to finish this scenario?")) {
-    pauseReplay();
-    await showEndScreen();
-  }
+    if (confirm("Are you sure you want to finish this scenario?")) {
+        pauseReplay();
+        await showEndScreen();
+    }
 });
 document.addEventListener("DOMContentLoaded", () => {
     const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
@@ -698,6 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
             limitOrdersErrorDiv.textContent = err.message;
         }
     }
+    window.fetchOrderHistory = fetchOrderHistory;
 
     function renderMarketOrders() {
         tradesTableBody.innerHTML = "";
@@ -770,7 +881,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== SAVE & LOAD REPLAY PROGRESS =====
 async function saveReplayProgress() {
-     if (hasFinishedScenario) return; 
+    if (scenarioEnded) return;
     if (!Object.keys(allSymbolsData).length) return; // nothing to save
     try {
         const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
@@ -1153,69 +1264,67 @@ function setKpis({ totalValue, cash, returnPct, isPB }) {
     if (isPB) pbBadge.style.display = 'flex';
 }
 
-
 async function showEndScreen() {
-    const modal = document.getElementById("endScreenModal");
-    if (!modal) return console.error("❌ End screen modal not found!");
+  const modal = document.getElementById("endScreenModal");
+  if (!modal) return console.error("❌ End screen modal not found!");
 
-    modal.style.display = "flex";
-    await new Promise(r => setTimeout(r, 50));
+  modal.style.display = "flex";
+  await new Promise(r => setTimeout(r, 50));
 
-    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-    const token = localStorage.getItem("token");
-    const stockCardsContainer = document.getElementById("endStockCards");
-    const ctx = document.getElementById("endPortfolioChart").getContext("2d");
+  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+  const token = localStorage.getItem("token");
+  const stockCardsContainer = document.getElementById("endStockCards");
+  const ctx = document.getElementById("endPortfolioChart").getContext("2d");
 
-    try {
-        // 1) Tell backend we're done (idempotent)
-        let finishData = null;
-        try {
-            const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({})
-            });
-            finishData = await res.json().catch(() => ({}));
-            if (!res.ok) console.warn("finishAttempt:", finishData?.message || res.status);
-        } catch (e) {
-            console.warn("finishAttempt call failed, continuing:", e);
-        }
+  try {
+    // ✅ 1) Freeze trading (lock UI)
+    disableTradingUI();
 
-        // 2) Freeze trading on FE
-        disableTradingUI();
+    // ✅ 2) Get KPIs (from portfolio + wallet + scenario details)
+    const [portfolioRes, walletRes, detailsRes] = await Promise.all([
+      fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`/scenarios/${scenarioId}/wallet`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`/scenarios/getDetails/${scenarioId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
 
-        // 3) KPIs (if backend responded with totals)
-        if (finishData && finishData.success) {
-            const start = await fetch(`/scenarios/getDetails/${scenarioId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(r => r.json()).catch(() => ({}));
-            const startBal = Number((start?.scenario || start)?.startingBalance || 0);
-            const totalVal = Number(finishData.totalPortfolioValue || 0);
-            const wallet = Number(finishData.wallet || 0);
-            const retPct = startBal > 0 ? (totalVal - startBal) / startBal : 0;
-            setKpis({ totalValue: totalVal, cash: wallet, returnPct: retPct, isPB: !!finishData.isPersonalBest });
-        }
+    const portfolioData = await portfolioRes.json();
+    const walletData = await walletRes.json();
+    const detailsData = await detailsRes.json();
 
-        // 4) Portfolio recap (your existing code)
-        const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const portfolioData = await portfolioRes.json();
-        const positions = portfolioData.positions || [];
-        updatePortfolioUI(positions, ctx, stockCardsContainer);
+    console.log("💰 End Screen Data →", { portfolioData, walletData, detailsData });
 
-        // 5) AI insights (your existing code)
-        const aiAdviceContainer = document.getElementById("aiAdviceContainer");
-        if (aiAdviceContainer) {
-            const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const aiData = await aiRes.json();
-            if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
-            const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
-            const ai = JSON.parse(cleaned);
+    const startBal = Number((detailsData?.scenario || detailsData)?.startingBalance || 0);
+    const positions = portfolioData.positions || [];
+    const totalVal = positions.reduce((sum, p) => sum + Number(p.currentValue || 0), 0);
 
-            aiAdviceContainer.innerHTML = `
+    // ✅ Wallet comes from the actual /wallet endpoint
+    const wallet = Number(walletData.cashBalance || walletData.balance || 0);
+
+    const retPct = startBal > 0 ? (totalVal + wallet - startBal) / startBal : 0;
+    setKpis({ totalValue: totalVal + wallet, cash: wallet, returnPct: retPct, isPB: false });
+
+    // ✅ 3) Render portfolio
+    updatePortfolioUI(positions, ctx, stockCardsContainer);
+
+    // ✅ 4) Render AI advice
+    const aiAdviceContainer = document.getElementById("aiAdviceContainer");
+    if (aiAdviceContainer) {
+      const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const aiData = await aiRes.json();
+      if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
+
+      const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
+      const ai = JSON.parse(cleaned);
+
+      aiAdviceContainer.innerHTML = `
         <hr style="border-color:#555;margin:12px 0;">
         <h2>AI Advice</h2>
         <p><strong>${ai.recap}</strong></p>
@@ -1223,19 +1332,23 @@ async function showEndScreen() {
           <li><b>Top Gainers:</b> ${ai.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
           <li><b>Top Losers:</b> ${ai.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
           <li><b>Total Unrealized P/L:</b> ${ai.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
-          <li><b>Cash Remaining:</b> ${ai.portfolioHighlights?.cashRemaining || "-"}</li>
+          <li><b>Cash Remaining:</b> ${ai.portfolioHighlights?.cashRemaining || wallet.toFixed(2)}</li>
         </ul>
         <h3>Next Time, Try:</h3>
         <ul>${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
         <p style="font-size:12px;color:#aaa;">${ai.disclaimer}</p>
       `;
-        }
-    } catch (err) {
-        console.error("❌ Failed to load end screen:", err);
-        const stockCardsContainer = document.getElementById("endStockCards");
-        if (stockCardsContainer) stockCardsContainer.innerHTML += `<p>Unable to load end data.</p>`;
     }
+
+  } catch (err) {
+    console.error("❌ Failed to load end screen:", err);
+    if (stockCardsContainer) {
+      stockCardsContainer.innerHTML += `<p>Unable to load end data.</p>`;
+    }
+  }
 }
+
+
 
 
 function updatePortfolioUI(positions, ctx, container) {
@@ -1301,32 +1414,118 @@ function updatePortfolioUI(positions, ctx, container) {
 
 
 
-// Hide end screen modal
-function hideEndScreen() {
-    const modal = document.getElementById("endScreenModal");
-    if (!modal) return;
+async function hideEndScreen() {
+  const modal = document.getElementById("endScreenModal");
+  if (!modal) return;
+
+  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+  const token = localStorage.getItem("token");
+
+  try {
+    // 🧾 Finalize attempt before closing
+    if (scenarioId && token) {
+      const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn("⚠️ Failed to finalize attempt:", data.message || res.status);
+      } else {
+        console.log("✅ Scenario finalized:", data);
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error finalizing scenario:", err);
+  } finally {
+    // 🧹 Clean up local/session data
+    sessionStorage.removeItem("scenarioPortfolioSnapshot");
+    sessionStorage.removeItem("scenarioId");
+    window.latestChartData = null;
+    window.latestAiData = null;
+
+    // 🧽 Hide modal
     modal.style.display = "none";
-    console.log("✅ End screen closed");
+    console.log("✅ End screen closed and cleaned up");
+
+    // 🚀 Redirect immediately (no delay)
+    window.location.href = "/html/scenarios.html";
+  }
 }
+
 
 // Setup modal event listeners
+// Setup modal event listeners
 function setupEndScreen() {
-    const modal = document.getElementById("endScreenModal");
-    if (!modal) return;
+  const modal = document.getElementById("endScreenModal");
+  if (!modal) return;
 
-    const closeBtn = document.getElementById("closeEndScreen");
-    const restartBtn = document.getElementById("restartScenario");
-    const moreBtn = document.getElementById("generateMoreInsights");
-    // Close button hides modal
-    if (closeBtn) closeBtn.addEventListener("click", hideEndScreen);
+  const closeBtn = document.getElementById("closeEndScreen");
+  const restartBtn = document.getElementById("restartScenario");
+  const moreBtn = document.getElementById("generateMoreInsights");
 
-    // Restart button hides modal and resets scenario
-    if (restartBtn) restartBtn.addEventListener("click", () => {
-        hideEndScreen();
-        console.log("✅ Scenario restarted");
-        resetScenario(); // make sure you have this function to reset the replay
+  // 🧹 Helper for cleanup + finish
+  async function finalizeAndCleanUp() {
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const token = localStorage.getItem("token");
+
+    try {
+      if (scenarioId && token) {
+        const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          console.warn("⚠️ Failed to finalize attempt:", data.message || res.status);
+        } else {
+          console.log("✅ Scenario finalized:", data);
+        }
+      }
+    } catch (err) {
+      console.error("❌ Error finalizing scenario:", err);
+    } finally {
+      // 🧹 Clear caches/session
+      sessionStorage.removeItem("scenarioPortfolioSnapshot");
+      sessionStorage.removeItem("scenarioId");
+      window.latestChartData = null;
+      window.latestAiData = null;
+      resetScenario();
+    }
+  }
+
+  // 🟥 Close button → cleanup + redirect
+  if (closeBtn) {
+    closeBtn.addEventListener("click", async () => {
+      await finalizeAndCleanUp();
+      modal.style.display = "none";
+      console.log("✅ End screen closed and cleaned up");
+      window.location.href = "/html/scenarios.html";
+      resetScenario();
     });
+  }
+
+  // 🔁 Restart button → cleanup + reset
+  if (restartBtn) {
+    restartBtn.addEventListener("click", async () => {
+      await finalizeAndCleanUp();
+      modal.style.display = "none";
+      console.log("✅ Scenario restarted");
+      if (typeof resetScenario === "function") resetScenario();
+    });
+  }
+
+  // 🧠 More Insights button → cleanup + redirect to detailed analysis
+  if (moreBtn) {
+    moreBtn.addEventListener("click", async () => {
+      await finalizeAndCleanUp();
+      const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}`;
+    });
+  }
 }
+
 
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
