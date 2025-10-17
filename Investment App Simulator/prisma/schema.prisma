@@ -196,6 +196,8 @@ model User {
   OptionTrade              OptionTrade[]
   ScenarioParticipant      ScenarioParticipant[]
   ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
+  ScenarioPersonalBest     ScenarioPersonalBest[]
+  ScenarioAttempt          ScenarioAttempt[]
 }
 
 model Referral {
@@ -511,6 +513,8 @@ model Scenario {
   updatedAt                DateTime                   @default(now()) @updatedAt
   ScenarioIntradayPrice    ScenarioIntradayPrice[]
   ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
+  ScenarioPersonalBest     ScenarioPersonalBest[]
+  ScenarioAttempt          ScenarioAttempt[]
 }
 
 model ScenarioParticipant {
@@ -539,7 +543,7 @@ model ScenarioMarketOrder {
   executedPrice Decimal
   status        String   @default("EXECUTED")
   createdAt     DateTime @default(now())
-  currentIndex   Int?  
+  currentIndex  Int?
 
   participant ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 }
@@ -556,9 +560,8 @@ model ScenarioLimitOrder {
   status        String
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
-  currentIndex   Int?                 // <-- the index when user placed the order
-  executedIndex  Int?                 // <-- the index when order executed (if executed)
-
+  currentIndex  Int? // <-- the index when user placed the order
+  executedIndex Int? // <-- the index when order executed (if executed)
 }
 
 model ScenarioReplayProgress {
@@ -621,4 +624,53 @@ model ScenarioAttemptAnalytics {
   @@unique([userId, scenarioId, attemptNumber])
   @@index([scenarioId])
   @@index([userId])
+}
+
+model ScenarioPersonalBest {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  scenarioId        Int
+  // which attempt achieved the PB (useful for debugging / replay links)
+  bestAttemptNumber Int
+  // canonical metrics
+  bestTotalValue    Decimal  @db.Decimal(14, 2) // wallet + invested + realized + unrealized at finish
+  bestReturnPct     Decimal  @db.Decimal(7, 4) // (bestTotalValue - startingBalance) / startingBalance
+  bestRealizedPnL   Decimal  @db.Decimal(14, 2)
+  bestUnrealizedPnL Decimal  @db.Decimal(14, 2)
+  achievedAt        DateTime @default(now())
+
+  // relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scenarioId]) // one PB per (user, scenario)
+  @@index([scenarioId, userId])
+}
+
+model ScenarioAttempt {
+  id            Int       @id @default(autoincrement())
+  scenarioId    Int
+  userId        Int
+  attemptNumber Int
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  totalValue    Decimal?  @db.Decimal(14, 2)
+  realizedPnL   Decimal?  @db.Decimal(14, 2)
+  unrealizedPnL Decimal?  @db.Decimal(14, 2)
+  returnPct     Decimal?  @db.Decimal(7, 4)
+  aiInsights    Json? 
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        ScenarioAttemptStatus @default(NOT_STARTED)
+
+  @@unique([scenarioId, userId, attemptNumber])
+  @@index([scenarioId])
+  @@index([userId])
+}
+
+enum ScenarioAttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
