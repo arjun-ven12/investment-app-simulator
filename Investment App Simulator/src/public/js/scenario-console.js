@@ -1,6 +1,6 @@
 
 const limitPriceInput = document.getElementById("limitPrice");
- const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
 let currentSymbol = null; // global
 let isPaused = true; // track pause state globally
 let scenarioChart = null;
@@ -18,8 +18,31 @@ const qtyInput = document.getElementById("quantity");
 const orderTypeSelect = document.getElementById("order-type");
 const usedHues = [];
 let hasShownEndScreen = false;
+let hasStartedAttempt = false;
 let hasReplayStarted = false; // ✅ new flag
 const userId = localStorage.getItem('userId');
+async function startScenarioAttempt() {
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const token = localStorage.getItem("token");
+    if (!scenarioId || !token) return;
+
+    try {
+        const res = await fetch(`/scenarios/${scenarioId}/attempts/start`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to start scenario attempt");
+
+        console.log("🎬 Scenario attempt started:", data);
+    } catch (err) {
+        console.error("❌ Error starting scenario attempt:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", startScenarioAttempt);
+
 function updateReplayProgress() {
     let totalLength = fullData.length;
 
@@ -612,19 +635,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+
     document.getElementById("chart-form-intraday").addEventListener("submit", async e => {
         e.preventDefault();
         const symbol = e.target.chartSymbol.value.trim().toUpperCase();
         const chartTypeElement = document.getElementById("chartType");
         currentChartType = chartTypeElement ? chartTypeElement.value : "line";
+
+        // ✅ Start the attempt only once
+        if (!hasStartedAttempt) {
+            await startScenarioAttempt();
+            hasStartedAttempt = true;
+        }
+        console.log("🎯 Scenario attempt started — you’re live!");
         await fetchScenarioData(symbol);
     });
 
     document.getElementById("btn-play").addEventListener("click", startReplay);
     document.getElementById("btn-pause").addEventListener("click", pauseReplay);
-    document.getElementById("btn-reset").addEventListener("click", resetReplay);
+    document.getElementById("btn-finish").addEventListener("click", async () => {
+        pauseReplay(); // stop replay immediately
+        await showEndScreen(); // show modal + mark scenario finished
+    });
 });
 
+document.getElementById("btn-finish").addEventListener("click", async () => {
+  if (confirm("Are you sure you want to finish this scenario?")) {
+    pauseReplay();
+    await showEndScreen();
+  }
+});
 document.addEventListener("DOMContentLoaded", () => {
     const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
     const tradesTableBody = document.getElementById("trades-table-body");
@@ -730,6 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== SAVE & LOAD REPLAY PROGRESS =====
 async function saveReplayProgress() {
+     if (hasFinishedScenario) return; 
     if (!Object.keys(allSymbolsData).length) return; // nothing to save
     try {
         const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
@@ -1090,91 +1131,91 @@ let endPortfolioChart = null; // global chart instance
 let scenarioEnded = false; // global flag
 
 function disableTradingUI() {
-  scenarioEnded = true;
-  const form = document.getElementById("trading-form");
-  if (!form) return;
-  [...form.querySelectorAll("input, select, button")].forEach(el => el.disabled = true);
-  const submitBtn = document.getElementById("submit-order");
-  if (submitBtn) submitBtn.textContent = "Scenario Completed";
+    scenarioEnded = true;
+    const form = document.getElementById("trading-form");
+    if (!form) return;
+    [...form.querySelectorAll("input, select, button")].forEach(el => el.disabled = true);
+    const submitBtn = document.getElementById("submit-order");
+    if (submitBtn) submitBtn.textContent = "Scenario Completed";
 }
 
 function setKpis({ totalValue, cash, returnPct, isPB }) {
-  const fmt = (n, opts) => {
-    const x = typeof n === 'number' ? n : Number(n || 0);
-    return isFinite(x) ? x.toLocaleString(undefined, opts) : '—';
-  };
-  document.getElementById("kpi-total").textContent = fmt(totalValue, { style:'currency', currency:'USD' });
-  document.getElementById("kpi-cash").textContent  = fmt(cash, { style:'currency', currency:'USD' });
-  const retEl = document.getElementById("kpi-return");
-  retEl.textContent = isFinite(returnPct) ? (returnPct*100).toFixed(2) + "%" : "—";
-  retEl.style.color = returnPct >= 0 ? '#7CFC00' : '#FF6B6B';
-  const pbBadge = document.getElementById("pbBadge");
-  if (isPB) pbBadge.style.display = 'flex';
+    const fmt = (n, opts) => {
+        const x = typeof n === 'number' ? n : Number(n || 0);
+        return isFinite(x) ? x.toLocaleString(undefined, opts) : '—';
+    };
+    document.getElementById("kpi-total").textContent = fmt(totalValue, { style: 'currency', currency: 'USD' });
+    document.getElementById("kpi-cash").textContent = fmt(cash, { style: 'currency', currency: 'USD' });
+    const retEl = document.getElementById("kpi-return");
+    retEl.textContent = isFinite(returnPct) ? (returnPct * 100).toFixed(2) + "%" : "—";
+    retEl.style.color = returnPct >= 0 ? '#7CFC00' : '#FF6B6B';
+    const pbBadge = document.getElementById("pbBadge");
+    if (isPB) pbBadge.style.display = 'flex';
 }
 
 
 async function showEndScreen() {
-  const modal = document.getElementById("endScreenModal");
-  if (!modal) return console.error("❌ End screen modal not found!");
+    const modal = document.getElementById("endScreenModal");
+    if (!modal) return console.error("❌ End screen modal not found!");
 
-  modal.style.display = "flex";
-  await new Promise(r => setTimeout(r, 50));
+    modal.style.display = "flex";
+    await new Promise(r => setTimeout(r, 50));
 
-  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-  const token = localStorage.getItem("token");
-  const stockCardsContainer = document.getElementById("endStockCards");
-  const ctx = document.getElementById("endPortfolioChart").getContext("2d");
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    const token = localStorage.getItem("token");
+    const stockCardsContainer = document.getElementById("endStockCards");
+    const ctx = document.getElementById("endPortfolioChart").getContext("2d");
 
-  try {
-    // 1) Tell backend we're done (idempotent)
-    let finishData = null;
     try {
-      const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
-        method: "POST",
-        headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
-        body: JSON.stringify({})
-      });
-      finishData = await res.json().catch(() => ({}));
-      if (!res.ok) console.warn("finishAttempt:", finishData?.message || res.status);
-    } catch (e) {
-      console.warn("finishAttempt call failed, continuing:", e);
-    }
+        // 1) Tell backend we're done (idempotent)
+        let finishData = null;
+        try {
+            const res = await fetch(`/scenarios/${scenarioId}/attempts/finish`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({})
+            });
+            finishData = await res.json().catch(() => ({}));
+            if (!res.ok) console.warn("finishAttempt:", finishData?.message || res.status);
+        } catch (e) {
+            console.warn("finishAttempt call failed, continuing:", e);
+        }
 
-    // 2) Freeze trading on FE
-    disableTradingUI();
+        // 2) Freeze trading on FE
+        disableTradingUI();
 
-    // 3) KPIs (if backend responded with totals)
-    if (finishData && finishData.success) {
-      const start = await fetch(`/scenarios/getDetails/${scenarioId}`, {
-        headers: { Authorization:`Bearer ${token}` }
-      }).then(r => r.json()).catch(() => ({}));
-      const startBal = Number((start?.scenario || start)?.startingBalance || 0);
-      const totalVal = Number(finishData.totalPortfolioValue || 0);
-      const wallet   = Number(finishData.wallet || 0);
-      const retPct   = startBal > 0 ? (totalVal - startBal) / startBal : 0;
-      setKpis({ totalValue: totalVal, cash: wallet, returnPct: retPct, isPB: !!finishData.isPersonalBest });
-    }
+        // 3) KPIs (if backend responded with totals)
+        if (finishData && finishData.success) {
+            const start = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }).then(r => r.json()).catch(() => ({}));
+            const startBal = Number((start?.scenario || start)?.startingBalance || 0);
+            const totalVal = Number(finishData.totalPortfolioValue || 0);
+            const wallet = Number(finishData.wallet || 0);
+            const retPct = startBal > 0 ? (totalVal - startBal) / startBal : 0;
+            setKpis({ totalValue: totalVal, cash: wallet, returnPct: retPct, isPB: !!finishData.isPersonalBest });
+        }
 
-    // 4) Portfolio recap (your existing code)
-    const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const portfolioData = await portfolioRes.json();
-    const positions = portfolioData.positions || [];
-    updatePortfolioUI(positions, ctx, stockCardsContainer);
+        // 4) Portfolio recap (your existing code)
+        const portfolioRes = await fetch(`/scenarios/portfolio/${scenarioId}?userId=${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const portfolioData = await portfolioRes.json();
+        const positions = portfolioData.positions || [];
+        updatePortfolioUI(positions, ctx, stockCardsContainer);
 
-    // 5) AI insights (your existing code)
-    const aiAdviceContainer = document.getElementById("aiAdviceContainer");
-    if (aiAdviceContainer) {
-      const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const aiData = await aiRes.json();
-      if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
-      const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
-      const ai = JSON.parse(cleaned);
+        // 5) AI insights (your existing code)
+        const aiAdviceContainer = document.getElementById("aiAdviceContainer");
+        if (aiAdviceContainer) {
+            const aiRes = await fetch(`/api/chatbot/${scenarioId}/scenario-analysis-summarised`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const aiData = await aiRes.json();
+            if (!aiRes.ok) throw new Error(aiData.error || "Failed to load AI summary");
+            const cleaned = aiData.aiAdvice.replace(/```json/g, '').replace(/```/g, '').trim();
+            const ai = JSON.parse(cleaned);
 
-      aiAdviceContainer.innerHTML = `
+            aiAdviceContainer.innerHTML = `
         <hr style="border-color:#555;margin:12px 0;">
         <h2>AI Advice</h2>
         <p><strong>${ai.recap}</strong></p>
@@ -1188,12 +1229,12 @@ async function showEndScreen() {
         <ul>${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
         <p style="font-size:12px;color:#aaa;">${ai.disclaimer}</p>
       `;
+        }
+    } catch (err) {
+        console.error("❌ Failed to load end screen:", err);
+        const stockCardsContainer = document.getElementById("endStockCards");
+        if (stockCardsContainer) stockCardsContainer.innerHTML += `<p>Unable to load end data.</p>`;
     }
-  } catch (err) {
-    console.error("❌ Failed to load end screen:", err);
-    const stockCardsContainer = document.getElementById("endStockCards");
-    if (stockCardsContainer) stockCardsContainer.innerHTML += `<p>Unable to load end data.</p>`;
-  }
 }
 
 
@@ -1305,93 +1346,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ----- helpers -----
 const fmtMoney = (n) => {
-  const x = (typeof n === 'string') ? Number(n) : (typeof n === 'bigint' ? Number(n.toString()) : n);
-  if (!isFinite(x)) return '—';
-  return x.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+    const x = (typeof n === 'string') ? Number(n) : (typeof n === 'bigint' ? Number(n.toString()) : n);
+    if (!isFinite(x)) return '—';
+    return x.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 };
 
 // "Tue, 9 Sep 2025 — 8am" / "8:15pm"
 const fmtDay = (d) =>
-  new Date(d).toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    new Date(d).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
 const fmtTimeCompact = (d) => {
-  const s = new Date(d).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit', hour12:true });
-  // "8:00 AM" -> "8am", "8:15 PM" -> "8:15pm"
-  return s.replace(':00','').replace(' ','').toLowerCase();
+    const s = new Date(d).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+    // "8:00 AM" -> "8am", "8:15 PM" -> "8:15pm"
+    return s.replace(':00', '').replace(' ', '').toLowerCase();
 };
 
 const fmtDayTimeCompact = (d) => {
-  if (!d) return '—';
-  const dt = (d instanceof Date) ? d : new Date(d);
-  if (isNaN(dt)) return '—';
-  return `${fmtDay(dt)} — ${fmtTimeCompact(dt)}`;
+    if (!d) return '—';
+    const dt = (d instanceof Date) ? d : new Date(d);
+    if (isNaN(dt)) return '—';
+    return `${fmtDay(dt)} — ${fmtTimeCompact(dt)}`;
 };
 
 const fmtDuration = (start, end) => {
-  if (!start || !end) return '—';
-  const s = new Date(start), e = new Date(end);
-  if (isNaN(s) || isNaN(e)) return '—';
-  const ms = Math.max(0, e - s);
-  const days = Math.floor(ms / 86400000);
-  const hours = Math.floor((ms % 86400000) / 3600000);
-  return `${days}d ${hours}h`;
+    if (!start || !end) return '—';
+    const s = new Date(start), e = new Date(end);
+    if (isNaN(s) || isNaN(e)) return '—';
+    const ms = Math.max(0, e - s);
+    const days = Math.floor(ms / 86400000);
+    const hours = Math.floor((ms % 86400000) / 3600000);
+    return `${days}d ${hours}h`;
 };
 
 // Prisma BigInt/Decimal guard
 const deBigInt = (obj) => JSON.parse(JSON.stringify(obj, (_, v) => {
-  if (typeof v === 'bigint') return v.toString();
-  if (v && v.constructor && v.constructor.name === 'Decimal') return v.toString();
-  return v;
+    if (typeof v === 'bigint') return v.toString();
+    if (v && v.constructor && v.constructor.name === 'Decimal') return v.toString();
+    return v;
 }));
 
 // ----- main -----
 async function loadScenarioDetails() {
-  const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-  if (!scenarioId) return;
+    const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+    if (!scenarioId) return;
 
-  const titleEl = document.getElementById("scenario-title");
-  const descEl  = document.getElementById("scenario-description");
-  const startEl = document.getElementById("scenario-start-date");
-  const endEl   = document.getElementById("scenario-end-date");
-  const durationEl = document.getElementById("scenario-duration");
-  const initialWalletEl = document.getElementById("scenario-initial-wallet");
-  const allowedWrap = document.getElementById("scenario-allowed"); // exists in your HTML
+    const titleEl = document.getElementById("scenario-title");
+    const descEl = document.getElementById("scenario-description");
+    const startEl = document.getElementById("scenario-start-date");
+    const endEl = document.getElementById("scenario-end-date");
+    const durationEl = document.getElementById("scenario-duration");
+    const initialWalletEl = document.getElementById("scenario-initial-wallet");
+    const allowedWrap = document.getElementById("scenario-allowed"); // exists in your HTML
 
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const payload = await res.json();
-    if (!res.ok) throw new Error(payload.message || "Failed to fetch scenario details");
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/scenarios/getDetails/${scenarioId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const payload = await res.json();
+        if (!res.ok) throw new Error(payload.message || "Failed to fetch scenario details");
 
-    const scenario = deBigInt(payload.scenario || payload);
+        const scenario = deBigInt(payload.scenario || payload);
 
-    // Write fields
-    titleEl.textContent = scenario.title || '—';
-    descEl.textContent  = scenario.description || '—';
+        // Write fields
+        titleEl.textContent = scenario.title || '—';
+        descEl.textContent = scenario.description || '—';
 
-    // ✅ pretty start/end (lowercase am/pm, no seconds)
-    startEl.textContent = fmtDayTimeCompact(scenario.startDate);
-    endEl.textContent   = fmtDayTimeCompact(scenario.endDate);
+        // ✅ pretty start/end (lowercase am/pm, no seconds)
+        startEl.textContent = fmtDayTimeCompact(scenario.startDate);
+        endEl.textContent = fmtDayTimeCompact(scenario.endDate);
 
-    durationEl.textContent = fmtDuration(scenario.startDate, scenario.endDate);
-    initialWalletEl.textContent = fmtMoney(scenario.startingBalance);
+        durationEl.textContent = fmtDuration(scenario.startDate, scenario.endDate);
+        initialWalletEl.textContent = fmtMoney(scenario.startingBalance);
 
-    // Chips for allowed/recommended symbols
-    if (allowedWrap) {
-      allowedWrap.innerHTML = '';
-      (Array.isArray(scenario.allowedStocks) ? scenario.allowedStocks : []).forEach(sym => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.textContent = sym;
-        allowedWrap.appendChild(chip);
-      });
+        // Chips for allowed/recommended symbols
+        if (allowedWrap) {
+            allowedWrap.innerHTML = '';
+            (Array.isArray(scenario.allowedStocks) ? scenario.allowedStocks : []).forEach(sym => {
+                const chip = document.createElement('span');
+                chip.className = 'chip';
+                chip.textContent = sym;
+                allowedWrap.appendChild(chip);
+            });
+        }
+
+    } catch (err) {
+        console.error("Error loading scenario details:", err);
     }
-
-  } catch (err) {
-    console.error("Error loading scenario details:", err);
-  }
 }
 
 document.addEventListener("DOMContentLoaded", loadScenarioDetails);

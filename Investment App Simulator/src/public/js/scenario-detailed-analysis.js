@@ -1,11 +1,13 @@
 const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-const userId = localStorage.getItem('userId');
+const userId = localStorage.getItem("userId");
+
+/* 🧠 Markdown Renderer for AI Advice */
 function renderAiAdviceMarkdown(aiTextString) {
   if (!aiTextString) return "";
 
   let html = aiTextString;
 
-  // ✅ Convert headings (h1 to h6)
+  // ✅ Convert headings
   html = html.replace(/^###### (.+)$/gm, "<h6>$1</h6>");
   html = html.replace(/^##### (.+)$/gm, "<h5>$1</h5>");
   html = html.replace(/^#### (.+)$/gm, "<h4>$1</h4>");
@@ -16,7 +18,7 @@ function renderAiAdviceMarkdown(aiTextString) {
   // ✅ Convert bold
   html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 
-  // ✅ Convert dash bullets into <ul>
+  // ✅ Convert bullet lists
   const lines = html.split("\n");
   let inList = false;
   html = lines.map(line => {
@@ -35,10 +37,9 @@ function renderAiAdviceMarkdown(aiTextString) {
       return `<p>${line.trim()}</p>`;
     }
   }).join("");
-
   if (inList) html += "</ul>";
 
-  // ✅ Convert simple tables like | Symbol | High | Low | Volatility |
+  // ✅ Simple table conversion
   html = html.replace(/\|(.+)\|/g, match => {
     const cells = match.split("|").slice(1, -1).map(c => c.trim());
     if (cells[0].toLowerCase() === "symbol") {
@@ -49,15 +50,13 @@ function renderAiAdviceMarkdown(aiTextString) {
       return "";
     }
   });
-
   if (html.includes("<table") && !html.includes("</table>")) html += "</tbody></table>";
 
-  // ✅ Wrap everything in a container
+  // ✅ Wrap in styled container
   return `<div class="ai-advice-content" style="color:#E0EBFF; padding-left:1rem;">${html}</div>`;
 }
 
-
-
+/* 🧩 Main Logic */
 document.addEventListener("DOMContentLoaded", async () => {
   const aiText = document.getElementById("ai-text");
   const intradayChartEl = document.getElementById("intraday-chart");
@@ -78,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ─────────────────────────────
-     1️⃣ LOAD & RENDER CHART DATA FIRST
+     1️⃣ LOAD & RENDER CHART DATA
   ───────────────────────────── */
   try {
     const chartRes = await fetch(`/scenarios/${scenarioId}/getChartData`, {
@@ -88,47 +87,67 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.latestChartData = chartData;
     console.log("📊 Chart Data from /scenarios:", chartData);
 
-    // ✅ Render Portfolio Pie Chart
+    /* === Portfolio Pie Chart === */
     if (portfolioPieChartEl && chartData.trades?.length) {
       const pieCtx = portfolioPieChartEl.getContext("2d");
       const pieLabels = chartData.trades.map(t => t.symbol);
       const pieValues = chartData.trades.map(t => Number(t.currentValue));
       const pieColors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
 
-   new Chart(pieCtx, {
-  type: "pie",
-  data: {
-    labels: pieLabels,
-    datasets: [{
-      data: pieValues,
-      backgroundColor: pieColors,
-      borderColor: "#53596B",
-      borderWidth: 2,
-    }],
-  },
-  options: {
-    responsive: false,   // 🛑 disable dynamic resizing
-    maintainAspectRatio: false, // 🔒 keep fixed ratio
-    plugins: {
-      legend: { labels: { color: "#E0EBFF" }, position: "right" },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const total = pieValues.reduce((a, b) => a + b, 0);
-            const percent = ((context.raw / total) * 100).toFixed(1);
-            return `${context.label}: $${context.raw.toFixed(2)} (${percent}%)`;
+      new Chart(pieCtx, {
+        type: "pie",
+        data: {
+          labels: pieLabels,
+          datasets: [{
+            data: pieValues,
+            backgroundColor: pieColors,
+            borderColor: "#53596B",
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: "#E0EBFF" }, position: "right" },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const total = pieValues.reduce((a, b) => a + b, 0);
+                  const percent = ((context.raw / total) * 100).toFixed(1);
+                  return `${context.label}: $${context.raw.toFixed(2)} (${percent}%)`;
+                },
+              },
+            },
           },
         },
-      },
-    },
-  },
-});
-
+      });
     } else {
+      // 🧠 No portfolio data → user didn’t trade in last attempt
+      if (portfolioPieChartEl) {
+        const parent = portfolioPieChartEl.parentElement;
+        parent.innerHTML = `
+          <div style="
+            color:#E0EBFF;
+            text-align:center;
+            padding:2rem;
+            border:1px solid #53596B;
+            border-radius:12px;
+            background:#000000;
+            transition: all 0.3s ease;
+          ">
+            <h3 style="margin-bottom:0.5rem;">No Portfolio Data</h3>
+            <p style="margin:0.5rem 0 0;">
+              You didn’t make any trades during your previous attempt.
+              <br />
+              <span style="color:#AEB7D0;">Start a new attempt to see your portfolio allocation here.</span>
+            </p>
+          </div>`;
+      }
       console.warn("⚠️ No portfolio data for pie chart.");
     }
 
-    // ✅ Render Intraday Chart
+    /* === Intraday Chart === */
     if (intradayChartEl && chartData.intraday && Object.keys(chartData.intraday).length) {
       const ctx = intradayChartEl.getContext("2d");
       const datasets = Object.entries(chartData.intraday).map(([symbol, stock], idx) => {
@@ -172,6 +191,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
       });
     } else {
+      // 🧠 No intraday data → user didn’t rerun or finish scenario
+      if (intradayChartEl) {
+        const parent = intradayChartEl.parentElement;
+        parent.innerHTML = `
+          <div style="
+            color:#E0EBFF;
+            text-align:center;
+            padding:2rem;
+            border:1px solid #53596B;
+            border-radius:12px;
+            background:#000000;
+            transition: all 0.3s ease;
+          ">
+            <h3 style="margin-bottom:0.5rem;">No Intraday Data</h3>
+            <p style="margin:0.5rem 0 0;">
+              No market or trading data was recorded for your last attempt.
+              <br />
+              <span style="color:#AEB7D0;">Rerun the scenario to generate new intraday charts and performance analytics.</span>
+            </p>
+          </div>`;
+      }
       console.warn("⚠️ No intraday data to render chart.");
     }
 
@@ -180,7 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ─────────────────────────────
-     2️⃣ FETCH AI ADVICE AFTER CHARTS
+     2️⃣ LOAD AI ADVICE
   ───────────────────────────── */
   try {
     if (aiText) aiText.innerHTML = "<p style='color:#aaa;'>Generating AI insights...</p>";
@@ -195,7 +235,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (aiText && aiData.aiAdvice) {
       aiText.innerHTML = renderAiAdviceMarkdown(aiData.aiAdvice);
     } else if (aiText) {
-      aiText.innerHTML = "<p style='color:#aaa;'>No AI insights available yet.</p>";
+      aiText.innerHTML = `
+        <div style="color:#E0EBFF; text-align:center; padding:2rem; border:1px solid #53596B; border-radius:12px; background:#000;">
+          <p><strong>No AI insights available yet.</strong></p>
+          <p style="color:#AEB7D0;">Once you complete a scenario attempt, your detailed AI analysis will appear here.</p>
+        </div>`;
     }
 
   } catch (err) {
@@ -204,12 +248,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// 🎯 Back Button Navigation
+/* 🎯 Back Button */
 document.addEventListener("DOMContentLoaded", () => {
   const backBtn = document.getElementById("back-button");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      window.location.href = "/html/scenarios.html"; // redirect to your scenarios page
+      window.location.href = "/html/scenarios.html";
     });
   }
 });

@@ -1,6 +1,6 @@
 const prisma = require('./prismaClient');
 const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
-const { Prisma } = require('@prisma/client'); 
+const { Prisma } = require('@prisma/client');
 
 // --- SCENARIO CRUD ---
 module.exports.createScenario = async (data) => {
@@ -1034,53 +1034,114 @@ module.exports.getParticipantRow = async function getParticipantRow(userId, scen
  */
 module.exports.finishAttemptOnce = async function finishAttemptOnce(userId, scenarioId) {
   const p = await module.exports.getParticipantRow(userId, scenarioId);
-  // atomic guard to avoid double-finish races
+  if (!p) throw new Error(`No participant found for user ${userId}, scenario ${scenarioId}`);
+
+  console.log(`🔹 Finishing attempt for participant ${p.id} (ended=${p.ended})`);
+
+  // Atomically flip participant flag
   const res = await prisma.scenarioParticipant.updateMany({
     where: { id: p.id, ended: false },
     data: { ended: true },
   });
-  return res.count === 1; // true iff we actually flipped from false->true
+
+  if (res.count === 0) {
+    console.warn(`⚠️ Participant ${p.id} already marked ended.`);
+    return false;
+  }
+
+  // ✅ Clean up transient attempt data in one atomic transaction
+  await prisma.$transaction(async (tx) => {
+    // 1️⃣ Cancel all unexecuted limit orders
+    await tx.scenarioLimitOrder.updateMany({
+      where: { participantId: p.id, status: "PENDING" },
+      data: { status: "CANCELLED" },
+    });
+
+    // 2️⃣ Remove all market orders (since they’re fully executed & no longer needed)
+    await tx.scenarioMarketOrder.deleteMany({
+      where: { participantId: p.id },
+    });
+
+    // 3️⃣ Remove all holdings (closing the participant’s portfolio)
+    await tx.scenarioHolding.deleteMany({
+      where: { participantId: p.id },
+    });
+
+    // 4️⃣ Remove replay state (reset progress, speed, etc.)
+    await tx.scenarioReplayProgress.deleteMany({
+      where: { userId, scenarioId },
+    });
+
+    // 5️⃣ Close any open attempts
+    await tx.scenarioAttempt.updateMany({
+      where: { userId, scenarioId, endedAt: null },
+      data: { endedAt: new Date() },
+    });
+  });
+
+  console.log(`✅ Cleaned up active trading + replay data for participant ${p.id}`);
+  return true;
 };
+
+
 
 /**
  * Ensure you can't start a new attempt while one is active.
  * Returns the next attempt number when it succeeds.
  */
 module.exports.startAttemptGuarded = async function startAttemptGuarded(userId, scenarioId, startingBalance) {
-  const p = await module.exports.getParticipantRow(userId, scenarioId);
-
-  if (p.ended === false) {
-    const err = new Error('Attempt already in progress. Finish it before starting a new one.');
-    err.status = 409;
+  // ensure participant row exists & is ended
+  const participant = await prisma.scenarioParticipant.findFirst({
+    where: { userId, scenarioId: Number(scenarioId) },
+    select: { id: true, ended: true },
+  });
+  if (!participant) {
+    const err = new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+    err.status = 404;
     throw err;
   }
-
-  // Validate + coerce to number first
-  const startNum = Number(startingBalance);
-  if (startNum == null || Number.isNaN(startNum)) {
-    throw new Error('startAttemptGuarded: startingBalance must be a number');
+  if (participant.ended === false) {
+    const hasAttempt = await prisma.scenarioAttempt.findFirst({
+      where: { userId, scenarioId: Number(scenarioId), endedAt: null },
+    });
+    if (hasAttempt) {
+      const err = new Error('Attempt already in progress. Finish it before starting a new one.');
+      err.status = 409;
+      throw err;
+    }
   }
 
-  const last = await prisma.scenarioAttemptAnalytics.findFirst({
+
+  // compute next attempt number (use ScenarioAttempt or ScenarioAttemptAnalytics — either is fine)
+  const lastAttempt = await prisma.scenarioAttempt.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
     orderBy: { attemptNumber: 'desc' },
     select: { attemptNumber: true },
   });
-  const nextAttempt = (last?.attemptNumber ?? 0) + 1;
+  const nextAttempt = (lastAttempt?.attemptNumber ?? 0) + 1;
 
+  // reset state + set starting balance + mark active, then create attempt row
   await prisma.$transaction(async (tx) => {
     await tx.scenarioLimitOrder.deleteMany({
-      where: { participantId: p.id, status: 'PENDING' },
+      where: { participantId: participant.id, status: 'PENDING' },
     });
-    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: p.id } });
-    await tx.scenarioHolding.deleteMany({ where: { participantId: p.id } });
+    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: participant.id } });
+    await tx.scenarioHolding.deleteMany({ where: { participantId: participant.id } });
 
-    // Write a Decimal or a plain Number (both are OK). Using Decimal is safest:
     await tx.scenarioParticipant.update({
-      where: { id: p.id },
+      where: { id: participant.id },
       data: {
-        cashBalance: new Prisma.Decimal(startNum), // ✅ correct
+        cashBalance: new Prisma.Decimal(Number(startingBalance)),
         ended: false,
+      },
+    });
+
+    await tx.scenarioAttempt.create({
+      data: {
+        userId,
+        scenarioId: Number(scenarioId),
+        attemptNumber: nextAttempt,
+        startedAt: new Date(),
       },
     });
   });
