@@ -1486,3 +1486,41 @@ module.exports.upsertAIAdvice = async (userId, scenarioId, aiAdvice) => {
     throw err;
   }
 };
+
+
+module.exports.getLatestAIAdvice = async (userId, scenarioId) => {
+  try {
+    if (!userId || !scenarioId) {
+      throw new Error("Missing userId or scenarioId");
+    }
+
+    // ✅ Find the latest attempt that actually HAS aiInsights
+    const latestAttempt = await prisma.scenarioAttempt.findFirst({
+      where: {
+        userId,
+        scenarioId,
+        aiInsights: {
+          not: null, // only attempts that have AI insights
+        },
+      },
+      orderBy: {
+        attemptNumber: "desc", // latest one
+      },
+      select: {
+        attemptNumber: true,
+        aiInsights: true,
+        endedAt: true,
+      },
+    });
+
+    if (!latestAttempt) {
+      console.log("ℹ️ No past attempts with AI insights found.");
+      return null;
+    }
+
+    return latestAttempt;
+  } catch (err) {
+    console.error("❌ Error fetching latest AI advice:", err);
+    throw err;
+  }
+};

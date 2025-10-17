@@ -774,3 +774,30 @@ module.exports.saveAIInsights = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+module.exports.getLatestAIAdviceController = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const scenarioId = Number(req.params.scenarioId);
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!scenarioId) return res.status(400).json({ error: "Invalid scenario ID" });
+
+    const latestAdvice = await scenarioModel.getLatestAIAdvice(userId, scenarioId);
+
+    if (!latestAdvice) {
+      return res.status(404).json({ message: "No AI advice found for this scenario." });
+    }
+
+    return res.status(200).json({
+      attemptNumber: latestAdvice.attemptNumber,
+      aiInsights: latestAdvice.aiInsights,
+      createdAt: latestAdvice.createdAt,
+      endedAt: latestAdvice.endedAt,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching latest AI advice controller:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};

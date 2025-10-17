@@ -178,6 +178,12 @@ async function renderMyScenarios() {
     btnContainer.appendChild(consoleBtn);
     btnContainer.appendChild(removeBtn);
     card.appendChild(btnContainer);
+// Link-style text for viewing last insights
+const insightsLink = document.createElement("span");
+insightsLink.textContent = "Show Last Attempt Insights";
+insightsLink.className = "insights-link";
+insightsLink.addEventListener("click", () => showInsightsPopup(s.id));
+card.appendChild(insightsLink);
 
     myPanel.appendChild(card);
   });
@@ -198,3 +204,80 @@ document.querySelectorAll(".tab-button").forEach(btn => {
 
 // -------------------- Init --------------------
 init();
+
+
+async function showInsightsPopup(scenarioId) {
+  const token = localStorage.getItem("token");
+  const popup = document.getElementById("aiInsightsPopup");
+  const body = document.getElementById("aiInsightsBody");
+
+  popup.style.display = "flex";
+  body.innerHTML = "Loading...";
+
+  try {
+    const res = await fetch(`/scenarios/${scenarioId}/ai-insights-latest`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Failed to load insights");
+    if (!data.aiInsights) {
+      body.innerHTML = `<p>No insights found for your last attempt.</p>`;
+      return;
+    }
+
+    let ai = data.aiInsights;
+    let html = "";
+
+    // 🧩 Try to handle both JSON & text outputs
+    try {
+      // Clean potential code block formatting
+      const cleaned = typeof ai === "string"
+        ? ai.replace(/```json/g, "").replace(/```/g, "").trim()
+        : JSON.stringify(ai);
+
+      const parsed = typeof cleaned === "string" ? JSON.parse(cleaned) : cleaned;
+
+      html = `
+        <h3>${parsed.title || "Scenario Insights"}</h3>
+        <p>${parsed.recap || ""}</p>
+        <ul>
+          <li><b>Top Gainers:</b> ${parsed.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
+          <li><b>Top Losers:</b> ${parsed.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
+          <li><b>Total Unrealized P/L:</b> ${parsed.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
+          <li><b>Cash Remaining:</b> ${parsed.portfolioHighlights?.cashRemaining || "-"}</li>
+        </ul>
+        <h4>Next Time, Try:</h4>
+        <ul>${(parsed.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
+        <p style="font-size:12px;color:#aaa;">${parsed.disclaimer || ""}</p>
+      `;
+    } catch {
+      // 🧠 Fallback for Markdown or plain text format
+      const text =
+        typeof ai === "string" ? ai : JSON.stringify(ai, null, 2);
+      html = text
+        .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+        .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+        .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+        .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/gim, "<em>$1</em>")
+        .replace(/\n/g, "<br>");
+    }
+
+    body.innerHTML = `<div class="markdown-text">${html}</div>`;
+  } catch (err) {
+    console.error("❌ Error fetching insights:", err);
+    body.innerHTML = `<p style="color:red;">Error loading insights: ${err.message}</p>`;
+  }
+}
+
+function closeInsightsPopup() {
+  document.getElementById("aiInsightsPopup").style.display = "none";
+}
+
+// Close popup when clicking outside
+window.addEventListener("click", (e) => {
+  const popup = document.getElementById("aiInsightsPopup");
+  if (e.target === popup) popup.style.display = "none";
+});
+

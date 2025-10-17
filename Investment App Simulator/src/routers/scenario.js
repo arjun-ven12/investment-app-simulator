@@ -75,4 +75,6 @@ router.post('/:scenarioId/attempts/finish', jwtMiddleware.verifyToken, scenarioC
 router.get('/:scenarioId/attempts', jwtMiddleware.verifyToken, scenarioController.listAttempts);
 router.post( "/:scenarioId/attempts/ai-insights",jwtMiddleware.verifyToken,scenarioController.saveAIInsights);
 router.get( "/:scenarioId/getChartData",jwtMiddleware.verifyToken,scenarioController.scenarioEndingDetailsCharts);
+router.get("/:scenarioId/ai-insights-latest",jwtMiddleware.verifyToken, scenarioController.getLatestAIAdviceController);
+
 module.exports = router;
