@@ -801,3 +801,20 @@ module.exports.getLatestAIAdviceController = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+
+exports.leaveScenario = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const scenarioId = Number(req.params.id);
+
+    const result = await scenarioModel.removeUserScenario(userId, scenarioId);
+    return res.json(result);
+  } catch (err) {
+    console.error("❌ Error leaving scenario:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while leaving scenario.",
+    });
+  }
+};
