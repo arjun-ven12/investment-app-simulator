@@ -8,12 +8,8 @@ const POLYGON_API_KEY = "GmN8ThlyrYE40pn2cFY657cNad05nqgQ"
 const prisma = require('./prismaClient'); // import the Prisma instance
 const fetch = require('node-fetch');
 
-
-
-
-
-
-
+const { ethers } = require("ethers");
+const hardhat = require("hardhat");
 
 //////////////////////////////////////////////////
 /// GET OPTIONS CONTRACTS BY SYMBOL (ex AAPL)

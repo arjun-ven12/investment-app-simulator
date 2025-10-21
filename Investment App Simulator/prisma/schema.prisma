@@ -198,6 +198,7 @@ model User {
   ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
   ScenarioPersonalBest     ScenarioPersonalBest[]
   ScenarioAttempt          ScenarioAttempt[]
+  BlockchainTransaction BlockchainTransaction[]
 }
 
 model Referral {
@@ -673,4 +674,16 @@ enum ScenarioAttemptStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+model BlockchainTransaction {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  symbol        String
+  tradeType     String
+  gasUsed       Float
+  transactionHash String
+  blockNumber   Int
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
