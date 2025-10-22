@@ -90,6 +90,7 @@ server.listen(port, () => {
 });
 
 
+require("./middlewares/dailyAIAdviceCron");
 
 // require('dotenv').config();
 // require('./middlewares/limitOrderCron');

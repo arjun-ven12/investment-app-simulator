@@ -5,18 +5,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Homepage</title>
-
-  <!-- CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="../css/settings.css" />
-  <link rel="stylesheet" href="../css/investment.css" />
-
   <!-- JS Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="../css/settings.css" />
+  <link rel="stylesheet" href="../css/investment.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+  marked.setOptions({ mangle: false, headerIds: false });
+</script>
 
   <!-- Home JS (defer so DOM is loaded) -->
   <script src="../js/home.js" defer></script>
@@ -38,7 +41,24 @@
         </button>
       </div>
     </div>
+    <!-- ================= AI ADVICE SECTION ================= -->
+    <div class="portfolio-section content chart-container">
+      <h1>AI Advice</h1>
+      <div class="tab-container">
+        <button id="tab-ai-stocks" class="tab-button active">Stocks</button>
+        <button id="tab-ai-options" class="tab-button">Options</button>
+      </div>
 
+      <div id="ai-stocks" class="tab-content active">
+        <br>
+        <div id="ai-stocks-card"></div>
+      </div>
+
+      <div id="ai-options" class="tab-content">
+        <br>
+        <div id="ai-options-card"></div>
+      </div>
+    </div>
     <!-- Leaderboard Section -->
     <div class="content">
       <h2>Leaderboard</h2>
@@ -83,27 +103,27 @@
     <div class="portfolio-section">
 
 
-  </div>
+    </div>
 
-  <!-- Navbar JS -->
-  <script src="../js/navbar.js"></script>
+    <!-- Navbar JS -->
+    <script src="../js/navbar.js"></script>
 
-  <!-- Inline Script for Goals & Tab Switching -->
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const goalsList = document.getElementById("goals-list");
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        try {
-          const response = await fetch(`/api/goals?userId=${userId}`);
-          if (response.ok) {
-            const goals = await response.json();
-            goalsList.innerHTML = "";
-            goals.forEach(goal => {
-              const div = document.createElement("div");
-              div.className = "goal-box";
-              div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
-              div.innerHTML = `
+    <!-- Inline Script for Goals & Tab Switching -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const goalsList = document.getElementById("goals-list");
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          try {
+            const response = await fetch(`/api/goals?userId=${userId}`);
+            if (response.ok) {
+              const goals = await response.json();
+              goalsList.innerHTML = "";
+              goals.forEach(goal => {
+                const div = document.createElement("div");
+                div.className = "goal-box";
+                div.style = "flex: 1 1 calc(30% - 10px); min-width: 250px; max-width: 300px;";
+                div.innerHTML = `
                   <p><strong>${goal.title}</strong></p>
                   <p>Amount: $${goal.amount}</p>
                   <p>Description: ${goal.description || "No description"}</p>
@@ -111,21 +131,21 @@
                   <button class="goal-edit" onclick="window.location.href='goalEdit.html?id=${goal.id}'">Edit</button>
                   <button class="goal-delete" onclick="deleteGoal(${goal.id})">Delete</button>
                 `;
-              goalsList.appendChild(div);
-            });
+                goalsList.appendChild(div);
+              });
+            }
+          } catch (error) {
+            console.error("Error fetching goals:", error);
           }
-        } catch (error) {
-          console.error("Error fetching goals:", error);
         }
-      }
-    });
+      });
 
-    function deleteGoal(id) {
-      fetch(`/api/goals/${id}`, { method: "DELETE" })
-        .then(() => location.reload())
-        .catch(error => console.error("Error deleting goal:", error));
-    }
-  </script>
+      function deleteGoal(id) {
+        fetch(`/api/goals/${id}`, { method: "DELETE" })
+          .then(() => location.reload())
+          .catch(error => console.error("Error deleting goal:", error));
+      }
+    </script>
 
 </body>
 

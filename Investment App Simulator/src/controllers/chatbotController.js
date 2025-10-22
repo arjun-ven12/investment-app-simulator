@@ -242,6 +242,7 @@ RULES:
 - Use "~X shares at current market price" for stock recommendations.
 - STRICT RULE: Do NOT recommend any stock in a sector that already represents more than 40% of the portfolio (e.g., Pharmaceuticals, Technology). Only pick stocks from underrepresented sectors: Energy, Industrials, Financials, Consumer Discretionary, or Utilities. Ensure the sector allocation improves diversification.
 - Add in a disclaimer that this is only for educational purposes and not financial advice.
+- Separate each major section with '---' so that front-end markdown rendering creates clear spacing.
 END
 `;
 
@@ -661,6 +662,9 @@ You are a quantitative options analyst.
 Write a concise, professional, and actionable assessment for an options trader.
 Assume only CALL/PUT instruments and MARKET/LIMIT order types are supported.
 Do not discuss changing expirations (user trades 0–7 days). Do not introduce strike-range "quality" commentary beyond the rules below.
+
+RULES:
+- Separate each major section with '---' so that front-end markdown rendering creates clear spacing.
 
 USER SUMMARY (JSON):
 ${JSON.stringify(summary, null, 2)}
