@@ -377,3 +377,13 @@
   font-weight: 600;
   color: #e0ebff;
 }
+
+.my-scenarios {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.my-scenarios::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
+}

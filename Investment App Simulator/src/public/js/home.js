@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // OPTIONS
     if (optionsData?.success && optionsData.advice?.length) {
       const latest = optionsData.advice[0];
-     optionsCard.innerHTML = `
+      optionsCard.innerHTML = `
 <div class="markdown-body">
 <div class="ai-options-box markdown-body">
     ${safeMarkedParse(latest.advice || "")}
@@ -396,4 +396,70 @@ Last updated: ${new Date(latest.createdAt).toLocaleString()}
       document.getElementById(tab.id.replace("tab-", "")).classList.add("active");
     });
   });
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("homepage-scenarios");
+  const token = localStorage.getItem("token");
+  if (!token) {
+    container.innerHTML = "<p>Please log in to view scenarios.</p>";
+    return;
+  }
+
+  try {
+    const res = await fetch("/scenarios/joined", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Failed to fetch scenarios");
+    const data = await res.json();
+    const scenarios = data.success ? data.scenarios : [];
+
+    if (scenarios.length === 0) {
+      container.innerHTML = "<p style='color:#E0EBFF;'>You haven’t joined any scenarios yet.</p>";
+      return;
+    }
+
+    // Sort by status first, then most recent (descending by createdAt or updatedAt)
+    const sorted = [...scenarios].sort((a, b) => {
+      const order = { IN_PROGRESS: 0, NOT_STARTED: 1, COMPLETED: 2 };
+      const statusDiff = order[a.status || "NOT_STARTED"] - order[b.status || "NOT_STARTED"];
+
+      // If statuses are same, sort by most recent date (newest first)
+      const dateA = new Date(a.updatedAt || a.createdAt || 0);
+      const dateB = new Date(b.updatedAt || b.createdAt || 0);
+
+      if (statusDiff !== 0) return statusDiff;        // first prioritize status
+      return dateB - dateA;                           // then prioritize recency
+    });
+    // Limit to 3 for homepage (most recent 3)
+    const limited = sorted.slice(0, 2);
+    container.innerHTML = "";
+
+    limited.forEach(s => {
+      const status = s.status || s.participantStatus || "NOT_STARTED";
+      const card = document.createElement("div");
+      card.className = "trading-card2";
+      card.style.marginBottom = "10px";
+      card.innerHTML = `
+<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+    <div style="flex:0.7;">
+      <h4>${s.title}</h4>
+      <p style="color:#E0EBFF;">${s.description || "No description"}</p>
+      <p><strong>Status:</strong> ${status.replace("_", " ")}</p>
+    </div>
+    <div style="flex-shrink:-1;">
+      <button class="submit-button scenario-btn"
+        onclick="window.open('scenario-console.html?scenarioId=${s.id}', '_blank')">
+        ${status === "COMPLETED" ? "Retry" : "Open Console"}
+      </button>
+    </div>
+  </div>
+`;
+
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Error loading scenarios:", err);
+    container.innerHTML = `<p style="color:red;">Failed to load scenarios.</p>`;
+  }
 });
