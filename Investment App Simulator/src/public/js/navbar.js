@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('navbar-container');
-
     fetch('../html/navbar.html')
         .then(response => {
             if (!response.ok) throw new Error('Navbar HTML not found');
@@ -8,9 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(html => {
             container.innerHTML = html;
-            initNavbar(); // Initialize toggle and logout after injecting
+            initNavbar();
+            highlightActiveLink(); // ✅ call here after injecting HTML
         })
         .catch(err => console.error('Error loading navbar:', err));
+
 });
 
 // Navbar initialization with token check
@@ -38,3 +39,21 @@ function initNavbar() {
         window.location.href = '/html/login.html';
     });
 }
+
+// Highlight active page
+function highlightActiveLink() {
+    const currentPath = window.location.pathname.split('/').pop(); // e.g. "home.html"
+    const navLinks = document.querySelectorAll('.navbar-links a');
+
+    navLinks.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (linkPath === currentPath) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+// Call after navbar loads
+document.addEventListener('DOMContentLoaded', highlightActiveLink);
