@@ -4,6 +4,8 @@ const prisma = require("../../prisma/prismaClient"); // your Prisma client
 const referralModel = require("../models/referral");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const userModel = require("../models/user");
+const crypto = require("crypto");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/email");
 //////////////////////////////////////////////////////
 // REGISTER USER
 //////////////////////////////////////////////////////
@@ -11,28 +13,47 @@ module.exports.register = async (req, res) => {
   const { email, username, password, name, referralCode } = req.body;
 
   try {
-    // 1️⃣ Check if user already exists
+    // 1️⃣ Validate email format before continuing
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    // 2️⃣ Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] },
     });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Email or username already exists" });
+      return res.status(400).json({ message: "Email or username already exists." });
     }
 
-    // 2️⃣ Hash password
+    // 3️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Create user
+    // 4️⃣ Generate verification token and expiry
+    const verifyToken = crypto.randomBytes(32).toString("hex");
+    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // 5️⃣ Create user (unverified)
     const newUser = await prisma.user.create({
-      data: { email, username, password: hashedPassword, name },
+      data: {
+        email,
+        username,
+        password: hashedPassword,
+        name,
+        verified: false,
+        verifyToken,
+        verifyExpires,
+      },
     });
 
-    // 4️⃣ Create referral for this user
-    const userReferralLink = `https://www.fintech.com/referral/${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    // 6️⃣ Send verification email
+    await sendVerificationEmail(email, verifyToken);
+
+    // 7️⃣ Create referral info (optional)
+    const referralCodeUse = crypto.randomBytes(5).toString("hex");
+    const userReferralLink = `https://www.sealed-fi.com/referral/${username}-${referralCodeUse}`;
+
     await prisma.referral.create({
       data: {
         userId: newUser.id,
@@ -46,31 +67,23 @@ module.exports.register = async (req, res) => {
       },
     });
 
-    // 5️⃣ If referral code is provided, use existing referral logic
+    // 8️⃣ Handle referral usage
     if (referralCode) {
       try {
-        // Reuse your referral model's useReferralLink function
         await referralModel.useReferralLink(newUser.id, referralCode);
       } catch (err) {
-        console.error("Referral code error:", err.message);
-        // optional: ignore error or notify user, don't block registration
+        console.warn("Referral code error:", err.message);
       }
     }
 
-    const token = jwt.sign(
-      { id: newUser.id, username: newUser.username },
-      JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
-    );
-
+    // ✅ 9️⃣ Do NOT log user in yet — just return success message
     return res.status(201).json({
-      message: "User registered successfully",
-      user: { id: newUser.id, email, username, referralLink: userReferralLink },
-      token,
+      message: "Verification email sent. Please check your inbox to verify your account.",
     });
+
   } catch (error) {
     console.error("Register error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -78,32 +91,56 @@ module.exports.register = async (req, res) => {
 // LOGIN USER
 //////////////////////////////////////////////////////
 module.exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
   try {
-    // 1️⃣ Find user by email
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    // 1️⃣ Find user by email OR username
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          email ? { email } : {},
+          username ? { username } : {}
+        ],
+      },
+    });
 
-    // 2️⃣ Compare password
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    // 2️⃣ Check if verified
+    if (!user.verified) {
+      return res
+        .status(403)
+        .json({ message: "Please verify your email before logging in." });
+    }
+
+    // 3️⃣ Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
 
+    // 4️⃣ Generate JWT token
     const token = jwt.sign(
-      { id: newUser.id, username: newUser.username },
+      { id: user.id, username: user.username },
       JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
+    // 5️⃣ Return success
     return res.status(200).json({
-      message: "Login successful",
-      user: { id: user.id, email: user.email, username: user.username },
+      message: "Login successful.",
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
       token,
     });
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -123,5 +160,77 @@ module.exports.getUserDetails = async (req, res) => {
     res.status(200).json({ user }); // { username, wallet }
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+
+//////////////////////////////////////////////////////
+// FORGOT PASSWORD
+//////////////////////////////////////////////////////
+module.exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // 1️⃣ Find user
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ message: "No account found with this email." });
+    }
+
+    // 2️⃣ Generate reset token and expiry (1 hour)
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000);
+
+    // 3️⃣ Save token to user
+    await prisma.user.update({
+      where: { email },
+      data: { verifyToken: resetToken, verifyExpires: resetExpires },
+    });
+
+    // 4️⃣ Send reset email
+    await sendPasswordResetEmail(email, resetToken);
+
+    return res.status(200).json({
+      message: "Password reset email sent. Please check your inbox.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+//////////////////////////////////////////////////////
+// RESET PASSWORD
+//////////////////////////////////////////////////////
+module.exports.resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // 1️⃣ Find user by valid token
+    const user = await prisma.user.findFirst({
+      where: { verifyToken: token, verifyExpires: { gt: new Date() } },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset link." });
+    }
+
+    // 2️⃣ Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 3️⃣ Update user password and clear reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        verifyToken: null,
+        verifyExpires: null,
+      },
+    });
+
+    res.status(200).json({ message: "Password has been reset successfully!" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };

@@ -49,19 +49,9 @@ module.exports.register = async function (req, res) {
       }
     }
 
-    // 6️⃣ Generate JWT token
-    const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '7d' });
-
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
-      token,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
-        name: newUser.name,
-      },
+      message: "Verification email sent! Please verify your email before logging in.",
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -84,6 +74,9 @@ module.exports.login = async function (req, res) {
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
+    if (!user.verified) {
+      return res.status(403).json({ success: false, message: "Please verify your email before logging in." });
+    }
     return res.status(200).json({
       success: true,
       token,

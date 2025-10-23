@@ -45,11 +45,14 @@ registerForm.addEventListener("submit", async function (event) {
       return;
     }
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("userId", data.user.id);
-    localStorage.setItem("username", data.user.username);
+    warningText.textContent = data.message || "Verification email sent! Please check your inbox.";
+    warningCard.classList.remove("d-none");
+    warningCard.classList.add("show");
 
-    window.location.href = "/html/home.html";
+    // Optionally redirect to login page after a short delay
+    setTimeout(() => {
+      window.location.href = "/html/login.html";
+    }, 2500);
   } catch (err) {
     warningText.textContent = err.message || "Unexpected error occurred.";
     warningCard.classList.remove("d-none");
