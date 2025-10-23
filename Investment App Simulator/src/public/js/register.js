@@ -61,3 +61,9 @@ registerForm.addEventListener("submit", async function (event) {
   }
 });
 
+
+
+document.getElementById("googleSignInBtn").addEventListener("click", () => {
+  // Redirect to your backend route that starts the Google OAuth flow
+  window.location.href = "http://localhost:3000/auth/google";
+});
