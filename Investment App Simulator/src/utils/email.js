@@ -4,32 +4,38 @@ const nodemailer = require("nodemailer");
 async function sendVerificationEmail(email, token) {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail", // 👈 Gmail helper for App Passwords
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // your 16-char app password
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    const link = `${process.env.APP_URL}/user/verify?token=${token}`;
+    // 💎 Use clean route
+    const link = `${process.env.APP_URL}/user/verify/${token}`;
 
     const info = await transporter.sendMail({
       from: `"Sealed Paper Trading" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Verify your email address",
       html: `
-        <h3>Welcome to Sealed Paper Trading!</h3>
-        <p>Click below to verify your email:</p>
-        <a href="${link}" style="color:#2563eb;">${link}</a>
-        <p>This link expires in 1 hour.</p>
+        <div style="font-family:Outfit, sans-serif; background:#fafafa; padding:30px; border-radius:12px; max-width:500px; margin:auto; color:#111;">
+          <h2 style="text-align:center; color:#2563eb; margin-bottom:0.5rem;">Sealed Paper Trading</h2>
+          <p style="text-align:center; margin-bottom:1.5rem;">Welcome aboard! Please verify your email address to activate your account.</p>
+          <div style="text-align:center; margin:20px 0;">
+            <a href="${link}" style="display:inline-block; background:#2563eb; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Verify Email</a>
+          </div>
+          <p style="text-align:center; color:#555;">Or copy and paste this link into your browser:</p>
+          <p style="word-break:break-all; text-align:center; color:#2563eb;">${link}</p>
+          <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:#777;">This link expires in 1 hour.</p>
+        </div>
       `,
     });
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Exists" : "Missing");
+
     console.log("✅ Verification email sent:", info.messageId);
   } catch (err) {
     console.error("❌ Email send error:", err);
-    throw err; // allow controller to catch it
+    throw err;
   }
 }
 

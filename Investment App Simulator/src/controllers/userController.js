@@ -132,7 +132,7 @@ module.exports.register = async (req, res) => {
 //////////////////////////////////////////////////////
 module.exports.login = async (req, res) => {
   const { email, username, password } = req.body;
-
+// const link = `${process.env.APP_URL}/verify/${token}`;
   try {
     // 1️⃣ Find user by email OR username
     const user = await prisma.user.findFirst({
