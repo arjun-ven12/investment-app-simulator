@@ -132,7 +132,7 @@ module.exports.register = async (req, res) => {
 //////////////////////////////////////////////////////
 module.exports.login = async (req, res) => {
   const { email, username, password } = req.body;
-// const link = `${process.env.APP_URL}/verify/${token}`;
+  // const link = `${process.env.APP_URL}/verify/${token}`;
   try {
     // 1️⃣ Find user by email OR username
     const user = await prisma.user.findFirst({
@@ -148,6 +148,12 @@ module.exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
+    // 🚫 Block password login for Google-only users
+    if (user.googleId && !user.password) {
+      return res.status(403).json({
+        message: "Please sign in using Google — this account doesn’t have a password.",
+      });
+    }
     // 2️⃣ Check if verified
     if (!user.verified) {
       return res
@@ -190,7 +196,7 @@ module.exports.login = async (req, res) => {
 
 module.exports.getUserDetails = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user.id;
     const user = await userModel.getUserBasicInfo(userId);
 
     if (!user) {

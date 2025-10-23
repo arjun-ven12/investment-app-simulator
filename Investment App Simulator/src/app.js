@@ -37,6 +37,7 @@ const stopMarketRouter = require("./routers/stopMarket");
 const scenarioRouter = require("./routers/scenario")
 const stopLimitRouter = require("./routers/stopLimit");
 const aiAdviceRoutes = require("./routers/aiAdvice");
+const authRoutes = require("./routers/auth");
 const app = express();
 
 // Middleware for parsing JSON requests
@@ -94,7 +95,7 @@ app.use("/api/goals", goalsRouter);
 app.use("/api/chatbot", chatbotRouter); 
 app.use("/guides", guideRouter)
 app.use("/ai-advice", aiAdviceRoutes);
-
+app.use("/auth", authRoutes);   
 // Handle unknown resources
 app.use((req, res, next) => {
     next(createError(404, `Unknown resource ${req.method} ${req.originalUrl}`));

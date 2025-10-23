@@ -463,3 +463,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     container.innerHTML = `<p style="color:red;">Failed to load scenarios.</p>`;
   }
 });
+
+// document.addEventListener("DOMContentLoaded", async () => {
+//   const token = localStorage.getItem("token");
+//   const userId = localStorage.getItem("userId");
+
+//   if (!token) {
+//     alert("Please log in first.");
+//     window.location.href = "/html/login.html";
+//     return;
+//   }
+
+//   // Optional: Verify token by pinging backend
+//   try {
+//     const res = await fetch(`/user/get/${userId}`);
+//     if (!res.ok) throw new Error("User not found");
+//     const data = await res.json();
+//     document.getElementById("usernameDisplay").innerText = data.user.username;
+//   } catch (err) {
+//     console.error(err);
+//     alert("Session expired. Please log in again.");
+//     localStorage.clear();
+//     window.location.href = "/html/login.html";
+//   }
+// });

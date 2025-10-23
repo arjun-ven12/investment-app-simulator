@@ -121,3 +121,9 @@ async function resendVerification(loginInput) {
 }
 
 });
+
+// Google Sign-In redirect
+document.getElementById("googleSignInBtn").addEventListener("click", () => {
+  // Redirect to your backend route that starts the Google OAuth flow
+  window.location.href = "http://localhost:3000/auth/google";
+});

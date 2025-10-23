@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const prisma = require("../../prisma/prismaClient");
+const jwtMiddleware = require('../middlewares/jwtMiddleware');
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 
-router.get('/get/:userId', userController.getUserDetails);
+router.get('/get/:userId', jwtMiddleware.verifyToken, userController.getUserDetails);
 router.post("/forgot-password", userController.forgotPassword);
 router.post("/verify-reset-code", userController.verifyResetCode);
 router.post("/reset-password", userController.resetPassword);
