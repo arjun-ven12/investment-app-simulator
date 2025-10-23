@@ -6,6 +6,39 @@ const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const userModel = require("../models/user");
 const crypto = require("crypto");
 const { sendVerificationEmail, sendPasswordResetCode } = require("../utils/email");
+
+
+
+
+const dns = require("dns");
+const emailExistence = require("email-existence");
+
+// simple domain + SMTP validation
+async function isRealEmail(email) {
+  // basic regex
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regex.test(email)) return false;
+
+  // check MX records
+  const domain = email.split("@")[1];
+  const mxExists = await new Promise((resolve) => {
+    dns.resolveMx(domain, (err, addresses) => {
+      if (err || !addresses?.length) resolve(false);
+      else resolve(true);
+    });
+  });
+  if (!mxExists) return false;
+
+  // optional SMTP probe (can be slow)
+  const exists = await new Promise((resolve) => {
+    emailExistence.check(email, (err, res) => {
+      if (err) resolve(false);
+      else resolve(res);
+    });
+  });
+
+  return exists;
+}
 //////////////////////////////////////////////////////
 // REGISTER USER
 //////////////////////////////////////////////////////
@@ -19,6 +52,13 @@ module.exports.register = async (req, res) => {
       return res.status(400).json({ message: "Please provide a valid email address." });
     }
 
+    // ✅ new check: verify if email actually exists
+    const isValid = await isRealEmail(email);
+    if (!isValid) {
+      return res.status(400).json({
+        message: "This email address appears invalid or unreachable. Please use a real email.",
+      });
+    }
     // 2️⃣ Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] },
