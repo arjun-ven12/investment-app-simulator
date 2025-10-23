@@ -179,6 +179,8 @@ model User {
   verifyExpires            DateTime?
   name                     String?
   phoneNumber              Int?
+  resetCode                String?
+  resetExpires             DateTime?
   BlogComment              BlogComment[]
   BlogPost                 BlogPost[]
   Comment                  Comment[]
