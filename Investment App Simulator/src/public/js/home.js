@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           labels,
           datasets: [{
             data,
-            backgroundColor: ["#E0EBFF","#A3C1FF","#7993FF","#5368A6","#2A3C6B","#0D1A33"],
+            backgroundColor: ["#E0EBFF", "#A3C1FF", "#7993FF", "#5368A6", "#2A3C6B", "#0D1A33"],
             hoverOffset: 6
           }]
         },
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             legend: { position: "top" },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   const total = context.dataset.data.reduce((a, b) => a + b, 0);
                   const percentage = ((context.raw / total) * 100).toFixed(2);
                   return `${context.label}: $${context.raw} (${percentage}%)`;
@@ -231,11 +231,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     summaryDiv.innerHTML = `
       <div style="text-align:center;">
         <strong>Total Realized PnL:</strong><br>
-        <span style="color:${totalRealized >= 0 ? 'limegreen':'red'};">${totalRealized.toFixed(2)}</span>
+        <span style="color:${totalRealized >= 0 ? 'limegreen' : 'red'};">${totalRealized.toFixed(2)}</span>
       </div>
       <div style="text-align:center;">
         <strong>Total Unrealized PnL:</strong><br>
-        <span style="color:${totalUnrealized >= 0 ? 'limegreen':'red'};">${totalUnrealized.toFixed(2)}</span>
+        <span style="color:${totalUnrealized >= 0 ? 'limegreen' : 'red'};">${totalUnrealized.toFixed(2)}</span>
       </div>
     `;
 
@@ -272,8 +272,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td style="padding:8px; text-align:center;">${item.expiredContracts}</td>
         <td style="padding:8px; text-align:center;">${item.openPositions}</td>
         <td style="padding:8px; text-align:center;">${item.closedPositions}</td>
-        <td style="padding:8px; text-align:center; color:${item.realizedPnL >= 0 ? "limegreen":"red"};">${item.realizedPnL.toFixed(2)}</td>
-        <td style="padding:8px; text-align:center; color:${item.unrealizedPnL >= 0 ? "limegreen":"red"};">${item.unrealizedPnL.toFixed(2)}</td>
+        <td style="padding:8px; text-align:center; color:${item.realizedPnL >= 0 ? "limegreen" : "red"};">${item.realizedPnL.toFixed(2)}</td>
+        <td style="padding:8px; text-align:center; color:${item.unrealizedPnL >= 0 ? "limegreen" : "red"};">${item.unrealizedPnL.toFixed(2)}</td>
       `;
       tbody.appendChild(row);
     });
@@ -326,3 +326,140 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
+function safeMarkedParse(text) {
+  if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+    return marked.parse(text || "");
+  } else {
+    console.warn("⚠️ Marked not loaded yet");
+    return text; // fallback: raw text
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
+
+  const stocksCard = document.getElementById("ai-stocks-card");
+  const optionsCard = document.getElementById("ai-options-card");
+
+  try {
+    const [stocksRes, optionsRes] = await Promise.all([
+      fetch(`/ai-advice/${userId}?category=stocks`),
+      fetch(`/ai-advice/${userId}?category=options`)
+    ]);
+
+    const stocksData = await stocksRes.json();
+    const optionsData = await optionsRes.json();
+
+    // STOCKS
+    if (stocksData?.success && stocksData.advice?.length) {
+      const latest = stocksData.advice[0];
+      stocksCard.innerHTML = `
+  <div class="markdown-body">
+    ${safeMarkedParse(latest.advice || "")}
+    <p style="color:#9CA3AF;font-size:0.9rem;margin-top:1.5rem;">
+      Last updated: ${new Date(latest.createdAt).toLocaleString()}
+    </p>
+  </div>`;
+    } else {
+      stocksCard.innerHTML = `<div class="markdown-body"><p style="color:#9CA3AF;">No stock advice available yet.</p></div>`;
+    }
+
+    // OPTIONS
+    if (optionsData?.success && optionsData.advice?.length) {
+      const latest = optionsData.advice[0];
+      optionsCard.innerHTML = `
+<div class="markdown-body">
+<div class="ai-options-box markdown-body">
+    ${safeMarkedParse(latest.advice || "")}
+ <p style="color:#9CA3AF;font-size:0.9rem;margin-top:1.5rem;">
+Last updated: ${new Date(latest.createdAt).toLocaleString()}
+  </div>`;
+    } else {
+      optionsCard.innerHTML = `<div class="markdown-body"><p style="color:#9CA3AF;">No options advice available yet.</p></div>`;
+    }
+
+  } catch (err) {
+    console.error("❌ Error fetching AI advice:", err);
+    stocksCard.innerHTML = `<div class="markdown-body"><p style="color:red;">Error loading stock advice.</p></div>`;
+    optionsCard.innerHTML = `<div class="markdown-body"><p style="color:red;">Error loading options advice.</p></div>`;
+  }
+
+  // Tabs
+  const aiTabs = document.querySelectorAll("#tab-ai-stocks, #tab-ai-options");
+  const aiContents = document.querySelectorAll("#ai-stocks, #ai-options");
+  aiTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      aiTabs.forEach(btn => btn.classList.remove("active"));
+      aiContents.forEach(div => div.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(tab.id.replace("tab-", "")).classList.add("active");
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("homepage-scenarios");
+  const token = localStorage.getItem("token");
+  if (!token) {
+    container.innerHTML = "<p>Please log in to view scenarios.</p>";
+    return;
+  }
+
+  try {
+    const res = await fetch("/scenarios/joined", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Failed to fetch scenarios");
+    const data = await res.json();
+    const scenarios = data.success ? data.scenarios : [];
+
+    if (scenarios.length === 0) {
+      container.innerHTML = "<p style='color:#E0EBFF;'>You haven’t joined any scenarios yet.</p>";
+      return;
+    }
+
+    // Sort by status first, then most recent (descending by createdAt or updatedAt)
+    const sorted = [...scenarios].sort((a, b) => {
+      const order = { IN_PROGRESS: 0, NOT_STARTED: 1, COMPLETED: 2 };
+      const statusDiff = order[a.status || "NOT_STARTED"] - order[b.status || "NOT_STARTED"];
+
+      // If statuses are same, sort by most recent date (newest first)
+      const dateA = new Date(a.updatedAt || a.createdAt || 0);
+      const dateB = new Date(b.updatedAt || b.createdAt || 0);
+
+      if (statusDiff !== 0) return statusDiff;        // first prioritize status
+      return dateB - dateA;                           // then prioritize recency
+    });
+    // Limit to 3 for homepage (most recent 3)
+    const limited = sorted.slice(0, 2);
+    container.innerHTML = "";
+
+    limited.forEach(s => {
+      const status = s.status || s.participantStatus || "NOT_STARTED";
+      const card = document.createElement("div");
+      card.className = "trading-card2";
+      card.style.marginBottom = "10px";
+      card.innerHTML = `
+<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+    <div style="flex:0.7;">
+      <h4>${s.title}</h4>
+      <p style="color:#E0EBFF;">${s.description || "No description"}</p>
+      <p><strong>Status:</strong> ${status.replace("_", " ")}</p>
+    </div>
+    <div style="flex-shrink:-1;">
+      <button class="submit-button scenario-btn"
+        onclick="window.open('scenario-console.html?scenarioId=${s.id}', '_blank')">
+        ${status === "COMPLETED" ? "Retry" : "Open Console"}
+      </button>
+    </div>
+  </div>
+`;
+
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Error loading scenarios:", err);
+    container.innerHTML = `<p style="color:red;">Failed to load scenarios.</p>`;
+  }
+});

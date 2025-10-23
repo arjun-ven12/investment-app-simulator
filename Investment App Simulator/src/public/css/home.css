@@ -1,3 +1,389 @@
   .h1{
     padding-top: 50px; /* ensures welcome message is below navbar */
 }
+
+
+/* cards */
+#ai-stocks-card, 
+#ai-options-card {
+  padding: 1.5rem;
+}
+
+.markdown-body {
+  font-family: 'Outfit','Segoe UI',sans-serif;
+  color: #e2e8f0;
+  line-height: 2;
+  letter-spacing: 0.3px;
+  font-size: 1.15rem; /* was 'large', now slightly bigger */
+}
+
+
+/* headings */
+.markdown-body h1, 
+.markdown-body h2, 
+.markdown-body h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #60a5fa;
+}
+
+/* paragraphs & lists */
+.markdown-body p, 
+.markdown-body ul, 
+.markdown-body ol {
+  margin-bottom: 1.3rem;
+  font-size: 1.15rem;
+}
+
+.markdown-body h1 {
+  font-size: 1.8rem;
+}
+.markdown-body h2 {
+  font-size: 1.5rem;
+}
+.markdown-body h3 {
+  font-size: 1.25rem;
+}
+
+/* horizontal rule spacing */
+.markdown-body hr {
+  border: 0;
+  height: 1px;
+  background: #334155;
+  margin: 2rem 0;      /* big gaps around ---- */
+  font-size:large;
+}
+
+/* tables */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem !important;
+  margin-bottom: 3.5rem !important;  /* big gap after table */
+  border: 1px solid #334155;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #334155;
+  padding: 12px 16px;
+  text-align: left;
+  color: #e2e8f0;
+}
+
+.markdown-body th {
+  background: #1e293b;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.markdown-body tr:nth-child(even) {
+  background: rgba(30,41,59,0.5);
+}
+
+/* padding at bottom of tab */
+.tab-content { padding-bottom: 2rem; }
+
+
+/* --- Force visible spacing after tables --- */
+.markdown-body table {
+  margin-bottom: 3rem !important;
+  border-collapse: collapse;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+/* Add a big gap after each table via pseudo-element */
+.markdown-body table::after {
+  content: "";
+  display: block;
+  height: 3rem;
+}
+
+/* Optional: extra spacing after headings too */
+.markdown-body h2, 
+.markdown-body h3 {
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 🎯 Options AI Advice Styling */
+.ai-options-box {
+  background: linear-gradient(160deg, #0b1324 0%, #141f33 100%);
+  border: 1px solid #2d3b57;
+  border-radius: 18px;
+  padding: 2.5rem 3rem;
+  color: #e2e8f0;
+  margin-top: 1.5rem;
+  line-height: 1.8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+
+.ai-options-box:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 28px rgba(30, 64, 175, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Headings */
+.ai-options-box h1, 
+.ai-options-box h2, 
+.ai-options-box h3 {
+  color: #60a5fa;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Scorecard bullets */
+.ai-options-box ul {
+  margin: 0 0 1.2rem 1.5rem;
+  padding: 0;
+}
+
+.ai-options-box li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Emphasis text */
+.ai-options-box strong {
+  color: #93c5fd;
+}
+
+/* Section dividers */
+.ai-options-box hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #334155, transparent);
+  margin: 2.5rem 0;
+}
+
+/* Footer timestamp */
+.ai-options-box .timestamp {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-top: 2rem;
+  text-align: right;
+  font-style: italic;
+}
+
+/* Optional: table styling (if model outputs a table) */
+.ai-options-box table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 3rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ai-options-box th, 
+.ai-options-box td {
+  border: 1px solid #334155;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.ai-options-box th {
+  background-color: #1e293b;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.ai-options-box tr:nth-child(even) {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+
+/* ------------------------------
+   OPTIONS AI ADVICE CARD
+--------------------------------*/
+.ai-options-box {
+  background: linear-gradient(160deg, #0b1324 0%, #141f33 100%);
+  border: 1px solid #2d3b57;
+  border-radius: 18px;
+  padding: 2.5rem 3rem;
+  color: #e2e8f0;
+  margin-top: 1.5rem;
+  line-height: 1.8;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* headings */
+.ai-options-box h1,
+.ai-options-box h2,
+.ai-options-box h3 {
+  color: #60a5fa;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* section divider */
+.ai-options-box hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #334155, transparent);
+  margin: 2.2rem 0;
+}
+
+/* emphasis text */
+.ai-options-box strong {
+  color: #93c5fd;
+}
+
+/* lists */
+.ai-options-box ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.ai-options-box li { margin-bottom: 0.4rem; }
+
+/* last-updated line */
+.ai-options-box .timestamp {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+/* ------------------------------
+   SCORECARD GRID
+--------------------------------*/
+.ai-options-box p:has(strong:contains("Performance:")),
+.ai-options-box p:has(strong:contains("Risk:")),
+.ai-options-box p:has(strong:contains("Timing:")),
+.ai-options-box p:has(strong:contains("Consistency:")) {
+  display: none; /* hide default text if LLM outputs plain bullets */
+}
+
+.ai-options-box .scorecard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.score-item {
+  background: rgba(30,41,59,0.6);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+}
+.score-item span.label {
+  display: block;
+  color: #93c5fd;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+.score-item span.value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+
+/* ===============================
+   OPTIONS AI ADVICE STYLING
+=============================== */
+.ai-options-box {
+  background: linear-gradient(160deg, #0b1324 0%, #141f33 100%);
+  border: 1px solid #2d3b57;
+  border-radius: 18px;
+  padding: 2.5rem 3rem;
+  color: #e2e8f0;
+  margin-top: 1.5rem;
+  line-height: 1.8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.ai-options-box h1,
+.ai-options-box h2,
+.ai-options-box h3 {
+  color: #60a5fa;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.ai-options-box strong {
+  color: #93c5fd;
+}
+
+.ai-options-box hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #334155, transparent);
+  margin: 2.2rem 0;
+}
+
+.ai-options-box ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.ai-options-box li {
+  margin-bottom: 0.4rem;
+}
+
+.ai-options-box .timestamp {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+/* ===============================
+   SCORECARD DASHBOARD GRID
+=============================== */
+.scorecard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.score-item {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+.score-item:hover {
+  transform: translateY(-2px);
+}
+
+.score-item span.label {
+  display: block;
+  color: #93c5fd;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+.score-item span.value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #e0ebff;
+}
+
+.my-scenarios {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.my-scenarios::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
+}

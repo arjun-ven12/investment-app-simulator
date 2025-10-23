@@ -1454,8 +1454,6 @@ async function hideEndScreen() {
   }
 }
 
-
-// Setup modal event listeners
 // Setup modal event listeners
 function setupEndScreen() {
   const modal = document.getElementById("endScreenModal");
@@ -1495,33 +1493,23 @@ function setupEndScreen() {
     }
   }
 
-  // 🟥 Close button → cleanup + redirect
+  // 🟥 Close button → finish attempt + cleanup + redirect
   if (closeBtn) {
     closeBtn.addEventListener("click", async () => {
       await finalizeAndCleanUp();
       modal.style.display = "none";
       console.log("✅ End screen closed and cleaned up");
       window.location.href = "/html/scenarios.html";
-      resetScenario();
     });
   }
 
-  // 🔁 Restart button → cleanup + reset
-  if (restartBtn) {
-    restartBtn.addEventListener("click", async () => {
-      await finalizeAndCleanUp();
-      modal.style.display = "none";
-      console.log("✅ Scenario restarted");
-      if (typeof resetScenario === "function") resetScenario();
-    });
-  }
-
-  // 🧠 More Insights button → cleanup + redirect to detailed analysis
+  // 🧠 More Insights button → go directly to detailed analysis (NO finalize)
   if (moreBtn) {
-    moreBtn.addEventListener("click", async () => {
-      await finalizeAndCleanUp();
+    moreBtn.addEventListener("click", () => {
       const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}`;
+      if (!scenarioId) return;
+      // Force a fresh reload each time
+      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}&_=${Date.now()}`;
     });
   }
 }
@@ -1533,15 +1521,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const moreBtn = document.getElementById("generateMoreInsights");
-    if (moreBtn) {
-        moreBtn.addEventListener("click", () => {
-            const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
-            // Navigate to a new page, passing scenarioId in query params
-            window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}`;
-        });
-    }
-})
+  const moreBtn = document.getElementById("generateMoreInsights");
+  if (moreBtn) {
+    moreBtn.addEventListener("click", () => {
+      const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
+      if (!scenarioId) return;
+
+      // Add timestamp to force reload
+      const cacheBuster = Date.now();
+      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}&t=${cacheBuster}`;
+    });
+  }
+});
+
 
 // ----- helpers -----
 const fmtMoney = (n) => {

@@ -174,6 +174,9 @@ model User {
   userReferralLink         String?                    @unique
   username                 String                     @unique
   updatedAt                DateTime                   @updatedAt
+  verified                 Boolean                    @default(false)
+  verifyToken              String?
+  verifyExpires            DateTime?
   name                     String?
   phoneNumber              Int?
   BlogComment              BlogComment[]
@@ -198,6 +201,7 @@ model User {
   ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
   ScenarioPersonalBest     ScenarioPersonalBest[]
   ScenarioAttempt          ScenarioAttempt[]
+  AIAdvice                 AIAdvice[]
   BlockchainTransaction BlockchainTransaction[]
 }
 
@@ -649,19 +653,19 @@ model ScenarioPersonalBest {
 }
 
 model ScenarioAttempt {
-  id            Int       @id @default(autoincrement())
+  id            Int                   @id @default(autoincrement())
   scenarioId    Int
   userId        Int
   attemptNumber Int
-  startedAt     DateTime  @default(now())
+  startedAt     DateTime              @default(now())
   endedAt       DateTime?
-  totalValue    Decimal?  @db.Decimal(14, 2)
-  realizedPnL   Decimal?  @db.Decimal(14, 2)
-  unrealizedPnL Decimal?  @db.Decimal(14, 2)
-  returnPct     Decimal?  @db.Decimal(7, 4)
-  aiInsights    Json? 
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalValue    Decimal?              @db.Decimal(14, 2)
+  realizedPnL   Decimal?              @db.Decimal(14, 2)
+  unrealizedPnL Decimal?              @db.Decimal(14, 2)
+  returnPct     Decimal?              @db.Decimal(7, 4)
+  aiInsights    Json?
+  scenario      Scenario              @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   status        ScenarioAttemptStatus @default(NOT_STARTED)
 
   @@unique([scenarioId, userId, attemptNumber])
@@ -675,6 +679,17 @@ enum ScenarioAttemptStatus {
   COMPLETED
   CANCELLED
 }
+
+model AIAdvice {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  category  String // "stocks" | "options"
+  advice    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 
 model BlockchainTransaction {
   id            Int      @id @default(autoincrement())

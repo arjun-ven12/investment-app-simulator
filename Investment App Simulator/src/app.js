@@ -36,7 +36,7 @@ const guideRouter = require("./routers/guide")
 const stopMarketRouter = require("./routers/stopMarket");
 const scenarioRouter = require("./routers/scenario")
 const stopLimitRouter = require("./routers/stopLimit");
-
+const aiAdviceRoutes = require("./routers/aiAdvice");
 const app = express();
 
 // Middleware for parsing JSON requests
@@ -93,7 +93,7 @@ app.use("/api", userRouter);
 app.use("/api/goals", goalsRouter); 
 app.use("/api/chatbot", chatbotRouter); 
 app.use("/guides", guideRouter)
-
+app.use("/ai-advice", aiAdviceRoutes);
 
 // Handle unknown resources
 app.use((req, res, next) => {

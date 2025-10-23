@@ -1,6 +1,7 @@
-const prisma = require('./prismaClient');
-const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
-const { Prisma } = require('@prisma/client');
+const prisma = require("./prismaClient");
+const API_KEY = "26d603eb0f773cc49609fc81898d4b9c";
+const { Prisma } = require("@prisma/client");
+const { ScenarioAttemptStatus } = require("@prisma/client");
 
 // --- SCENARIO CRUD ---
 module.exports.createScenario = async (data) => {
@@ -19,7 +20,7 @@ module.exports.createScenario = async (data) => {
 
 module.exports.getAllScenarios = async () => {
   return prisma.scenario.findMany({
-    orderBy: { startDate: 'asc' },
+    orderBy: { startDate: "asc" },
   });
 };
 
@@ -28,7 +29,7 @@ module.exports.getScenarioById = async (id) => {
     where: { id: Number(id) },
     include: { participants: true },
   });
-  if (!scenario) throw new Error('Scenario not found');
+  if (!scenario) throw new Error("Scenario not found");
   return scenario;
 };
 
@@ -51,7 +52,6 @@ module.exports.deleteScenario = async (id) => {
   return prisma.scenario.delete({ where: { id: Number(id) } });
 };
 
-
 module.exports.startScenarioAttempt = async (userId, scenarioId) => {
   const last = await prisma.scenarioAttempt.findFirst({
     where: { userId, scenarioId },
@@ -68,46 +68,86 @@ module.exports.startScenarioAttempt = async (userId, scenarioId) => {
   });
 };
 
-
-// --- JOIN SCENARIO ---
 module.exports.joinScenario = async (scenarioId, userId) => {
-  const scenario = await prisma.scenario.findUnique({ where: { id: Number(scenarioId) } });
-  if (!scenario) throw new Error('Scenario not found');
+  const scenario = await prisma.scenario.findUnique({
+    where: { id: Number(scenarioId) },
+  });
+  if (!scenario) throw new Error("Scenario not found");
 
   const existing = await prisma.scenarioParticipant.findFirst({
     where: { scenarioId: Number(scenarioId), userId },
   });
-  if (existing) throw new Error('Already joined');
+  if (existing) throw new Error("Already joined");
 
+  // 🟢 Create participant first
   const participant = await prisma.scenarioParticipant.create({
     data: {
-      scenarioId: Number(scenarioId),  // <-- convert to Int
+      scenarioId: Number(scenarioId),
       userId,
       cashBalance: scenario.startingBalance,
-    }
+    },
+  });
+
+  // 🟢 Immediately create a NOT_STARTED attempt
+  await prisma.scenarioAttempt.create({
+    data: {
+      attemptNumber: 1,
+      status: ScenarioAttemptStatus.NOT_STARTED,
+      // 👇 don't set startedAt (Prisma will auto-fill now())
+      endedAt: null,
+      scenario: { connect: { id: Number(scenarioId) } },
+      user: { connect: { id: userId } },
+    },
   });
 
   return participant;
 };
 
-
 // --- LEADERBOARD ---
 module.exports.getLeaderboard = async (scenarioId) => {
   return prisma.scenarioParticipant.findMany({
     where: { scenarioId: Number(scenarioId) },
-    orderBy: { finalRank: 'asc' },
+    orderBy: { finalRank: "asc" },
     include: { holdings: true },
   });
 };
 
+
 module.exports.getJoinedScenarios = async (userId) => {
   const joined = await prisma.scenarioParticipant.findMany({
     where: { userId },
-    include: { scenario: true },
-    orderBy: { joinedAt: 'desc' },
+    include: {
+      scenario: {
+        include: {
+          ScenarioAttempt: {
+            where: { userId },
+            orderBy: { attemptNumber: "desc" },
+            take: 1,
+            select: { status: true },
+          },
+        },
+      },
+    },
+    orderBy: { joinedAt: "desc" },
   });
-  return joined.map((jp) => jp.scenario);
+
+  return joined.map((jp) => {
+    const latestStatus = jp.scenario.ScenarioAttempt?.[0]?.status || "NOT_STARTED";
+
+    return {
+      id: jp.scenario.id,
+      title: jp.scenario.title,
+      description: jp.scenario.description,
+      startDate: jp.scenario.startDate,
+      endDate: jp.scenario.endDate,
+      startingBalance: jp.scenario.startingBalance,
+      allowedStocks: jp.scenario.allowedStocks,
+      rules: jp.scenario.rules,
+      status: latestStatus, // 👈 now exists for frontend
+    };
+  });
 };
+
 
 // --- REPLAY DATA ---
 module.exports.getReplayData = async (scenarioId, symbol) => {
@@ -117,12 +157,12 @@ module.exports.getReplayData = async (scenarioId, symbol) => {
   const data = await prisma.scenarioIntradayPrice.findMany({
     where: {
       scenarioId: scenarioId,
-      symbol: symbol
+      symbol: symbol,
     },
-    orderBy: { date: 'asc' },
+    orderBy: { date: "asc" },
   });
 
-  return data.map(d => ({
+  return data.map((d) => ({
     date: d.date,
     open: d.openPrice,
     high: d.highPrice,
@@ -139,8 +179,13 @@ module.exports.getReplayProgress = async (userId, scenarioId, symbol) => {
   return progress || { lastIndex: 0, speed: 1 };
 };
 
-
-module.exports.saveReplayProgress = async (userId, scenarioId, symbol, currentIndex, currentSpeed) => {
+module.exports.saveReplayProgress = async (
+  userId,
+  scenarioId,
+  symbol,
+  currentIndex,
+  currentSpeed
+) => {
   symbol = symbol.toUpperCase();
   return prisma.scenarioReplayProgress.upsert({
     where: { userId_scenarioId_symbol: { userId, scenarioId, symbol } },
@@ -159,7 +204,11 @@ module.exports.saveReplayProgress = async (userId, scenarioId, symbol, currentIn
   });
 };
 
-module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, quantity, price, currentIndex }) => {
+module.exports.executeMarketOrder = async (
+  scenarioId,
+  userId,
+  { side, symbol, quantity, price, currentIndex }
+) => {
   const totalCost = quantity * price;
 
   return await prisma.$transaction(async (tx) => {
@@ -172,38 +221,47 @@ module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, q
     const currentBalance = parseFloat(participant.cashBalance);
 
     // 1.5 Check for sufficient funds if buying
-    if (side === 'buy' && totalCost > currentBalance) {
+    if (side === "buy" && totalCost > currentBalance) {
       throw new Error("Insufficient funds");
     }
 
     // 1.6 Check for sufficient holdings if selling
-    if (side === 'sell') {
+    if (side === "sell") {
       const holding = await tx.scenarioHolding.findUnique({
-        where: { participantId_symbol: { participantId: participant.id, symbol } },
+        where: {
+          participantId_symbol: { participantId: participant.id, symbol },
+        },
       });
       const currentQty = holding ? parseFloat(holding.quantity) : 0;
 
       if (quantity > currentQty) {
-        throw new Error(`Insufficient stocks to sell. You have ${currentQty} shares.`);
+        throw new Error(
+          `Insufficient stocks to sell. You have ${currentQty} shares.`
+        );
       }
     }
 
     // 2. Update holdings
-    if (side === 'buy') {
+    if (side === "buy") {
       await tx.scenarioHolding.upsert({
-        where: { participantId_symbol: { participantId: participant.id, symbol } },
+        where: {
+          participantId_symbol: { participantId: participant.id, symbol },
+        },
         update: { quantity: { increment: quantity } },
         create: { participantId: participant.id, symbol, quantity },
       });
-    } else if (side === 'sell') {
+    } else if (side === "sell") {
       await tx.scenarioHolding.update({
-        where: { participantId_symbol: { participantId: participant.id, symbol } },
+        where: {
+          participantId_symbol: { participantId: participant.id, symbol },
+        },
         data: { quantity: { decrement: quantity } },
       });
     }
 
     // 3. Update cash balance safely
-    const newBalance = side === 'buy' ? currentBalance - totalCost : currentBalance + totalCost;
+    const newBalance =
+      side === "buy" ? currentBalance - totalCost : currentBalance + totalCost;
 
     await tx.scenarioParticipant.update({
       where: { id: participant.id },
@@ -218,7 +276,7 @@ module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, q
         symbol,
         quantity,
         executedPrice: price,
-        currentIndex
+        currentIndex,
       },
     });
 
@@ -226,19 +284,17 @@ module.exports.executeMarketOrder = async (scenarioId, userId, { side, symbol, q
   });
 };
 
-
-
 // Get net holdings of a symbol for a participant
 async function getHoldings(participantId, symbol) {
   const executedOrders = await prisma.scenarioMarketOrder.findMany({
-    where: { participantId, symbol, status: 'EXECUTED' },
+    where: { participantId, symbol, status: "EXECUTED" },
   });
 
   let netQty = 0;
   for (let order of executedOrders) {
-    if (order.side === 'buy') {
+    if (order.side === "buy") {
       netQty += Number(order.quantity);
-    } else if (order.side === 'sell') {
+    } else if (order.side === "sell") {
       netQty -= Number(order.quantity);
     }
   }
@@ -252,46 +308,63 @@ async function getAvailableShares(participantId, symbol) {
 
   // Total pending sell limit orders
   const pendingSellOrders = await prisma.scenarioLimitOrder.findMany({
-    where: { participantId, symbol, side: 'sell', status: 'PENDING' },
+    where: { participantId, symbol, side: "sell", status: "PENDING" },
   });
 
-  const reservedQty = pendingSellOrders.reduce((sum, order) => sum + Number(order.quantity), 0);
+  const reservedQty = pendingSellOrders.reduce(
+    (sum, order) => sum + Number(order.quantity),
+    0
+  );
 
   return executedQty - reservedQty; // available shares to sell
 }
 
-
-module.exports.createLimitOrder = async (scenarioId, userId, { side, symbol, quantity, limitPrice, price, currentIndex }) => {
+module.exports.createLimitOrder = async (
+  scenarioId,
+  userId,
+  { side, symbol, quantity, limitPrice, price, currentIndex }
+) => {
   const participant = await prisma.scenarioParticipant.findFirst({
     where: { scenarioId: Number(scenarioId), userId },
   });
-  if (!participant) throw new Error('User has not joined this scenario');
+  if (!participant) throw new Error("User has not joined this scenario");
 
   // Enforce limit price conditions using frontend price
-  if (side === 'buy' && price < limitPrice) {
-    throw new Error(`Cannot place buy limit order: current price (${price}) is below your limit (${limitPrice})`);
+  if (side === "buy" && price < limitPrice) {
+    throw new Error(
+      `Cannot place buy limit order: current price (${price}) is below your limit (${limitPrice})`
+    );
   }
-  if (side === 'sell' && price > limitPrice) {
-    throw new Error(`Cannot place sell limit order: current price (${price}) is above your limit (${limitPrice})`);
+  if (side === "sell" && price > limitPrice) {
+    throw new Error(
+      `Cannot place sell limit order: current price (${price}) is above your limit (${limitPrice})`
+    );
   }
 
   // Check available funds for buy
-  if (side === 'buy') {
+  if (side === "buy") {
     const pendingBuyOrders = await prisma.scenarioLimitOrder.findMany({
-      where: { participantId: participant.id, side: 'buy', status: 'PENDING' },
+      where: { participantId: participant.id, side: "buy", status: "PENDING" },
     });
-    const reservedCash = pendingBuyOrders.reduce((sum, order) => sum + Number(order.limitPrice) * Number(order.quantity), 0);
+    const reservedCash = pendingBuyOrders.reduce(
+      (sum, order) => sum + Number(order.limitPrice) * Number(order.quantity),
+      0
+    );
     const availableCash = Number(participant.cashBalance) - reservedCash;
     if (quantity * limitPrice > availableCash) {
-      throw new Error('Not enough cash to place this buy limit order considering existing pending orders');
+      throw new Error(
+        "Not enough cash to place this buy limit order considering existing pending orders"
+      );
     }
   }
 
   // Check available shares for sell
-  if (side === 'sell') {
+  if (side === "sell") {
     const availableShares = await getAvailableShares(participant.id, symbol);
     if (quantity > availableShares) {
-      throw new Error('Not enough shares to place this sell limit order considering existing pending orders');
+      throw new Error(
+        "Not enough shares to place this sell limit order considering existing pending orders"
+      );
     }
   }
 
@@ -303,14 +376,12 @@ module.exports.createLimitOrder = async (scenarioId, userId, { side, symbol, qua
       symbol,
       quantity,
       limitPrice,
-      orderType: 'LIMIT',
-      status: 'PENDING',
-      currentIndex
+      orderType: "LIMIT",
+      status: "PENDING",
+      currentIndex,
     },
   });
 };
-
-
 
 module.exports.getWalletBalance = async (scenarioId, userId) => {
   const participant = await prisma.scenarioParticipant.findFirst({
@@ -325,15 +396,20 @@ module.exports.getWalletBalance = async (scenarioId, userId) => {
 function toNumber(value) {
   // Prisma Decimal has toNumber() for some setups; fallback to Number()
   if (value === null || value === undefined) return 0;
-  if (typeof value === 'object' && typeof value.toNumber === 'function') return value.toNumber();
+  if (typeof value === "object" && typeof value.toNumber === "function")
+    return value.toNumber();
   return Number(value);
 }
 
-module.exports.processLimitOrders = async (symbol, latestPrice, currentIndex) => {
+module.exports.processLimitOrders = async (
+  symbol,
+  latestPrice,
+  currentIndex
+) => {
   // ensure latestPrice is a Number
   latestPrice = Number(latestPrice);
   const pendingOrders = await prisma.scenarioLimitOrder.findMany({
-    where: { symbol, status: 'PENDING' },
+    where: { symbol, status: "PENDING" },
     include: { participant: true },
   });
 
@@ -350,74 +426,97 @@ module.exports.processLimitOrders = async (symbol, latestPrice, currentIndex) =>
     const limit = Number(limitPrice);
     const qty = Number(quantity);
 
-    const shouldExecute = (side === 'buy' && limit >= latestPrice) || (side === 'sell' && limit <= latestPrice);
+    const shouldExecute =
+      (side === "buy" && limit >= latestPrice) ||
+      (side === "sell" && limit <= latestPrice);
     if (!shouldExecute) continue;
 
     try {
       await prisma.$transaction(async (tx) => {
         // Re-fetch participant inside transaction
-        const participantTx = await tx.scenarioParticipant.findUnique({ where: { id: participant.id } });
+        const participantTx = await tx.scenarioParticipant.findUnique({
+          where: { id: participant.id },
+        });
         if (!participantTx) {
-          console.log(`participant ${participant.id} disappeared, skipping order ${id}`);
+          console.log(
+            `participant ${participant.id} disappeared, skipping order ${id}`
+          );
           return;
         }
 
         // Get holdings for participant for this symbol (read/write within tx)
         const holdingRow = await tx.scenarioHolding.findUnique({
           where: {
-            participantId_symbol: { participantId: participantTx.id, symbol }
-          }
+            participantId_symbol: { participantId: participantTx.id, symbol },
+          },
         });
 
         const holdings = holdingRow ? Number(holdingRow.quantity) : 0;
         const cash = toNumber(participantTx.cashBalance);
-        console.log(cash)
+        console.log(cash);
 
         // Check affordability / availability
-        if (side === 'buy' && cash < qty * latestPrice) {
-          console.log(`Not enough cash for participant ${participantTx.id} for order ${id}`);
+        if (side === "buy" && cash < qty * latestPrice) {
+          console.log(
+            `Not enough cash for participant ${participantTx.id} for order ${id}`
+          );
           return;
         }
-        if (side === 'sell' && holdings < qty) {
-          console.log(`Not enough holdings for participant ${participantTx.id} for order ${id}`);
+        if (side === "sell" && holdings < qty) {
+          console.log(
+            `Not enough holdings for participant ${participantTx.id} for order ${id}`
+          );
           return;
         }
 
         // compute new cash balance
-        const newCash = side === 'buy'
-          ? Number((cash - qty * latestPrice).toFixed(2))
-          : Number((cash + qty * latestPrice).toFixed(2));
+        const newCash =
+          side === "buy"
+            ? Number((cash - qty * latestPrice).toFixed(2))
+            : Number((cash + qty * latestPrice).toFixed(2));
 
         // Update participant cash
         await tx.scenarioParticipant.update({
           where: { id: participantTx.id },
-          data: { cashBalance: newCash }
+          data: { cashBalance: newCash },
         });
 
         // Update holdings: increment for buys, decrement for sells
-        if (side === 'buy') {
+        if (side === "buy") {
           if (holdingRow) {
             await tx.scenarioHolding.update({
-              where: { participantId_symbol: { participantId: participantTx.id, symbol } },
-              data: { quantity: holdingRow.quantity + qty }
+              where: {
+                participantId_symbol: {
+                  participantId: participantTx.id,
+                  symbol,
+                },
+              },
+              data: { quantity: holdingRow.quantity + qty },
             });
           } else {
             await tx.scenarioHolding.create({
-              data: { participantId: participantTx.id, symbol, quantity: qty }
+              data: { participantId: participantTx.id, symbol, quantity: qty },
             });
           }
-        } else { // sell
+        } else {
+          // sell
           // holdings >= qty checked above
           await tx.scenarioHolding.update({
-            where: { participantId_symbol: { participantId: participantTx.id, symbol } },
-            data: { quantity: holdingRow.quantity - qty }
+            where: {
+              participantId_symbol: { participantId: participantTx.id, symbol },
+            },
+            data: { quantity: holdingRow.quantity - qty },
           });
         }
 
         // Mark limit order executed
         await tx.scenarioLimitOrder.update({
           where: { id },
-          data: { status: 'EXECUTED', executedIndex: currentIndex, updatedAt: new Date() },
+          data: {
+            status: "EXECUTED",
+            executedIndex: currentIndex,
+            updatedAt: new Date(),
+          },
         });
 
         // // Create scenario market order record (record executed trade)
@@ -432,8 +531,14 @@ module.exports.processLimitOrders = async (symbol, latestPrice, currentIndex) =>
         //     currentIndex
         //   },
         // });
-        console.log(newCash)
-        executedOrders.push({ id, side, symbol, quantity: qty, executedPrice: latestPrice });
+        console.log(newCash);
+        executedOrders.push({
+          id,
+          side,
+          symbol,
+          quantity: qty,
+          executedPrice: latestPrice,
+        });
       });
     } catch (txErr) {
       // unexpected transaction error — log it and continue
@@ -443,7 +548,6 @@ module.exports.processLimitOrders = async (symbol, latestPrice, currentIndex) =>
 
   return executedOrders;
 };
-
 
 module.exports.getOrderHistory = async (scenarioId, userId) => {
   // Get participant ID
@@ -468,23 +572,28 @@ module.exports.getOrderHistory = async (scenarioId, userId) => {
   return { marketOrders, limitOrders };
 };
 
-
-module.exports.getParticipantId = async function getParticipantId(scenarioId, userId) {
+module.exports.getParticipantId = async function getParticipantId(
+  scenarioId,
+  userId
+) {
   const participant = await prisma.scenarioParticipant.findFirst({
     where: { scenarioId, userId },
   });
   if (!participant) throw new Error("Participant not found in this scenario");
   return participant.id;
-}
-
-
-
+};
 
 // Get replay progress for a single symbol
 module.exports.getReplayProgress = async (userId, scenarioId, symbol) => {
   symbol = symbol.toUpperCase();
   const progress = await prisma.scenarioReplayProgress.findUnique({
-    where: { userId_scenarioId_symbol: { userId, scenarioId: Number(scenarioId), symbol } },
+    where: {
+      userId_scenarioId_symbol: {
+        userId,
+        scenarioId: Number(scenarioId),
+        symbol,
+      },
+    },
   });
   return progress || { lastIndex: 0, speed: 1, symbol };
 };
@@ -496,7 +605,7 @@ module.exports.loadProgress = async (scenarioId, userId, symbol) => {
 
   return prisma.scenarioReplayProgress.findMany({
     where: whereClause,
-    orderBy: { updatedAt: "desc" }
+    orderBy: { updatedAt: "desc" },
   });
 };
 
@@ -507,54 +616,64 @@ module.exports.loadIntradayData = async (scenarioId, symbols) => {
     const chartData = await prisma.scenarioIntradayPrice.findMany({
       where: { scenarioId, symbol },
       orderBy: { date: "asc" },
-      select: { date: true, closePrice: true }
+      select: { date: true, closePrice: true },
     });
 
-    data[symbol] = chartData.map(d => ({ x: d.date, c: parseFloat(d.closePrice) }));
+    data[symbol] = chartData.map((d) => ({
+      x: d.date,
+      c: parseFloat(d.closePrice),
+    }));
   }
   return data;
 };
 
-
-module.exports.getScenarioIntradayDataFromAPI = async function (scenarioId, symbol, dateFrom, dateTo) {
-  if (!symbol) throw new Error('Stock symbol is required.');
-  if (!scenarioId) throw new Error('Scenario ID is required.');
+module.exports.getScenarioIntradayDataFromAPI = async function (
+  scenarioId,
+  symbol,
+  dateFrom,
+  dateTo
+) {
+  if (!symbol) throw new Error("Stock symbol is required.");
+  if (!scenarioId) throw new Error("Scenario ID is required.");
   // Default to past 7 days if no dates provided
   const now = new Date();
-  const defaultTo = now.toISOString().split('T')[0];
+  const defaultTo = now.toISOString().split("T")[0];
   const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     .toISOString()
-    .split('T')[0];
+    .split("T")[0];
 
   const params = new URLSearchParams({
     access_key: API_KEY,
     symbols: symbol,
-    sort: 'ASC',
-    interval: '15min',
+    sort: "ASC",
+    interval: "15min",
     limit: 1000,
     date_from: dateFrom || defaultFrom,
-    date_to: dateTo || defaultTo
+    date_to: dateTo || defaultTo,
   });
 
   const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Marketstack API error: ${response.status}`);
     const data = await response.json();
 
     if (!data.data || data.data.length === 0) {
-      throw new Error('No intraday data found for this symbol.');
+      throw new Error("No intraday data found for this symbol.");
     }
 
     // Upsert stock in DB
     const stock = await prisma.stock.upsert({
       where: { symbol: symbol },
       update: {},
-      create: { symbol: symbol }
+      create: { symbol: symbol },
     });
 
-    console.log(`Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`);
+    console.log(
+      `Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`
+    );
 
     // Upsert each intraday price into IntradayPrice3 table
     for (const item of data.data) {
@@ -568,15 +687,15 @@ module.exports.getScenarioIntradayDataFromAPI = async function (scenarioId, symb
             scenarioId_symbol_date: {
               scenarioId: scenarioId,
               symbol: symbol,
-              date: dateObj
-            }
+              date: dateObj,
+            },
           },
           update: {
             openPrice: item.open,
             highPrice: item.high,
             lowPrice: item.low,
             closePrice: item.close,
-            volume: item.volume
+            volume: item.volume,
           },
           create: {
             scenarioId: scenarioId,
@@ -586,41 +705,45 @@ module.exports.getScenarioIntradayDataFromAPI = async function (scenarioId, symb
             highPrice: item.high,
             lowPrice: item.low,
             closePrice: item.close,
-            volume: item.volume
-          }
+            volume: item.volume,
+          },
         });
-
       } catch (err) {
-        console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
+        console.error(
+          `Failed to upsert intraday price for ${symbol} at ${item.date}:`,
+          err
+        );
       }
     }
 
     // Return OHLC array for candlestick chart
-    const ohlcData = data.data.map(item => ({
+    const ohlcData = data.data.map((item) => ({
       date: item.date,
       openPrice: item.open,
       highPrice: item.high,
       lowPrice: item.low,
-      closePrice: item.close
+      closePrice: item.close,
     }));
 
     return ohlcData;
-
   } catch (err) {
-    console.error('Error fetching intraday data:', err);
+    console.error("Error fetching intraday data:", err);
     throw err;
   }
 };
 
-
-module.exports.getScenarioIntradayDataWithProgress = async (scenarioId, symbol, userId) => {
+module.exports.getScenarioIntradayDataWithProgress = async (
+  scenarioId,
+  symbol,
+  userId
+) => {
   // Fetch all intraday prices
   const intradayData = await prisma.scenarioIntradayPrice.findMany({
     where: {
       scenarioId: Number(scenarioId),
       symbol: symbol.toUpperCase(),
     },
-    orderBy: { date: 'asc' },
+    orderBy: { date: "asc" },
   });
 
   // Fetch user's last replay progress
@@ -663,10 +786,9 @@ module.exports.getScenarioDetails = async (scenarioId) => {
     },
   });
 
-  if (!scenario) throw new Error('Scenario not found');
+  if (!scenario) throw new Error("Scenario not found");
   return scenario;
 };
-
 
 module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
   // 1. Get participant
@@ -682,7 +804,7 @@ module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
     where: { participantId: participant.id },
     select: {
       symbol: true,
-      quantity: true
+      quantity: true,
     },
   });
 
@@ -690,191 +812,216 @@ module.exports.getScenarioPortfolio = async (scenarioId, userId) => {
   return { cashBalance, holdings };
 };
 
+module.exports.getUserScenarioPortfolio =
+  async function getUserScenarioPortfolio(userId, scenarioId) {
+    if (!userId || !scenarioId) {
+      throw new Error("User ID and Scenario ID are required.");
+    }
 
-module.exports.getUserScenarioPortfolio = async function getUserScenarioPortfolio(userId, scenarioId) {
-  if (!userId || !scenarioId) {
-    throw new Error("User ID and Scenario ID are required.");
-  }
+    // --- Confirm user belongs to scenario ---
+    const participant = await prisma.scenarioParticipant.findFirst({
+      where: { userId, scenarioId },
+      select: { id: true },
+    });
 
-  // --- Confirm user belongs to scenario ---
-  const participant = await prisma.scenarioParticipant.findFirst({
-    where: { userId, scenarioId },
-    select: { id: true },
-  });
+    if (!participant) {
+      throw new Error(
+        `User ${userId} is not a participant in scenario ${scenarioId}.`
+      );
+    }
 
-  if (!participant) {
-    throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
-  }
+    const participantId = participant.id;
 
-  const participantId = participant.id;
+    // --- Fetch all executed trades (Market + Limit) ---
+    const [marketOrders, limitOrders] = await Promise.all([
+      prisma.scenarioMarketOrder.findMany({
+        where: { participantId, status: "EXECUTED" },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.scenarioLimitOrder.findMany({
+        where: { participantId, status: "EXECUTED" },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
 
-  // --- Fetch all executed trades (Market + Limit) ---
-  const [marketOrders, limitOrders] = await Promise.all([
-    prisma.scenarioMarketOrder.findMany({
-      where: { participantId, status: "EXECUTED" },
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.scenarioLimitOrder.findMany({
-      where: { participantId, status: "EXECUTED" },
-      orderBy: { createdAt: "asc" },
-    }),
-  ]);
+    // --- Combine all executed trades ---
+    const allTrades = [
+      ...marketOrders.map((t) => ({
+        symbol: t.symbol,
+        side: t.side.toUpperCase(),
+        quantity: parseFloat(t.quantity),
+        price: parseFloat(t.executedPrice),
+        createdAt: t.createdAt,
+      })),
+      ...limitOrders.map((t) => ({
+        symbol: t.symbol,
+        side: t.side.toUpperCase(),
+        quantity: parseFloat(t.quantity),
+        price: parseFloat(t.limitPrice),
+        createdAt: t.createdAt,
+      })),
+    ];
 
-  // --- Combine all executed trades ---
-  const allTrades = [
-    ...marketOrders.map(t => ({
-      symbol: t.symbol,
-      side: t.side.toUpperCase(),
-      quantity: parseFloat(t.quantity),
-      price: parseFloat(t.executedPrice),
-      createdAt: t.createdAt,
-    })),
-    ...limitOrders.map(t => ({
-      symbol: t.symbol,
-      side: t.side.toUpperCase(),
-      quantity: parseFloat(t.quantity),
-      price: parseFloat(t.limitPrice),
-      createdAt: t.createdAt,
-    })),
-  ];
+    if (allTrades.length === 0) {
+      return {
+        summary: {
+          openShares: 0,
+          totalShares: 0,
+          totalInvested: 0,
+          unrealizedPnL: 0,
+          realizedPnL: 0,
+        },
+        positions: [],
+      };
+    }
 
-  if (allTrades.length === 0) {
-    return {
-      summary: { openShares: 0, totalShares: 0, totalInvested: 0, unrealizedPnL: 0, realizedPnL: 0 },
-      positions: [],
-    };
-  }
+    // --- Group trades by stock symbol ---
+    const stockMap = new Map();
 
-  // --- Group trades by stock symbol ---
-  const stockMap = new Map();
+    for (const trade of allTrades) {
+      const { symbol, side, quantity, price } = trade;
 
-  for (const trade of allTrades) {
-    const { symbol, side, quantity, price } = trade;
+      if (!stockMap.has(symbol)) {
+        stockMap.set(symbol, {
+          buyQueue: [],
+          netQuantity: 0,
+          totalBoughtQty: 0,
+          totalBoughtValue: 0,
+          totalSoldValue: 0,
+          realizedPnL: 0,
+        });
+      }
 
-    if (!stockMap.has(symbol)) {
-      stockMap.set(symbol, {
-        buyQueue: [],
-        netQuantity: 0,
-        totalBoughtQty: 0,
-        totalBoughtValue: 0,
-        totalSoldValue: 0,
-        realizedPnL: 0,
+      const stock = stockMap.get(symbol);
+
+      if (side === "BUY") {
+        stock.buyQueue.push({ quantity, price });
+        stock.netQuantity += quantity;
+        stock.totalBoughtQty += quantity;
+        stock.totalBoughtValue += quantity * price;
+      } else if (side === "SELL") {
+        let sellQty = quantity;
+        const sellProceeds = quantity * price;
+        stock.totalSoldValue += sellProceeds;
+
+        // FIFO logic for realized P&L
+        while (sellQty > 0 && stock.buyQueue.length > 0) {
+          const buy = stock.buyQueue[0];
+          if (buy.quantity <= sellQty) {
+            stock.realizedPnL += (price - buy.price) * buy.quantity;
+            sellQty -= buy.quantity;
+            stock.buyQueue.shift();
+          } else {
+            stock.realizedPnL += (price - buy.price) * sellQty;
+            buy.quantity -= sellQty;
+            sellQty = 0;
+          }
+        }
+
+        stock.netQuantity -= quantity;
+      }
+    }
+
+    // --- Preload replay progress + all intraday prices for all symbols ---
+    const symbols = Array.from(stockMap.keys());
+
+    const [replayProgress, intradayPrices] = await Promise.all([
+      prisma.scenarioReplayProgress.findMany({
+        where: { userId, scenarioId, symbol: { in: symbols } },
+        select: { symbol: true, lastIndex: true },
+      }),
+      prisma.scenarioIntradayPrice.findMany({
+        where: { scenarioId, symbol: { in: symbols } },
+        orderBy: { date: "asc" },
+        select: { symbol: true, closePrice: true },
+      }),
+    ]);
+
+    // Organize data for quick lookup
+    const replayMap = new Map(
+      replayProgress.map((r) => [r.symbol, r.lastIndex])
+    );
+    const priceMap = new Map();
+
+    for (const sym of symbols) {
+      priceMap.set(
+        sym,
+        intradayPrices
+          .filter((p) => p.symbol === sym)
+          .map((p) => parseFloat(p.closePrice))
+      );
+    }
+
+    // --- Compute portfolio metrics ---
+    // --- Compute portfolio metrics ---
+    const positions = [];
+    let totalOpenShares = 0;
+    let totalShares = 0;
+    let totalInvested = 0;
+    let totalUnrealizedPnL = 0;
+    let totalRealizedPnL = 0;
+
+    for (const [symbol, stock] of stockMap.entries()) {
+      const {
+        buyQueue,
+        netQuantity,
+        realizedPnL,
+        totalBoughtQty,
+        totalBoughtValue,
+      } = stock;
+
+      // Determine latest price based on replay progress
+      const allPrices = priceMap.get(symbol) || [];
+      const lastIndex = replayMap.get(symbol);
+
+      // ✅ FIX: if lastIndex exists, use that candle’s close price (not the next one)
+      // fallback to last available price if not found
+      const priceIndex =
+        lastIndex !== undefined
+          ? Math.max(0, Math.min(lastIndex - 1, allPrices.length - 1))
+          : allPrices.length - 1;
+
+      const latestPrice = allPrices[priceIndex] || 0;
+
+      const investedOpen = buyQueue.reduce(
+        (sum, b) => sum + b.quantity * b.price,
+        0
+      );
+      const currentValue = latestPrice * netQuantity;
+      const unrealizedPnL = currentValue - investedOpen;
+
+      totalOpenShares += netQuantity;
+      totalShares += totalBoughtQty;
+      totalInvested += totalBoughtValue;
+      totalUnrealizedPnL += unrealizedPnL;
+      totalRealizedPnL += realizedPnL;
+
+      positions.push({
+        symbol,
+        quantity: netQuantity.toFixed(6),
+        totalShares: totalBoughtQty.toFixed(6),
+        avgBuyPrice: totalBoughtQty
+          ? (totalBoughtValue / totalBoughtQty).toFixed(2)
+          : "0.00",
+        currentPrice: latestPrice.toFixed(2),
+        totalInvested: totalBoughtValue.toFixed(2),
+        currentValue: currentValue.toFixed(2),
+        unrealizedPnL: unrealizedPnL.toFixed(2),
+        realizedPnL: realizedPnL.toFixed(2),
       });
     }
 
-    const stock = stockMap.get(symbol);
-
-    if (side === "BUY") {
-      stock.buyQueue.push({ quantity, price });
-      stock.netQuantity += quantity;
-      stock.totalBoughtQty += quantity;
-      stock.totalBoughtValue += quantity * price;
-    } else if (side === "SELL") {
-      let sellQty = quantity;
-      const sellProceeds = quantity * price;
-      stock.totalSoldValue += sellProceeds;
-
-      // FIFO logic for realized P&L
-      while (sellQty > 0 && stock.buyQueue.length > 0) {
-        const buy = stock.buyQueue[0];
-        if (buy.quantity <= sellQty) {
-          stock.realizedPnL += (price - buy.price) * buy.quantity;
-          sellQty -= buy.quantity;
-          stock.buyQueue.shift();
-        } else {
-          stock.realizedPnL += (price - buy.price) * sellQty;
-          buy.quantity -= sellQty;
-          sellQty = 0;
-        }
-      }
-
-      stock.netQuantity -= quantity;
-    }
-  }
-
-  // --- Preload replay progress + all intraday prices for all symbols ---
-  const symbols = Array.from(stockMap.keys());
-
-  const [replayProgress, intradayPrices] = await Promise.all([
-    prisma.scenarioReplayProgress.findMany({
-      where: { userId, scenarioId, symbol: { in: symbols } },
-      select: { symbol: true, lastIndex: true },
-    }),
-    prisma.scenarioIntradayPrice.findMany({
-      where: { scenarioId, symbol: { in: symbols } },
-      orderBy: { date: "asc" },
-      select: { symbol: true, closePrice: true },
-    }),
-  ]);
-
-  // Organize data for quick lookup
-  const replayMap = new Map(replayProgress.map(r => [r.symbol, r.lastIndex]));
-  const priceMap = new Map();
-
-  for (const sym of symbols) {
-    priceMap.set(sym, intradayPrices.filter(p => p.symbol === sym).map(p => parseFloat(p.closePrice)));
-  }
-
-  // --- Compute portfolio metrics ---
-  // --- Compute portfolio metrics ---
-  const positions = [];
-  let totalOpenShares = 0;
-  let totalShares = 0;
-  let totalInvested = 0;
-  let totalUnrealizedPnL = 0;
-  let totalRealizedPnL = 0;
-
-  for (const [symbol, stock] of stockMap.entries()) {
-    const { buyQueue, netQuantity, realizedPnL, totalBoughtQty, totalBoughtValue } = stock;
-
-    // Determine latest price based on replay progress
-    const allPrices = priceMap.get(symbol) || [];
-    const lastIndex = replayMap.get(symbol);
-
-    // ✅ FIX: if lastIndex exists, use that candle’s close price (not the next one)
-    // fallback to last available price if not found
-    const priceIndex =
-      lastIndex !== undefined
-        ? Math.max(0, Math.min(lastIndex - 1, allPrices.length - 1))
-        : allPrices.length - 1;
-
-    const latestPrice = allPrices[priceIndex] || 0;
-
-    const investedOpen = buyQueue.reduce((sum, b) => sum + b.quantity * b.price, 0);
-    const currentValue = latestPrice * netQuantity;
-    const unrealizedPnL = currentValue - investedOpen;
-
-    totalOpenShares += netQuantity;
-    totalShares += totalBoughtQty;
-    totalInvested += totalBoughtValue;
-    totalUnrealizedPnL += unrealizedPnL;
-    totalRealizedPnL += realizedPnL;
-
-    positions.push({
-      symbol,
-      quantity: netQuantity.toFixed(6),
-      totalShares: totalBoughtQty.toFixed(6),
-      avgBuyPrice: totalBoughtQty ? (totalBoughtValue / totalBoughtQty).toFixed(2) : "0.00",
-      currentPrice: latestPrice.toFixed(2),
-      totalInvested: totalBoughtValue.toFixed(2),
-      currentValue: currentValue.toFixed(2),
-      unrealizedPnL: unrealizedPnL.toFixed(2),
-      realizedPnL: realizedPnL.toFixed(2),
-    });
-  }
-
-
-  return {
-    summary: {
-      openShares: totalOpenShares.toFixed(6),
-      totalShares: totalShares.toFixed(6),
-      totalInvested: totalInvested.toFixed(2),
-      unrealizedPnL: totalUnrealizedPnL.toFixed(2),
-      realizedPnL: totalRealizedPnL.toFixed(2),
-    },
-    positions,
+    return {
+      summary: {
+        openShares: totalOpenShares.toFixed(6),
+        totalShares: totalShares.toFixed(6),
+        totalInvested: totalInvested.toFixed(2),
+        unrealizedPnL: totalUnrealizedPnL.toFixed(2),
+        realizedPnL: totalRealizedPnL.toFixed(2),
+      },
+      positions,
+    };
   };
-};
 
 module.exports.getParticipantWallet = async function (userId, scenarioId) {
   const participant = await prisma.scenarioParticipant.findFirst({
@@ -886,7 +1033,9 @@ module.exports.getParticipantWallet = async function (userId, scenarioId) {
 };
 
 // --- Get all participants for a scenario ---
-module.exports.getScenarioParticipants = async function getScenarioParticipants(scenarioId) {
+module.exports.getScenarioParticipants = async function getScenarioParticipants(
+  scenarioId
+) {
   return prisma.scenarioParticipant.findMany({
     where: { scenarioId },
     select: { id: true, userId: true },
@@ -894,14 +1043,19 @@ module.exports.getScenarioParticipants = async function getScenarioParticipants(
 };
 
 // --- End scenario for a participant ---
-module.exports.markScenarioEnded = async function markScenarioEnded(userId, scenarioId) {
+module.exports.markScenarioEnded = async function markScenarioEnded(
+  userId,
+  scenarioId
+) {
   // Ensure participant exists
   const participant = await prisma.scenarioParticipant.findFirst({
     where: { userId, scenarioId },
   });
 
   if (!participant) {
-    throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+    throw new Error(
+      `User ${userId} is not a participant in scenario ${scenarioId}.`
+    );
   }
 
   return prisma.scenarioParticipant.update({
@@ -913,10 +1067,10 @@ module.exports.markScenarioEnded = async function markScenarioEnded(userId, scen
 function serializeBigInt(obj) {
   if (Array.isArray(obj)) {
     return obj.map(serializeBigInt);
-  } else if (obj && typeof obj === 'object') {
+  } else if (obj && typeof obj === "object") {
     const newObj = {};
     for (const key in obj) {
-      if (typeof obj[key] === 'bigint') {
+      if (typeof obj[key] === "bigint") {
         newObj[key] = obj[key].toString(); // convert BigInt to string
       } else {
         newObj[key] = serializeBigInt(obj[key]);
@@ -943,33 +1097,33 @@ module.exports.fetchUserScenarioData = async (scenarioId, userId) => {
   // 3. Get market orders
   const marketOrders = await prisma.scenarioMarketOrder.findMany({
     where: { participantId: participant.id },
-    orderBy: { currentIndex: 'asc' },
+    orderBy: { currentIndex: "asc" },
   });
 
   // 4. Get limit orders
   const limitOrders = await prisma.scenarioLimitOrder.findMany({
     where: { participantId: participant.id },
-    orderBy: { currentIndex: 'asc' },
+    orderBy: { currentIndex: "asc" },
   });
 
   // 5. Combine all symbols from holdings, marketOrders, and limitOrders
   const symbols = [
-    ...holdings.map(h => h.symbol),
-    ...marketOrders.map(o => o.symbol),
-    ...limitOrders.map(o => o.symbol),
+    ...holdings.map((h) => h.symbol),
+    ...marketOrders.map((o) => o.symbol),
+    ...limitOrders.map((o) => o.symbol),
   ];
   const uniqueSymbols = [...new Set(symbols)];
 
   // 6. Get intraday prices for all symbols
   const intradayPrices = await prisma.scenarioIntradayPrice.findMany({
     where: { scenarioId, symbol: { in: uniqueSymbols } },
-    orderBy: { date: 'asc' },
+    orderBy: { date: "asc" },
   });
 
   // 7. Add index to intraday prices
   const intradayBySymbol = {};
-  uniqueSymbols.forEach(symbol => {
-    const prices = intradayPrices.filter(p => p.symbol === symbol);
+  uniqueSymbols.forEach((symbol) => {
+    const prices = intradayPrices.filter((p) => p.symbol === symbol);
     intradayBySymbol[symbol] = prices.map((p, idx) => ({
       ...p,
       date: p.date.toISOString(),
@@ -979,39 +1133,39 @@ module.exports.fetchUserScenarioData = async (scenarioId, userId) => {
       lowPrice: p.lowPrice !== null ? Number(p.lowPrice) : null,
       closePrice: Number(p.closePrice),
       volume: p.volume !== null ? Number(p.volume) : null,
-      index: idx
+      index: idx,
     }));
   });
 
   // 8. Build data object indexed by symbol
   const dataBySymbol = {};
-  uniqueSymbols.forEach(symbol => {
-    const holding = holdings.find(h => h.symbol === symbol);
+  uniqueSymbols.forEach((symbol) => {
+    const holding = holdings.find((h) => h.symbol === symbol);
     dataBySymbol[symbol] = {
       holding: holding
         ? { ...holding, quantity: Number(holding.quantity) }
         : { quantity: 0 },
 
       marketOrders: marketOrders
-        .filter(o => o.symbol === symbol)
-        .map(o => ({
+        .filter((o) => o.symbol === symbol)
+        .map((o) => ({
           ...o,
           quantity: Number(o.quantity),
           executedPrice: Number(o.executedPrice),
-          createdAt: o.createdAt.toISOString()
+          createdAt: o.createdAt.toISOString(),
         })),
 
       limitOrders: limitOrders
-        .filter(o => o.symbol === symbol)
-        .map(o => ({
+        .filter((o) => o.symbol === symbol)
+        .map((o) => ({
           ...o,
           quantity: Number(o.quantity),
           limitPrice: Number(o.limitPrice),
           createdAt: o.createdAt.toISOString(),
-          updatedAt: o.updatedAt.toISOString()
+          updatedAt: o.updatedAt.toISOString(),
         })),
 
-      intraday: intradayBySymbol[symbol] || []
+      intraday: intradayBySymbol[symbol] || [],
     };
   });
 
@@ -1019,12 +1173,18 @@ module.exports.fetchUserScenarioData = async (scenarioId, userId) => {
 };
 
 // === Idempotency / state helpers ===
-module.exports.getParticipantRow = async function getParticipantRow(userId, scenarioId) {
+module.exports.getParticipantRow = async function getParticipantRow(
+  userId,
+  scenarioId
+) {
   const p = await prisma.scenarioParticipant.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
     select: { id: true, ended: true, cashBalance: true },
   });
-  if (!p) throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  if (!p)
+    throw new Error(
+      `User ${userId} is not a participant in scenario ${scenarioId}.`
+    );
   return p;
 };
 
@@ -1032,59 +1192,64 @@ module.exports.getParticipantRow = async function getParticipantRow(userId, scen
  * Atomically mark an attempt finished (ended=true) if it's currently active (ended=false).
  * Returns true if we flipped it, false if it was already ended.
  */
+
 module.exports.finishAttemptOnce = async function finishAttemptOnce(userId, scenarioId) {
   const p = await module.exports.getParticipantRow(userId, scenarioId);
-  if (!p) throw new Error(`No participant found for user ${userId}, scenario ${scenarioId}`);
+  if (!p)
+    throw new Error(`No participant found for user ${userId}, scenario ${scenarioId}`);
 
   console.log(`🔹 Finishing attempt for participant ${p.id} (ended=${p.ended})`);
 
-  // Atomically flip participant flag
-  const res = await prisma.scenarioParticipant.updateMany({
-    where: { id: p.id, ended: false },
+  // ✅ Step 1: Ensure participant is marked ended (no conditional early return)
+  await prisma.scenarioParticipant.update({
+    where: { id: p.id },
     data: { ended: true },
   });
 
-  if (res.count === 0) {
-    console.warn(`⚠️ Participant ${p.id} already marked ended.`);
-    return false;
-  }
-
-  // ✅ Clean up transient attempt data in one atomic transaction
+  // ✅ Step 2: Clean up and mark attempt completed
   await prisma.$transaction(async (tx) => {
-    // 1️⃣ Cancel pending limit orders first (so they aren’t executed mid-cleanup)
+    // 1️⃣ Cancel all pending limit orders
     await tx.scenarioLimitOrder.updateMany({
       where: { participantId: p.id, status: "PENDING" },
       data: { status: "CANCELLED" },
     });
 
-    // 2️⃣ Delete ALL limit orders for this participant
-    await tx.scenarioLimitOrder.deleteMany({
-      where: { participantId: p.id },
-    });
+    // 2️⃣ Delete all limit orders
+    await tx.scenarioLimitOrder.deleteMany({ where: { participantId: p.id } });
 
     // 3️⃣ Delete all market orders
-    await tx.scenarioMarketOrder.deleteMany({
-      where: { participantId: p.id },
-    });
+    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: p.id } });
 
-    // 4️⃣ Delete all holdings (close portfolio)
-    await tx.scenarioHolding.deleteMany({
-      where: { participantId: p.id },
-    });
+    // 4️⃣ Delete all holdings (clear portfolio)
+    await tx.scenarioHolding.deleteMany({ where: { participantId: p.id } });
 
     // 5️⃣ Delete replay progress
     await tx.scenarioReplayProgress.deleteMany({
       where: { userId, scenarioId },
     });
 
-    // 6️⃣ Mark all open attempts as ended
+    // 6️⃣ ✅ Mark all attempts as COMPLETED
     await tx.scenarioAttempt.updateMany({
-      where: { userId, scenarioId, endedAt: null },
-      data: { endedAt: new Date() },
+      where: {
+        userId: Number(userId),
+        scenarioId: Number(scenarioId),
+        status: {
+          in: [
+            ScenarioAttemptStatus.IN_PROGRESS,
+            ScenarioAttemptStatus.NOT_STARTED,
+          ],
+        },
+      },
+      data: {
+        status: ScenarioAttemptStatus.COMPLETED,
+        endedAt: new Date(),
+      },
     });
+
+    console.log(`🏁 Marked scenario ${scenarioId} attempts as COMPLETED for user ${userId}`);
   });
 
-  console.log(`✅ Cleaned up active trading, limit orders, and replay data for participant ${p.id}`);
+  console.log(`✅ Cleaned up active trading, orders, and replay data for participant ${p.id}`);
   return true;
 };
 
@@ -1094,45 +1259,65 @@ module.exports.finishAttemptOnce = async function finishAttemptOnce(userId, scen
  * Ensure you can't start a new attempt while one is active.
  * Returns the next attempt number when it succeeds.
  */
-module.exports.startAttemptGuarded = async function startAttemptGuarded(userId, scenarioId, startingBalance) {
-  // ensure participant row exists & is ended
+module.exports.startAttemptGuarded = async function startAttemptGuarded(
+  userId,
+  scenarioId,
+  startingBalance
+) {
+  // 1️⃣ Ensure participant row exists
   const participant = await prisma.scenarioParticipant.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
     select: { id: true, ended: true },
   });
+
   if (!participant) {
-    const err = new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+    const err = new Error(
+      `User ${userId} is not a participant in scenario ${scenarioId}.`
+    );
     err.status = 404;
     throw err;
   }
-  if (participant.ended === false) {
+
+  // 2️⃣ Prevent double active attempts
+  if (!participant.ended) {
     const hasAttempt = await prisma.scenarioAttempt.findFirst({
-      where: { userId, scenarioId: Number(scenarioId), endedAt: null },
+      where: {
+        userId,
+        scenarioId: Number(scenarioId),
+        status: ScenarioAttemptStatus.IN_PROGRESS,
+      },
     });
     if (hasAttempt) {
-      const err = new Error('Attempt already in progress. Finish it before starting a new one.');
+      const err = new Error(
+        "Attempt already in progress. Finish it before starting a new one."
+      );
       err.status = 409;
       throw err;
     }
   }
 
-
-  // compute next attempt number (use ScenarioAttempt or ScenarioAttemptAnalytics — either is fine)
+  // 3️⃣ Find latest attempt number
   const lastAttempt = await prisma.scenarioAttempt.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
-    orderBy: { attemptNumber: 'desc' },
-    select: { attemptNumber: true },
+    orderBy: { attemptNumber: "desc" },
+    select: { attemptNumber: true, status: true },
   });
   const nextAttempt = (lastAttempt?.attemptNumber ?? 0) + 1;
 
-  // reset state + set starting balance + mark active, then create attempt row
+  // 4️⃣ Reset state + set new attempt
   await prisma.$transaction(async (tx) => {
+    // cleanup old state
     await tx.scenarioLimitOrder.deleteMany({
-      where: { participantId: participant.id, status: 'PENDING' },
+      where: { participantId: participant.id, status: "PENDING" },
     });
-    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: participant.id } });
-    await tx.scenarioHolding.deleteMany({ where: { participantId: participant.id } });
+    await tx.scenarioMarketOrder.deleteMany({
+      where: { participantId: participant.id },
+    });
+    await tx.scenarioHolding.deleteMany({
+      where: { participantId: participant.id },
+    });
 
+    // reset wallet
     await tx.scenarioParticipant.update({
       where: { id: participant.id },
       data: {
@@ -1141,26 +1326,53 @@ module.exports.startAttemptGuarded = async function startAttemptGuarded(userId, 
       },
     });
 
-    await tx.scenarioAttempt.create({
-      data: {
-        userId,
-        scenarioId: Number(scenarioId),
-        attemptNumber: nextAttempt,
-        startedAt: new Date(),
-      },
-    });
+    // 🧠 CASE 1: Reuse existing NOT_STARTED attempt
+    if (
+      lastAttempt &&
+      lastAttempt.status === ScenarioAttemptStatus.NOT_STARTED
+    ) {
+      await tx.scenarioAttempt.update({
+        where: {
+          scenarioId_userId_attemptNumber: {
+            // ✅ correct order of fields!
+            scenarioId: Number(scenarioId),
+            userId,
+            attemptNumber: lastAttempt.attemptNumber,
+          },
+        },
+        data: {
+          status: ScenarioAttemptStatus.IN_PROGRESS,
+          startedAt: new Date(),
+        },
+      });
+    }
+
+    // 🧠 CASE 2: Create a fresh IN_PROGRESS attempt
+    else {
+      await tx.scenarioAttempt.create({
+        data: {
+          userId,
+          scenarioId: Number(scenarioId),
+          attemptNumber: nextAttempt,
+          status: ScenarioAttemptStatus.IN_PROGRESS,
+          startedAt: new Date(),
+        },
+      });
+    }
   });
 
   return nextAttempt;
 };
-
 
 /** ——— helpers ——— */
 async function getParticipant(userId, scenarioId) {
   const p = await prisma.scenarioParticipant.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
   });
-  if (!p) throw new Error(`User ${userId} is not a participant in scenario ${scenarioId}.`);
+  if (!p)
+    throw new Error(
+      `User ${userId} is not a participant in scenario ${scenarioId}.`
+    );
   return p;
 }
 
@@ -1169,17 +1381,18 @@ async function getScenarioStartBalance(scenarioId) {
     where: { id: Number(scenarioId) },
     select: { startingBalance: true },
   });
-  if (!sc) throw new Error('Scenario not found');
+  if (!sc) throw new Error("Scenario not found");
   return Number(sc.startingBalance);
 }
 
-
-module.exports.getScenarioStartBalance = async function getScenarioStartBalance(scenarioId) {
+module.exports.getScenarioStartBalance = async function getScenarioStartBalance(
+  scenarioId
+) {
   const sc = await prisma.scenario.findUnique({
     where: { id: Number(scenarioId) },
     select: { startingBalance: true },
   });
-  if (!sc) throw new Error('Scenario not found');
+  if (!sc) throw new Error("Scenario not found");
   return Number(sc.startingBalance);
 };
 
@@ -1193,7 +1406,7 @@ module.exports.startAttempt = async function startAttempt(userId, scenarioId) {
   // next attempt number
   const last = await prisma.scenarioAttemptAnalytics.findFirst({
     where: { userId, scenarioId: Number(scenarioId) },
-    orderBy: { attemptNumber: 'desc' },
+    orderBy: { attemptNumber: "desc" },
     select: { attemptNumber: true },
   });
   const nextAttempt = (last?.attemptNumber ?? 0) + 1;
@@ -1201,10 +1414,14 @@ module.exports.startAttempt = async function startAttempt(userId, scenarioId) {
   // reset state for a fresh run
   await prisma.$transaction(async (tx) => {
     await tx.scenarioLimitOrder.deleteMany({
-      where: { participantId: participant.id, status: 'PENDING' },
+      where: { participantId: participant.id, status: "PENDING" },
     });
-    await tx.scenarioMarketOrder.deleteMany({ where: { participantId: participant.id } });
-    await tx.scenarioHolding.deleteMany({ where: { participantId: participant.id } });
+    await tx.scenarioMarketOrder.deleteMany({
+      where: { participantId: participant.id },
+    });
+    await tx.scenarioHolding.deleteMany({
+      where: { participantId: participant.id },
+    });
 
     await tx.scenarioParticipant.update({
       where: { id: participant.id },
@@ -1216,7 +1433,10 @@ module.exports.startAttempt = async function startAttempt(userId, scenarioId) {
 };
 
 /** ——— finish attempt helpers you’ll call from controller ——— */
-module.exports.markScenarioEnded = async function markScenarioEnded(userId, scenarioId) {
+module.exports.markScenarioEnded = async function markScenarioEnded(
+  userId,
+  scenarioId
+) {
   const p = await getParticipant(userId, scenarioId);
   return prisma.scenarioParticipant.update({
     where: { id: p.id },
@@ -1224,121 +1444,162 @@ module.exports.markScenarioEnded = async function markScenarioEnded(userId, scen
   });
 };
 
-module.exports.getParticipantWallet = async function getParticipantWallet(userId, scenarioId) {
+module.exports.getParticipantWallet = async function getParticipantWallet(
+  userId,
+  scenarioId
+) {
   const p = await getParticipant(userId, scenarioId);
   return Number(p.cashBalance);
 };
 
 // if you already have these two in your model, keep your versions and delete these:
 /** minimal getUserScenarioPortfolio used by finishAttempt */
-module.exports.getUserScenarioPortfolio = async function getUserScenarioPortfolio(userId, scenarioId) {
-  const participant = await prisma.scenarioParticipant.findFirst({
-    where: { userId, scenarioId: Number(scenarioId) },
-    select: { id: true },
-  });
-  if (!participant) throw new Error('Participant not found');
-
-  const [marketOrders, limitOrders, prices] = await Promise.all([
-    prisma.scenarioMarketOrder.findMany({
-      where: { participantId: participant.id, status: 'EXECUTED' },
-      orderBy: { createdAt: 'asc' },
-    }),
-    prisma.scenarioLimitOrder.findMany({
-      where: { participantId: participant.id, status: 'EXECUTED' },
-      orderBy: { createdAt: 'asc' },
-    }),
-    prisma.scenarioIntradayPrice.findMany({
-      where: { scenarioId: Number(scenarioId) },
-      orderBy: { date: 'asc' },
-      select: { symbol: true, closePrice: true },
-    }),
-  ]);
-
-  const allTrades = [
-    ...marketOrders.map(o => ({ symbol: o.symbol, side: o.side.toUpperCase(), quantity: Number(o.quantity), price: Number(o.executedPrice) })),
-    ...limitOrders.map(o => ({ symbol: o.symbol, side: o.side.toUpperCase(), quantity: Number(o.quantity), price: Number(o.limitPrice) })),
-  ];
-
-  if (allTrades.length === 0) {
-    return { summary: { openShares: 0, totalShares: 0, totalInvested: 0, unrealizedPnL: 0, realizedPnL: 0 }, positions: [] };
-  }
-
-  const priceMap = new Map();
-  for (const p of prices) {
-    const arr = priceMap.get(p.symbol) || [];
-    arr.push(Number(p.closePrice));
-    priceMap.set(p.symbol, arr);
-  }
-
-  // aggregate FIFO
-  const buckets = new Map();
-  for (const t of allTrades) {
-    if (!buckets.has(t.symbol)) {
-      buckets.set(t.symbol, { buyQueue: [], net: 0, totalBuyQty: 0, totalBuyVal: 0, realized: 0 });
-    }
-    const b = buckets.get(t.symbol);
-    if (t.side === 'BUY') {
-      b.buyQueue.push({ q: t.quantity, p: t.price });
-      b.net += t.quantity;
-      b.totalBuyQty += t.quantity;
-      b.totalBuyVal += t.quantity * t.price;
-    } else {
-      let remain = t.quantity;
-      while (remain > 0 && b.buyQueue.length) {
-        const head = b.buyQueue[0];
-        const used = Math.min(head.q, remain);
-        b.realized += (t.price - head.p) * used;
-        head.q -= used;
-        remain -= used;
-        if (head.q === 0) b.buyQueue.shift();
-      }
-      b.net -= t.quantity;
-    }
-  }
-
-  const positions = [];
-  let sumInvested = 0, sumUnreal = 0, sumReal = 0, sumOpen = 0, sumTotalShares = 0;
-  for (const [symbol, b] of buckets.entries()) {
-    const latestPrices = priceMap.get(symbol) || [];
-    const lastPrice = latestPrices.at(-1) || 0;
-
-    const investedOpen = b.buyQueue.reduce((s, x) => s + x.q * x.p, 0);
-    const currentValue = b.net * lastPrice;
-    const unreal = currentValue - investedOpen;
-
-    positions.push({
-      symbol,
-      quantity: b.net.toFixed(6),
-      totalShares: b.totalBuyQty.toFixed(6),
-      avgBuyPrice: b.totalBuyQty ? (b.totalBuyVal / b.totalBuyQty).toFixed(2) : '0.00',
-      currentPrice: lastPrice.toFixed(2),
-      totalInvested: b.totalBuyVal.toFixed(2),
-      currentValue: currentValue.toFixed(2),
-      unrealizedPnL: unreal.toFixed(2),
-      realizedPnL: b.realized.toFixed(2),
+module.exports.getUserScenarioPortfolio =
+  async function getUserScenarioPortfolio(userId, scenarioId) {
+    const participant = await prisma.scenarioParticipant.findFirst({
+      where: { userId, scenarioId: Number(scenarioId) },
+      select: { id: true },
     });
+    if (!participant) throw new Error("Participant not found");
 
-    sumInvested += b.totalBuyVal;
-    sumUnreal += unreal;
-    sumReal += b.realized;
-    sumOpen += b.net;
-    sumTotalShares += b.totalBuyQty;
-  }
+    const [marketOrders, limitOrders, prices] = await Promise.all([
+      prisma.scenarioMarketOrder.findMany({
+        where: { participantId: participant.id, status: "EXECUTED" },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.scenarioLimitOrder.findMany({
+        where: { participantId: participant.id, status: "EXECUTED" },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.scenarioIntradayPrice.findMany({
+        where: { scenarioId: Number(scenarioId) },
+        orderBy: { date: "asc" },
+        select: { symbol: true, closePrice: true },
+      }),
+    ]);
 
-  return {
-    summary: {
-      openShares: sumOpen.toFixed(6),
-      totalShares: sumTotalShares.toFixed(6),
-      totalInvested: sumInvested.toFixed(2),
-      unrealizedPnL: sumUnreal.toFixed(2),
-      realizedPnL: sumReal.toFixed(2),
-    },
-    positions,
+    const allTrades = [
+      ...marketOrders.map((o) => ({
+        symbol: o.symbol,
+        side: o.side.toUpperCase(),
+        quantity: Number(o.quantity),
+        price: Number(o.executedPrice),
+      })),
+      ...limitOrders.map((o) => ({
+        symbol: o.symbol,
+        side: o.side.toUpperCase(),
+        quantity: Number(o.quantity),
+        price: Number(o.limitPrice),
+      })),
+    ];
+
+    if (allTrades.length === 0) {
+      return {
+        summary: {
+          openShares: 0,
+          totalShares: 0,
+          totalInvested: 0,
+          unrealizedPnL: 0,
+          realizedPnL: 0,
+        },
+        positions: [],
+      };
+    }
+
+    const priceMap = new Map();
+    for (const p of prices) {
+      const arr = priceMap.get(p.symbol) || [];
+      arr.push(Number(p.closePrice));
+      priceMap.set(p.symbol, arr);
+    }
+
+    // aggregate FIFO
+    const buckets = new Map();
+    for (const t of allTrades) {
+      if (!buckets.has(t.symbol)) {
+        buckets.set(t.symbol, {
+          buyQueue: [],
+          net: 0,
+          totalBuyQty: 0,
+          totalBuyVal: 0,
+          realized: 0,
+        });
+      }
+      const b = buckets.get(t.symbol);
+      if (t.side === "BUY") {
+        b.buyQueue.push({ q: t.quantity, p: t.price });
+        b.net += t.quantity;
+        b.totalBuyQty += t.quantity;
+        b.totalBuyVal += t.quantity * t.price;
+      } else {
+        let remain = t.quantity;
+        while (remain > 0 && b.buyQueue.length) {
+          const head = b.buyQueue[0];
+          const used = Math.min(head.q, remain);
+          b.realized += (t.price - head.p) * used;
+          head.q -= used;
+          remain -= used;
+          if (head.q === 0) b.buyQueue.shift();
+        }
+        b.net -= t.quantity;
+      }
+    }
+
+    const positions = [];
+    let sumInvested = 0,
+      sumUnreal = 0,
+      sumReal = 0,
+      sumOpen = 0,
+      sumTotalShares = 0;
+    for (const [symbol, b] of buckets.entries()) {
+      const latestPrices = priceMap.get(symbol) || [];
+      const lastPrice = latestPrices.at(-1) || 0;
+
+      const investedOpen = b.buyQueue.reduce((s, x) => s + x.q * x.p, 0);
+      const currentValue = b.net * lastPrice;
+      const unreal = currentValue - investedOpen;
+
+      positions.push({
+        symbol,
+        quantity: b.net.toFixed(6),
+        totalShares: b.totalBuyQty.toFixed(6),
+        avgBuyPrice: b.totalBuyQty
+          ? (b.totalBuyVal / b.totalBuyQty).toFixed(2)
+          : "0.00",
+        currentPrice: lastPrice.toFixed(2),
+        totalInvested: b.totalBuyVal.toFixed(2),
+        currentValue: currentValue.toFixed(2),
+        unrealizedPnL: unreal.toFixed(2),
+        realizedPnL: b.realized.toFixed(2),
+      });
+
+      sumInvested += b.totalBuyVal;
+      sumUnreal += unreal;
+      sumReal += b.realized;
+      sumOpen += b.net;
+      sumTotalShares += b.totalBuyQty;
+    }
+
+    return {
+      summary: {
+        openShares: sumOpen.toFixed(6),
+        totalShares: sumTotalShares.toFixed(6),
+        totalInvested: sumInvested.toFixed(2),
+        unrealizedPnL: sumUnreal.toFixed(2),
+        realizedPnL: sumReal.toFixed(2),
+      },
+      positions,
+    };
   };
-};
 
 /** ——— analytics & attempts ——— */
-module.exports.saveAttemptAnalytics = async function saveAttemptAnalytics({ userId, scenarioId, attemptNumber, summary, positions }) {
+module.exports.saveAttemptAnalytics = async function saveAttemptAnalytics({
+  userId,
+  scenarioId,
+  attemptNumber,
+  summary,
+  positions,
+}) {
   return prisma.scenarioAttemptAnalytics.create({
     data: {
       userId,
@@ -1353,12 +1614,19 @@ module.exports.saveAttemptAnalytics = async function saveAttemptAnalytics({ user
 module.exports.listAttempts = async function listAttempts(userId, scenarioId) {
   return prisma.scenarioAttemptAnalytics.findMany({
     where: { userId, scenarioId: Number(scenarioId) },
-    orderBy: { attemptNumber: 'desc' },
+    orderBy: { attemptNumber: "desc" },
   });
 };
 
 /** ——— personal bests ——— */
-module.exports.upsertPersonalBest = async function upsertPersonalBest({ userId, scenarioId, attemptNumber, totalPortfolioValue, realizedPnL, unrealizedPnL }) {
+module.exports.upsertPersonalBest = async function upsertPersonalBest({
+  userId,
+  scenarioId,
+  attemptNumber,
+  totalPortfolioValue,
+  realizedPnL,
+  unrealizedPnL,
+}) {
   const start = await getScenarioStartBalance(scenarioId);
   const retPct = start > 0 ? (Number(totalPortfolioValue) - start) / start : 0;
 
@@ -1383,7 +1651,8 @@ module.exports.upsertPersonalBest = async function upsertPersonalBest({ userId, 
       return { record: created, isNewPB: true };
     }
 
-    const isNewPB = Number(existing.bestTotalValue) < Number(totalPortfolioValue);
+    const isNewPB =
+      Number(existing.bestTotalValue) < Number(totalPortfolioValue);
     if (!isNewPB) return { record: existing, isNewPB: false };
 
     const updated = await tx.scenarioPersonalBest.update({
@@ -1401,7 +1670,10 @@ module.exports.upsertPersonalBest = async function upsertPersonalBest({ userId, 
   });
 };
 
-module.exports.getPersonalBest = async function getPersonalBest(userId, scenarioId) {
+module.exports.getPersonalBest = async function getPersonalBest(
+  userId,
+  scenarioId
+) {
   return prisma.scenarioPersonalBest.findUnique({
     where: { userId_scenarioId: { userId, scenarioId: Number(scenarioId) } },
   });
@@ -1411,11 +1683,9 @@ module.exports.listPersonalBests = async function listPersonalBests(userId) {
   return prisma.scenarioPersonalBest.findMany({
     where: { userId },
     include: { scenario: { select: { id: true, title: true } } },
-    orderBy: { achievedAt: 'desc' },
+    orderBy: { achievedAt: "desc" },
   });
 };
-
-
 
 module.exports.saveAIInsights = async (userId, scenarioId, aiAdvice) => {
   try {
@@ -1445,10 +1715,16 @@ module.exports.saveAIInsights = async (userId, scenarioId, aiAdvice) => {
 
 module.exports.upsertAIAdvice = async (userId, scenarioId, aiAdvice) => {
   try {
-    console.log("🧩 upsertAIAdvice received:", { userId, scenarioId, aiAdviceLength: aiAdvice?.length });
+    console.log("🧩 upsertAIAdvice received:", {
+      userId,
+      scenarioId,
+      aiAdviceLength: aiAdvice?.length,
+    });
 
     if (!userId || !scenarioId || isNaN(scenarioId)) {
-      throw new Error(`Invalid userId (${userId}) or scenarioId (${scenarioId})`);
+      throw new Error(
+        `Invalid userId (${userId}) or scenarioId (${scenarioId})`
+      );
     }
 
     // ✅ Step 1: find the latest attempt
@@ -1480,13 +1756,11 @@ module.exports.upsertAIAdvice = async (userId, scenarioId, aiAdvice) => {
       },
       data: { aiInsights: aiAdvice }, // ✅ FIXED field name
     });
-
   } catch (err) {
     console.error("❌ Error in upsertAIAdvice:", err);
     throw err;
   }
 };
-
 
 module.exports.getLatestAIAdvice = async (userId, scenarioId) => {
   try {
@@ -1522,5 +1796,77 @@ module.exports.getLatestAIAdvice = async (userId, scenarioId) => {
   } catch (err) {
     console.error("❌ Error fetching latest AI advice:", err);
     throw err;
+  }
+};
+
+
+// 🧹 Completely remove a user's participation from a scenario (including all related data)
+module.exports.removeUserScenario = async function removeUserScenario(userId, scenarioId) {
+  try {
+    if (!userId || !scenarioId) {
+      return { success: false, message: "Missing userId or scenarioId" };
+    }
+
+    const uid = Number(userId);
+    const sid = Number(scenarioId);
+
+    // check if they’re even part of it
+    const participant = await prisma.scenarioParticipant.findFirst({
+      where: { userId: uid, scenarioId: sid },
+    });
+
+    if (!participant) {
+      return { success: false, message: "You are not part of this scenario." };
+    }
+
+    const pid = participant.id;
+
+    // 💣 delete everything connected to this participant and user in this scenario
+    await prisma.$transaction([
+      // 1️⃣ Delete holdings
+      prisma.scenarioHolding.deleteMany({
+        where: { participantId: pid },
+      }),
+
+      // 2️⃣ Delete market orders
+      prisma.scenarioMarketOrder.deleteMany({
+        where: { participantId: pid },
+      }),
+
+      // 3️⃣ Delete limit orders
+      prisma.scenarioLimitOrder.deleteMany({
+        where: { participantId: pid },
+      }),
+
+      // 4️⃣ Delete replay progress (optional, but nice cleanup)
+      prisma.scenarioReplayProgress.deleteMany({
+        where: { userId: uid, scenarioId: sid },
+      }),
+
+      // 5️⃣ Delete attempt analytics
+      prisma.scenarioAttemptAnalytics.deleteMany({
+        where: { userId: uid, scenarioId: sid },
+      }),
+
+      // 6️⃣ Delete personal bests
+      prisma.scenarioPersonalBest.deleteMany({
+        where: { userId: uid, scenarioId: sid },
+      }),
+
+      // 7️⃣ Delete attempts
+      prisma.scenarioAttempt.deleteMany({
+        where: { userId: uid, scenarioId: sid },
+      }),
+
+      // 8️⃣ Delete the participant itself
+      prisma.scenarioParticipant.delete({
+        where: { id: pid },
+      }),
+    ]);
+
+    return { success: true, message: "Scenario and all related data removed for this user." };
+  } catch (err) {
+    console.error("❌ Error removing user from scenario:", err);
+    return { success: false, message: "Error removing scenario participation." };
   }
 };
