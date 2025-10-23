@@ -5,7 +5,7 @@ const referralModel = require("../models/referral");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const userModel = require("../models/user");
 const crypto = require("crypto");
-const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/email");
+const { sendVerificationEmail, sendPasswordResetCode } = require("../utils/email");
 //////////////////////////////////////////////////////
 // REGISTER USER
 //////////////////////////////////////////////////////
@@ -163,74 +163,131 @@ module.exports.getUserDetails = async (req, res) => {
   }
 };
 
-
-//////////////////////////////////////////////////////
-// FORGOT PASSWORD
-//////////////////////////////////////////////////////
 module.exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // 1️⃣ Find user
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "No account found with this email." });
+      return res.status(400).json({ message: "No account found with that email." });
     }
 
-    // 2️⃣ Generate reset token and expiry (1 hour)
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    // 🚫 not verified yet
+    if (!user.verified) {
+      return res.status(403).json({
+        message: "Please verify your account before resetting your password.",
+        canResend: true, // so frontend knows to show 'Resend verification email'
+      });
+    }
 
-    // 3️⃣ Save token to user
+    // ✅ verified — generate code and email
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
     await prisma.user.update({
       where: { email },
-      data: { verifyToken: resetToken, verifyExpires: resetExpires },
+      data: { resetCode, resetExpires },
     });
 
-    // 4️⃣ Send reset email
-    await sendPasswordResetEmail(email, resetToken);
-
-    return res.status(200).json({
-      message: "Password reset email sent. Please check your inbox.",
-    });
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Internal server error." });
+    await sendPasswordResetCode(email, resetCode);
+    return res.json({ message: "Reset code sent to your email." });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
-//////////////////////////////////////////////////////
-// RESET PASSWORD
-//////////////////////////////////////////////////////
-module.exports.resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
+
+// ✅ Verify Reset Code (keeps code valid until reset)
+module.exports.verifyResetCode = async (req, res) => {
+  const { email, code } = req.body;
 
   try {
-    // 1️⃣ Find user by valid token
-    const user = await prisma.user.findFirst({
-      where: { verifyToken: token, verifyExpires: { gt: new Date() } },
-    });
-
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "Invalid or expired reset link." });
+      return res.status(400).json({ message: "Invalid email." });
     }
 
-    // 2️⃣ Hash new password
+    if (user.resetCode !== code) {
+      return res.status(400).json({ message: "Invalid or expired code." });
+    }
+
+    if (new Date() > user.resetExpires) {
+      return res.status(400).json({ message: "Code has expired." });
+    }
+
+    // ✅ Do NOT clear code here — wait until password is reset
+    res.json({
+      message: "Code verified successfully.",
+    });
+  } catch (err) {
+    console.error("Verify reset code error:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};
+
+module.exports.resetPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(400).json({ message: "Invalid email." });
+
+    if (user.resetCode !== code)
+      return res.status(400).json({ message: "Invalid or expired code." });
+
+    if (new Date() > user.resetExpires)
+      return res.status(400).json({ message: "Code expired." });
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // 3️⃣ Update user password and clear reset token
     await prisma.user.update({
-      where: { id: user.id },
+      where: { email },
       data: {
         password: hashedPassword,
-        verifyToken: null,
-        verifyExpires: null,
+        resetCode: null,       // ✅ clear only now
+        resetExpires: null,
       },
     });
 
-    res.status(200).json({ message: "Password has been reset successfully!" });
-  } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({ message: "Internal server error." });
+    res.json({ message: "Password reset successful." });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};
+
+
+
+module.exports.resendVerification = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await userModel.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(400).json({ message: "No account found." });
+    }
+
+    if (user.verified) {
+      return res.status(400).json({ message: "Account is already verified." });
+    }
+
+    // create new verification token + expiry
+    const verifyToken = crypto.randomBytes(32).toString("hex");
+    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // update in DB
+    await userModel.resendVerificationEmail(email, verifyToken, verifyExpires);
+
+    // send verification email
+    await sendVerificationEmail(email, verifyToken);
+
+    return res.status(200).json({
+      message: "Verification email resent successfully.",
+    });
+  } catch (err) {
+    console.error("Resend verification error:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };

@@ -106,3 +106,15 @@ module.exports.getUserBasicInfo = async (userId) => {
     },
   });
 };
+
+
+module.exports.resendVerificationEmail = async (email, verifyToken, verifyExpires) => {
+  return await prisma.user.update({
+    where: { email },
+    data: { verifyToken, verifyExpires },
+  });
+};
+
+module.exports.findUserByEmail = async (email) => {
+  return await prisma.user.findUnique({ where: { email } });
+};
