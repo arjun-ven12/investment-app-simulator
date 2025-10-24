@@ -225,34 +225,46 @@ const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 const eyeIcon = document.getElementById("eyeIcon");
 
-// Toggle password visibility
+// Smooth text transition (no disappearing box)
+function smoothToggle(input, type) {
+  input.style.transition = "color 0.25s ease-in-out";
+  input.style.color = "transparent"; // temporarily hide text only
+  setTimeout(() => {
+    input.setAttribute("type", type);
+    input.style.color = ""; // restore
+  }, 150);
+}
+
+// Toggle password visibility on click
 togglePassword.addEventListener("click", () => {
   const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-  passwordInput.setAttribute("type", type);
+  smoothToggle(passwordInput, type);
 
-  // Swap icons
-  if (type === "text") {
-    eyeIcon.innerHTML = `
-      <path stroke-linecap="round" stroke-linejoin="round"
-        d="M17.94 17.94A10.07 10.07 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.973 9.973 0 012.17-3.32M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18" />
-    `;
-  } else {
-    eyeIcon.innerHTML = `
-      <path stroke-linecap="round" stroke-linejoin="round"
-        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      <circle cx="12" cy="12" r="3" />
-    `;
-  }
+  // Swap eye icons
+  eyeIcon.innerHTML =
+    type === "text"
+      ? `
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M17.94 17.94A10.07 10.07 0 0112 19
+             c-4.478 0-8.268-2.943-9.542-7
+             a9.973 9.973 0 012.17-3.32M9.88 9.88
+             a3 3 0 104.24 4.24M3 3l18 18" />
+      `
+      : `
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5
+             c4.478 0 8.268 2.943 9.542 7
+             -1.274 4.057-5.064 7-9.542 7
+             -4.477 0-8.268-2.943-9.542-7z" />
+        <circle cx="12" cy="12" r="3" />
+      `;
 });
 
-// Show or hide the icon based on input
+// Show or hide eye icon when typing
 passwordInput.addEventListener("input", () => {
-  if (passwordInput.value.length > 0) {
-    togglePassword.classList.add("visible");
-  } else {
-    togglePassword.classList.remove("visible");
-  }
+  togglePassword.classList.toggle("visible", passwordInput.value.length > 0);
 });
+
 
 
 });
@@ -266,3 +278,4 @@ document.getElementById("googleSignInBtn").addEventListener("click", () => {
 document.getElementById("microsoftSignInBtn").addEventListener("click", () => {
   window.location.href = "http://localhost:3000/auth/microsoft";
 });
+
