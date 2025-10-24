@@ -564,3 +564,42 @@ html, body {
   margin-top: 10px;
   display: none; /* hide it completely */
 }
+
+.password-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-row input {
+  width: 100%;
+  padding-right: 44px; /* make room for the icon */
+  box-sizing: border-box;
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-87%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: color 0.2s ease, transform 0.15s ease, opacity 0.25s ease;
+  line-height: 0;
+  opacity: 0; /* hidden by default */
+  pointer-events: none; /* not clickable until shown */
+}
+
+.password-toggle.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
