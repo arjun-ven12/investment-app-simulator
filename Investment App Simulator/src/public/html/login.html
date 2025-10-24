@@ -40,9 +40,13 @@
           <div class="form-row">
             <input type="password" id="password" placeholder="Password" required />
           </div>
+          <div class="cf-challenge" data-sitekey="0x4AAAAAAB8YN75ek6-FFt-N" data-theme="dark"
+            data-callback="onCaptchaSuccess">
+          </div>
 
           <button type="submit">Login</button>
         </form>
+
         <div class="divider">
           <hr><span>or</span>
           <hr>
@@ -70,7 +74,13 @@
       </div>
     </div>
   </div>
+  <script>
+    function onCaptchaSuccess(token) {
+      document.getElementById("loginForm").dispatchEvent(new Event("captcha-passed"));
+    }
+  </script>
   <script src="../js/login.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 </body>
 

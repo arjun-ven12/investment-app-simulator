@@ -13,6 +13,8 @@ const { sendVerificationEmail, sendPasswordResetCode } = require("../utils/email
 const dns = require("dns");
 const emailExistence = require("email-existence");
 
+
+
 // simple domain + SMTP validation
 async function isRealEmail(email) {
   // basic regex
@@ -130,52 +132,91 @@ module.exports.register = async (req, res) => {
 //////////////////////////////////////////////////////
 // LOGIN USER
 //////////////////////////////////////////////////////
+// at top of file if you want easy tweaks
+const MAX_ATTEMPTS = 3;           // allowed wrong passwords
+const LOCK_WINDOW_MIN = 5;       // lockout duration
+
 module.exports.login = async (req, res) => {
   const { email, username, password } = req.body;
-  // const link = `${process.env.APP_URL}/verify/${token}`;
+
   try {
-    // 1️⃣ Find user by email OR username
+    // 1) Find the user by email OR username
     const user = await prisma.user.findFirst({
       where: {
         OR: [
           email ? { email } : {},
-          username ? { username } : {}
+          username ? { username } : {},
         ],
       },
     });
 
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials." });
-    }
+    // Uniform "invalid" to avoid user enumeration
+    if (!user) return res.status(401).json({ message: "Invalid credentials." });
 
+    if (user.lockUntil && new Date() < user.lockUntil) {
+      return res.status(403).json({
+        message: "Account temporarily locked.",
+        lockUntil: user.lockUntil, // 🔥 send this timestamp
+      });
+    }
+    // 3) SSO-only accounts can’t use password login
     if ((user.googleId || user.microsoftId) && !user.password) {
       return res.status(403).json({
-        message: `Please sign in using ${user.googleId ? "Google" : "Microsoft"
-          } — this account doesn’t have a password.`,
+        message: `Please sign in using ${user.googleId ? "Google" : "Microsoft"} — this account doesn’t have a password.`,
       });
     }
 
-    // 2️⃣ Check if verified
+    // 4) Email verification check
     if (!user.verified) {
-      return res
-        .status(403)
-        .json({ message: "Please verify your email before logging in." });
+      return res.status(403).json({ message: "Please verify your email before logging in." });
     }
 
-    // 3️⃣ Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    // 5) Compare password
+    const isMatch = await bcrypt.compare(password || "", user.password || "");
+
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials." });
+      const nextFailed = (user.failedLogins || 0) + 1;
+
+      // Hit threshold? start lock, and reset the counter
+      if (nextFailed >= MAX_ATTEMPTS) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            failedLogins: 0,
+            lockUntil: new Date(Date.now() + LOCK_WINDOW_MIN * 60 * 1000),
+          },
+        });
+        return res
+          .status(401)
+          .json({ message: `Too many failed attempts. Account locked for ${LOCK_WINDOW_MIN} minutes.` });
+      }
+
+      // Otherwise just increment failed count
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { failedLogins: nextFailed, lockUntil: null },
+      });
+
+      return res.status(401).json({
+        message: `Invalid credentials. ${MAX_ATTEMPTS - nextFailed} attempt${MAX_ATTEMPTS - nextFailed === 1 ? "" : "s"} left.`,
+      });
     }
 
-    // 4️⃣ Generate JWT token
+    // 6) Success — reset counters
+    if (user.failedLogins || user.lockUntil) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { failedLogins: 0, lockUntil: null },
+      });
+    }
+
+    // 7) Issue JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
       JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
-    // 5️⃣ Return success
     return res.status(200).json({
       message: "Login successful.",
       user: {
@@ -190,6 +231,7 @@ module.exports.login = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 //////////////////////////////////////////////////////
 // GET SPECIFIC USER DETAILS
