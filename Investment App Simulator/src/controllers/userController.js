@@ -148,12 +148,13 @@ module.exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    // 🚫 Block password login for Google-only users
-    if (user.googleId && !user.password) {
+    if ((user.googleId || user.microsoftId) && !user.password) {
       return res.status(403).json({
-        message: "Please sign in using Google — this account doesn’t have a password.",
+        message: `Please sign in using ${user.googleId ? "Google" : "Microsoft"
+          } — this account doesn’t have a password.`,
       });
     }
+
     // 2️⃣ Check if verified
     if (!user.verified) {
       return res

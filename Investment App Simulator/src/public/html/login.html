@@ -48,10 +48,17 @@
           <hr>
         </div>
 
-        <button id="googleSignInBtn" class="google-btn google-dark">
-          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-icon">
-          <span>Sign in with Google</span>
-        </button>
+        <div class="oauth-container">
+          <button id="googleSignInBtn" class="oauth-btn google-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="oauth-icon">
+            <span>Sign in with Google</span>
+          </button>
+
+          <button id="microsoftSignInBtn" class="oauth-btn microsoft-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Microsoft logo" class="oauth-icon">
+            <span>Sign in with Microsoft</span>
+          </button>
+        </div>
         <div id="successCard" class="success-card d-none">
           <span id="successText"></span>
         </div>

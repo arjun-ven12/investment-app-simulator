@@ -168,7 +168,8 @@ model User {
   email                       String                        @unique
   password                    String?
   wallet                      Int                           @default(100000)
-  googleId    String?  // ✅ optional, for Google users
+  googleId                    String?
+  microsoftId                 String?
   createdAt                   DateTime                      @default(now())
   referredById                Int?
   status                      String                        @default("Sufficient Money")
@@ -182,6 +183,8 @@ model User {
   phoneNumber                 Int?
   resetCode                   String?
   resetExpires                DateTime?
+  failedLogins                Int                           @default(0)
+  lockUntil                   DateTime?
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
   Comment                     Comment[]
@@ -717,6 +720,9 @@ model OptionBlockchainTransaction {
   premium          Float // cost per contract × multiplier
   transactionHash  String
   blockNumber      Int
+  tradeType        String
+  gasUsed          Int
+  symbol           String
   createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

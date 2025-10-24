@@ -101,7 +101,7 @@ exports.googleCallback = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
+      { expiresIn: "1h" }
     );
 
     // Redirect to frontend

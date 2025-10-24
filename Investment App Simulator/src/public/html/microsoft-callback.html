@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing In with Microsoft...</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #333;
+      border-top: 4px solid #0078d4; /* Microsoft blue */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    h2 {
+      color: #d0d0d0;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h2>Signing you in with Microsoft...</h2>
+
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+
+      if (!token) {
+        document.body.innerHTML = "<h2 style='color:red;'>Login failed. No token found.</h2>";
+        return;
+      }
+
+      // Save token
+      localStorage.setItem('token', token);
+
+      // Decode JWT payload (base64)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = JSON.parse(atob(base64));
+
+      const userId = decodedPayload.id;
+      const email = decodedPayload.email;
+      const username = email.split('@')[0];
+
+      // Save in localStorage for session use
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', email);
+
+      // Redirect to home
+      window.location.href = '/html/home.html';
+    })();
+  </script>
+</body>
+</html>
