@@ -1,191 +1,449 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sealed — AI Paper Trading • Blockchain • Copilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <script>
-    </script>
+<style>
+/* ===============================
+   SEALEd — LUXURY LANDING SYSTEM
+   =============================== */
 
-    <title>Project Management</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      /* General Body Styling */
-      body {
-        font-family: "Roboto", sans-serif;
-        background-color: #f4f7fc;
-        margin: 0;
-        padding: 0;
-      }
+:root{
+  --bg:#07090D;
+  --ink:#F5F7FA;
+  --muted:rgba(240,248,255,.65);
+  --accent:#00E0FF;
+  --accent-2:#9A4DFF;
+  --glass:rgba(15,16,24,.35);
+  --glass-strong:rgba(15,16,24,.70);
+  --ring: conic-gradient(from 180deg at 50% 50%, #00E0FF, #9A4DFF 40%, #00E0FF 80%);
+  --nav-h: 78px;
+  --radius: 18px;
+  --shadow: 0 10px 40px rgba(0,0,0,.45);
+  --ease: cubic-bezier(.4,0,.2,1);
+}
 
-      /* Navbar Styling */
-      .navbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: #333;
-        padding: 10px 20px;
-        color: #fff;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-      }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:radial-gradient(60% 100% at 80% 0%, rgba(0,224,255,.10) 0%, transparent 60%) ,
+             radial-gradient(50% 60% at -10% 20%, rgba(154,77,255,.10) 0%, transparent 70%) ,
+             var(--bg);
+  color:var(--ink);
+  font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  letter-spacing:.1px;
+  overflow-x:hidden;
+  padding-top:var(--nav-h);
+}
 
-      .navbar-logo a {
-        color: #fff;
-        font-weight: 700;
-        text-decoration: none;
-        font-size: 1.5em;
-      }
+/* NAVBAR */
+.nav{
+  position:fixed; top:0; left:0; right:0; height:var(--nav-h);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 clamp(20px,6vw,88px);
+  z-index:999;
+  background:transparent;
+  transition:background .6s var(--ease), backdrop-filter .6s var(--ease);
+}
+.nav.scrolled{
+  background:var(--glass-strong);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.brand{
+  display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:.6px;
+  text-decoration:none; color:var(--ink);
+}
+.brand-badge{
+  width:26px; height:26px; border-radius:50%;
+  background:var(--ring); filter:blur(.2px); position:relative;
+}
+.brand-badge:after{
+  content:""; position:absolute; inset:3px; border-radius:50%; background:#0d1117;
+}
+.nav ul{list-style:none; display:flex; gap:34px; margin:0; padding:0; align-items:center}
+.nav a{color:var(--muted); text-decoration:none; font-weight:500; font-size:15px; position:relative; transition:color .3s var(--ease)}
+.nav a:hover{color:#fff}
+.nav a.active{color:#fff}
+.nav a.active:after, .nav a:hover:after{
+  content:""; position:absolute; left:0; right:0; bottom:-10px; height:1px; background:#fff; transform-origin:center; animation:underline .35s var(--ease) forwards;
+}
+@keyframes underline{from{transform:scaleX(0)} to{transform:scaleX(1)}}
 
-      .navbar-links {
-        list-style: none;
-        display: flex;
-        gap: 20px;
-      }
+.nav .cta{
+  padding:10px 14px; border-radius:12px; background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#0b0d12; font-weight:800; letter-spacing:.3px; box-shadow:0 8px 20px rgba(0,224,255,.25);
+}
 
-      .navbar-links li a {
-        color: #fff;
-        text-decoration: none;
-        font-weight: lighter;
-        padding: 5px 10px;
-        border-radius: 4px;
-        transition: background-color 0.3s;
-      }
+/* HERO */
+.hero{
+  min-height:calc(100dvh - var(--nav-h));
+  display:grid; grid-template-columns:1.1fr .9fr; align-items:center;
+  padding: clamp(24px,6vw,88px);
+  gap: clamp(20px,3vw,48px);
+}
+h1{
+  font-size: clamp(34px,5.2vw,74px);
+  line-height: .98;
+  margin:0 0 12px;
+  letter-spacing:.4px;
+}
+.hero p{color:var(--muted); font-size: clamp(16px,1.2vw,18px); margin: 12px 0 28px}
+.hero .buttons{display:flex; gap:14px; flex-wrap:wrap}
+.btn{
+  padding:14px 18px; border-radius:14px; border:1px solid rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:700; letter-spacing:.2px;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  backdrop-filter: blur(8px);
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.btn:hover{ transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.35); border-color:rgba(255,255,255,.25)}
+.btn.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#0b0d12; box-shadow:0 12px 28px rgba(0,224,255,.25)}
+.hero-sub{
+  display:flex; gap:18px; align-items:center; color:var(--muted); font-size:14px; margin-top:10px
+}
+.hero-sub i{color:var(--accent)}
 
-      .navbar-links li a:hover {
-        background-color: #111;
-      }
+/* ORB (NYRA) */
+.orb-wrap{ position:relative; height:min(60vh,540px); display:grid; place-items:center}
+.orb{
+  width:min(58vh,520px); height:min(58vh,520px); border-radius:50%;
+  background: radial-gradient(40% 40% at 50% 50%, rgba(0,224,255,.35), rgba(154,77,255,.15) 60%, transparent 70%),
+              radial-gradient(60% 60% at 50% 60%, rgba(255,255,255,.08), transparent 70%), #0b0d12;
+  box-shadow:
+    0 0 120px rgba(0,224,255,.25),
+    inset 0 0 60px rgba(0,224,255,.15);
+  position:relative;
+  transform:translateZ(0);
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float{ 0%,100%{ transform: translateY(-6px)} 50%{ transform: translateY(6px)}}
+.orb::before{
+  content:""; position:absolute; inset:-3px; border-radius:50%;
+  background: var(--ring); filter: blur(10px); opacity:.55; mask: linear-gradient(#000 60%, transparent 100%);
+}
+.glow-dot{
+  position:absolute; width:22px; height:22px; border-radius:50%;
+  background:#fff; box-shadow:0 0 30px 12px rgba(255,255,255,.35), 0 0 120px 40px rgba(0,224,255,.12);
+  animation: orbit 8.5s linear infinite;
+}
+@keyframes orbit{
+  from{ transform: rotate(0deg) translateX(calc(50% - 10px)) rotate(0deg) }
+  to{ transform: rotate(360deg) translateX(calc(50% - 10px)) rotate(-360deg) }
+}
+.play{
+  position:absolute; width:86px; height:86px; border-radius:50%;
+  background:rgba(255,255,255,.08);
+  display:grid; place-items:center; border:1px solid rgba(255,255,255,.15);
+  backdrop-filter: blur(6px);
+  cursor:pointer; transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease);
+}
+.play:hover{ transform:scale(1.04); box-shadow:0 10px 30px rgba(0,0,0,.4); background:rgba(255,255,255,.12)}
+.play i{ font-size:26px; color:#fff; transform:translateX(1px)}
 
-      .navbar-toggle {
-        display: none;
-        font-size: 1.5em;
-        cursor: pointer;
-        color: #fff;
-      }
+/* TRUST BAR */
+.trust{
+  padding: 16px clamp(20px,6vw,88px) 0;
+  opacity:.85
+}
+.trust .rail{
+  display:flex; gap:42px; overflow:auto; scrollbar-width:none; -ms-overflow-style:none
+}
+.trust .rail::-webkit-scrollbar{display:none}
+.pill{
+  border:1px solid rgba(255,255,255,.08); padding:8px 12px; border-radius:999px; color:var(--muted); white-space:nowrap; background:rgba(255,255,255,.02)
+}
 
-      /* Responsive Navbar */
-      @media (max-width: 768px) {
-        .navbar-links {
-          position: absolute;
-          top: 60px;
-          left: 0;
-          width: 100%;
-          background-color: #333;
-          flex-direction: column;
-          align-items: center;
-          display: none;
-        }
+/* FEATURE GRID */
+.section{ padding: clamp(36px,8vw,96px) clamp(20px,6vw,88px)}
+.section h2{ font-size: clamp(26px,3.6vw,42px); margin:0 0 18px}
+.kicker{ color:var(--muted); margin-bottom:28px}
+.grid{
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:22px;
+}
+.card{
+  position:relative; border-radius:var(--radius); overflow:hidden; padding:22px; min-height:180px;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.08); box-shadow: var(--shadow);
+  transition: transform .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease)
+}
+.card:hover{ transform: translateY(-6px); border-color:rgba(255,255,255,.18); background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03))}
+.card h3{ margin:6px 0 8px; font-size:18px}
+.card p{ color:var(--muted); margin:0}
+.card i{ color:var(--accent); font-size:18px}
+.card .cta-mini{ margin-top:14px; display:inline-flex; align-items:center; gap:8px; color:#fff; text-decoration:none; font-weight:700}
+.card .cta-mini i{font-size:12px}
 
-        .navbar-links.active {
-          display: flex;
-        }
+/* SHOWCASE STRIP */
+.showcase{ display:grid; grid-template-columns: 1.2fr .8fr; gap:22px }
+.panel{
+  border-radius:var(--radius);
+  background:var(--glass); border:1px solid rgba(255,255,255,.08); min-height:260px;
+  padding:22px; position:relative; overflow:hidden; box-shadow: var(--shadow);
+}
+.panel .texture{
+  position:absolute; inset:-20%; background: radial-gradient(40% 40% at 70% 30%, rgba(0,224,255,.20), transparent 60%),
+                               radial-gradient(40% 40% at 30% 70%, rgba(154,77,255,.18), transparent 60%);
+  filter: blur(40px); opacity:.85; pointer-events:none;
+}
+.panel h3{ margin:6px 0 8px }
+.list{ margin:10px 0 0; padding:0; list-style:none; color:var(--muted)}
+.list li{ display:flex; gap:10px; align-items:baseline; margin:8px 0}
+.list li i{ color:var(--accent)}
 
-        .navbar-toggle {
-          display: block;
-        }
-      }
+/* STATS STRIP */
+.stats{ display:flex; gap:18px; flex-wrap:wrap; margin-top:8px}
+.stat{
+  flex:1 1 200px; border-radius:16px; padding:18px 20px; border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); text-align:center
+}
+.stat strong{ font-size:28px}
+.stat span{ display:block; color:var(--muted); margin-top:2px}
 
-      /* Table Styling */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
+/* CTA FOOTER */
+.cta-foot{
+  text-align:center; padding: clamp(48px,10vw,120px) clamp(20px,6vw,88px);
+}
+.cta-foot .box{
+  display:inline-flex; flex-direction:column; gap:16px; align-items:center; justify-content:center; text-align:center;
+  padding: 34px clamp(18px,5vw,48px);
+  border-radius: 24px; border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  box-shadow: var(--shadow);
+}
+footer{color:var(--muted); text-align:center; padding:40px 20px}
 
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-      <div class="navbar-logo">
-        <a href="#" onclick="window.location.reload();">Fintech</a>
-      </div>
-      <ul class="navbar-links">
-        <li><a href="./index.html">Product Management</a></li>
-        <li><a href="./html/login.html">Login</a></li>
-        <li><a href="./html/register.html">Register!</a></li>
+/* REVEAL on scroll */
+.reveal{ opacity:0; transform: translateY(16px); transition: all .7s var(--ease)}
+.reveal.on{ opacity:1; transform:none}
+
+/* RESPONSIVE */
+@media (max-width: 1020px){
+  .hero{ grid-template-columns:1fr; padding-top:clamp(18px,4vw,36px)}
+  .orb-wrap{ order:-1; height:52vh}
+  .grid{ grid-template-columns:1fr 1fr}
+  .showcase{ grid-template-columns:1fr}
+}
+@media (max-width: 640px){
+  .grid{ grid-template-columns:1fr}
+  .nav ul{ display:none}
+  .nav .menu{display:block}
+}
+
+/* MOBILE MENU (simple) */
+.menu{display:none; font-size:22px; cursor:pointer}
+.drawer{
+  position:fixed; top:var(--nav-h); right:16px; left:16px; border-radius:16px; padding:14px;
+  background:var(--glass-strong); border:1px solid rgba(255,255,255,.08); display:none; z-index:998
+}
+.drawer a{ display:block; padding:12px 8px; color:#fff; text-decoration:none; border-radius:10px}
+.drawer a + a{ margin-top:6px}
+.drawer.show{ display:block}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a class="brand" href="home.html">
+    <span class="brand-badge"></span> Sealed
+  </a>
+  <ul>
+    <li><a href="/html/investment.html">Invest</a></li>
+    <li><a href="/html/scenarios.html">Scenarios</a></li>
+    <li><a href="/html/referral.html">Referral</a></li>
+    <li><a href="/html/allGuides.html">Guides</a></li>
+    <li><a href="/html/news.html">News</a></li>
+    <li><a class="cta" href="/html/login.html">Launch App</a></li>
+  </ul>
+  <i class="fa-solid fa-bars menu" id="menuBtn"></i>
+</nav>
+<div class="drawer" id="drawer">
+  <a href="/html/investment.html">Invest</a>
+  <a href="/html/scenarios.html">Scenarios</a>
+  <a href="/html/referral.html">Referral</a>
+  <a href="/html/allGuides.html">Guides</a>
+  <a href="/html/news.html">News</a>
+  <a class="btn primary" href="/html/login.html" style="display:block;text-align:center;margin-top:8px;">Launch App</a>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="reveal on">
+    <h1>Data-Driven Paper Trading.<br/>Blockchain-verified Results.<br/>Nyra at your side.</h1>
+    <p>
+      Sealed is a premium environment to learn, simulate, and refine strategies.
+      Trade with AI insights, prove performance on-chain, and level up with cinematic scenarios.
+    </p>
+    <div class="buttons">
+      <a class="btn primary" href="/html/login.html"><i class="fa-solid fa-rocket"></i>&nbsp; Launch App</a>
+      <a class="btn" href="/html/scenarios.html"><i class="fa-regular fa-circle-play"></i>&nbsp; Try a Scenario</a>
+      <a class="btn" href="/html/referral.html"><i class="fa-solid fa-gift"></i>&nbsp; Earn by Referral</a>
+    </div>
+    <div class="hero-sub"><i class="fa-solid fa-shield"></i> Transparent. On-chain verified. Free to start.</div>
+  </div>
+
+  <div class="orb-wrap reveal">
+    <div class="orb" id="orb">
+      <span class="glow-dot" style="top:8%; left:50%"></span>
+      <button class="play" style="top:50%; left:50%; transform:translate(-50%,-50%)">
+        <i class="fa-solid fa-play"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- TRUST -->
+<section class="trust reveal">
+  <div class="rail">
+    <div class="pill">AI Copilot: Nyra</div>
+    <div class="pill">On-chain Performance Ledger</div>
+    <div class="pill">Scenario Engine</div>
+    <div class="pill">Paper Options & Equities</div>
+    <div class="pill">Referrals up to $5,000</div>
+    <div class="pill">Guides • News • Console</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <h2 class="reveal">Everything you need to train like a pro.</h2>
+  <p class="kicker reveal">Sealed blends institutional-grade simulation with delightful product polish.</p>
+
+  <div class="grid">
+    <article class="card reveal">
+      <i class="fa-solid fa-brain"></i>
+      <h3>Nyra — AI Copilot</h3>
+      <p>Contextual advice, trade rationales, and post-mortems tuned for your scenario. Not just chat — a coach.</p>
+      <a class="cta-mini" href="/html/chatbot.html">Talk to Nyra <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+
+    <article class="card reveal">
+      <i class="fa-solid fa-cubes"></i>
+      <h3>On-chain Proof</h3>
+      <p>Every attempt sealed on a tamper-proof ledger. Share performance with recruiters or teammates.</p>
+      <a class="cta-mini" href="/html/investment.html">View Ledger <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+
+    <article class="card reveal">
+      <i class="fa-solid fa-chart-line"></i>
+      <h3>Paper Trading</h3>
+      <p>Trade equities & options with live-like feeds, limit/market orders, and P&L tracking.</p>
+      <a class="cta-mini" href="/html/investment.html">Open Terminal <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+
+    <article class="card reveal">
+      <i class="fa-solid fa-clapperboard"></i>
+      <h3>Scenario Engine</h3>
+      <p>Time-boxed challenges, curated volatility, and scoring. Replay, learn, and iterate.</p>
+      <a class="cta-mini" href="/html/scenarios.html">Start Challenge <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+
+    <article class="card reveal">
+      <i class="fa-solid fa-graduation-cap"></i>
+      <h3>Guides & Playbooks</h3>
+      <p>Bite-size lessons on options, risk, and strategy. Designed to be read between trades.</p>
+      <a class="cta-mini" href="/html/allGuides.html">Browse Guides <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+
+    <article class="card reveal">
+      <i class="fa-solid fa-gift"></i>
+      <h3>Referral Rewards</h3>
+      <p>Invite your circle and unlock tiered rewards up to <strong>$5,000</strong>. Everyone levels up.</p>
+      <a class="cta-mini" href="/html/referral.html">Get My Link <i class="fa-solid fa-arrow-right"></i></a>
+    </article>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section class="section">
+  <div class="showcase">
+    <div class="panel reveal">
+      <div class="texture"></div>
+      <h3>Why Sealed?</h3>
+      <ul class="list">
+        <li><i class="fa-solid fa-check"></i> Train with **realistic constraints** and scoring.</li>
+        <li><i class="fa-solid fa-check"></i> Keep an **immutable record** of attempt history.</li>
+        <li><i class="fa-solid fa-check"></i> Use **Nyra** to detect blind spots & craft better setups.</li>
+        <li><i class="fa-solid fa-check"></i> Share **verifiable results** — not screenshots.</li>
       </ul>
-      <div class="navbar-toggle" id="navbar-toggle">
-        <i class="fas fa-bars"></i>
+      <div class="stats">
+        <div class="stat"><strong id="s1">0</strong><span>Scenarios Completed</span></div>
+        <div class="stat"><strong id="s2">0</strong><span>On-chain Seals</span></div>
+        <div class="stat"><strong id="s3">0</strong><span>Guides Read</span></div>
       </div>
-    </nav>
+    </div>
 
-    <h1>Project Management</h1>
+    <div class="panel reveal">
+      <div class="texture"></div>
+      <h3>Next up</h3>
+      <ul class="list">
+        <li><i class="fa-regular fa-bell"></i> Real-time alerts & risk nudges.</li>
+        <li><i class="fa-regular fa-compass"></i> Strategy templates & backtests.</li>
+        <li><i class="fa-regular fa-star"></i> Public profiles with sealed records.</li>
+      </ul>
+      <div style="margin-top:18px">
+        <a class="btn primary" href="/html/login.html">Reserve Handle</a>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Form to add new task -->
-    <form id="taskForm">
-      <p>
-        <label for="taskName">Task Name:</label>
-        <input type="text" id="taskName" name="taskName" required />
-      </p>
-      <p>
-        <label for="taskStatus">Status:</label>
-        <select id="taskStatus" name="taskStatus" required></select>
-      </p>
-      <p>
-        <label for="assignees">Assign To:</label>
-        <select id="assignees" name="assignees" multiple required></select>
-      </p>
-      <button type="submit">Add Task</button>
-    </form>
+<!-- CTA FOOTER -->
+<section class="cta-foot">
+  <div class="box reveal">
+    <h2 style="margin:0">Ready to get sealed?</h2>
+    <p class="kicker">Launch the console, run a scenario, and mint your first on-chain attempt.</p>
+    <div class="buttons">
+      <a class="btn primary" href="/html/login.html">Launch App</a>
+      <a class="btn" href="/html/scenarios.html">Try a Challenge</a>
+    </div>
+  </div>
+</section>
 
-    <h2>All Tasks</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Assignees</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="tasksTableBody">
-        <!-- Rows will be populated by JavaScript -->
-      </tbody>
-    </table>
+<footer>© 2025 Sealed — AI • Ledger • Paper Trading</footer>
 
-    <!-- Template for task row -->
-    <template id="taskRowTemplate">
-      <tr>
-        <td class="task-id"></td>
-        <td class="task-name"></td>
-        <td class="task-status"></td>
-        <td>
-          <ul class="task-assignees"></ul>
-        </td>
-        <td>
-          <button class="delete-button">Delete</button>
-        </td>
-      </tr>
-    </template>
+<script>
+/* Scroll effects */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>{ if (scrollY>40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled'); });
 
-    <template id="assigneeLiTemplate">
-      <li>
-        <span class="assigneeName"></span>
-        <button class="unassignButton">❌</button>
-      </li>
-    </template>
+/* Mobile drawer */
+const drawer = document.getElementById('drawer');
+document.getElementById('menuBtn')?.addEventListener('click', ()=> drawer.classList.toggle('show'));
 
-    <script>
-      // Toggle mobile menu
-      document.getElementById("navbar-toggle").onclick = function () {
-        document.querySelector(".navbar-links").classList.toggle("active");
-      };
-    </script>
+/* Parallax-ish orb follow */
+const orb = document.getElementById('orb');
+if (orb){
+  window.addEventListener('mousemove', (e)=>{
+    const rect = orb.getBoundingClientRect();
+    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    const dx = (e.clientX - cx)/rect.width, dy = (e.clientY - cy)/rect.height;
+    orb.style.transform = `translateY(${Math.sin(Date.now()/1400)*6}px) rotateX(${dy*6}deg) rotateY(${dx*-6}deg)`;
+  });
+}
 
-    <script src="index.js" type="text/javascript"></script>
-  </body>
+/* Reveal on scroll */
+const reveals = [...document.querySelectorAll('.reveal')];
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('on'); io.unobserve(en.target);} });
+},{threshold:.12});
+reveals.forEach(el=>io.observe(el));
+
+/* Cute stat counter */
+function count(el, to, dur=1200){
+  const start = performance.now(); const from = 0;
+  function tick(t){ const p = Math.min(1,(t-start)/dur); el.textContent = Math.floor(from+(to-from)*p).toLocaleString(); if(p<1) requestAnimationFrame(tick); }
+  requestAnimationFrame(tick);
+}
+count(document.getElementById('s1'), 128);
+count(document.getElementById('s2'), 342);
+count(document.getElementById('s3'), 76);
+</script>
+</body>
 </html>
