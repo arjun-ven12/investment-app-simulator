@@ -23,6 +23,9 @@ html, body {
   gap: 30px;
 }
 
+.container h1{
+  padding-top: 40px;
+}
 /* use a separate inner wrapper if you need nested spacing */
 .inner-container {
   display: flex;

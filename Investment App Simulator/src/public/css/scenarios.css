@@ -22,12 +22,13 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding-bottom: 20px;
   border-bottom: 1px solid #53596B;
 }
 
 h1{
   text-align: center;
+  padding-top: 40px;
 }
 /* Panels */
 .sidebar, .middle-panel, .right-panel {
