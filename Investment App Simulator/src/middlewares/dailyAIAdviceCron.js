@@ -77,9 +77,8 @@ async function generateDailyAdvice() {
   }
 }
 
-// 🕙 Schedule daily at 10:39 AM Singapore time
 cron.schedule(
-  "08 13 * * *",
+  "00 11 * * *",
   async () => {
     await generateDailyAdvice();
   },
