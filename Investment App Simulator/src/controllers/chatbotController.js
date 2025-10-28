@@ -4,6 +4,7 @@ const scenarioController = require("./scenarioController");
 const prisma = require("../../prisma/prismaClient");
 const optionsModel = require('../models/options');
 const optionsController = require('../controllers/optionsController');
+const { broadcastChatbotMessage } = require("../socketBroadcast");
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
@@ -794,3 +795,78 @@ async function upsertAIAdvice(userId, scenarioId, aiAdvice) {
     throw err;
   }
 }
+
+
+//////////////////////////////////////////////////////
+// CHAT CONTROLLER — Persistent Across Pages
+//////////////////////////////////////////////////////
+const { startChatSession, saveMessage, getChatHistory } = require("../models/chatbot");
+
+// 🧠 Create or Resume Session
+module.exports.startChatSession = async (req, res) => {
+  try {
+    const userId = parseInt(req.user?.id);
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+const session = await startChatSession(userId); // ✅ capture it
+    res.status(200).json(session);
+  } catch (err) {
+    console.error("startChatSession error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports.endChatSession = async (req, res) => {
+  try {
+    const { userId, sessionId } = req.body;
+    if (!userId || !sessionId)
+      return res.status(400).json({ error: "Missing userId or sessionId" });
+
+    const ended = await chatbotModel.endChatSession(sessionId, userId);
+    res.status(200).json(ended);
+  } catch (err) {
+    console.error("❌ endChatSession error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 💬 Send Message
+module.exports.sendChatMessage = async (req, res) => {
+  try {
+    const { userId, sessionId, prompt } = req.body;
+    if (!userId || !sessionId || !prompt)
+      return res.status(400).json({ error: "Missing userId, sessionId, or prompt" });
+
+    // 1️⃣ Save user message
+    await saveMessage(parseInt(userId), sessionId, "user", prompt);
+
+    // 2️⃣ Generate AI reply
+    const aiResponse = await chatbotModel.generateResponseForNyra(prompt, "gpt-4o-mini", 400);
+
+    // 3️⃣ Save AI message
+    await saveMessage(parseInt(userId), sessionId, "assistant", aiResponse);
+broadcastChatbotMessage(userId, sessionId, {
+  role: "assistant",
+  content: aiResponse,
+});
+
+    res.status(200).json({ response: aiResponse });
+  } catch (err) {
+    console.error("sendChatMessage error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 📜 Get Chat History
+module.exports.getChatHistory = async (req, res) => {
+  try {
+    const { userId, sessionId } = req.query;
+    if (!userId || !sessionId)
+      return res.status(400).json({ error: "Missing userId or sessionId" });
+
+    const messages = await getChatHistory(Number(userId), Number(sessionId));
+    res.status(200).json(messages);
+  } catch (err) {
+    console.error("getChatHistory error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};

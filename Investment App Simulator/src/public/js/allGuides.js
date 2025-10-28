@@ -1,3 +1,4 @@
+let socket = null;
 async function fetchAllGuides() {
   const token = localStorage.getItem("token");
   if (!token) return [];

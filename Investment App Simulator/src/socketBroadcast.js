@@ -98,6 +98,20 @@ function broadcastScenarioPortfolioUpdate(userId, scenarioId, portfolio) {
   console.log(`💼 Broadcasting Portfolio Update → ${room}`);
   ioInstance.to(room).emit('scenarioPortfolioUpdate', portfolio);
 }
+
+function broadcastChatbotMessage(userId, sessionId, message) {
+  if (!ioInstance) return console.warn('Socket not initialized for chatbot broadcast');
+  const room = `user_${userId}`;
+  console.log(`💬 Broadcasting chatbot message to room: ${room}`);
+
+  ioInstance.to(room).emit("chatbot:newMessage", {
+    userId,
+    sessionId,
+    role: message.role || "assistant",
+    content: message.content || "",
+  });
+
+}
 module.exports = {
   setSocketIO,
   broadcastNewsView,
@@ -111,7 +125,8 @@ module.exports = {
   broadcastStopMarketUpdate,
   broadcastScenarioMarketUpdate,
   broadcastScenarioLimitUpdate,
-  broadcastScenarioPortfolioUpdate
+  broadcastScenarioPortfolioUpdate,
+  broadcastChatbotMessage
 };
 
 

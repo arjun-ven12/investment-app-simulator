@@ -648,6 +648,99 @@ async function getUserOptionTradesWithPnL(userId) {
   return results;
 }
 
+//////////////////////////////////////////////////////
+// CHAT PERSISTENCE — DB OPERATIONS
+//////////////////////////////////////////////////////
+
+async function startChatSession(userId) {
+  if (!userId) throw new Error("Missing userId");
+  const numericUserId = parseInt(userId, 10);
+
+  // 🧹 Optional: deactivate previous sessions
+  await prisma.chatSession.updateMany({
+    where: { userId: numericUserId },
+    data: { active: false },
+  });
+
+  // ✅ Always create a new chat session
+  const session = await prisma.chatSession.create({
+    data: {
+      userId: numericUserId,
+      title: `Session ${new Date().toLocaleString("en-SG", {
+        hour12: false,
+      })}`,
+      active: true,
+      createdAt: new Date(),
+    },
+  });
+
+  return session;
+}
+
+
+
+async function saveMessage(userId, sessionId, role, content) {
+  if (!userId || !sessionId || !role || !content)
+    throw new Error("Missing message parameters");
+
+  return prisma.chatMessage.create({
+    data: { userId, sessionId, role, content },
+  });
+}
+
+async function getChatHistory(userId, sessionId) {
+  if (!userId || !sessionId) throw new Error("Missing userId or sessionId");
+
+  return prisma.chatMessage.findMany({
+    where: { userId, sessionId },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+async function generateResponseForNyra(prompt, model = "gpt-4o-mini", max_tokens = 400) {
+  if (!prompt) throw new Error("No prompt provided.");
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are Nyra, a helpful and intelligent Fintech AI assistant for Sealed(Paper Trading Simulator with blockchain). Speak professionally but friendly. Keep answers short and insightful.",
+        },
+        { role: "user", content: prompt },
+      ],
+      max_tokens,
+      temperature: 0.8,
+    });
+
+    const reply = completion.choices?.[0]?.message?.content?.trim();
+    console.log("✅ AI Reply:", reply || "⚠️ Empty reply");
+    return reply || "Sorry, I didn’t quite understand that.";
+  } catch (err) {
+    console.error("❌ OpenAI API error:", err.message);
+    return "Sorry, something went wrong generating a response.";
+  }
+}
+ async function endChatSession(sessionId, userId){
+  const session = await prisma.chatSession.findUnique({
+    where: { id: Number(sessionId) },
+  });
+
+  if (!session || session.userId !== Number(userId)) {
+    throw new Error("Session not found or unauthorized");
+  }
+
+  const ended = await prisma.chatSession.update({
+    where: { id: Number(sessionId) },
+    data: { endedAt: new Date(), active: false },
+  });
+
+  return { message: "Session ended", session: ended };
+};
+
+
 export {
   getUserPortfolio,
   buildPortfolioSummary,
@@ -665,6 +758,13 @@ export {
   probDrawdown,
   generateResponseForChatbot,
   getUserOptionTradesWithPnL,
-  generateScenarioAIAdviceDetailed
+  generateScenarioAIAdviceDetailed,
+  startChatSession,
+   saveMessage, 
+   getChatHistory,
+  generateResponseForNyra,
+  endChatSession
 };
+
+
 

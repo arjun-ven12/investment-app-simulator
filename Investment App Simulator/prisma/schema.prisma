@@ -210,6 +210,8 @@ model User {
   AIAdvice                    AIAdvice[]
   BlockchainTransaction       BlockchainTransaction[]
   OptionBlockchainTransaction OptionBlockchainTransaction[]
+  ChatSession                 ChatSession[]
+  ChatMessage                 ChatMessage[]
 }
 
 model Referral {
@@ -726,4 +728,36 @@ model OptionBlockchainTransaction {
   createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ===========================================
+// NYRA Chat Persistence
+// ===========================================
+
+model ChatSession {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  title     String?
+  active    Boolean        @default(true)      // ✅ add this
+  endedAt   DateTime?                         // ✅ add this
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  messages  ChatMessage[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  userId    Int
+  role      String // "user" | "assistant" | "system"
+  content   String
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
 }
