@@ -840,7 +840,13 @@ module.exports.sendChatMessage = async (req, res) => {
     await saveMessage(parseInt(userId), sessionId, "user", prompt);
 
     // 2️⃣ Generate AI reply
-    const aiResponse = await chatbotModel.generateResponseForNyra(prompt, "gpt-4o-mini", 400);
+    const aiResponse = await chatbotModel.generateResponseForNyra(
+  prompt,       // ✅ first
+  userId,       // ✅ second
+  sessionId,    // ✅ third
+  "gpt-4o-mini",
+  400
+);
 
     // 3️⃣ Save AI message
     await saveMessage(parseInt(userId), sessionId, "assistant", aiResponse);

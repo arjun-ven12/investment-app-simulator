@@ -383,15 +383,15 @@ async function getUserPortfolio(userId) {
     throw new Error(`Invalid user ID: ${userId}`);
   }
 
-const user = await prisma.user.findUnique({
-  where: { id: userId },
-  select: {
-    wallet: true,
-  },
-});
-console.log(user)
-console.log(user.wallet)
-const wallet = user.wallet
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      wallet: true,
+    },
+  });
+  console.log(user)
+  console.log(user.wallet)
+  const wallet = user.wallet
 
   // Fetch all trades for the user
   const userTrades = await prisma.trade.findMany({
@@ -406,7 +406,7 @@ const wallet = user.wallet
   });
 
   if (!userTrades || userTrades.length === 0) {
-    return { openPositions: [], closedPositions: [], wallet  };
+    return { openPositions: [], closedPositions: [], wallet };
   }
 
   const stockMap = new Map();
@@ -556,7 +556,7 @@ const wallet = user.wallet
     }
   }
 
-  return { openPositions, closedPositions, wallet}
+  return { openPositions, closedPositions, wallet }
 }
 
 
@@ -656,26 +656,41 @@ async function startChatSession(userId) {
   if (!userId) throw new Error("Missing userId");
   const numericUserId = parseInt(userId, 10);
 
-  // 🧹 Optional: deactivate previous sessions
+  // 🧹 Deactivate previous sessions
   await prisma.chatSession.updateMany({
     where: { userId: numericUserId },
     data: { active: false },
   });
 
-  // ✅ Always create a new chat session
+  // ✅ Create new chat session
   const session = await prisma.chatSession.create({
     data: {
       userId: numericUserId,
-      title: `Session ${new Date().toLocaleString("en-SG", {
-        hour12: false,
-      })}`,
+      title: `Session ${new Date().toLocaleString("en-SG", { hour12: false })}`,
       active: true,
       createdAt: new Date(),
     },
   });
 
+  // 💬 Create Nyra greeting message
+  await prisma.chatMessage.create({
+    data: {
+      role: "assistant",
+      content:
+        "Hello, I’m <strong>Nyra</strong> — your Fintech AI assistant. How can I help you today?",
+      session: {
+        connect: { id: session.id },   // ✅ connect to the session
+      },
+      user: {
+        connect: { id: numericUserId }, // ✅ connect to the user
+      },
+    },
+  });
+
   return session;
 }
+
+
 
 
 
@@ -697,20 +712,36 @@ async function getChatHistory(userId, sessionId) {
   });
 }
 
-async function generateResponseForNyra(prompt, model = "gpt-4o-mini", max_tokens = 400) {
+async function generateResponseForNyra(prompt, userId, sessionId, model = "gpt-4o-mini", max_tokens = 400) {
   if (!prompt) throw new Error("No prompt provided.");
 
   try {
+    // 🧠 1. Load recent chat history from DB (only the last few for performance)
+    const pastMessages = await prisma.chatMessage.findMany({
+      where: { userId: parseInt(userId), sessionId: parseInt(sessionId) },
+      orderBy: { createdAt: "asc" },
+      take: 10, // you can adjust this (limit context size)
+      select: { role: true, content: true },
+    });
+
+    // 🧩 2. Build conversation array for OpenAI
+    const conversation = [
+      {
+        role: "system",
+        content:
+          "You are Nyra, a helpful and intelligent Fintech AI assistant for Sealed (Paper Trading Simulator with blockchain). Speak professionally but friendly. Keep answers concise and insightful.",
+      },
+      ...pastMessages.map((msg) => ({
+        role: msg.role === "assistant" ? "assistant" : "user",
+        content: msg.content,
+      })),
+      { role: "user", content: prompt },
+    ];
+
+    // 🚀 3. Call OpenAI API
     const completion = await openai.chat.completions.create({
       model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Nyra, a helpful and intelligent Fintech AI assistant for Sealed(Paper Trading Simulator with blockchain). Speak professionally but friendly. Keep answers short and insightful.",
-        },
-        { role: "user", content: prompt },
-      ],
+      messages: conversation,
       max_tokens,
       temperature: 0.8,
     });
@@ -723,7 +754,13 @@ async function generateResponseForNyra(prompt, model = "gpt-4o-mini", max_tokens
     return "Sorry, something went wrong generating a response.";
   }
 }
- async function endChatSession(sessionId, userId){
+
+
+
+
+
+
+async function endChatSession(sessionId, userId) {
   const session = await prisma.chatSession.findUnique({
     where: { id: Number(sessionId) },
   });
@@ -760,8 +797,8 @@ export {
   getUserOptionTradesWithPnL,
   generateScenarioAIAdviceDetailed,
   startChatSession,
-   saveMessage, 
-   getChatHistory,
+  saveMessage,
+  getChatHistory,
   generateResponseForNyra,
   endChatSession
 };
