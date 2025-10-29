@@ -1,160 +1,731 @@
+/* ============================================================
+   BLACKSEALED — Academy Timeline (Cinematic White Edition)
+============================================================ */
+
+/* ------------------------------------------------------------
+   1. IMPORTS & ROOT VARIABLES
+------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --accent-blue: #3a7be0;
+  --accent-cyan: #4ddfb5;
+  --text-light: #f2f5f9;
+  --text-muted: #9ca4b3;
+  --glass-bg: rgba(15, 18, 28, 0.75);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --radius: 18px;
+  --blur: 20px;
+  --transition: 0.45s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ------------------------------------------------------------
+   2. BASE LAYOUT
+------------------------------------------------------------ */
 body {
-    font-family: 'Outfit', "Segoe UI", sans-serif;
-    margin: 0;
-    /* background: linear-gradient(180deg, #1c3347, #000000); */
-    background-color: rgb(23, 52, 85);
-    color: #333;
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-light);
+  background: radial-gradient(circle at 40% 20%, #0b1018 0%, #030509 80%, #010204 100%);
+  overflow-x: hidden;
 }
 
-/* Title fade-in animation */
-.page-title {
-    padding-top: 50px;
-    text-align: center;
-    margin: 30px 0;
-    font-size: 2rem;
-    color: #d8efff;
-    animation: fadeSlideDown 1s ease forwards;
+/* ------------------------------------------------------------
+   3. BACKGROUND LAYERS
+------------------------------------------------------------ */
+.bg-auras {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
 }
 
+.auras {
+  position: absolute;
+  width: 1200px;
+  height: 1200px;
+  border-radius: 50%;
+  filter: blur(200px);
+  opacity: 0.3;
+  mix-blend-mode: screen;
+  animation: floatAura 20s ease-in-out infinite alternate;
+}
+
+.auras:nth-child(1) {
+  background: radial-gradient(circle, rgba(58,123,224,0.55), transparent 60%);
+  top: -200px;
+  left: -250px;
+}
+
+.auras:nth-child(2) {
+  background: radial-gradient(circle, rgba(77,223,181,0.45), transparent 70%);
+  bottom: -200px;
+  right: -200px;
+}
+
+@keyframes floatAura {
+  0%   { transform: translate(0,0) scale(1); opacity: 0.25; }
+  50%  { transform: translate(60px, -40px) scale(1.05); opacity: 0.4; }
+  100% { transform: translate(-40px, 40px) scale(1.1); opacity: 0.25; }
+}
+
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.08;
+  animation: gridDrift 80s linear infinite;
+}
+
+@keyframes gridDrift {
+  from { background-position: 0 0; }
+  to   { background-position: 200px 200px; }
+}
+
+.center-glow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(70,120,255,0.15), transparent 70%);
+  filter: blur(120px);
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+/* ------------------------------------------------------------
+   4. TYPOGRAPHY & CONTAINER
+------------------------------------------------------------ */
 .guides-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 20px;
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 140px 24px 160px;
+  text-align: center;
 }
 
-.guides-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    animation: fadeIn 0.8s ease-in-out;
+.page-title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.section-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(210,220,240,0.6);
+  margin-bottom: 20px;
+}
+
+.page-subtitle {
+  font-size: 1.05rem;
+  color: rgba(210,220,235,0.65);
+  max-width: 700px;
+  margin: 0 auto -90px;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------
+   5. TIMELINE SECTION
+------------------------------------------------------------ */
+
+/* === Board === */
+.timeline-board {
+  position: relative;
+  width: 100%;
+  max-width: 2400px;
+  height: 440px;
+  margin: 0 auto;
+  overflow: visible;
+  border-radius: var(--radius);
+  margin-top: -150px;
+}
+
+.timeline-scroll {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* === Line === */
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-50%);
+  z-index: 0;
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--progress, 0%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(77,223,181,0.3));
+  filter: drop-shadow(0 0 8px rgba(77,223,181,0.4));
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Nodes === */
+.timeline-nodes {
+  position: relative;
+  top: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transform: translateY(-50%);
+  transition: transform 1.1s cubic-bezier(.23,1,.32,1);
+  z-index: 2;
+}
+
+.timeline-node {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #bebebe;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.timeline-node.active {
+  transform: scale(1.3);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+  background: #ffffff;
+}
+
+.timeline-node.active::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, .25);
+  animation: pulseWhite 2s infinite ease-in-out;
+}
+
+.timeline-node:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 25px rgba(77,223,181,0.6), 0 0 50px rgba(77,223,181,0.3);
+}
+
+@keyframes pulseWhite {
+  0%, 100% { transform: scale(1); opacity: .8; }
+  50%      { transform: scale(1.5); opacity: 0; }
+}
+
+/* === Detail Card === */
+#timeline-detail {
+  position: relative;
+  width: 60%;
+  max-width: 800px;
+  margin: -100px auto 0;
+  padding: 50px 60px;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+#timeline-detail.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === Navigation === */
+.timeline-nav {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+}
+
+.nav-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 1.4rem;
+  transition: all 0.25s ease;
+}
+
+.nav-btn:hover {
+  background: var(--accent-cyan);
+  color: #0b1018;
+}
+
+/* ------------------------------------------------------------
+   6. GRID VIEW — ALL GUIDES
+------------------------------------------------------------ */
+
+/* === Layout === */
+.guides-grid {
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 80px;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* === Guide Card === */
+.guide-card {
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 40px 30px;
+  backdrop-filter: blur(18px);
+  box-shadow: inset 0 0 8px rgba(255,255,255,0.03), 0 10px 35px rgba(0,0,0,0.45);
+  transition: all 0.45s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.guide-card:nth-child(1) { animation-delay: 0.1s; }
+.guide-card:nth-child(2) { animation-delay: 0.2s; }
+.guide-card:nth-child(3) { animation-delay: 0.3s; }
+.guide-card:nth-child(4) { animation-delay: 0.4s; }
+.guide-card:nth-child(5) { animation-delay: 0.5s; }
+.guide-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === Background Overlay === */
+.guide-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-img) center/cover no-repeat;
+  opacity: 0.85;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  border-radius: 20px;
+}
+
+/* === Content === */
+.guide-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f6f8ff;
+  letter-spacing: -0.015em;
+  margin-bottom: 10px;
+}
+
+.guide-card h3::after {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin: 12px 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent);
+}
+
+.guide-card p {
+  color: rgba(220,230,250,0.78);
+  line-height: 1.6;
+  font-size: 0.93rem;
+  margin-bottom: 16px;
+}
+
+.guide-card span {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  opacity: 0.85;
+}
+
+/* === Hover Effects === */
+.guide-card:hover::before { opacity: 1; }
+.guide-card:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.6);
+}
+
+
+
+.guide-card:hover p { color: rgba(255,255,255,0.9); }
+.guide-card:hover span { color: #ffffff; opacity: 1; }
+
+.guide-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, #000000, #8d8d8d);
+  transition: width 0.4s ease;
+}
+
+.guide-card:hover::after { width: 100%; }
+
+/* === Grid Backdrop === */
+.guide-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.75)),
+    var(--bg-img) center/cover no-repeat;
+  opacity: 0.9;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  border-radius: 20px;
+}
+
+.guide-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.8)),
+    var(--bg-img) center/cover no-repeat;
+  opacity: 0.9;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  border-radius: 20px;
+  z-index: 0; /* stays behind text */
+}
+
+.guide-card .guide-content {
+  position: relative;
+  z-index: 2; /* ensures text stays above overlay */
+}
+
+.guide-content {
+  position: absolute;
+  bottom: -90px;              /* pushes text to bottom */
+  /* left: 24px;
+  right: 24px; */
+  z-index: 2;
+  text-align: left;
+}
+
+.guides-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* slightly wider columns */
+  gap: 36px;
 }
 
 .guide-card {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
+  height: 340px; /* ⬆️ increased from auto — feel free to test 320–380px range */
+  padding: 40px 32px 30px;
 }
 
-/* Subtle card hover effect */
-.guide-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+.guide-card h3 {
+  font-size: 1.15rem;
+  line-height: 1.4;
 }
 
-/* Add animated gradient highlight on hover */
+.guide-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 90%;
+}
+
 .guide-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(120deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.3) 50%,
-            rgba(255, 255, 255, 0.1) 100%);
-    transform: skewX(-20deg);
-    transition: left 0.6s ease;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 15%,      /* barely dark at top */
+      rgba(0, 0, 0, 0.25) 30%,    /* soft mid tone */
+      rgba(0, 0, 0, 0.55) 60%,    /* deeper shadow */
+      rgba(0, 0, 0, 0.85) 85%,    /* near full dark */
+      rgba(0, 0, 0, 0.95) 100%    /* solid dark at bottom */
+    ),
+    var(--bg-img) center/cover no-repeat;
+  opacity: 0.95;
+  transition: opacity 0.4s ease, transform 0.3s ease;
+  z-index: 0;
 }
+.guide-card:hover::before {
+  opacity: 0.85;
+  filter: brightness(1.05);
+}
+
 
 .guide-card:hover::before {
-    left: 100%;
+  opacity: 0.85;
+  filter: brightness(1.05);
+  transform: scale(1.02);
 }
 
-.guide-title {
-    font-size: 1.25rem;
-    margin-bottom: 10px;
-    color: #0a3d62;
-    transition: color 0.3s ease;
+
+/* === View Toggle Buttons === */
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 120px 0 40px;
+  position: relative;
+  z-index: 20;
 }
 
-.guide-card:hover .guide-title {
-    color: #145374;
+.view-toggle button {
+  background: rgba(0, 0, 0, 0.05);
+  border: 0.4px solid rgba(255, 255, 255, 0.6);
+  color: #f1f5fa;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  border-radius: 12px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.guide-preview {
-    flex-grow: 1;
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 15px;
-    line-height: 1.4;
-    transition: color 0.3s ease;
+.view-toggle button.active,
+.view-toggle button:hover {
+  background: linear-gradient(90deg, rgba(191, 241, 250, 0.85), rgba(255, 255, 255, 0.85));
+  color: #000000;
+  border-color: transparent;
 }
 
-.guide-card:hover .guide-preview {
-    color: #333;
+/* ------------------------------------------------------------
+   7. LAYER FIXES
+------------------------------------------------------------ */
+.timeline-board,
+.timeline-scroll {
+  position: relative;
+  z-index: 1;
 }
 
-.view-btn {
-    background: #0a3d62;
-    color: white;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    align-self: flex-start;
-    font-size: 0.9rem;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+.center-glow,
+.bg-auras,
+.grid-bg {
+  z-index: 0 !important;
+  pointer-events: none;
 }
 
-/* Button hover pop effect */
-.view-btn:hover {
-    background: #145374;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-}
-
-/* Keyframes for smooth intro animations */
+/* ------------------------------------------------------------
+   8. ANIMATIONS
+------------------------------------------------------------ */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+
+
+
+/* ============================================================
+   TIMELINE DETAIL — Cinematic Transition Edition
+============================================================ */
+.detail-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 48px 64px;
+  background: linear-gradient(
+      to bottom right,
+      rgba(15, 18, 28, 0.65),
+      rgba(10, 12, 18, 0.85)
+    );
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.65);
+  transform: translateY(40px) scale(0.97);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  border: 1px white;
+}
+
+.timeline-detail.show .detail-card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* --- Cinematic background overlay --- */
+.detail-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.9) 100%
+    ),
+    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+  z-index: 0;
+  filter: brightness(0.8) saturate(0.9);
+  transition: transform 1.5s ease, opacity 1.2s ease;
+  border-radius: 1px white solid;
+}
+
+/* subtle parallax motion */
+.timeline-detail.show .detail-card::before {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+/* --- Text Styling --- */
+.detail-card h3 {
+  position: relative;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #f1f4fa;
+  margin-bottom: 16px;
+  z-index: 2;
+}
+
+.detail-card p {
+  position: relative;
+  color: #c9d2e0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.detail-card .detail-link {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: transparent;
+  border-color: white;
+  text-decoration: none;
+  transition: all 0.4s ease;
+}
+
+.detail-card .detail-link:hover {
+  transform: translateY(-2px);
+}
+
+
+.detail-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.9) 100%
+    ),
+    var(--bg) center/cover no-repeat;
+  z-index: 0;
+  filter: brightness(0.8) saturate(0.9);
+  transition: transform 1.5s ease, opacity 1.2s ease;
+}
+
+
+#timeline-detail {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   READ MORE Button — BlackSealed White Luxe Edition
+============================================================ */
+
+/* ============================================================
+   READ MORE Button — Grid Edition (White Luxe)
+============================================================ */
+.guide-card .detail-link {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  padding: 9px 20px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+
+  background: transparent;
+  backdrop-filter: blur(6px);
+  transition: all 0.35s cubic-bezier(.4,0,.2,1);
+  z-index: 2;
+  overflow: hidden;
+}
+
+
+
+/* --- Hover: fills to white with cinematic glow --- */
+.guide-card .detail-link:hover {
+text-decoration: underline;
+}
+
+.guide-card .detail-link:hover::before {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   View Transition Animations — Timeline <-> Grid
+============================================================ */
+
+/* Fade + Slide Up for Grid appearing */
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Fade + Slide Down for Timeline appearing */
 @keyframes fadeSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  0% { opacity: 0; transform: translateY(-30px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-
-/* Guide title in card */
-.guide-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #0a3d62;
-    margin-bottom: 10px;
-    transition: color 0.3s ease;
+/* Apply base animation styles */
+.guides-grid,
+.timeline-wrapper {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.guide-card:hover .guide-title {
-    color: #145374;
+.guides-grid.active {
+  animation: fadeSlideUp 0.8s ease forwards;
 }
 
-/* Guide preview */
-.guide-preview {
-    flex-grow: 1;
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 15px;
-    line-height: 1.5;
+.timeline-wrapper.active {
+  animation: fadeSlideDown 0.8s ease forwards;
 }

@@ -1,23 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>All Guides</title>
-  <link rel="stylesheet" href="../css/allGuides.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackSealed — Investment Guides</title>
+  <link rel="stylesheet" href="../css/allGuides.css" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="/css/chatbot.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
 </head>
+
 <body>
+  <!-- ==============================
+       Cinematic Multi-Layer Background
+  =============================== -->
+  <div class="bg-auras">
+    <div class="auras"></div>
+    <div class="auras"></div>
+  </div>
+  <div class="grid-bg"></div>
+  <div class="center-glow"></div>
   <div id="navbar-container"></div>
 
+  <!-- ==============================
+       Main Container
+  =============================== -->
   <div class="guides-container">
     <h1 class="page-title">Investment Guides</h1>
-    <div id="guides-list" class="guides-list"></div>
+    <p class="section-label">ACADEMY</p>
+    <p class="page-subtitle">
+      Your progression through mastery — from fundamental insights to advanced strategy.
+    </p>
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <button id="timeline-view" class="active">Timeline View</button>
+      <button id="grid-view">All Guides</button>
+    </div>
+
+    <!-- ==============================
+         Timeline View
+    =============================== -->
+    <div class="timeline-wrapper show">
+      <div class="timeline-board">
+        <div class="timeline-scroll">
+          <div class="timeline-line"></div>
+          <div id="timeline-nodes" class="timeline-nodes"></div>
+        </div>
+      </div>
+
+      <div id="timeline-detail" class="timeline-detail"></div>
+
+      <div class="timeline-nav">
+        <button id="prev-btn" class="nav-btn">‹</button>
+        <span id="timeline-index" class="timeline-index"></span>
+        <button id="next-btn" class="nav-btn">›</button>
+      </div>
+    </div>
+
+    <!-- ==============================
+         Grid View (Initially Hidden)
+    =============================== -->
+    <div class="guides-grid" id="guides-grid"></div>
   </div>
-<script src="/socket.io/socket.io.js"></script>
+
+  <!-- ==============================
+       Background Animation Scripts
+  =============================== -->
+  <script>
+    const auras = document.querySelectorAll('.auras');
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    document.addEventListener('mousemove', e => {
+      targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function animateAuras() {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+
+      auras.forEach((aura, i) => {
+        const depth = (i + 1) * 140;
+        aura.style.transform = `translate(${currentX * depth}px, ${currentY * depth}px) scale(1.05)`;
+      });
+
+      requestAnimationFrame(animateAuras);
+    }
+    animateAuras();
+
+    // Spotlight Glow Follows Cursor
+    const spotlight = document.createElement('div');
+    spotlight.classList.add('cursor-spotlight');
+    document.body.appendChild(spotlight);
+
+    document.addEventListener('mousemove', e => {
+      spotlight.style.left = `${e.clientX}px`;
+      spotlight.style.top = `${e.clientY}px`;
+    });
+  </script>
+
+  <!-- ==============================
+       JS Imports
+  =============================== -->
+  <script src="/socket.io/socket.io.js"></script>
   <script src="../js/allGuides.js"></script>
   <script src="../js/navbar.js"></script>
   <script src="../js/chatbot.js" defer></script>
 </body>
+
 </html>
