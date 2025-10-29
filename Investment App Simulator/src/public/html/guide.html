@@ -2,24 +2,71 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Feed</title>
-    <link rel="stylesheet" href="../css/guide.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlackSealed — Guide Journey</title>
+    <link rel="stylesheet" href="../css/guide.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 
 <body>
 
-    <body>
-        <div id="navbar-container"></div>
+    <div id="navbar-container"></div>
+    <!-- Back Button -->
 
+
+
+    <!-- Reactive Aura Layer -->
+    <div class="aura-bg">
+        <div class="aura aura-1"></div>
+        <div class="aura aura-2"></div>
+        <div class="aura aura-3"></div>
+    </div>
+
+
+    <div class="guide-wrapper">
+        <div class="vertical-line"></div>
+        <div class="scroll-label"></div>
         <div class="guide-container">
-            <h1 id="guide-title" class="guide-title">Loading guide...</h1>
+            <!-- Back Button — now positioned above the title -->
+            <button class="back-btn" onclick="window.history.back()">
+                <span class="arrow">←</span> Back
+            </button>
+
+            <h1 id="guide-title" class="guide-title">Loading Journey...</h1>
             <div id="guide-content" class="guide-content"></div>
         </div>
-        <script src="../js/guide.js"></script>
-        <script src="../js/navbar.js"></script>
 
-    </body>
+
+    </div>
+
+    </button>
+    <script>
+        const auras = document.querySelectorAll(".aura");
+
+        document.addEventListener("mousemove", e => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 100;
+            const y = (e.clientY / window.innerHeight - 0.5) * 100;
+            auras.forEach((aura, i) => {
+                const strength = (i + 1) * 0.3;
+                aura.style.transform = `translate(${x * strength}px, ${y * strength}px) scale(1.15)`;
+            });
+        });
+    </script>
+    <script>
+        const backBtn = document.querySelector(".back-btn");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 100) {
+                backBtn.classList.remove("hidden");
+            } else {
+                backBtn.classList.add("hidden");
+            }
+        });
+    </script>
+
+
+    <script src="../js/guide.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
 
 </html>
