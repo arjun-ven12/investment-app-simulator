@@ -183,16 +183,16 @@ module.exports.incrementNewsViewController = async function (req, res) {
   try {
     const updatedNews = await newsModel.incrementNewsView(newsId, newsData);
 
-    // Pass a single object with the right keys
     broadcastNewsView({
       id: updatedNews.id,
-      apiId: updatedNews.apiId || updatedNews.id, // prefer apiId if available
-      views: updatedNews.views || 0
+      apiId: updatedNews.apiId || updatedNews.id,
+      views: updatedNews.views || 0,
     });
 
-    res.status(200).json({ success: true, views: news.views });
+    return res.status(200).json({ success: true, views: updatedNews.views || 0 });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    console.error("incrementNewsViewController error:", err);
+    return res.status(400).json({ success: false, message: err.message });
   }
 };
 

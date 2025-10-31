@@ -1,54 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>News Feed</title>
-  <link rel="stylesheet" href="../css/news.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="/css/chatbot.css">
+
+  <!-- Fonts & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
+
+  <link rel="stylesheet" href="../css/news.css" />
+  <link rel="stylesheet" href="/css/chatbot.css" />
 </head>
 
 <body>
+<!-- Scroll Progress Beam -->
+<!-- Vertical Scroll Progress Bar -->
+<div id="scroll-progress-vertical"></div>
 
-  <body>
-    <div id="navbar-container"></div>
 
-    <h1>News Feed</h1>
-    <div class="category-wrapper">
-      <label for="category-filter" class="sr-only">Choose category</label>
-      <div class="dropdown">
-      <div class="select-wrap dropdown">
-        <select id="category-filter" aria-label="News category">
-          <option value="" selected disabled>Browse categories</option>
-          <!-- options injected by JS -->
-        </select>
 
-        </div>
-      </div>
+  <div id="navbar-container"></div>
+<div class="bg-auras">
+  <div class="aura"></div>
+  <div class="aura"></div>
+  <div class="aura"></div>
+</div>
 
-      <!-- optional chips row created by JS for quick picks -->
-      <div id="category-chips" class="category-chips" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Articles & News</h1>
+    <p>Latest market insights, reports, and analyses curated by Sealed.</p>
+  </section>
+
+
+<section class="news-header">
+  <h2 class="news-title">Latest Insights</h2>
+  <div class="chips" id="category-chips"></div>
+</section>
+
+<!-- Articles Grid -->
+<section class="articles">
+  <div class="grid" id="news-container"></div>
+  <div id="error-message"></div>
+</section>
+
+<!-- Floating Saved Tab
+<div class="folder-tab-wrapper" id="folderTabWrapper">
+  <div id="folderTab" class="folder-tab">Saved</div>
+
+  <div class="folder-content">
+    <div class="folder-header">
+      <h3>Saved Articles</h3>
+      <button id="closeFolder" title="Close">&times;</button>
     </div>
-    <div class="layout">
-      <!-- Main News Section -->
-      <main class="news-section">
-        <h2>Latest News</h2>
-        <div id="error-message"></div>
-        <div id="news-container" class="cards-container"></div>
-      </main>
-
-      <!-- Sidebar for Bookmarks -->
-      <aside class="bookmark-section">
-        <h2>Your Bookmarks</h2>
-        <div id="bookmark-container" class="cards-container"></div>
+    <div class="folder-body" id="bookmark-container">
+      <div class="empty-state">No saved news yet.</div>
     </div>
+  </div>
+</div> -->
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="../js/news.js"></script>
-    <script src="../js/navbar.js"></script>
-<script src="../js/chatbot.js" defer></script>
-  </body>
+<script>
+window.addEventListener("scroll", () => {
+  const bar = document.getElementById("scroll-progress-vertical");
+  if (!bar) return;
 
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const scrolled = (scrollTop / docHeight) * 100;
+
+  bar.style.height = scrolled + "%";
+});
+</script>
+
+
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../js/news.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/chatbot.js" defer></script>
+</body>
 </html>

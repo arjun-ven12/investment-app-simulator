@@ -1,86 +1,71 @@
-// news.js - full cleaned version with socket.io integration
+// ============================================================
+// news.js — BlackSealed Market Feed (Final Production)
+// Cinematic Grid · Smart Rotation · Socket.IO Live Views
+// ============================================================
 
-// ---------------- SOCKET + SVG EYE ----------------
+// ---------------- SOCKET + SVG ICONS ----------------
 let socket = null;
 
 function createEyeSVG(size = 16) {
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"
+      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
       <circle cx="12" cy="12" r="3"></circle>
-    </svg>
-  `;
+    </svg>`;
 }
 
-// ---------------- DOM & SOCKET INIT ----------------
-const newsContainer = document.getElementById('news-container');
-const bookmarkContainer = document.getElementById('bookmark-container');
-const errorMessage = document.getElementById('error-message');
-
+// ---------------- DOM ELEMENTS ----------------
+const newsContainer = document.getElementById("news-container");
+const bookmarkContainer = document.getElementById("bookmark-container");
+const errorMessage = document.getElementById("error-message");
 let userBookmarks = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Socket client must be loaded before this file
-  if (typeof io === 'undefined') {
-    console.warn('Socket.IO client (io) is not available. Make sure /socket.io/socket.io.js is included before news.js');
-  } else {
-    socket = io(); // connect to same origin
+// ---------------- INITIALIZE ----------------
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof io !== "undefined") {
+        socket = io();
+        socket.on("connect", () => console.log("✅ Socket connected:", socket.id));
+        socket.on("connect_error", (err) => console.error("Socket connect_error:", err));
 
-    socket.on('connect', () => console.log('Socket connected (client):', socket.id));
-    socket.on('connect_error', (err) => console.error('Socket connect_error:', err));
+        socket.on("newsViewUpdated", (payload) => {
+            if (!payload) return;
+            const idStr = payload.apiId || payload.id || payload.newsId;
+            const card = document.querySelector(`.news-card[data-news-key="${idStr}"]`);
+            if (!card) return;
+            const viewsDiv = card.querySelector(".views");
+            if (viewsDiv)
+                viewsDiv.innerHTML = `${createEyeSVG(16)} ${payload.views ?? 0}`;
+        });
+    }
 
-    // Accept multiple payload shapes: { apiId, id, newsId }
-    socket.on('newsViewUpdated', (payload) => {
-      if (!payload) return;
-      const idStr = payload.apiId ? String(payload.apiId) : (payload.id ? String(payload.id) : (payload.newsId ? String(payload.newsId) : null));
-      if (!idStr) return;
-
-      const card = document.querySelector(`.news-card[data-news-key="${idStr}"]`);
-      if (!card) return;
-      const viewsDiv = card.querySelector('.views');
-      if (!viewsDiv) return;
-
-      viewsDiv.innerHTML = `${createEyeSVG(16)} ${payload.views ?? 0}`;
-    });
-  }
-
-  
-  // still populate categories on DOMContentLoaded
-  populateCategoryFilter();
-
-  // initial data loads
-  fetchNews();
-  fetchBookmarks();
+    populateCategoryFilter();
+    fetchNews();
+    fetchBookmarks();
+    initSavedDrawer();
 });
 
-
-// ---------------- Helpers & API calls ----------------
-// Helper to get userId from JWT token
+// ============================================================
+// HELPERS + API CALLS
+// ============================================================
 function getUserIdFromToken() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) return null;
     try {
-      const payloadBase64 = token.split('.')[1];
-      const payload = JSON.parse(atob(payloadBase64));
-      return payload.id;
-    } catch (e) {
-      return null;
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.id;
+    } catch {
+        return null;
     }
 }
 
 async function fetchNewsViews(newsId) {
-    // Allow non-authenticated fetch: remove token requirement if you want public view counts
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
     try {
-        const res = await fetch(`/api/news/news/views/${newsId}`, {
-            headers
-        });
+        const res = await fetch(`/api/news/news/views/${newsId}`);
         const data = await res.json();
-        if (data.success) return data.views || 0;
-        return 0;
-    } catch (err) {
-        console.error("Failed to fetch news views:", err);
+        return data.success ? data.views || 0 : 0;
+    } catch {
         return 0;
     }
 }
@@ -88,41 +73,31 @@ async function fetchNewsViews(newsId) {
 async function fetchUserBookmarksIds() {
     const token = localStorage.getItem("token");
     if (!token) return [];
-
     try {
-        const res = await fetch('/api/news/news/bookmarks', {
-            headers: { Authorization: `Bearer ${token}` }
+        const res = await fetch("/api/news/news/bookmarks", {
+            headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (data.success) {
-            // store apiId as string for consistent comparisons
-            return data.bookmarks.map(b => String(b.news.apiId));
-        }
-        return [];
-    } catch (err) {
-        console.error(err);
+        return data.success ? data.bookmarks.map((b) => String(b.news.apiId)) : [];
+    } catch {
         return [];
     }
 }
 
-async function fetchNews(category = '') {
+async function fetchNews(category = "") {
     const token = localStorage.getItem("token");
     try {
-        const url = category ? `/api/news/news?category=${encodeURIComponent(category)}` : '/api/news/news?category=top news';
-        const response = await fetch(url, {
-            method: 'GET',
+        const url = category
+            ? `/api/news/news?category=${encodeURIComponent(category)}`
+            : "/api/news/news?category=top news";
+        const res = await fetch(url, {
             headers: {
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                "Content-Type": "application/json"
-            }
+                "Content-Type": "application/json",
+            },
         });
-
-        if (!response.ok) throw new Error('Failed to fetch news');
-
-        const result = await response.json();
-
-        if (!result.success) throw new Error(result.message || 'Failed to fetch news');
-
+        const result = await res.json();
+        if (!result.success) throw new Error(result.message || "Failed to fetch");
         displayNews(result.news);
     } catch (err) {
         console.error(err);
@@ -130,18 +105,16 @@ async function fetchNews(category = '') {
     }
 }
 
-
-// increment view API (server will broadcast)
 async function incrementNewsViewAPI(newsId, newsData) {
     const token = localStorage.getItem("token");
     try {
-        const res = await fetch('/api/news/news/view', {
-            method: 'POST',
+        const res = await fetch("/api/news/news/view", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                ...(token ? { Authorization: `Bearer ${token}` } : {})
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            body: JSON.stringify({ newsId, newsData })
+            body: JSON.stringify({ newsId, newsData }),
         });
         return await res.json();
     } catch (err) {
@@ -150,455 +123,588 @@ async function incrementNewsViewAPI(newsId, newsData) {
     }
 }
 
+// ============================================================
+// DB-FED FALLBACK IMAGE ROTATION (Circular Loader)
+// ============================================================
+const fallbackCache = {};
+// ============================================================
+// GLOBAL FALLBACK IMAGE ROTATION (Shared Across All Categories)
+// ============================================================
+let globalFallback = {
+    list: [],
+    index: 0,
+    loading: false,
+};
 
-// ---------------- UI Rendering ----------------
+async function loadGlobalFallbackImages() {
+    if (globalFallback.loading) return;
+    globalFallback.loading = true;
 
-function updateBookmarkButtonUI(button, bookmarked) {
-    if (!button) return;
-    if (bookmarked) {
-        button.textContent = 'Bookmarked ✅';
-        button.disabled = true;
-        button.style.backgroundColor = '#ccc';
-        button.style.cursor = 'not-allowed';
-    } else {
-        button.textContent = 'Bookmark';
-        button.disabled = false;
-        button.style.backgroundColor = '#007bff';
-        button.style.cursor = 'pointer';
+    try {
+        const res = await fetch(`/api/fallback-image/all`); // you can keep this as /api/fallback-image
+        const data = await res.json();
+
+        if (data.success && Array.isArray(data.images) && data.images.length > 0) {
+            globalFallback.list = data.images.map((img) => img.url || img);
+            shuffleArray(globalFallback.list); // optional randomization
+            globalFallback.index = 0;
+        } else {
+            globalFallback.list = [
+                "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+            ];
+        }
+    } catch (err) {
+        console.error("⚠️ Fallback image fetch failed:", err);
+        globalFallback.list = [
+            "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+        ];
+    } finally {
+        globalFallback.loading = false;
     }
 }
 
-function formatLikes(count) {
-    return `${count} like${count === 1 ? '' : 's'}`;
+// Small utility: shuffle once for natural variation
+function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
 }
 
-function formatViews(count) {
-    if (count === 1) return '1 view';
-    return `${count || 0} views`;
+async function getFallbackImage() {
+    // Ensure global list loaded
+    if (globalFallback.list.length === 0 && !globalFallback.loading) {
+        await loadGlobalFallbackImages();
+    }
+
+    // Guard if still empty
+    if (globalFallback.list.length === 0) {
+        return "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80";
+    }
+
+    // Use next image and advance pointer
+    const imgUrl = globalFallback.list[globalFallback.index];
+    globalFallback.index = (globalFallback.index + 1) % globalFallback.list.length;
+    return imgUrl;
+}
+
+
+function createSmartImage(url, headline, category) {
+    const img = document.createElement("img");
+    img.alt = headline || "thumbnail";
+    img.className = "news-thumb";
+    img.loading = "lazy";
+    img.style.opacity = "0"; // start invisible
+    img.style.transition = "opacity 0.6s ease"; // fade-in animation
+
+    const isValid = (src) =>
+        src &&
+        typeof src === "string" &&
+        src.trim() !== "" &&
+        !src.includes("placeholder") &&
+        !src.includes("default") &&
+        !src.includes("logo") &&
+        !["null", "undefined"].includes(src.toLowerCase());
+
+    // 🧠 Smart loader — use fallback if invalid or fails
+    async function loadImage() {
+        let finalSrc = isValid(url) ? url : await getFallbackImage();
+
+        // Attempt to load the chosen image
+        img.src = finalSrc;
+        img.onload = () => {
+            img.style.opacity = "1"; // fade in when ready
+        };
+        img.onerror = async () => {
+            const fallback = await getFallbackImage();
+            img.src = fallback;
+            img.onload = () => (img.style.opacity = "1");
+        };
+    }
+
+    loadImage();
+    return img;
+}
+
+// ============================================================
+// DISPLAY NEWS + LIKES + BOOKMARKS + SUBTLE GRID VARIATION
+// ============================================================
+function updateBookmarkButtonUI(button, bookmarked) {
+    button.classList.toggle("saved", bookmarked);
+    button.innerHTML = bookmarked
+        ? '<i class="fa-solid fa-bookmark"></i>'
+        : '<i class="fa-regular fa-bookmark"></i>';
+    button.setAttribute("data-tooltip", bookmarked ? "Saved" : "Save");
+}
+
+function updateLikeButtonUI(button, liked) {
+    button.classList.toggle("liked", liked);
+    button.innerHTML = liked
+        ? '<i class="fa-solid fa-heart"></i>'
+        : '<i class="fa-regular fa-heart"></i>';
+    button.setAttribute("data-tooltip", liked ? "Liked" : "Like");
+}
+
+function formatLikes(c) {
+    return `${c} like${c === 1 ? "" : "s"}`;
+}
+
+function formatViews(c) {
+    return `${c || 0} view${c === 1 ? "" : "s"}`;
+}
+async function removeBookmarkByApiId(apiId) {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        await fetch(`/api/news/news/bookmark/byApiId/${apiId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+    } catch (err) {
+        console.error("❌ Failed to remove bookmark by apiId:", err);
+    }
+}
+function bookmarkIdFromDrawer(apiId) {
+  const card = bookmarkContainer.querySelector(`[data-bookmark-id="${apiId}"]`);
+  if (!card) return null;
+  // Use dataset if you store actual bookmarkId
+  return card.dataset.bookmarkDbId || apiId;
 }
 
 async function displayNews(newsList = []) {
     if (!newsContainer) return;
-    newsContainer.innerHTML = '';
+    newsContainer.innerHTML = "";
 
     userBookmarks = await fetchUserBookmarksIds();
     if (!Array.isArray(newsList)) newsList = [];
 
-    for (const news of newsList) {
-        const card = document.createElement('div');
-        card.className = 'news-card';
+    newsList.forEach((news, i) => {
+        const card = document.createElement("article");
+        card.className = "news-card";
 
-        const headline = document.createElement('div');
-        headline.className = 'headline';
+        // if (i % 8 === 0) card.classList.add("highlighted");
+
+        const key = String(news.apiId || news.id);
+        card.dataset.newsKey = key;
+
+        // Thumbnail
+        const thumbWrapper = document.createElement("div");
+        thumbWrapper.className = "thumb-wrapper";
+        const img = createSmartImage(news.image, news.headline, news.category);
+        thumbWrapper.appendChild(img);
+        card.appendChild(thumbWrapper);
+
+        // Text
+        const source = document.createElement("div");
+        source.className = "source";
+        source.textContent = news.source || "Unknown";
+
+        const headline = document.createElement("h3");
+        headline.className = "headline";
         headline.textContent = news.headline;
 
-        const summary = document.createElement('div');
-        summary.className = 'summary';
-        summary.textContent = news.summary || '';
+        const summary = document.createElement("p");
+        summary.className = "summary";
+        summary.textContent = news.summary || "";
 
-        const source = document.createElement('div');
-        source.className = 'source';
-        source.textContent = news.source || '';
+        // Meta
+        const viewsDiv = document.createElement("div");
+        viewsDiv.className = "views";
+        viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(0)} • ${formatLikes(news.totalLikes || 0)}`;
 
-        const readMore = document.createElement('a');
-        readMore.href = news.url;
+        fetchNewsViews(news.apiId || news.id).then((views) => {
+            news.views = views;
+            viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(views)} • ${formatLikes(news.totalLikes || 0)}`;
+        });
+
+        // Buttons
+        const readMore = document.createElement("a");
+        readMore.href = news.url || "#";
         readMore.target = "_blank";
+        readMore.className = "read-more";
         readMore.textContent = "Read more";
 
-        const newsKey = String(news.apiId || news.id);
-        card.dataset.newsKey = newsKey;
+        const bookmarkBtn = document.createElement("button");
+        bookmarkBtn.className = "bookmark-btn";
+        updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(key));
 
-        // Bookmark button
-        const bookmarkBtn = document.createElement('button');
-        bookmarkBtn.className = 'bookmark-btn full-width';
-        updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(newsKey));
         bookmarkBtn.onclick = async () => {
-            if (userBookmarks.includes(newsKey)) return;
-            updateBookmarkButtonUI(bookmarkBtn, true);
-            const result = await bookmarkNews(news);
-            if (result && result.success) {
-                userBookmarks.push(newsKey);
-                fetchBookmarks();
-            } else {
+            const isBookmarked = userBookmarks.includes(key);
+
+            if (isBookmarked) {
+                // 🧠 Unbookmark immediately
                 updateBookmarkButtonUI(bookmarkBtn, false);
+                userBookmarks = userBookmarks.filter((id) => id !== key);
+
+                // remove from server + drawer
+                await removeBookmark(bookmarkIdFromDrawer(key)); // 🧩 use existing backend delete route
+                const existing = bookmarkContainer.querySelector(`[data-bookmark-id="${key}"]`);
+                if (existing) existing.remove();
+
+                // show empty state if none left
+                if (!bookmarkContainer.querySelector(".news-card")) {
+                    const emptyMsg = document.createElement("div");
+                    emptyMsg.className = "empty-state";
+                    emptyMsg.textContent = "No saved news yet.";
+                    bookmarkContainer.appendChild(emptyMsg);
+                }
+
+            } else {
+                // 🧠 Bookmark instantly
+                updateBookmarkButtonUI(bookmarkBtn, true);
+                const result = await bookmarkNews(news);
+                if (result?.success) userBookmarks.push(key);
             }
         };
 
-        // Like button
-        const likeBtn = document.createElement('button');
-        likeBtn.className = 'like-btn full-width';
-        likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
 
-        // Views row (eye icon + likes)
-        const viewsDiv = document.createElement('div');
-        viewsDiv.className = 'views';
-        viewsDiv.style.display = 'flex';
-        viewsDiv.style.alignItems = 'center';
-        viewsDiv.style.gap = '8px';
-        viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(0)}  ${formatLikes(news.totalLikes || 0)}`;
 
-        // Fetch actual views
-        fetchNewsViews(news.apiId || news.id).then(views => {
-            news.views = views;
-            viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(views)} &nbsp; ${formatLikes(news.totalLikes || 0)}`;
-        });
-
-        // Like button click
+        const likeBtn = document.createElement("button");
+        likeBtn.className = "like-btn";
+        updateLikeButtonUI(likeBtn, news.liked);
         likeBtn.onclick = async () => {
-            const currentlyLiked = news.liked;
-            news.liked = !currentlyLiked;
-            news.totalLikes = currentlyLiked ? (news.totalLikes - 1) : (news.totalLikes + 1);
-            likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-            viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views || 0)}   ${formatLikes(news.totalLikes)}`;
-
-            const result = await toggleLike(news, likeBtn);
+            const result = await toggleLike(news);
             if (result) {
                 news.totalLikes = result.totalLikes;
                 news.liked = result.liked;
-                likeBtn.textContent = news.liked ? '❤️ Liked' : '🤍 Like';
-                viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views || 0)}  ${formatLikes(result.totalLikes)}`;
+                updateLikeButtonUI(likeBtn, result.liked);
+                viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views || 0)} • ${formatLikes(result.totalLikes)}`;
             }
         };
 
-        // Read more click increments view
-        readMore.addEventListener('click', async (e) => {
+        readMore.addEventListener("click", async (e) => {
             e.preventDefault();
-            try {
-                const result = await incrementNewsViewAPI(news.apiId || news.id, news);
-                if (result && result.success) {
-                    const newViews = (result.views != null) ? result.views : ((news.views || 0) + 1);
-                    news.views = newViews;
-                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(newViews)}  ${formatLikes(news.totalLikes || 0)}`;
-                } else {
-                    news.views = (news.views || 0) + 1;
-                    viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(news.views)}  ${formatLikes(news.totalLikes || 0)}`;
-                }
-            } catch (err) {
-                console.error("Failed to increment view:", err);
-            } finally {
-                window.open(news.url, "_blank");
+            const result = await incrementNewsViewAPI(news.apiId || news.id, news);
+            if (result?.success) {
+                const newViews = result.views ?? (news.views || 0) + 1;
+                news.views = newViews;
+                viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(newViews)} • ${formatLikes(news.totalLikes || 0)}`;
             }
+            window.open(news.url, "_blank");
         });
 
-        requestAnimationFrame(() => {
-            card.style.opacity = 1;
-            card.style.transform = 'translateY(0)';
-        });
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        actions.append(readMore, bookmarkBtn, likeBtn);
 
-        // Append in order
-        card.append(headline, summary, source, readMore, bookmarkBtn, likeBtn, viewsDiv);
+        card.append(source, headline, summary, actions, viewsDiv);
         newsContainer.appendChild(card);
-    }
-}
-
-
-
-// ---------------- Bookmarks, Likes and other helpers ----------------
-
-async function fetchBookmarks() {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-        const response = await fetch('/api/news/news/bookmarks', {
-            method: 'GET',
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-        });
-
-        if (!response.ok) {
-            let errorMsg = 'Failed to fetch bookmarks';
-            try {
-                const errJson = await response.json();
-                errorMsg = errJson.message || errorMsg;
-            } catch (_) {
-                const errText = await response.text();
-                if (errText) errorMsg = errText;
-            }
-            throw new Error(errorMsg);
-        }
-
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message || 'Failed to fetch bookmarks');
-
-        displayBookmarks(result.bookmarks);
-    } catch (err) {
-        console.error(err);
-        if (errorMessage) errorMessage.textContent = err.message;
-    }
-}
-
-function displayBookmarks(bookmarks) {
-    if (!bookmarkContainer) return;
-    bookmarkContainer.innerHTML = '';
-    if (!bookmarks || !bookmarks.length) {
-        bookmarkContainer.textContent = "You have no bookmarks yet.";
-        return;
-    }
-
-    bookmarks.forEach(bookmark => {
-        const news = bookmark.news;
-        const card = document.createElement('div');
-        card.className = 'news-card';
-
-        if (news.image) {
-            const img = document.createElement('img');
-            img.src = news.image;
-            img.alt = news.headline;
-            img.className = 'news-image';
-            card.appendChild(img);
-        }
-
-        const headline = document.createElement('div');
-        headline.className = 'headline';
-        headline.textContent = news.headline;
-
-        const summary = document.createElement('div');
-        summary.className = 'summary';
-        summary.textContent = news.summary || '';
-
-        const source = document.createElement('div');
-        source.className = 'source';
-        source.textContent = news.source || '';
-
-        const datetime = document.createElement('div');
-        datetime.className = 'datetime';
-        datetime.textContent = news.datetime ? new Date(news.datetime).toLocaleString() : '';
-
-        const readMore = document.createElement('a');
-        readMore.href = news.url;
-        readMore.target = "_blank";
-        readMore.textContent = "Read more";
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-btn';
-        removeBtn.textContent = 'Remove';
-        removeBtn.onclick = () => removeBookmark(bookmark.id, news.apiId);
-
-        card.append(headline, summary, source, datetime, readMore, removeBtn);
-        bookmarkContainer.appendChild(card);
     });
+    // --- Scroll Reveal Observer ---
+const observer = new IntersectionObserver(
+  entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target); // reveal once per card
+      }
+    });
+  },
+  { threshold: 0.2 } // trigger when 20% visible
+);
+
+// Observe all newly loaded cards
+document.querySelectorAll('.news-card').forEach(card => observer.observe(card));
+
+}
+function applyScrollReveal() {
+  const cards = document.querySelectorAll('.news-card');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // add a tiny stagger for a smoother flow
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80); // 80 ms delay between cards
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  cards.forEach(card => observer.observe(card));
 }
 
 
+// ============================================================
+// BOOKMARKS + SAVED DRAWER
+// ============================================================
 async function bookmarkNews(newsData) {
     try {
         const userId = getUserIdFromToken();
-        if (!userId) {
-            console.error("You must be logged in to bookmark news.");
-            return { success: false };
-        }
+        if (!userId) return { success: false };
 
-        const payloadBody = {
-            userId: parseInt(userId),
-            newsData: {
-                apiId: newsData.id || newsData.apiId,
-                category: newsData.category,
-                datetime: newsData.datetime,
-                headline: newsData.headline,
-                image: newsData.image,
-                source: newsData.source,
-                summary: newsData.summary,
-                url: newsData.url
-            }
-        };
+        if (!newsData.apiId && newsData.id) newsData.apiId = newsData.id;
 
-        const response = await fetch('/api/news/news/bookmark', {
-            method: 'POST',
+        const response = await fetch("/api/news/news/bookmark", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            body: JSON.stringify(payloadBody)
+            body: JSON.stringify({ userId, newsData }),
         });
 
         const result = await response.json();
+        if (!result.success) return { success: false };
 
-        if (!result.success) {
-            console.error(result.message || "Could not bookmark news");
-            return { success: false };
-        }
+        // ✅ instantly reflect new bookmark visually
+        addBookmarkToDrawer(newsData);
 
-        return { success: true, data: result.bookmark };
-
+        return { success: true };
     } catch (err) {
         console.error(err);
         return { success: false };
     }
 }
 
-async function removeBookmark(bookmarkId, newsApiId = null) {
+function addBookmarkToDrawer(newsData) {
+    if (!bookmarkContainer) return;
+
+    // 🔹 Remove existing empty message (if present)
+    const existingEmpty = bookmarkContainer.querySelector(".empty-state");
+    if (existingEmpty) existingEmpty.remove();
+
+    // 🔹 Prevent duplicates
+    if (bookmarkContainer.querySelector(`[data-bookmark-id="${newsData.apiId}"]`)) return;
+
+    const card = document.createElement("div");
+    card.className = "news-card fade-in";
+    card.dataset.bookmarkId = newsData.apiId;
+
+    const img = createSmartImage(newsData.image, newsData.headline, newsData.category);
+    card.appendChild(img);
+
+    const h = document.createElement("h3");
+    h.textContent = newsData.headline;
+
+    const p = document.createElement("p");
+    p.textContent = newsData.summary || "";
+
+    const rmv = document.createElement("button");
+    rmv.className = "remove-btn";
+    rmv.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    rmv.onclick = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        // 🔹 Delete from DB
+        await fetch(`/api/news/news/bookmark/${newsData.apiId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // 🔹 Update local state
+        userBookmarks = userBookmarks.filter((id) => id !== String(newsData.apiId));
+
+        // 🔹 Animate + remove from drawer
+        card.classList.add("fade-out");
+        setTimeout(() => card.remove(), 300);
+
+        // 🔹 Update bookmark button in main feed (instant UI sync)
+        const mainCardBtn = document.querySelector(
+            `.news-card[data-news-key="${newsData.apiId}"] .bookmark-btn`
+        );
+        if (mainCardBtn) updateBookmarkButtonUI(mainCardBtn, false);
+
+        // 🔹 Add empty-state if no bookmarks left
+        setTimeout(() => {
+            if (!bookmarkContainer.querySelector(".news-card")) {
+                const emptyMsg = document.createElement("div");
+                emptyMsg.className = "empty-state";
+                emptyMsg.textContent = "No saved news yet.";
+                bookmarkContainer.appendChild(emptyMsg);
+            }
+        }, 350);
+    };
+
+    card.append(h, p, rmv);
+    bookmarkContainer.prepend(card);
+}
+
+
+
+async function fetchBookmarks() {
     const token = localStorage.getItem("token");
-    if (!token) {
-        alert("You must be logged in to remove a bookmark.");
+    if (!token) return;
+    try {
+        const res = await fetch("/api/news/news/bookmarks", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) displayBookmarks(data.bookmarks);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function displayBookmarks(bookmarks = []) {
+    if (!bookmarkContainer) return;
+    bookmarkContainer.innerHTML = ""; // always reset
+
+    if (!bookmarks.length) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.className = "empty-state";
+        emptyMsg.textContent = "No saved news yet.";
+        bookmarkContainer.appendChild(emptyMsg);
         return;
     }
 
-    try {
-        const response = await fetch(`/api/news/news/bookmark/${bookmarkId}`, {
-            method: 'DELETE',
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+    bookmarks.forEach((bookmark) => {
+        const n = bookmark.news;
+        const card = document.createElement("div");
+        card.className = "news-card";
+        card.dataset.bookmarkId = n.apiId;
 
-        const result = await response.json();
-        if (!result.success) {
-            alert(result.message || "Failed to remove bookmark");
-            return;
-        }
+        const img = createSmartImage(n.image, n.headline, n.category);
+        card.appendChild(img);
 
-        if (newsApiId) {
-            userBookmarks = userBookmarks.filter(k => String(k) !== String(newsApiId));
-            // update UI button if present
-            const card = document.querySelector(`.news-card[data-news-key="${String(newsApiId)}"]`);
-            if (card) {
-                const btn = card.querySelector('.bookmark-btn');
-                if (btn) updateBookmarkButtonUI(btn, false);
-            }
-        } else {
-            userBookmarks = await fetchUserBookmarksIds();
-        }
+        const h = document.createElement("h3");
+        h.textContent = n.headline;
 
-        await fetchBookmarks();
+        const p = document.createElement("p");
+        p.textContent = n.summary || "";
 
-    } catch (err) {
-        console.error("Error removing bookmark:", err);
-        alert(err.message || "An error occurred while removing bookmark");
-    }
+        const rmv = document.createElement("button");
+        rmv.className = "remove-btn";
+        rmv.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        rmv.onclick = () => removeBookmark(bookmark.id, n.apiId);
+
+        card.append(h, p, rmv);
+        bookmarkContainer.appendChild(card);
+    });
 }
 
 
-async function toggleLike(newsData, button) {
-    const userId = getUserIdFromToken();
-    if (!userId) {
-        alert("You must be logged in to like news.");
-        return null;
-    }
+async function removeBookmark(bookmarkId, newsApiId) {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    await fetch(`/api/news/news/bookmark/${bookmarkId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    userBookmarks = userBookmarks.filter((id) => id !== String(newsApiId));
+    fetchBookmarks();
+}
 
-    button.disabled = true;
+// ============================================================
+// TOGGLE LIKE
+// ============================================================
+async function toggleLike(newsData) {
+    const userId = getUserIdFromToken();
+    if (!userId) return null;
+
+    // ensure apiId exists (fallback to id)
+    if (!newsData.apiId && newsData.id) newsData.apiId = newsData.id;
 
     try {
-        const response = await fetch('/api/news/news/like', {
-            method: 'POST',
+        const response = await fetch("/api/news/news/like", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            body: JSON.stringify({
-                userId: parseInt(userId),
-                newsData: {
-                    apiId: newsData.id || newsData.apiId,
-                    headline: newsData.headline,
-                    summary: newsData.summary,
-                    url: newsData.url,
-                    source: newsData.source,
-                    image: newsData.image,
-                    datetime: newsData.datetime,
-                    category: newsData.category
-                }
-            }),
+            body: JSON.stringify({ userId, newsData }),
         });
-
         const result = await response.json();
-        if (!result.success) {
-            alert(result.message || 'Failed to toggle like');
-            return null;
-        }
-
-        button.textContent = result.liked ? '❤️ Liked' : '🤍 Like';
-        return result;
-
+        return result.success ? result : null;
     } catch (err) {
         console.error(err);
-        alert(err.message);
         return null;
-    } finally {
-        button.disabled = false;
     }
 }
 
 
-// ---------------- Category filter ----------------
+// ============================================================
+// SAVED DRAWER LOGIC
+// ============================================================
+function initSavedDrawer() {
+    const folderWrapper = document.getElementById("folderTabWrapper");
+    const tab = document.getElementById("folderTab");
+    const closeBtn = document.getElementById("closeFolder");
+    if (!folderWrapper || !tab || !closeBtn) return;
+
+    tab.addEventListener("click", () => {
+        folderWrapper.classList.toggle("open");
+    });
+    closeBtn.addEventListener("click", () => {
+        folderWrapper.classList.remove("open");
+    });
+}
+
+// ============================================================
+// CATEGORY FILTER
+// ============================================================
+// ============================================================
+// CATEGORY FILTER (Ordered + Auto-Active "General")
+// ============================================================
 async function populateCategoryFilter() {
   try {
-    const res = await fetch('/api/news/categories');
+    const res = await fetch("/api/news/categories");
     const data = await res.json();
     if (!data.success) return;
 
-    const select = document.getElementById('category-filter');
-    const chipsContainer = document.getElementById('category-chips');
-    const selectWrap = document.querySelector('.select-wrap');
+    const chipsContainer = document.getElementById("category-chips");
+    chipsContainer.innerHTML = "";
 
-    if (!select) return;
-    select.innerHTML = `<option value="" selected>Browse categories</option>`;
-
-    // create options + chips
-    data.categories.forEach((cat, idx) => {
-      const name = String(cat.name || cat).trim();
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name.charAt(0).toUpperCase() + name.slice(1);
-      select.appendChild(opt);
-
-      // chip
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'category-chip';
-      chip.textContent = opt.textContent;
-      chip.dataset.value = name;
-      chip.addEventListener('click', () => {
-        // set select, trigger change
-        select.value = name;
-        // visually mark active
-        document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        // small pulse effect
-        chip.animate([{ transform: 'scale(0.98)' }, { transform: 'scale(1)' }], { duration: 200 });
-        // fetch news for that category
-        fetchNews(name);
+    // 🧠 Custom order — anything not listed goes at the end alphabetically
+    const order = ["general", "crypto", "forex", "merger"];
+    const sortedCategories = data.categories
+      .map((c) => String(c.name || c).trim().toLowerCase())
+      .sort((a, b) => {
+        const ai = order.indexOf(a);
+        const bi = order.indexOf(b);
+        if (ai === -1 && bi === -1) return a.localeCompare(b);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
       });
+
+    // 🧩 Create chips dynamically
+    sortedCategories.forEach((cat, i) => {
+      const displayName = cat.charAt(0).toUpperCase() + cat.slice(1);
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "category-chip";
+      chip.textContent = displayName;
+      chip.dataset.value = cat;
+
+      chip.addEventListener("click", () => {
+        document
+          .querySelectorAll(".category-chip")
+          .forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        fetchNews(cat);
+      });
+
       chipsContainer.appendChild(chip);
     });
 
-    // toggle caret rotation while select is opened (visual only)
-    select.addEventListener('mousedown', () => selectWrap.classList.add('open'));
-    // close after small delay (native dropdown closes on mouseup)
-    select.addEventListener('blur', () => selectWrap.classList.remove('open'));
-    select.addEventListener('change', (e) => {
-      // remove active from chips, set matching chip active if exists
-      const val = e.target.value;
-      document.querySelectorAll('.category-chip').forEach(c => c.classList.toggle('active', c.dataset.value === val));
-      // call fetch news with selected category
-      if (val) fetchNews(val);
-      // small micro animation
-      selectWrap.animate([{ transform: 'translateY(-2px)' }, { transform: 'translateY(0)' }], { duration: 180 });
-    });
+    // ✅ Auto-select and load "General" (or the first in order)
+    const defaultCategory = "general";
+    const defaultChip = document.querySelector(
+      `.category-chip[data-value="${defaultCategory}"]`
+    );
 
-    // optional: pre-activate first chip for top news
-    const firstChip = document.querySelector('.category-chip');
-    if (firstChip) firstChip.classList.add('active');
+    if (defaultChip) {
+      defaultChip.classList.add("active");
+      fetchNews(defaultCategory);
+    } else if (chipsContainer.firstChild) {
+      chipsContainer.firstChild.classList.add("active");
+      fetchNews(chipsContainer.firstChild.dataset.value);
+    }
   } catch (err) {
     console.error("Failed to load categories", err);
   }
 }
 
-// find select wrap + select (run after DOM ready)
-const selectWrap = document.querySelector('.select-wrap');
-const categorySelect = document.getElementById('category-filter');
 
-if (categorySelect && selectWrap) {
-  // open visual on pointer down / keyboard open attempt
-  categorySelect.addEventListener('pointerdown', () => selectWrap.classList.add('open'));
-  // remove open on blur
-  categorySelect.addEventListener('blur', () => selectWrap.classList.remove('open'));
-  // also remove on change after a short delay so rotated caret is smooth
-  categorySelect.addEventListener('change', () => {
-    setTimeout(() => selectWrap.classList.remove('open'), 180);
-  });
-}
 
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  if (window.scrollY > 20) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
 
