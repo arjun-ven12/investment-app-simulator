@@ -35,7 +35,6 @@
     <input type="hidden" id="current-stock-id" value="" />
     <!-- Sidebar -->
     <div class="sidebar">
-      <br><br>
       <h1>WatchList</h1>
       <div class="search-container">
         <input
@@ -43,9 +42,12 @@
           id="stock-search"
           placeholder="Enter stock name or symbol"
         />
-        <button id="search-button">Search</button>
+        <button id="search-button" style="margin-top: 10px;">Search</button>
       </div>
-      <br />
+      <br />      
+      <h3>Search Results</h3>
+      <ul id="stock-list"></ul>
+      <br>
       <h4>Favorited Stocks</h4>
       <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
       <div id="favorites-error-message" class="error-message"></div>
@@ -55,8 +57,7 @@
         style="margin-top: 8px"
       ></div>
       <div id="stocks-container" style="margin-top: 8px"></div>
-      <h3>Search Results</h3>
-      <ul id="stock-list"></ul>
+
     </div>
 
 
@@ -92,7 +93,8 @@
               placeholder="Enter symbol (e.g. AAPL)"
               required
             />
-            <label for="range">Select Range:</label>
+            <div class="options-wrap">
+            <!-- <label for="range">Select Range:</label> -->
             <select name="range" id="range">
               <option value="1d">Last 1 Day</option>
               <option value="1w" selected>Last 1 Week</option>
@@ -105,6 +107,7 @@
                 <option value="line">Line (Close Price)</option>
                 <option value="candlestick">Candlestick</option>
               </select>
+            </div>
             </div>
             <button type="submit">Generate Chart</button>
           </form>
@@ -210,6 +213,9 @@
               />
             </div>
             <div id="buy-error" class="error-message"></div>
+
+
+            <div id="create-success" class="success-message"></div>
             <button type="submit" class="submit-button" id="submit-order">
               Submit Order
             </button>
@@ -334,12 +340,25 @@
 
         </div>
       </div>
+      <!-- Cancel confirmation popup -->
+<div id="cancel-popup" class="popup hidden">
+  <div class="popup-content">
+    <p>Are you sure you want to cancel?</p>
+    <br>
+    <button id="confirm-yes">Yes</button>
+    <button id="confirm-no">No</button>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast hidden"></div>
+
 
       <div class="chart-container">
         <div class="content trading-card2"></div>
       </div>
 
-      <!-- Stock Comments -->
+      <!-- Stock Comments
       <div class="content chart-container">
         <h1>Search Stock Comments</h1>
         <div id="comments-error" class="error-message"></div>
@@ -361,8 +380,8 @@
           <button id="submit-comment-button2">Submit Comment</button>
         </div>
         <ul id="comments-list"></ul>
-      </div>
-    </div>
+      </div>-->
+    </div> 
 
 
 
@@ -436,16 +455,44 @@
     <!-- END main-content -->
     <!-- Logout Script -->
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const logoutButton = document.getElementById("logoutButton");
-        if (logoutButton) {
-          logoutButton.addEventListener("click", () => {
-            localStorage.removeItem("token");
-            alert("You have been logged out.");
-            window.location.href = "./login.html";
-          });
-        }
-      });
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutButton = document.getElementById("logoutButton");
+
+  if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+      // 1️⃣ Remove auth token
+      localStorage.removeItem("token");
+
+      // 2️⃣ Clear ALL sessionStorage caches related to options
+//       for (let i = sessionStorage.length - 1; i >= 0; i--) {
+//         const key = sessionStorage.key(i);
+//         if (key && key.startsWith("options_contracts_")) {
+//           sessionStorage.removeItem(key);
+//         }
+//       }
+//            for (let i = sessionStorage.length - 1; i >= 0; i--) {
+//   const key = sessionStorage.key(i);
+//   sessionStorage.removeItem(key);
+// }
+
+// console.log('After clear:', Object.keys(sessionStorage));
+// console.log('After clear (localStorage):', Object.keys(localStorage));
+
+
+
+      // 3️⃣ Confirm removal by clearing general session data if needed
+      // sessionStorage.clear(); // Uncomment if you want to clear everything
+
+      // 4️⃣ Small delay to ensure cache is cleared before redirect
+      setTimeout(() => {
+        alert("You have been logged out.");
+        window.location.href = "./login.html";
+      }, 100); // 100ms delay ensures browser flushes removals
+    });
+  }
+});
+
+
 
 
         // window.addEventListener('DOMContentLoaded', () => {
@@ -515,6 +562,37 @@
   });
 });
 
+(function () {
+  const banner = document.getElementById('market-status-banner');
+  const sidebar = document.querySelector('.sidebar');
+
+  if (!sidebar) return;
+
+  function adjustSidebar() {
+    // if banner not present, fallback to top: 0
+    if (!banner) {
+      sidebar.style.top = '0px';
+      sidebar.style.height = '100vh';
+      return;
+    }
+
+    // get actual bottom coordinate of the banner (in px from viewport top)
+    const rect = banner.getBoundingClientRect();
+    // rect.bottom is the pixel position where the banner ends from the top of viewport
+    const topPx = Math.max(0, rect.bottom); // ensure non-negative
+
+    // set sidebar top and height so it starts immediately below banner
+    sidebar.style.top = `${topPx}px`;
+    sidebar.style.height = `calc(100vh - ${topPx}px)`;
+  }
+
+  // run on load and on resize / font changes
+  window.addEventListener('load', adjustSidebar);
+  window.addEventListener('resize', adjustSidebar);
+
+  // If you change banner content dynamically, call adjustSidebar() again.
+  // For SPA route changes you might also call it after rendering new header.
+})();
 
     </script>
   </body>

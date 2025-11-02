@@ -1,6 +1,7 @@
 
 
 
+
 const chartsModel = require('../models/Charts');
 
 const { Parser } = require('json2csv');
@@ -445,7 +446,8 @@ exports.createLimitOrderController = async function (req, res) {
 
   if (!userId || !stockId || !quantity || !limitPrice || !orderType || !timeframe) {
     return res.status(400).json({ message: "All fields are required." });
-  }
+  }    
+
 
   try {
     const userIdInt = parseInt(userId);
@@ -494,12 +496,15 @@ exports.createLimitOrderController = async function (req, res) {
     return res
       .status(201)
       .json({ message: "Limit order created successfully", limitOrder });
-  } catch (error) {
-    console.error("Error creating limit order:", error);
-    return res
-      .status(500)
-      .json({ message: "Error creating limit order", error });
-  }
+  } 
+  catch (error) {
+  console.error("Error creating limit order:", error);
+  // Use 400 for validation errors
+  return res
+    .status(400)
+    .json({ message: error.message }); // <--- send actual error message
+}
+
 };
 
 

@@ -1,5 +1,24 @@
+
 const prisma = require('../../prisma/prismaClient');
 const socketBroadcast = require('../socketBroadcast');
+const { ethers } = require('ethers');
+require("dotenv").config();
+
+const ledgerAbi = require("../../artifacts/contracts/tradeLedger.sol/TradeLedger.json").abi;
+
+// ✅ Hardhat Local Node Provider
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+
+// ✅ Signer: Your first Hardhat account
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+// ✅ Smart Contract
+const ledgerContract = new ethers.Contract(
+  process.env.LEDGER_ADDRESS,
+  ledgerAbi,
+  signer
+);
+const ledger = new ethers.Contract(process.env.LEDGER_ADDRESS, ledgerAbi, signer);
 
 module.exports.createStopLimitOrder = async (userId, stockId, quantity, triggerPrice, limitPrice, tradeType) => {
   // Fetch latest market price
@@ -80,76 +99,118 @@ module.exports.getUserStopLimitOrders = async (userId) => {
 };
 
 
-
-
 module.exports.processStopLimitOrders = async (stockId = null) => {
-  // Fetch pending orders, optionally filtered by stockId
   const whereClause = { status: "PENDING" };
   if (stockId) whereClause.stockId = stockId;
 
-  const pendingOrders = await prisma.StopLimitOrder.findMany({ where: whereClause });
+  const pendingOrders = await prisma.stopLimitOrder.findMany({ where: whereClause });
+  const executedOrders = [];
+
+  // Get current nonce from signer for sequential blockchain tx
+  let nonce = await provider.getTransactionCount(signer.address);
 
   for (const order of pendingOrders) {
     const latestPriceData = await prisma.intradayPrice3.findFirst({
       where: { stockId: order.stockId },
-      orderBy: { date: 'desc' }
+      orderBy: { date: "desc" },
     });
     if (!latestPriceData) continue;
     const price = parseFloat(latestPriceData.closePrice);
 
-    if (order.tradeType === "SELL") {
-      if (price <= order.triggerPrice && price >= order.limitPrice) {
-        await prisma.trade.create({
+    let shouldExecute = false;
+    if (order.tradeType === "SELL" && price <= order.triggerPrice && price >= order.limitPrice) {
+      shouldExecute = true;
+      // DB trade
+      await prisma.trade.create({
+        data: {
+          userId: order.userId,
+          stockId: order.stockId,
+          quantity: order.quantity,
+          tradeType: "SELL",
+          price,
+          totalAmount: price * order.quantity,
+        },
+      });
+    } else if (order.tradeType === "BUY" && price >= order.triggerPrice && price <= order.limitPrice) {
+      shouldExecute = true;
+      // Update wallet first
+      await prisma.user.update({
+        where: { id: order.userId },
+        data: { wallet: { decrement: price * order.quantity } },
+      });
+      // DB trade
+      await prisma.trade.create({
+        data: {
+          userId: order.userId,
+          stockId: order.stockId,
+          quantity: order.quantity,
+          tradeType: "BUY",
+          price,
+          totalAmount: price * order.quantity,
+        },
+      });
+    }
+
+    if (shouldExecute) {
+      // Update stop-limit order status
+      await prisma.stopLimitOrder.update({
+        where: { id: order.id },
+        data: { status: "EXECUTED", updatedAt: new Date() },
+      });
+
+      executedOrders.push(order);
+
+      console.log(`Executed ${order.tradeType} stop-limit order ${order.id} at ${price}`);
+
+      // Record on blockchain
+      try {
+        const tx = await ledger.recordTrade(
+          order.stockId.toString(),
+          order.tradeType,
+          order.quantity,
+          Math.floor(price), // integer for blockchain
+          { nonce }
+        );
+        const receipt = await tx.wait();
+
+        // Store blockchain tx in DB
+        await prisma.blockchainTransaction.create({
           data: {
             userId: order.userId,
-            stockId: order.stockId,
-            quantity: order.quantity,
-            tradeType: 'SELL',
-            price,
-            totalAmount: price * order.quantity
-          }
+            symbol: order.stockId.toString(),
+            tradeType: order.tradeType,
+            gasUsed: Number(receipt.gasUsed),
+            transactionHash: receipt.hash,
+            blockNumber: receipt.blockNumber,
+          },
         });
-        await prisma.StopLimitOrder.update({
-          where: { id: order.id },
-          data: { status: 'EXECUTED', updatedAt: new Date() }
-        });
-        console.log(`Executed SELL stop-limit order ${order.id} at ${price}`);
-      }
-    } else if (order.tradeType === "BUY") {
-      if (price >= order.triggerPrice && price <= order.limitPrice) {
-        await prisma.user.update({
-          where: { id: order.userId },
-          data: { wallet: { decrement: price * order.quantity } }
-        });
-        await prisma.trade.create({
-          data: {
-            userId: order.userId,
-            stockId: order.stockId,
-            quantity: order.quantity,
-            tradeType: 'BUY',
-            price,
-            totalAmount: price * order.quantity
-          }
-        });
-        await prisma.StopLimitOrder.update({
-          where: { id: order.id },
-          data: { status: 'EXECUTED', updatedAt: new Date() }
-        });
-        console.log(`Executed BUY stop-limit order ${order.id} at ${price}`);
+
+        console.log(
+          `🧾 Recorded stop-limit trade on blockchain: TxHash ${receipt.hash}, Gas: ${receipt.gasUsed}`
+        );
+
+        nonce++; // increment nonce for next tx
+      } catch (err) {
+        console.error(
+          `Error recording stop-limit order ${order.id} on blockchain:`,
+          err
+        );
       }
     }
   }
 
- // broadcast updates via socket
-    if (executedOrders.length) {
-        const users = [...new Set(executedOrders.map(o => o.userId))];
-        for (const userId of users) {
-            const updatedOrders = await module.exports.getUserStopLimitOrders(userId);
-            socketBroadcast.broadcastStopLimitUpdate(userId, updatedOrders);
-        }
+  // broadcast updates via socket
+  if (executedOrders.length) {
+    const users = [...new Set(executedOrders.map((o) => o.userId))];
+    for (const userId of users) {
+      const updatedOrders = await module.exports.getUserStopLimitOrders(userId);
+      socketBroadcast.broadcastStopLimitUpdate(userId, updatedOrders);
     }
-    return executedOrders;
+  }
+
+  return executedOrders;
 };
+
 
 module.exports.getUserStopLimitOrders = async (userId) => {
   return prisma.stopLimitOrder.findMany({

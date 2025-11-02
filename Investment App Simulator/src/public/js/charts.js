@@ -1,6 +1,7 @@
 
 
 
+
 window.currentStockId = null;
 
 ////////////////////////////////////////////////////
@@ -14,7 +15,7 @@ function renderPaginationControls() {
 
   if (currentPage > 1) {
     const prevBtn = document.createElement('button');
-    prevBtn.textContent = '← Previous';
+    prevBtn.textContent = 'Previous';
     prevBtn.addEventListener('click', () => {
       currentPage--;
       renderTradeTablePage(currentPage);
@@ -25,7 +26,7 @@ function renderPaginationControls() {
 
   if (currentPage < totalPages) {
     const nextBtn = document.createElement('button');
-    nextBtn.textContent = 'Next →';
+    nextBtn.textContent = 'Next';
     nextBtn.addEventListener('click', () => {
       currentPage++;
       renderTradeTablePage(currentPage);
@@ -1231,6 +1232,8 @@ const amountInput = document.getElementById('amount');
 const errorEl = document.getElementById('buy-error');
 const chartForm = document.getElementById('chart-form-intraday');
 const symbolInput = chartForm.querySelector("input[name='chartSymbol']");
+const successMessage = document.querySelector('#create-success');
+
 
 let currentSymbol = null;
 
@@ -1285,6 +1288,7 @@ chartForm.addEventListener('submit', async (e) => {
 tradingForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorEl.textContent = '';
+successMessage.textContent = '';
 
   const symbol = currentSymbol || symbolInput.value.trim();
   if (!symbol) {
@@ -1336,7 +1340,10 @@ tradingForm.addEventListener('submit', async (e) => {
       }
 
       const result = await res.json();
-      alert(`${side.toUpperCase()} market order successful!`);
+      successMessage.textContent = `${side.toUpperCase()} market order successful!`;
+successMessage.classList.remove('hidden'); // in case you hide it with CSS
+errorEl.textContent = ''; // clear any previous errors
+
       console.log('Trade result:', result);
     } 
     // else {
@@ -1458,14 +1465,20 @@ function renderTradesPage(page) {
     tradesTableBody.appendChild(row);
   });
 }
-
 function renderPaginationControls() {
   tradesPaginationContainer.innerHTML = '';
-  const totalPages = Math.ceil(allTrades.length / pageSize);
+  tradesPaginationContainer.style.display = 'flex';
+  tradesPaginationContainer.style.alignItems = 'center';
+  tradesPaginationContainer.style.gap = '8px'; // spacing between buttons and page indicator
+  tradesPaginationContainer.style.justifyContent = 'flex-start'; // align everything to the left
 
+  // Ensure at least 1 page
+  const totalPages = Math.max(1, Math.ceil(allTrades.length / pageSize));
+
+  // Previous button
   if (currentPage > 1) {
     const prevBtn = document.createElement('button');
-    prevBtn.textContent = '← Previous';
+    prevBtn.textContent = 'Previous';
     prevBtn.addEventListener('click', () => {
       currentPage--;
       renderTradesPage(currentPage);
@@ -1474,9 +1487,15 @@ function renderPaginationControls() {
     tradesPaginationContainer.appendChild(prevBtn);
   }
 
+  // Page indicator
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+  tradesPaginationContainer.appendChild(pageIndicator);
+
+  // Next button
   if (currentPage < totalPages) {
     const nextBtn = document.createElement('button');
-    nextBtn.textContent = 'Next →';
+    nextBtn.textContent = 'Next';
     nextBtn.addEventListener('click', () => {
       currentPage++;
       renderTradesPage(currentPage);
@@ -1484,13 +1503,11 @@ function renderPaginationControls() {
     });
     tradesPaginationContainer.appendChild(nextBtn);
   }
-
-  const pageIndicator = document.createElement('span');
-  pageIndicator.textContent = ` Page ${currentPage} of ${totalPages} `;
-  tradesPaginationContainer.appendChild(pageIndicator);
 }
 
+
 loadUserTrades(userId);
+
 
 
   // ------------------------------
@@ -1558,23 +1575,23 @@ loadUserTrades(userId);
 //       const orderId = btn.dataset.orderId;
 //       if (!orderId) return;
 
-//       try {
-//         const res = await fetch(`/limit/cancel/${orderId}`, {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ userId })
-//         });
+    //   try {
+    //     const res = await fetch(`/limit/cancel/${orderId}`, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({ userId })
+    //     });
 
-//         const data = await res.json();
-//         if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
+    //     const data = await res.json();
+    //     if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
 
-//         alert(`Order ${orderId} cancelled successfully.`);
-//         loadUserLimitOrders(userId); // Refresh table
-//       } catch (err) {
-//         console.error('Error cancelling order:', err);
-//         alert(`Error: ${err.message}`);
-//       }
-//     });
+    //     alert(`Order ${orderId} cancelled successfully.`);
+    //     loadUserLimitOrders(userId); // Refresh table
+    //   } catch (err) {
+    //     console.error('Error cancelling order:', err);
+    //     alert(`Error: ${err.message}`);
+    //   }
+    //  });
 //   });
 // }
 
@@ -1583,35 +1600,77 @@ const limitOrdersTableBody = document.getElementById('limit-orders-table-body');
 const limitOrdersErrorDisplay = document.getElementById('limit-orders-error');
 const limitOrdersPaginationContainer = document.getElementById('limit-orders-pagination');
 
-socket.off('broadcastLimitTradeHistoryUpdate');
-socket.on('broadcastLimitTradeHistoryUpdate', () => {
-  console.log('Limit order history update received');
-  loadUserLimitOrders(userId);
-});
+const cancelPopup = document.querySelector('#cancel-popup');
+const confirmYes = document.querySelector('#confirm-yes');
+const confirmNo = document.querySelector('#confirm-no');
 
-// const pageSize = 10;  // 10 rows per page
 let currentLimitPage = 1;
 let allLimitOrders = [];
+let orderId = null;
 
-function loadUserLimitOrders(userId) {
-  fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
-    .then(res => {
-      if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching limit orders'); });
-      return res.json();
-    })
-    .then(data => {
-      allLimitOrders = data.limitOrders;
-      renderLimitOrdersPage(currentLimitPage);
-      renderLimitOrdersPagination();
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      limitOrdersErrorDisplay.textContent = err.message;
-    });
+// ✅ Toast Function
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => toast.classList.add('show'), 100);
+
+  // Remove toast after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
 }
 
+// Event delegation for cancel buttons
+limitOrdersTableBody.addEventListener('click', (e) => {
+  if (e.target.classList.contains('cancel-limit-btn')) {
+    orderId = e.target.dataset.orderId;
+    cancelPopup.classList.remove('hidden'); // show confirmation popup
+  }
+});
+
+// Cancel popup buttons
+confirmNo.addEventListener('click', () => {
+  cancelPopup.classList.add('hidden');
+  orderId = null;
+});
+
+confirmYes.addEventListener('click', async () => {
+  if (!orderId) return;
+  cancelPopup.classList.add('hidden');
+
+  try {
+    const res = await fetch(`/limit/cancel/${orderId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
+
+    // ✅ Success toast
+    showToast(`Order ${orderId} cancelled successfully`, 'success');
+
+    loadUserLimitOrders(userId); // Refresh table
+  } catch (err) {
+    console.error('Error cancelling order:', err);
+
+    // ❌ Error toast
+    showToast(`Error: ${err.message}`, 'error');
+  }
+
+  orderId = null;
+});
+
+// Render a page of limit orders
 function renderLimitOrdersPage(page) {
   limitOrdersTableBody.innerHTML = '';
+
   if (!allLimitOrders || allLimitOrders.length === 0) {
     limitOrdersTableBody.innerHTML = `<tr><td colspan="8">No limit orders found.</td></tr>`;
     return;
@@ -1624,14 +1683,12 @@ function renderLimitOrdersPage(page) {
   ordersToShow.forEach(order => {
     const orderDate = new Date(order.createdAt).toLocaleString();
     const symbol = order.stock ? order.stock.symbol : 'N/A';
-    const row = document.createElement('tr');
-
-    // Add cancel button only for PENDING or DAY orders
     const canCancel = order.status === 'PENDING' || order.status === 'DAY';
-    const cancelButtonHTML = canCancel 
-      ? `<button class="cancel-limit-btn" data-order-id="${order.id}">Cancel</button>` 
+    const cancelButtonHTML = canCancel
+      ? `<button class="cancel-limit-btn" data-order-id="${order.id}">Cancel</button>`
       : '';
 
+    const row = document.createElement('tr');
     row.innerHTML = `
       <td>${orderDate}</td>
       <td>${symbol}</td>
@@ -1642,43 +1699,25 @@ function renderLimitOrdersPage(page) {
       <td>${order.status}</td>
       <td>${cancelButtonHTML}</td>
     `;
-
     limitOrdersTableBody.appendChild(row);
-  });
-
-  // Add click event for cancel buttons
-  document.querySelectorAll('.cancel-limit-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const orderId = btn.dataset.orderId;
-      if (!orderId) return;
-
-      try {
-        const res = await fetch(`/limit/cancel/${orderId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to cancel order');
-
-        alert(`Order ${orderId} cancelled successfully.`);
-        loadUserLimitOrders(userId); // Refresh table
-      } catch (err) {
-        console.error('Error cancelling order:', err);
-        alert(`Error: ${err.message}`);
-      }
-    });
   });
 }
 
+// Render pagination buttons
 function renderLimitOrdersPagination() {
   limitOrdersPaginationContainer.innerHTML = '';
-  const totalPages = Math.ceil(allLimitOrders.length / pageSize);
+  limitOrdersPaginationContainer.style.display = 'flex';
+  limitOrdersPaginationContainer.style.alignItems = 'center';
+  limitOrdersPaginationContainer.style.gap = '8px'; // spacing between buttons and page indicator
+  limitOrdersPaginationContainer.style.justifyContent = 'flex-start'; // align everything to the left
 
+  // Ensure at least 1 page
+  const totalPages = Math.max(1, Math.ceil(allLimitOrders.length / pageSize));
+
+  // Previous button
   if (currentLimitPage > 1) {
     const prevBtn = document.createElement('button');
-    prevBtn.textContent = '← Previous';
+    prevBtn.textContent = 'Previous';
     prevBtn.addEventListener('click', () => {
       currentLimitPage--;
       renderLimitOrdersPage(currentLimitPage);
@@ -1687,9 +1726,15 @@ function renderLimitOrdersPagination() {
     limitOrdersPaginationContainer.appendChild(prevBtn);
   }
 
+  // Page indicator
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = `Page ${currentLimitPage} of ${totalPages}`;
+  limitOrdersPaginationContainer.appendChild(pageIndicator);
+
+  // Next button
   if (currentLimitPage < totalPages) {
     const nextBtn = document.createElement('button');
-    nextBtn.textContent = 'Next →';
+    nextBtn.textContent = 'Next';
     nextBtn.addEventListener('click', () => {
       currentLimitPage++;
       renderLimitOrdersPage(currentLimitPage);
@@ -1697,14 +1742,37 @@ function renderLimitOrdersPagination() {
     });
     limitOrdersPaginationContainer.appendChild(nextBtn);
   }
-
-  const pageIndicator = document.createElement('span');
-  pageIndicator.textContent = ` Page ${currentLimitPage} of ${totalPages} `;
-  limitOrdersPaginationContainer.appendChild(pageIndicator);
 }
 
+
+// Load user limit orders from backend
+function loadUserLimitOrders(userId) {
+  fetch(`/trade/user-limit-orders?userId=${encodeURIComponent(userId)}`)
+    .then(res => {
+      if (!res.ok) return res.json().then(d => { throw new Error(d.message || 'Error fetching limit orders'); });
+      return res.json();
+    })
+    .then(data => {
+      allLimitOrders = data.limitOrders;
+      currentLimitPage = 1;
+      renderLimitOrdersPage(currentLimitPage);
+      renderLimitOrdersPagination();
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      limitOrdersErrorDisplay.textContent = err.message;
+    });
+}
+
+// Initial load
 loadUserLimitOrders(userId);
 
+// Socket listener for live updates
+socket.off('broadcastLimitTradeHistoryUpdate');
+socket.on('broadcastLimitTradeHistoryUpdate', () => {
+  console.log('Limit order history update received');
+  loadUserLimitOrders(userId);
+});
 
 
   // ------------------------------
@@ -1935,6 +2003,8 @@ window.addEventListener('DOMContentLoaded', function () {
   const sellRadio = document.querySelector("input[name='side'][value='sell']");
   const submitButton = document.querySelector('#submit-order');
   const errorMessage = document.querySelector('#buy-error');
+  const successMessage = document.querySelector('#create-success');
+
 
   let latestPrice = 0;
 
@@ -1982,6 +2052,7 @@ window.addEventListener('DOMContentLoaded', function () {
     const quantity = parseInt(quantityInput.value);
     const side = buyRadio.checked ? 'BUY' : 'SELL';
     const timeframe = timeframeSelect.value; // gtc or day
+    successMessage.textContent = ''; // clear any previous success messages
 
     errorMessage.textContent = '';
 
@@ -1999,6 +2070,7 @@ window.addEventListener('DOMContentLoaded', function () {
       errorMessage.textContent = 'Limit order price must differ from the current market price.';
       return;
     }
+
 
     try {
       const stockId = await fetchStockId(symbol);
@@ -2022,7 +2094,12 @@ window.addEventListener('DOMContentLoaded', function () {
       }
 
       const data = await res.json();
-      alert(`${side} limit order created successfully (${timeframe.toUpperCase()})`);
+      // alert(`${side} limit order created successfully (${timeframe.toUpperCase()})`);
+
+      successMessage.textContent = `${side} limit order created successfully (${timeframe.toUpperCase()})`;
+      successMessage.classList.remove('hidden'); // in case you hide it with CSS
+      errorMessage.textContent = ''; // clear any previous errors
+
       tradingForm.reset();
       amountInput.value = '--';
       timeframeContainer.classList.add('hidden');
@@ -2058,3 +2135,4 @@ window.addEventListener('DOMContentLoaded', function () {
       .catch((err) => console.error('Error fetching stock data:', err));
   });
 });
+

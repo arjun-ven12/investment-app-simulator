@@ -30,6 +30,8 @@ const settingRouter = require("./routers/setting");
 
 const goalsRouter = require("./routers/Goals"); 
 
+const blockchainRouter = require("./routers/blockchain"); 
+
 const chatbotRouter = require("./routers/chatbot"); 
 const newsRouter = require("./routers/news")
 const guideRouter = require("./routers/guide")
@@ -82,6 +84,8 @@ app.use('/trade', tradeRouter);
 app.use('/tradeOrder', tradeOrderRouter);
 app.use('/leaderboard', leaderboardRouter)
 app.use('/options', optionsRouter)
+app.use('/blockchain', blockchainRouter)
+
 
 app.use('/referral', referralRouter);
 app.use('/dashboard', dashboardRouter);

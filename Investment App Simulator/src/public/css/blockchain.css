@@ -1,0 +1,680 @@
+
+/* --- Global Theme Colors --- */
+:root {
+    --color-dark-navy: #040613; /* Primary background color (Updated to match request) */
+    --color-card-dark: #12192B; /* Background for all cards and containers */
+    --color-input-dark: #1E2537; /* Background for search bar and table headers */
+    --color-accent-blue: #00A3FF; /* Vibrant blue accent for highlights (inferred from image) */
+    --color-text-light: #E0E0E0;
+    --color-border-subtle: #33405B;
+    --color-text-secondary: #9090A0; /* New soft gray for secondary text */
+  }
+  
+  /* --- Body & Base --- */
+  body {
+    /* IMPRESSIVE FIX: Use deep navy gradient base (if you want the background richer than black) */
+    /* background: linear-gradient(to bottom, #0080ffaa 0%, #000000 30%);  */
+    font-family: 'Outfit', sans-serif;
+    color: var(--color-text-light);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.5;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(to right, rgba(20, 20, 30, 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 20, 30, 0.4) 1px, transparent 1px);
+    background-size: 50px 50px; 
+    opacity: 0.3; 
+    z-index: -2; 
+    pointer-events: none;
+  }
+  
+  /* body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  background: 
+  radial-gradient(circle at 25% 50%, rgba(200, 255, 255, 0.12) 0%, transparent 50%), 
+      radial-gradient(circle at 85% 50%, rgba(150, 50, 255, 0.15) 0%, transparent 80%);
+    mix-blend-mode: screen;
+    animation: auraPulse 10s infinite alternate;
+    z-index: -1; 
+    pointer-events: none;
+  } */
+  
+  @keyframes auraPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.05); opacity: 1; }
+  } 
+  
+  
+  /* .blockchainBody {
+    position: relative;
+    z-index: 1;
+  } */
+  
+  /* --- Headings --- */
+  h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(255,255,255,0.05);
+  }
+  h3 {
+      font-size: 0.875rem;
+      font-family: Arial;
+      font-weight: 100;
+      margin-bottom: 15px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.1);
+  }
+  /* --- Search Input --- *//* --- Search Container & Icon Styles --- */
+  .search-wrapper {
+      position: relative; /* Essential for absolutely positioning the icon inside */
+      margin-bottom: 20px; 
+  }
+  
+  .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 12px; /* Position inside the input field */
+      transform: translateY(-50%);
+      width: 16px; /* Icon size */
+      height: 16px;
+      color: white; /* Initial icon color */
+      pointer-events: none; /* Allows clicks to pass through to the input */
+      transition: color 0.2s;
+      z-index: 2;
+  }
+  
+  /* --- Search Input (Frosted) --- */
+  #tradeSearch {
+    width: 100%;
+    /* CRITICAL: Left padding ensures text doesn't overlap the icon (12px margin + 16px icon + 10px buffer = ~38px) */
+    padding: 10px 12px 10px 38px; 
+    box-sizing: border-box; /* Includes padding in the total width */
+    border-radius: 8px;
+    border: 1.1px solid #ffffff; 
+    background: #11141c00; /* Fully transparent background for the filter */
+    backdrop-filter: blur(4px); /* Frosted Glass Effect */
+    -webkit-backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  #tradeSearch:focus {
+    outline: none;
+    /* Glow effect on focus */
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2);
+  }
+  /* Change icon color when input is focused */
+  #tradeSearch:focus + .search-icon {
+      color: var(--color-accent-blue);
+  }
+  
+  
+  /* --- Card: General Container (Frosted/Translucent) --- */
+  .company-card-content {
+    background-color: #11141C;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+    transition: transform 0.2s, box-shadow 0.3s;
+    border: 1px solid var(--color-border-subtle); /* ADDED: subtle border for definition */
+  }
+  
+  /* Inner content above border */
+  .company-card-content > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Hover effect */
+  .company-card-content:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.85);
+  }
+  
+  
+  
+  
+  /* /******************************************************************
+   * GLOBAL AURA & WRAPPER STYLING (For continuous background glow)
+   ******************************************************************/
+  
+  /* --- Wrapper for all 4 summary cards --- */
+  .all-summary {
+      position: relative; 
+      /* Ensures the aura is positioned relative to this block and doesn't affect the entire page */
+      z-index: 1; 
+      max-height: 370px
+      /* Ensure summary cards have a higher z-index (2) than the aura (-1) */
+  }
+  
+  /* --- CONTINUOUS BLUE/PURPLE AURA GLOW (Applied to the wrapper) --- */
+  .all-summary::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); 
+      width: 180%; /* Increased size to make the blob much bigger */
+      height: 180%; /* Increased size to make the blob much bigger */
+      border-radius: 50%; 
+      
+  
+      /* background: 
+        radial-gradient(circle at 50% 50%, 
+            rgba(0, 17, 150, 0.1) 0%, 
+            transparent 40%
+        ); */
+      
+      z-index: -1; /* Place this effect behind all the cards */
+      pointer-events: none;
+      mix-blend-mode: screen; 
+  }
+  
+  
+  /* /******************************************************************
+   * SUMMARY CARD STYLING 
+   * Cards are now translucent to let the wrapper's aura shine through.
+   ******************************************************************/
+  
+  /* --- Summary Card Styles (Stats and Charts) --- */
+  
+  /* --- Summary Card Styles (Stats and Charts) --- */
+  .summary-card {
+      /* Inherit the same border radius */
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      
+      /* ADDED: Ensure cards take full height of their grid cell */
+      height: 100%;
+  
+      /* --- Border & Background Implementation --- */
+      background: 
+          /* Layer 1: TRANSLUCENT INNER FILL - slight dark fill */
+          rgba(0, 0, 0, 0.35); 
+  
+      /* ADDED: Subtle glass-like border */
+      border: 1.35px solid rgba(255, 255, 255, 0.182); 
+      
+      /* Pushes content in 16px (1px border + 15px content padding) */
+      padding: 16px; 
+      
+      /* Glass Effect: CRITICAL for showing the parent's glow */
+      backdrop-filter: blur(6px); /* Slightly reduced blur for crisper glass */
+      -webkit-backdrop-filter: blur(6px);
+  
+      /* Subtle Inner and Outer Shadow */
+      box-shadow: 
+                  0 6px 18px rgba(0, 0, 0, 0.34); 
+  
+      /* Content Styling & Interaction (Layout properties removed, relying on Tailwind classes) */
+      
+      text-align: center; /* Kept for text content */
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      z-index: 2; /* Ensures cards stack above the aura (-1) */
+  }
+  /* Summary Card Label (now targeting the <p> tag directly) */
+  .summary-card p {
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Summary Card Value (now targeting the <h4> tag directly) */
+  .summary-card h4 {
+    color: #ffffff; 
+    font-weight: 700;
+    font-size: 2.5rem; /* Increased size for prominence */
+    /* Subtle text shadow for digital pop */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.602);
+    line-height: 1; 
+  
+  }
+  
+  /* --- Digital Noise Texture (::before) --- */
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Creates a fine-grain, randomly scattered noise pattern using SVG data URL */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+    
+    opacity: 0.16;
+    z-index: 2;
+    pointer-events: none;
+    /* Mask the noise to respect the border radius */
+    -webkit-mask: linear-gradient(#fff, #fff);
+    mask: linear-gradient(#fff, #fff);
+  }
+  
+  /* --- VIBRANT BLUE/PURPLE AURA GLOW (::after) - DELETED FROM SUMMARY CARD --- */
+  /* The glow is now handled by the parent .all-summary::after */
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* .analytics-section {
+      max-height: 400px;
+  }
+   */
+  
+  
+  
+  /* /******************************************************************
+   * CHART COMPONENT STYLING 
+   * Uses two main wrappers now:
+   * 1. .chart-wrap: Handles the large, soft dual-color box-shadow.
+   * 2. .chart-container: Handles the content, noise, aura, blur, AND gradient border.
+   ******************************************************************/
+  
+  /* --- New Shadow Wrapper (HTML structure required: PARENT) --- */
+  .chart-wrap {
+    position: relative;
+    /* Dual-Color Shadow: Follows the blue (top-left) and purple (bottom-right) aura blobs */
+    box-shadow: 
+      -20px -20px 220px rgba(0, 162, 255, 0.047),
+      15px 15px 220px rgba(238, 0, 255, 0.05);
+    margin-bottom: 15px;
+  }
+  
+  /* --- Chart Container (Frosted/Translucent: CHILD) --- */
+  .chart-container, .chart-container2 {
+    /* BORDER & CONTENT PADDING LOGIC:
+       - Total padding is 21px (1px for border + 20px for content spacing)
+       - The background is set to draw the border gradient and a dark inner fill.
+    */
+    border-radius: 12px;
+    position: relative; 
+    overflow: hidden; 
+    z-index: 10;
+    
+    /* --- Gradient Border Implementation --- */
+    /* Layer 1: The solid dark fill (covers the center of the gradient) */
+    /* Layer 2: The original frosted background */
+    /* Layer 3: The border gradient (outermost) */
+    background: 
+      /* Layer 1: Inner Dark Fill (to ensure the center doesn't mix with the gradient) */
+      #0a0b1f, 
+      /* Layer 2: The original frosted background for the content area */
+      linear-gradient(160deg,rgba(255,255,255,.025),rgba(0, 0, 0, 0.015)),
+      /* Layer 3: Border Gradient (the fading white line) */
+      linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.4) 0%,   
+          rgba(255, 255, 255, 0.8) 25%,  
+          rgba(255, 255, 255, 0.8) 75%,  
+          rgba(255, 255, 255, 0.4) 100% 
+      );
+  
+    /* Clip the dark fill and frosted background to the content area (20px in)
+       The border gradient is clipped to the border-box (the full element). */
+    background-clip: content-box, content-box, border-box;
+    background-origin: border-box;
+    
+    /* Pushes content in 21px (1px border + 20px content padding) */
+    padding: 21px; 
+  
+    /* Existing Styles - Blur */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  /* --- Digital Noise Texture (::before) --- */
+  .chart-container::before, .chart-container2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Creates a fine-grain, randomly scattered noise pattern using SVG data URL */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+    
+    opacity: 0.3;
+    z-index: 2;
+    pointer-events: none;
+    /* Mask the noise to respect the border radius */
+    -webkit-mask: linear-gradient(#fff, #fff);
+    mask: linear-gradient(#fff, #fff);
+  }
+  
+  /* --- VIBRANT BLUE/PURPLE AURA GLOW (::after) --- */
+  .chart-container::after, .chart-container2::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    width: 150%; 
+    height: 150%;
+    border-radius: 50%; 
+    
+    /* UPDATED: Two separate radial gradients for the distinct "blobs" */
+    background: 
+      /* Blue Blob: Top-Left Corner */
+      radial-gradient(circle at 20% 20%, 
+          rgba(0, 200, 255, 0.35) 0%, 
+          transparent 35% 
+      ),
+      /* Purple Blob: Bottom-Right Corner */
+      radial-gradient(circle at 80% 80%, 
+          rgba(255, 0, 251, 0.35) 0%, 
+          transparent 35% 
+      );
+    
+    z-index: -1;
+    pointer-events: none;
+    
+    /* CRITICAL: Use color-dodge or screen for maximum digital glow effect */
+    mix-blend-mode: screen; 
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* --- Canvas Fix (Required to stop expansion) --- */
+  canvas {
+    width: 100% !important;
+    max-height: 270px !important; /* Adjusted to fit better inside the 20px padding (40px total) */
+    display: block; 
+  }
+  
+  
+  
+  
+  
+  
+  
+  /* /******************************************************************
+   * TRADE TABLE WRAPPER STYLING (For background blobs)
+   ******************************************************************/
+  .trade-table-wrapper {
+      position: relative;
+      z-index: 1; /* Ensures the wrapper has context */
+      overflow: visible; /* Allow blobs to overflow slightly */
+      padding: 1px; /* Small padding to prevent clipping of subtle shadows */
+  }
+  
+  /* --- DUAL BLUE/PINK AURA GLOW for the Table --- */
+  .trade-table-wrapper::before,
+  .trade-table-wrapper::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px); /* Massive blur for the soft glow effect */
+      opacity: 0.3;
+      z-index: 0; /* Behind the table (z-index 1) */
+      pointer-events: none;
+      mix-blend-mode: screen; 
+  }
+  
+  /* Pink Blob (Top-Right) */
+  .trade-table-wrapper::before {
+      top: -50px;
+      right: -50px;
+      width: 250px;
+      height: 250px;
+      background: rgb(255, 0, 251); /* Pink/Magenta */
+  }
+  
+  /* Blue Blob (Bottom-Left) */
+  .trade-table-wrapper::after {
+      bottom: -50px;
+      left: -50px;
+      width: 300px;
+      height: 300px;
+      background: #00A3FF; /* Theme Blue */
+  }
+  
+  /* /******************************************************************
+   * TRADE TABLE STYLING 
+   ******************************************************************/
+  
+  /* --- Trade Table (Main Data List) --- */
+  .trade-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px; /* Consistent border radius */
+      overflow: hidden; 
+      color: var(--color-text-light);
+      font-size: 10px;
+      position: relative;
+      
+      /* --- FONT WEIGHT ADJUSTMENT (Thin/Light) --- */
+      font-weight: 300; 
+  
+      /* --- BORDER FIX: Add transparent border to create 1px space for glow to show --- */
+      border: 1px solid transparent; 
+  
+      /* --- Border & Background Implementation (Frosted Glass with Fading Border) --- */
+      background: 
+          /* Layer 1 (TOP): TRANSLUCENT INNER FILL */
+          rgba(0, 0, 0, 0.9),
+          /* Layer 2 (BOTTOM): Border Gradient (Top-Left/Bottom-Right glow) */
+          linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.8) 0%,    /* Top-Left Corner Glow */
+              transparent 15%,                
+              transparent 85%,                
+              rgba(255, 255, 255, 0.8) 100%   /* Bottom-Right Corner Glow */
+          );
+  
+      /* --- UPDATED CLIPPING: Clip the dark fill to the padding box (inside the 1px border)
+           and clip the gradient glow to the border box (the full element size) --- */
+      background-clip: padding-box, border-box;
+      background-origin: border-box;
+  
+      /* Apply glass effect */
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      
+      /* Shadow */
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34); 
+      
+      /* CRITICAL: Ensure the table sits on top of the wrapper's blobs */
+      z-index: 10;
+  }
+  
+  /* Table Header Cell Styling */
+  .trade-table th {
+      /* --- UPDATED COLORS/WEIGHT --- */
+      color: #e0e0e0d4; /* Specified header text color with opacity */
+      font-weight: 300; /* Thin font weight */
+  
+      letter-spacing: 0.5px;
+      font-size: 10px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      /* Darker background for header row for definition */
+      background-color: rgba(0, 0, 0, 0.2); 
+      
+      /* --- User Requested Enhancements --- */
+      text-transform: uppercase;
+      opacity: 0.7; /* Less opacity */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border bottom */
+      border-top: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border top */
+  
+  }
+  
+  .trade-table th, .trade-table td {
+      padding: 12px 12px;
+      text-align: left;
+      position: relative;
+      z-index: 1;
+  }
+  
+  /* Table Row Border (using border-bottom for internal lines) */
+  .trade-table tbody tr td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Thin internal separator */
+  }
+  
+  /* REMOVED the last border on the last row/cell */
+  .trade-table tbody tr:last-child td {
+      border-bottom: none;
+  }
+  
+  .trade-table tr:hover {
+      /* IMPRESSIVE FIX: Use a darker blue hover for a high-tech feel */
+      background-color: #4848483e;
+  }
+  
+  /* --- Color Hierarchy on Table Data --- */
+  
+  /* Style for TX Hash - Make it pop and look actionable */
+  .trade-table td:nth-child(2) { /* Assuming TX Hash is the second column (Keeping Blue) */
+      color: var(--color-accent-blue);
+      font-weight: 500;
+  }
+  
+  /* Style for secondary data like Timestamp - Now Pinkish */
+  .trade-table td:nth-child(3) { /* Assuming Timestamp is the third column */
+      color: var(--color-text-light); /* UPDATED to default text color */
+  }
+  
+  /* Style for Block Number - Now Pinkish */
+  .trade-table td:nth-child(5) { /* Assuming Block is the fifth column */
+      color: rgb(255, 0, 251); /* UPDATED to match the blob color */
+      font-weight: 500;
+  }
+  
+  
+  .trade-table td.break-all {
+      word-break: break-all;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  .text-gray-400 {
+    color: #f5f5f5 !important;
+    font-size: 10px !important;
+    padding-bottom: 10px !important;
+    padding-top: 5px !important;
+  }
+  
+  
+  .text-white-400 {
+    color: #f5f5f5 !important;
+    font-size: 10px !important;
+    padding-bottom: 10px !important;
+    padding-top: 5px !important;
+  }
+  
+  
+  .trade-block {
+    margin-top: 20px;
+    background: #00000000;
+    border-radius: 12px;
+    /* box-shadow: 0 0px 5px rgba(0, 0, 0, 0.225); */
+  }
+  
+  
+  #blockchain-explorer {
+  background: #00000038;
+  padding: 10px;
+  margin-top: 20px;
+   border: 1px solid #1d1d1d;
+     box-shadow: 0 6px 20px rgba(0,0,0,0.8); /* Stronger shadow to make it pop */
+     border-radius: 10px;
+  
+  }
+  
+  
+  
+  
+  
+  
+  .pagebutton {
+      /* NEW: Linear gradient from Blue (#00A3FF) to Pink (rgb(255, 0, 251)) */
+      background: #E0EBFF !important;
+      /* Requested border color */
+      /* border: 1px solid rgb(158, 158, 158) !important; */
+      color: rgb(0, 0, 0) !important;
+      font-size: 10px !important;
+      padding: 0px 20px !important;
+      
+      /* Preserving necessary properties with !important */
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      min-width: 70px !important; 
+      font-weight: 300 !important; 
+  }
+  
+  .pagebutton:hover {
+      /* Soft glow on hover (now matching the pink accent) */
+      box-shadow: 0 0 15px #0089d2b0 !important;
+      /* Slightly darker gradient on hover for contrast */
+      background: linear-gradient(90deg, #0089d2a2, #d200cfbd) !important; 
+      transform: translateY(-1px) !important;
+      color: white !important;
+  }
+  .bg-gray-700 {
+      color: #0080ffaa !important;
+  }
+  

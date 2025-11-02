@@ -1,3 +1,4 @@
+
 const stopLimitModel = require('../models/stopLimit');
 const socketBroadcast = require('../socketBroadcast');
 
@@ -22,7 +23,7 @@ exports.createStopLimitOrderController = async (req, res) => {
     res.status(201).json({ message: "Stop-limit order created", orders: updatedTable });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error creating stop-limit order", error: err.message });
+    res.status(400).json({ message: "Error creating stop-limit order", error: err.message });
   }
 };
 

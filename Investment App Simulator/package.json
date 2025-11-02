@@ -14,7 +14,7 @@
         "dotenv": "^16.6.1",
         "dotenv-cli": "^7.4.2",
         "email-existence": "^0.1.6",
-        "ethers": "^6.13.2",
+        "ethers": "^6.15.0",
         "express": "^4.21.2",
         "express-rate-limit": "^8.1.0",
         "google-auth-library": "^9.15.1",
@@ -28,7 +28,8 @@
         "openai": "^4.73.1",
         "pg": "^8.13.0",
         "readline-sync": "^1.4.10",
-        "socket.io": "^4.8.1"
+        "socket.io": "^4.8.1",
+        "solidity": "^0.0.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.11.1",
@@ -37,7 +38,7 @@
         "@types/node": "^22.7.2",
         "eslint": "^9.11.1",
         "globals": "^15.9.0",
-        "hardhat": "^2.26.3",
+        "hardhat": "^2.26.5",
         "nodemon": "^3.1.10",
         "prisma": "^6.18.0"
     },

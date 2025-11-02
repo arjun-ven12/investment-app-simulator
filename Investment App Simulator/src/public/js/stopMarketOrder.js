@@ -1,4 +1,5 @@
 
+
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem('userId');
   // ===== Element references =====
@@ -32,38 +33,106 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  function attachCancelHandlers() {
-    const cancelButtons = document.querySelectorAll(".cancel-btn");
+  // function attachCancelHandlers() {
+  //   const cancelButtons = document.querySelectorAll(".cancel-btn");
 
-    cancelButtons.forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const orderId = btn.dataset.id;
-        const orderType = btn.dataset.type;
+  //   cancelButtons.forEach((btn) => {
+  //     btn.addEventListener("click", async () => {
+  //       const orderId = btn.dataset.id;
+  //       const orderType = btn.dataset.type;
 
-        if (!confirm("Are you sure you want to cancel this order?")) return;
+  //       if (!confirm("Are you sure you want to cancel this order?")) return;
 
-        try {
-          const res = await fetch(`/${orderType}/cancel/${orderId}`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.message || "Failed to cancel order");
+  //       try {
+  //         const res = await fetch(`/${orderType}/cancel/${orderId}`, {
+  //           method: "POST",
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         });
+  //         const data = await res.json();
+  //         if (!res.ok) throw new Error(data.message || "Failed to cancel order");
 
-          alert("Order cancelled successfully!");
+  //         alert("Order cancelled successfully!");
 
-          // Refresh tables
-          if (orderType === "stop-limit") fetchStopLimitOrders();
-          else if (orderType === "stop-market") fetchStopMarketOrders();
-        } catch (err) {
-          console.error(err);
-          alert(err.message || "Error cancelling order");
-        }
-      });
-    });
+  //         // Refresh tables
+  //         if (orderType === "stop-limit") fetchStopLimitOrders();
+  //         else if (orderType === "stop-market") fetchStopMarketOrders();
+  //       } catch (err) {
+  //         console.error(err);
+  //         alert(err.message || "Error cancelling order");
+  //       }
+  //     });
+  //   });
+  // }
+function attachCancelHandlers() {
+  const cancelButtons = document.querySelectorAll(".cancel-btn");
+  const cancelPopup = document.getElementById("cancel-popup");
+  const confirmYes = document.getElementById("confirm-yes");
+  const confirmNo = document.getElementById("confirm-no");
+  const toast = document.getElementById("toast");
+
+  let selectedOrderId = null;
+  let selectedOrderType = null;
+
+  // Toast helper
+  function showToast(message, type = "success") {
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 5000);
   }
+
+  cancelButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedOrderId = btn.dataset.id;
+      selectedOrderType = btn.dataset.type;
+
+      cancelPopup.classList.remove("hidden"); // show popup
+    });
+  });
+
+  confirmNo.addEventListener("click", () => {
+    cancelPopup.classList.add("hidden"); // close popup
+    selectedOrderId = null;
+    selectedOrderType = null;
+  });
+
+  confirmYes.addEventListener("click", async () => {
+    cancelPopup.classList.add("hidden"); // close popup
+
+    if (!selectedOrderId || !selectedOrderType) return;
+
+    try {
+      const res = await fetch(`/${selectedOrderType}/cancel/${selectedOrderId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to cancel order");
+
+      showToast("Order cancelled successfully", "success");
+
+      // Refresh tables
+      if (selectedOrderType === "stop-limit") fetchStopLimitOrders();
+      else if (selectedOrderType === "stop-market") fetchStopMarketOrders();
+
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || "Error cancelling order", "error");
+    }
+
+    selectedOrderId = null;
+    selectedOrderType = null;
+  });
+}
+
+
   function formatToSGT(utcString) {
     if (!utcString) return "N/A";
     const date = new Date(utcString);
@@ -207,6 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
   stopLimitPriceInput?.addEventListener("input", updateAmount);
   triggerInput?.addEventListener("input", updateAmount);
   priceInput?.addEventListener("input", updateAmount);
+  const successMessage = document.querySelector('#create-success');
+
 
   // order type change
   orderTypeSelect.addEventListener("change", (e) => {
@@ -359,6 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
 tradingForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   buyError.textContent = "";
+successMessage.textContent = '';
 
   const side = tradingForm.querySelector("input[name='side']:checked")?.value;
   const orderType = orderTypeSelect.value;
@@ -420,7 +492,9 @@ tradingForm?.addEventListener("submit", async (e) => {
       stopLimitPriceInput.value = "";
       quantityInput.value = "";
       amountInput.value = "--";
-      alert("Stop-Limit order created successfully!");
+            successMessage.textContent = `Stop-Limit order created successfully!`;
+successMessage.classList.remove('hidden'); // in case you hide it with CSS
+buyError.textContent = ''; // clear any previous errors
     }
 
     else if (orderType === "stop-market") {
@@ -465,7 +539,10 @@ tradingForm?.addEventListener("submit", async (e) => {
       stopLimitPriceInput.value = "";
       quantityInput.value = "";
       amountInput.value = "--";
-      alert("Stop-Market order created successfully!");
+      // alert("Stop-Market order created successfully!");
+      successMessage.textContent = `Stop-Market order created successfully!`;
+successMessage.classList.remove('hidden'); // in case you hide it with CSS
+buyError.textContent = ''; // clear any previous errors
     }
 
     else {
@@ -480,7 +557,132 @@ tradingForm?.addEventListener("submit", async (e) => {
 });
 
 
-  const ROWS_PER_PAGE = 10;
+//   const ROWS_PER_PAGE = 10;
+// let stopMarketPage = 1;
+// let stopLimitPage = 1;
+// let stopMarketOrders = [];
+// let stopLimitOrders = [];
+
+// function renderStopMarketTable(orders = []) {
+//   stopMarketOrders = orders;
+//   renderStopMarketPage(stopMarketPage);
+// }
+
+// function renderStopMarketPage(page) {
+//   const tableBody = document.getElementById("stop-market-table-body");
+//   const pagination = document.getElementById("stop-market-pagination");
+//   if (!tableBody) return;
+
+//   tableBody.innerHTML = "";
+//   const start = (page - 1) * ROWS_PER_PAGE;
+//   const end = start + ROWS_PER_PAGE;
+//   const paginatedOrders = stopMarketOrders.slice(start, end);
+
+//   paginatedOrders.forEach((order) => {
+//     const tr = document.createElement("tr");
+//     tr.innerHTML = `
+//       <td>${formatToSGT(order.createdAt)}</td>
+//       <td>${order.stock?.symbol || "N/A"}</td>
+//       <td>${order.tradeType}</td>
+//       <td>${order.quantity}</td>
+//       <td>${order.triggerPrice}</td>
+//       <td>${order.status}</td>
+//       <td>
+//         ${order.status === "PENDING"
+//           ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>`
+//           : ""}
+//       </td>
+//     `;
+//     tableBody.appendChild(tr);
+//   });
+
+//   // Pagination controls
+//   const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
+//   pagination.innerHTML = `
+//     <button ${page <= 1 ? "disabled" : ""} id="stop-market-prev">Prev</button>
+//     <span>Page ${page} of ${totalPages || 1}</span>
+//     <button ${page >= totalPages ? "disabled" : ""} id="stop-market-next">Next</button>
+//   `;
+
+//   document.getElementById("stop-market-prev")?.addEventListener("click", () => {
+//     if (stopMarketPage > 1) {
+//       stopMarketPage--;
+//       renderStopMarketPage(stopMarketPage);
+//     }
+//   });
+
+//   document.getElementById("stop-market-next")?.addEventListener("click", () => {
+//     const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
+//     if (stopMarketPage < totalPages) {
+//       stopMarketPage++;
+//       renderStopMarketPage(stopMarketPage);
+//     }
+//   });
+
+//   attachCancelHandlers();
+// }
+
+// function renderStopLimitTable(orders = []) {
+//   stopLimitOrders = orders;
+//   renderStopLimitPage(stopLimitPage);
+// }
+
+// function renderStopLimitPage(page) {
+//   const tableBody = document.getElementById("stop-limit-table-body");
+//   const pagination = document.getElementById("stop-limit-pagination");
+//   if (!tableBody) return;
+
+//   tableBody.innerHTML = "";
+//   const start = (page - 1) * ROWS_PER_PAGE;
+//   const end = start + ROWS_PER_PAGE;
+//   const paginatedOrders = stopLimitOrders.slice(start, end);
+
+//   paginatedOrders.forEach((order) => {
+//     const tr = document.createElement("tr");
+//     tr.innerHTML = `
+//       <td>${formatToSGT(order.createdAt)}</td>
+//       <td>${order.stock?.symbol || "N/A"}</td>
+//       <td>${order.tradeType}</td>
+//       <td>${order.quantity}</td>
+//       <td>${order.triggerPrice}</td>
+//       <td>${order.limitPrice}</td>
+//       <td>${order.status}</td>
+//       <td>
+//         ${order.status === "PENDING"
+//           ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-limit">Cancel</button>`
+//           : ""}
+//       </td>
+//     `;
+//     tableBody.appendChild(tr);
+//   });
+
+//   // Pagination controls
+//   const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
+//   pagination.innerHTML = `
+//     <button ${page <= 1 ? "disabled" : ""} id="stop-limit-prev">Previous</button>
+//     <span>Page ${page} of ${totalPages || 1}</span>
+//     <button ${page >= totalPages ? "disabled" : ""} id="stop-limit-next">Next</button>
+//   `;
+
+//   document.getElementById("stop-limit-prev")?.addEventListener("click", () => {
+//     if (stopLimitPage > 1) {
+//       stopLimitPage--;
+//       renderStopLimitPage(stopLimitPage);
+//     }
+//   });
+
+//   document.getElementById("stop-limit-next")?.addEventListener("click", () => {
+//     const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
+//     if (stopLimitPage < totalPages) {
+//       stopLimitPage++;
+//       renderStopLimitPage(stopLimitPage);
+//     }
+//   });
+
+//   attachCancelHandlers();
+// }
+
+const ROWS_PER_PAGE = 10;
 let stopMarketPage = 1;
 let stopLimitPage = 1;
 let stopMarketOrders = [];
@@ -501,7 +703,7 @@ function renderStopMarketPage(page) {
   const end = start + ROWS_PER_PAGE;
   const paginatedOrders = stopMarketOrders.slice(start, end);
 
-  paginatedOrders.forEach((order) => {
+  paginatedOrders.forEach(order => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${formatToSGT(order.createdAt)}</td>
@@ -511,8 +713,8 @@ function renderStopMarketPage(page) {
       <td>${order.triggerPrice}</td>
       <td>${order.status}</td>
       <td>
-        ${order.status === "PENDING"
-          ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>`
+        ${order.status === "PENDING" 
+          ? `<button class="cancel-btn" data-id="${order.id}" data-type="stop-market">Cancel</button>` 
           : ""}
       </td>
     `;
@@ -521,26 +723,31 @@ function renderStopMarketPage(page) {
 
   // Pagination controls
   const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
-  pagination.innerHTML = `
-    <button ${page <= 1 ? "disabled" : ""} id="stop-market-prev">Prev</button>
-    <span>Page ${page} of ${totalPages || 1}</span>
-    <button ${page >= totalPages ? "disabled" : ""} id="stop-market-next">Next</button>
-  `;
+  pagination.innerHTML = "";
 
-  document.getElementById("stop-market-prev")?.addEventListener("click", () => {
-    if (stopMarketPage > 1) {
+  if (page > 1) {
+    const prevBtn = document.createElement("button");
+    prevBtn.textContent = "Previous";
+    prevBtn.addEventListener("click", () => {
       stopMarketPage--;
       renderStopMarketPage(stopMarketPage);
-    }
-  });
+    });
+    pagination.appendChild(prevBtn);
+  }
 
-  document.getElementById("stop-market-next")?.addEventListener("click", () => {
-    const totalPages = Math.ceil(stopMarketOrders.length / ROWS_PER_PAGE);
-    if (stopMarketPage < totalPages) {
+  const pageIndicator = document.createElement("span");
+  pageIndicator.textContent = `  Page ${page} of ${totalPages || 1}  `;
+  pagination.appendChild(pageIndicator);
+
+  if (page < totalPages && totalPages > 1) {
+    const nextBtn = document.createElement("button");
+    nextBtn.textContent = "Next";
+    nextBtn.addEventListener("click", () => {
       stopMarketPage++;
       renderStopMarketPage(stopMarketPage);
-    }
-  });
+    });
+    pagination.appendChild(nextBtn);
+  }
 
   attachCancelHandlers();
 }
@@ -560,7 +767,7 @@ function renderStopLimitPage(page) {
   const end = start + ROWS_PER_PAGE;
   const paginatedOrders = stopLimitOrders.slice(start, end);
 
-  paginatedOrders.forEach((order) => {
+  paginatedOrders.forEach(order => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${formatToSGT(order.createdAt)}</td>
@@ -581,26 +788,31 @@ function renderStopLimitPage(page) {
 
   // Pagination controls
   const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
-  pagination.innerHTML = `
-    <button ${page <= 1 ? "disabled" : ""} id="stop-limit-prev">Prev</button>
-    <span>Page ${page} of ${totalPages || 1}</span>
-    <button ${page >= totalPages ? "disabled" : ""} id="stop-limit-next">Next</button>
-  `;
+  pagination.innerHTML = "";
 
-  document.getElementById("stop-limit-prev")?.addEventListener("click", () => {
-    if (stopLimitPage > 1) {
+  if (page > 1) {
+    const prevBtn = document.createElement("button");
+    prevBtn.textContent = "Previous";
+    prevBtn.addEventListener("click", () => {
       stopLimitPage--;
       renderStopLimitPage(stopLimitPage);
-    }
-  });
+    });
+    pagination.appendChild(prevBtn);
+  }
 
-  document.getElementById("stop-limit-next")?.addEventListener("click", () => {
-    const totalPages = Math.ceil(stopLimitOrders.length / ROWS_PER_PAGE);
-    if (stopLimitPage < totalPages) {
+  const pageIndicator = document.createElement("span");
+  pageIndicator.textContent = `  Page ${page} of ${totalPages || 1}  `;
+  pagination.appendChild(pageIndicator);
+
+  if (page < totalPages && totalPages > 1) {
+    const nextBtn = document.createElement("button");
+    nextBtn.textContent = "Next";
+    nextBtn.addEventListener("click", () => {
       stopLimitPage++;
       renderStopLimitPage(stopLimitPage);
-    }
-  });
+    });
+    pagination.appendChild(nextBtn);
+  }
 
   attachCancelHandlers();
 }

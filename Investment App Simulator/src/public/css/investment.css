@@ -1,7 +1,5 @@
 
-
-
-   /* Import Outfit font */
+/* Import Outfit font */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
 
 /* General Reset & Fonts */
@@ -10,105 +8,94 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Outfit', sans-serif;
-    font-size: 12px; /* base font smaller */
+    font-size: 10px; /* Further reduced base font to 10px */
 }
 
 body {
     background-color: #0a0a0f; /* deeper black */
     color: #ffffff;
-    line-height: 1.4; /* slightly tighter for smaller font */
+    line-height: 1.4; /* Slightly reduced line height */
 }
 
 h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem; /* Reduced from 1.6rem */
     font-weight: 100;
-    margin-bottom: 8px;
+    margin-bottom: 5px; /* Reduced margin */
     color: #ffffff;
 }
 
 h2 {
-    font-size: 1.2rem;
-    margin-top: 15px;
-    margin-bottom: 6px;
+    font-size: 1rem; /* Reduced from 1.1rem */
+    margin-top: 8px; /* Reduced margin */
+    margin-bottom: 4px; /* Reduced margin */
     font-weight: 700;
     color: #ffffff;
 }
 
 h4 {
-    font-size: 1rem;
+    font-size: 0.9rem; /* Reduced from 0.95rem */
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 4px; /* Reduced margin */
     color: #ffffff;
 }
 
 /* Container & Layout */
 .content {
     width: 100%;
-    margin: 15px auto;
-    padding: 15px;
+    margin: 8px auto; /* Reduced margin */
+    padding: 10px; /* Reduced padding */
     background-color: #00000080; /* ultra-dark card background */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    border-radius: 8px; /* Reduced border radius */
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5); /* Adjusted shadow */
 }
 
 .container {
     display: grid;
     grid-template-columns: 75% 25%;
-    gap: 10px;          
+    gap: 6px; /* Reduced gap */
     box-sizing: border-box;
     width: 100%;
-    /* max-height: 600px; */
 }
 
 .chart-container, .trading-card {
     background-color: #000000;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    border-radius: 8px; /* Reduced border radius */
+    padding: 12px; /* Reduced padding */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6); /* Adjusted shadow */
     width: 100%;
-    margin: 10px 0;
+    margin: 6px 0; /* Reduced margin */
     outline: 1px solid #53596B;
   }
-
-/* .trading-card{
-  max-width: 300px;
-} */
 
 /* Side-by-side container */
 .history-container {
     display: grid;
     grid-template-columns: 1fr 1fr; /* 2 equal columns */
-    gap: 10px;
+    gap: 6px; /* Reduced gap */
     width: 100%;
-    margin: 10px 0;
-    /* padding-left: 40px;
-        padding-right: 40px; */
-      /* max-width: 1500px; */
-
+    margin: 6px 0; /* Reduced margin */
 }
 
 /* Column styling */
 .history-column {
     background-color: #000000b3;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    border-radius: 5px; /* Reduced border radius */
+    padding: 10px; /* Reduced padding */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     overflow-x: auto;
-    width: auto;    
+    width: auto; 
     outline: 1px solid #53596B;
-
 }
 
 /* Table styling */
 .history-column table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
-
+    margin-top: 6px; /* Reduced margin */
 }
 
 .history-column th, .history-column td {
-    padding: 10px;
+    padding: 6px; /* Reduced padding */
     text-align: center;
     border-bottom: 1px solid #333;
     color: #fff;
@@ -133,15 +120,15 @@ h4 {
 form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-size: 0.9rem; /* slightly smaller text in forms */
+    gap: 6px; /* Reduced gap */
+    font-size: 0.8rem; 
 }
 
 select, textarea, button {
-    padding: 10px 12px;
-    border-radius: 6px;
+    padding: 8px 8px; /* Reduced padding */
+    border-radius: 4px; /* Reduced border radius */
     border: none;
-    font-size: 0.85rem; /* smaller input text */
+    font-size: 0.75rem; /* smaller input text */
     background-color: #1c1c28;
     color: #fff;
     width: auto
@@ -149,10 +136,10 @@ select, textarea, button {
 
 
 input {
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 8px 8px; /* Reduced padding */
+  border-radius: 4px; /* Reduced border radius */
   border: none;
-  font-size: 0.85rem; /* smaller input text */
+  font-size: 0.75rem; /* smaller input text */
   background-color: #1c1c28;
   color: #fff;
   width: 100%
@@ -166,8 +153,8 @@ input:focus, select:focus, textarea:focus {
 input::placeholder,
 textarea::placeholder,
 select::placeholder {
-    font-size: 1rem;  /* smaller placeholder text */
-    color: #aaa;        /* optional: subtle lighter color */
+    font-size: 0.8rem; /* Adjusted placeholder font */
+    color: #aaa; 
 }
 
 
@@ -177,11 +164,11 @@ button {
     color: #000000;
     cursor: pointer;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Reduced font size */
     transition: background 0.3s, transform 0.2s;
-    border-radius: 6px;
+    border-radius: 4px; /* Reduced border radius */
     border: none;
-    margin: 2px;
+    margin: 1px; /* Reduced margin */
 }
 
 #submit-comment-button2 {
@@ -189,11 +176,11 @@ button {
   color: #000000;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: background 0.3s, transform 0.2s;
-  border-radius: 6px;
+  border-radius: 4px;
   border: none;
-  margin: 2px;
+  margin: 1px;
   width: 100%;
 }
 
@@ -203,17 +190,17 @@ button {
   color: #000000;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: background 0.3s, transform 0.2s;
-  border-radius: 6px;
+  border-radius: 4px;
   border: none;
-  margin: 2px;
+  margin: 1px;
   width: 100%;
 }
 
 button:hover, .submit-button:hover {
     background-color: #94cdff;
-    transform: translateY(-2px);
+    transform: translateY(-1px); /* Less hover lift */
 }
 
 button:active, .submit-button:active {
@@ -225,9 +212,9 @@ table {
     border-collapse: collapse;
     width: 100%;
     background-color: #1c1c28;
-    border-radius: 6px;
+    border-radius: 4px; /* Reduced border radius */
     overflow: hidden;
-    font-size: 0.85rem; /* smaller table text */
+    font-size: 0.75rem; /* smaller table text */
 }
 
 thead {
@@ -235,7 +222,7 @@ thead {
 }
 
 th, td {
-    padding: 8px;
+    padding: 5px; /* Reduced padding */
     text-align: center;
     border-bottom: 1px solid #333;
 }
@@ -244,120 +231,114 @@ tr:hover {
     background-color: #2e2e40;
 }
 
+
+
 /* Search */
 .search-container {
     display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 4px; /* Reduced gap */
+    margin-bottom: 5px; /* Reduced margin */
 }
 
 #stock-search {
     flex: 1;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 /* Stock/Favorites List */
 #stock-list, #favorite-stocks, #comments-list {
     list-style: none;
-    margin-top: 8px;
+    margin-top: 5px; /* Reduced margin */
     padding-left: 0;
 }
 
 #stock-list li, #favorite-stocks li, #comments-list li {
-    padding: 6px;
+    padding: 4px; /* Reduced padding */
     border-bottom: 1px solid #333;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 /* Charts */
 canvas {
     background-color: #000000;
-    border-radius: 12px;
-    padding: 8px;
+    border-radius: 8px; /* Reduced border radius */
+    padding: 4px; /* Reduced padding */
 }
-
-/* Market Status */
-/* #market-status {
-    padding: 10px;
-    background-color: #1c1c28;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-} */
 
 /* Comments Section */
 .stock-symbol-search {
     display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 4px; /* Reduced gap */
+    margin-bottom: 5px; /* Reduced margin */
 }
 
 .new-comment textarea {
     width: 100%;
     resize: none;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 5px; /* Reduced width */
 }
 
 ::-webkit-scrollbar-track {
     background: #12121a;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: #4a90e2;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 /* Stock List Styling */
 #stock-list {
     list-style: none;
     padding: 0;
-    margin-top: 10px;
+    margin-top: 6px; /* Reduced margin */
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px; /* Reduced gap */
 }
 
 #stock-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    background-color: #171720ad;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    padding: 8px 10px; /* Reduced padding */
+    background-color: #1b1b2bad;
+    border-radius: 6px; /* Reduced border radius */
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4); /* Adjusted shadow */
     transition: background 0.3s, transform 0.2s;
+    border:1px solid #363636;
 }
 
 #stock-list li:hover {
     background-color: #2a2a38;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 #stock-list li span {
-    font-size: 0.9rem; /* slightly smaller text */
+    font-size: 0.8rem; /* slightly smaller text */
     color: #ffffff;
     font-weight: 500;
 }
 
 #stock-list li button {
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 4px 8px; /* Reduced padding */
+    border-radius: 4px;
     border: none;
     background-color: #E0EBFF;
     color: black;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
 }
 
 #stock-list li button:hover {
-    background-color: #357ab8;
+    background-color: #181c1f;
     transform: translateY(-1px);
 }
 
@@ -370,7 +351,7 @@ canvas {
 @media (max-width: 900px) {
     .container {
         grid-template-columns: 1fr; /* stacked on smaller screens */
-        padding: 0 20px;
+        padding: 0 10px; /* Reduced padding */
     }
     canvas {
         width: 100% !important;
@@ -382,32 +363,32 @@ canvas {
 
 
 #market-status-banner {
-    position: fixed;      
-    top: 50px;     
-    left: 0;        
+    position: fixed; 
+    top: 50px; 
+    left: 0; 
     width: 100%;
     background-color: #000000;
     color: rgb(255, 255, 255);
-    overflow: hidden;         /* Hide overflow */
-    white-space: nowrap;      /* Keep text on one line */
+    overflow: hidden; 
+    white-space: nowrap; 
     font-weight: light;
-    font-size: 1.3rem;
+    font-size: 1rem; /* Reduced font size */
     z-index: 1000;
-    padding: 10px 0;
-    border-bottom: 1.5px solid #53596B;
+    padding: 6px 0; /* Reduced padding */
+    border-bottom: 1px solid #53596B; /* Reduced border thickness */
 
 }
 
 #market-status {
     display: inline-block;
-    padding-left: 100%;       /* Start from right */
-    animation: scroll-text 15s linear infinite;  /* Adjust speed */
-    font-size: 1.3rem;
+    padding-left: 100%; 
+    animation: scroll-text 15s linear infinite; 
+    font-size: 1rem; /* Reduced font size */
     font-weight: 400;
 }
 
 @keyframes scroll-text {
-    0%   { transform: translateX(0); }
+    0%  { transform: translateX(0); }
     100% { transform: translateX(-100%); }
 }
 
@@ -418,247 +399,291 @@ canvas {
 .favorite-stocks-grid {
   display: flex;
   flex-direction: column; /* stack items vertically */
-  gap: 10px;
-  margin-top: 10px;
+  gap: 6px; /* Reduced gap */
+  margin-top: 6px; /* Reduced margin */
   width: 100%; /* take full width of sidebar */
 }
 
-
-/* .favorite-stock-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f5f5f5;
-  border-radius: 6px;
-  padding: 6px 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-} */
 
 .favorite-stock-item button {
   background: #ff4d4f;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 2px 6px;
+  border-radius: 3px;
+  padding: 1px 5px;
   cursor: pointer;
+  font-size: 0.75rem;
+  
 }
 
-.favorite-stock-item button:hover {
-  background: #d9363e;
+
+
+.favorite-stocks-grid li button:hover {
+    background-color: #201e34 !important;
+    transform: translateY(-1px) !important;
 }
 
-.favorite-stock-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #171720ad;
-  border-radius: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+/* --- MODIFIED FAVORITE STOCK ITEM STYLE --- */
+.favorite-stocks-grid li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px !important; /* Reduced padding */
+    background-color: #1b1b2bad;
+    border-radius: 6px; /* Reduced border radius */
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4); /* Adjusted shadow */
+    transition: background 0.3s, transform 0.2s;
+    border:1px solid #363636;
 }
 
 .favorite-stock-item:hover {
   background-color: #2a2a38;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  border-color: #0ff; /* Subtle hover effect */
 }
+/* --- END MODIFICATION --- */
 
 
-
-/* Sidebar (Watchlist) */
+/* sidebar base (no fixed top) */
 .sidebar {
-  position: fixed;
-  top: 50px; /* same height as your market-status-banner */
-  left: 0;
-  width: 260px;
-  height: 100vh;
-  background-color: #000000;
-  padding: 20px 15px;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  z-index: 200;
-  border-right: 1.5px solid #53596B;
+    position: fixed;
+    left: 0;
+    width: 200px; /* DECREASED WIDTH: from 220px to 200px */
+    /* top and height will be set by JS for accurate alignment */
+    background-color: #000000;
+    padding: 12px 10px; /* Reduced padding */
+    box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    z-index: 500; 
+    border-right: 1px solid #53596B; /* Reduced border thickness */
 
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #3498db #111; /* thumb + track */
 }
+
+/* Chrome / Edge / Safari scrollbar styling */
+.sidebar::-webkit-scrollbar { width: 5px; } /* Reduced width */
+.sidebar::-webkit-scrollbar-track { background: #111; border-radius: 10px; }
+.sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3498db, #1e6bb8);
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #4da3ff, #2c7be5);
+}
+
 
 /* Sidebar header */
 .sidebar h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  color: #0ff; /* highlight color */
+    font-size: 1rem; /* Reduced font size */
+    font-weight: 700;
+    margin-bottom: 10px; /* Reduced margin */
+    color: #0ff; /* highlight color */
 }
 
 /* Sidebar search */
 .sidebar .search-container {
-  margin-bottom: 15px;
+    margin-bottom: 10px; /* Reduced margin */
 }
 
+.search-container {
+  align-items: center;
+}
 .sidebar #stock-search {
-  width: 100%;
+    width: 100%;
+}
+#stock-search {
+    font-size: 0.75rem; /* smaller input text */
+    height: 28px;
 }
 
+#search-button {
+  margin: 0px !important;
+  height: 28px !important ;
+}
 /* Watchlist items */
 #watchlist {
-  flex: 1;
-  overflow-y: auto;
-  list-style: none;
-  margin-top: 10px;
-  padding: 0;
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    margin-top: 6px; /* Reduced margin */
+    padding: 0;
 }
 
 #watchlist li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  background-color: #171720ad;
-  border-radius: 8px;
-  transition: background 0.3s, transform 0.2s;
-  cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px; /* Reduced padding */
+    margin-bottom: 4px; /* Reduced margin */
+    background-color: #171720ad;
+    border-radius: 5px; /* Reduced border radius */
+    transition: background 0.3s, transform 0.2s;
+    cursor: pointer;
 }
 
 #watchlist li:hover {
-  background-color: #2a2a38;
-  transform: translateY(-2px);
+    background-color: #2a2a38;
+    transform: translateY(-1px);
 }
 
 #watchlist li span {
-  font-size: 0.9rem;
-  color: #fff;
-  font-weight: 500;
+    font-size: 0.8rem;
+    color: #fff;
+    font-weight: 500;
 }
 
 #watchlist li button {
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: none;
-  background-color: #E0EBFF;
-  color: #000;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background 0.3s;
+    padding: 2px 5px; /* Reduced padding */
+    border-radius: 4px;
+    border: none;
+    background-color: #E0EBFF;
+    color: #000;
+    font-size: 0.7rem; /* Reduced font size */
+    cursor: pointer;
+    transition: background 0.3s;
 }
 
 #watchlist li button:hover {
-  background-color: #357ab8;
+    background-color: #357ab8;
 }
+
+
+/*
+ * Styles for the options-wrap container using Flexbox
+ * to place the select elements side-by-side.
+ */
+.options-wrap {
+  display: flex; /* Enables flex container */
+  gap: 1rem; /* Space between the two select groups */
+  align-items: center; /* Vertically centers the items if they have different heights */
+  padding: 0.5rem 0;
+}
+
+/* Optional: Basic styling for the select elements themselves for better visibility */
+select {
+  padding: 10px 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: white;
+  appearance: none; /* Removes default browser styling */
+}
+
+/* Optional: Focus state styling */
+select:focus {
+  border-color: #3b82f6; /* Blue border on focus */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 
 /* Push main content right */
 .main-content {
-  margin-left: 260px; /* same as sidebar width */
-  padding: 20px;
+    margin-left: 200px; /* UPDATED: to match new sidebar width (200px) */
+    padding: 12px; /* Reduced padding */
 }
 
 /* Container to position the arrow */
 .select-wrapper {
-  position: relative;
-  width: 100%; /* or 100% if you want full width */
-  display: inline-block;
+    position: relative;
+    width: 100%; 
+    display: inline-block;
 }
 
 /* Dropdown styling */
 #range {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background-color: #1c1c28; /* dark background */
-  color: #fff; /* white text */
-  border: 1px solid #333;
-  font-size: 0.9rem;
-  cursor: pointer;
-  appearance: none; /* remove default arrow */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  transition: border 0.3s, background 0.3s;
+    width: 100%;
+    padding: 8px 8px; /* Reduced padding */
+    border-radius: 4px;
+    background-color: #1c1c28; 
+    color: #fff; 
+    border: 1px solid #333;
+    font-size: 0.8rem; /* Reduced font size */
+    cursor: pointer;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: border 0.3s, background 0.3s;
 }
 
 /* Hover & focus states */
 #range:hover, #range:focus {
-  border-color: #0ff; /* highlight on hover/focus */
-  outline: none;
+    border-color: #0ff; 
+    outline: none;
 }
 
 /* Add custom arrow using pseudo-element */
 .select-wrapper::after {
-  content: "▼";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #0ff;
-  font-size: 0.8rem;
+    content: "▼";
+    position: absolute;
+    right: 8px; /* Adjusted position */
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #0ff;
+    font-size: 0.7rem; /* Reduced font size */
 }
 
 /* Option styling */
 #range option {
-  background-color: #1c1c28;
-  color: #fff;
+    background-color: #1c1c28;
+    color: #fff;
 }
 
 /* Label styling */
 label[for="range"] {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 500;
-  color: #fff;
-  font-size: 0.9rem;
-  margin-bottom: 5px;
+    display: block;
+    margin-bottom: 4px; /* Reduced margin */
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.8rem; /* Reduced font size */
+    margin-bottom: 2px;
 }
 
 
 
 /* Dropdown styling */
 #chartType {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background-color: #1c1c28; /* dark background */
-  color: #fff; /* white text */
-  border: 1px solid #333;
-  font-size: 0.9rem;
-  cursor: pointer;
-  appearance: none; /* remove default arrow */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  transition: border 0.3s, background 0.3s;
+    width: 100%;
+    padding: 8px 8px; /* Reduced padding */
+    border-radius: 4px;
+    background-color: #1c1c28; 
+    color: #fff; 
+    border: 1px solid #333;
+    font-size: 0.8rem; /* Reduced font size */
+    cursor: pointer;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: border 0.3s, background 0.3s;
 }
 
 /* Hover & focus states */
 #chartType:hover,
 #chartType:focus {
-  border-color: #0ff; /* highlight on hover/focus */
-  outline: none;
-}
-
-/* Add custom arrow using pseudo-element */
-.select-wrapper::after {
-  content: "▼";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #0ff;
-  font-size: 0.8rem;
+    border-color: #0ff; 
+    outline: none;
 }
 
 /* Option styling */
 #chartType option {
-  background-color: #1c1c28;
-  color: #fff;
+    background-color: #1c1c28;
+    color: #fff;
 }
 
 /* Optional label styling */
 label[for="chartType"] {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #fff;
-  font-size: 0.9rem;
+    display: block;
+    margin-bottom: 2px; /* Reduced margin */
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.8rem; /* Reduced font size */
 }
 
 
@@ -666,372 +691,459 @@ label[for="chartType"] {
 
 /* ==================== Global Fade-in ==================== */
 body {
-  animation: fadeInBody 0.8s ease forwards;
+    animation: fadeInBody 0.8s ease forwards;
 }
 
 @keyframes fadeInBody {
-  from { opacity: 0; }
-  to { opacity: 1; }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* Only animate new elements that you add dynamically */
 .animate-slideup {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: slideUp 0.6s forwards;
+    opacity: 0;
+    transform: translateY(10px); /* Reduced translateY */
+    animation: slideUp 0.6s forwards;
 }
 
 @keyframes slideUp {
-  to {
-      opacity: 1;
-      transform: translateY(0);
-  }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Sidebar slide-in (only once) */
 .sidebar {
-  transform: translateX(-100%);
-  animation: slideInLeft 0.8s forwards;
+    transform: translateX(-100%);
+    animation: slideInLeft 0.8s forwards;
 }
 
 @keyframes slideInLeft {
-  to { transform: translateX(0); }
+    to { transform: translateX(0); }
 }
-
-/* Buttons hover animation stays */
-/* button:hover,
-#stock-list li button:hover,
-#favorite-stocks li button:hover,
-#watchlist li button:hover {
-  transform: translateY(-2px) scale(1.05);
-} */
-
-
-
-
 
 
 /* Portfolio container */
 #portfolioContainer {
-  margin: 20px auto;
-  width: 90%;
-  max-width: 1200px;
-  color: #ffffff;
+    margin: 12px auto; /* Reduced margin */
+    width: 95%; 
+    max-width: 1000px; /* Reduced max width */
+    color: #ffffff;
 }
 
 /* Portfolio title */
 #portfolioContainer h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #E0EBFF;
-  text-align: center;
+    font-size: 1.2rem; /* Reduced font size */
+    font-weight: 700;
+    margin-bottom: 12px; /* Reduced margin */
+    color: #E0EBFF;
+    text-align: center;
 }
 
 /* Grid for stocks */
 .stock-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Adjusted minmax for smaller cards */
+    gap: 8px; /* Reduced gap */
+    margin-bottom: 15px; /* Reduced margin */
 }
 
 /* Individual stock card */
 .stock-column {
-  background-color: #000000;
-  border: 1px solid #53596B;
-  border-radius: 12px;
-  padding: 15px 20px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-  transition: transform 0.2s, background 0.3s;
-  overflow-wrap: anywhere;
+    background-color: #000000;
+    border: 1px solid #53596B;
+    border-radius: 8px; /* Reduced border radius */
+    padding: 10px 12px; /* Reduced padding */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    transition: transform 0.2s, background 0.3s;
+    overflow-wrap: anywhere;
 }
 
 .stock-column h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: #E0EBFF;
+    font-size: 0.95rem; /* Reduced font size */
+    font-weight: 700;
+    margin-bottom: 6px; /* Reduced margin */
+    color: #E0EBFF;
 }
 
 .stock-column p {
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-  color: #ffffff;
+    font-size: 0.8rem; /* Reduced font size */
+    margin-bottom: 3px; /* Reduced margin */
+    color: #ffffff;
 }
 
 .stock-column strong {
-  color: #E0EBFF;
+    color: #E0EBFF;
 }
 
 /* Hover effect */
 .stock-column:hover {
-  background-color: #12121a;
-  transform: translateY(-3px);
+    background-color: #12121a;
+    transform: translateY(-1px); /* Less hover lift */
 }
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-  .stock-grid {
-      grid-template-columns: 1fr; /* stack cards on small screens */
-  }
+    .stock-grid {
+        grid-template-columns: 1fr; /* stack cards on small screens */
+    }
 }
 
 
 
 .portfolio-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr; /* left chart bigger than portfolio */
-  gap: 20px;
-  width: 100%;
-  margin-top: 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* left chart bigger than portfolio */
+    gap: 12px; /* Reduced gap */
+    margin-top: 12px; /* Reduced margin */
 }
 
 .chart-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .fullscreen-chart {
-  height: 100%;
+    height: 100%;
 }
 
 .trading-card2 {
-  height: 100%;
-  overflow-y: auto;
-  /* width: 300px */
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* Responsive: stack on smaller screens */
 @media (max-width: 900px) {
-  .portfolio-container {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
+    .portfolio-container {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
 }
 
 
 
 /* Ensure chart container has a fixed height */
 #myChart2, .fullscreen-chart canvas {
-  width: 100% !important;
-height:100%
+    width: 100% !important;
+    height:100%
 }
 
 
 
 .company-card-content {
-  background-color: #000000; /* dark-blue/gray background */
-  color: #E0EBFF; /* light text */
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  max-width: 400px;
-  margin: 0px auto;
-  transition: transform 0.2s, box-shadow 0.2s;
-  outline: 1px solid #53596B;
+    background-color: #000000; /* dark-blue/gray background */
+    color: #E0EBFF; /* light text */
+    padding: 10px; /* Reduced padding */
+    border-radius: 8px; /* Reduced border radius */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    max-width: 320px; /* Reduced max width */
+    margin: 0px auto;
+    transition: transform 0.2s, box-shadow 0.2s;
+    outline: 1px solid #53596B;
 
 }
 
 .company-card-content:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
 }
 
 .company-card-content h2 {
-  margin-top: 10px;
-  font-size: 1.6rem;
-  font-weight: 400;
+    margin-top: 6px; /* Reduced margin */
+    font-size: 1.3rem; /* Reduced font size */
+    font-weight: 400;
 }
 
 .company-logo img {
-  border-radius: 8px;
-  /* border: 2px solid #E0EBFF;  */
-  /* background-color: #fff; */
+    border-radius: 5px; /* Reduced border radius */
 }
 
 .company-card-content p {
-  margin: 6px 0;
-  font-size: 1.1rem;
-  padding-bottom: 5px;
+    margin: 4px 0; /* Reduced margin */
+    font-size: 0.9rem; /* Reduced font size */
+    padding-bottom: 2px; /* Reduced padding */
 }
 
 .company-card-content a {
-  color: #0ff; /* theme blue for links */
-  text-decoration: none;
+    color: #0ff; 
+    text-decoration: none;
 }
 
 .company-card-content a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 
 .form-group {
-  display: flex;
-  gap: 15px;
-  align-items: center;
+    display: flex;
+    gap: 8px; /* Reduced gap */
+    align-items: center;
+}
+
+.form-group select {
+    background: #000000;
+    color: white;
+    padding: 8px 8px
 }
 
 .pretty-radio {
-  position: relative;
-  padding-left: 25px; /* space for circle */
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
+    position: relative;
+    padding-left: 18px; /* Reduced padding */
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 11px; /* Reduced font size */
 }
 
 .pretty-radio input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .radio-label::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px;
-  height: 14px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  background: #000000; /* light background instead of white */
-  box-sizing: border-box;
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px; /* Reduced size */
+    height: 10px; /* Reduced size */
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    background: #000000; 
+    box-sizing: border-box;
 }
 
 .radio-label::after {
-  content: "";
-  position: absolute;
-  left: 1px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px;
-  height: 14px;
-  background: #ffffff; /* fill color */
-  border-radius: 100%;
-  opacity: 0;
-  transition: opacity 0.2s;
+    content: "";
+    position: absolute;
+    left: 1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 9px; /* Reduced size */
+    height: 9px; /* Reduced size */
+    background: #ffffff; 
+    border-radius: 100%;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
 .pretty-radio input:checked + .radio-label::after {
-  opacity: 1;
+    opacity: 1;
 }
 .hidden {
-  display: none;
+    display: none;
 }
 
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 3px; /* Reduced gap */
+    align-items: flex-start;
 }
 
 .form-group.radio-group {
-  flex-direction: row;
-  align-items: center;
-  gap: 15px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px; /* Reduced gap */
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .visible {
-  opacity: 1;
-  height: auto;
+    opacity: 1;
+    height: auto;
 }
 
 
 .form-group-radio {
-  display: flex;
-  gap: 50px;
-  align-items: center; /* aligns Buy & Sell to the same vertical line */
-  padding: 10px 0;
+    display: flex;
+    gap: 20px; /* Reduced gap */
+    align-items: center; 
+    padding: 6px 0; /* Reduced padding */
 }
 
 .pretty-radio input {
-  vertical-align: middle; /* ensures the radio button lines up with the label text */
+    vertical-align: middle; 
 }
 
 .pretty-radio .radio-label {
-  vertical-align: middle;
-  display: inline-block; /* makes sure the span respects alignment */
-  font-size: 13px;
+    vertical-align: middle;
+    display: inline-block; 
+    font-size: 10px; /* Reduced font size */
 }
 
 
 .portfolio-layout {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
+    display: flex;
+    gap: 12px; /* Reduced gap */
+    align-items: flex-start;
 }
 
 .positions-section {
-  flex: 2;
+    flex: 2;
 }
 
 .portfolio-chart-container {
-  flex: 1;
-  /* max-width: 300px; */
+    flex: 1;
 }
 
 
 .tab-container {
-  display: flex;
-  justify-content: flex-start;
-  gap: 5px;
-  margin-top: 60px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 3px; /* Reduced gap */
+    margin-top: 40px; /* Reduced margin */
 }
 
 .tab-button {
-  background-color: #1c1c28;
-  border: 1px solid #333;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 6px 6px 0 0;
-  cursor: pointer;
-  transition: background 0.3s, border 0.3s;
+    background-color: #1c1c28;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 6px 12px; /* Reduced padding */
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    transition: background 0.3s, border 0.3s;
+    font-size: 0.85rem;
 }
 
 .tab-button.active {
-  background-color: #2a2a3d;
-  border-bottom: 2px solid #A3C1FD; /* highlight matches your chart scheme */
-  color: #A3C1FD;
+    background-color: #2a2a3d;
+    border-bottom: 2px solid #A3C1FD; 
+    color: #A3C1FD;
 }
 
 .tab-content {
-  display: none;
+    display: none;
 }
 
 .tab-content.active {
-  display: block;
+    display: block;
 }
 
 
 .options-card {
-  background-color: #000000;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  margin: 20px 0;
-  outline: 1px solid #53596B;
+    background-color: #000000;
+    border-radius: 8px; /* Reduced border radius */
+    padding: 12px; /* Reduced padding */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+    margin: 12px 0; /* Reduced margin */
+    outline: 1px solid #53596B;
 
 }
 
 .options-container {
-  margin-top: 15px;
-  background-color: #1c1c28;
-  border-radius: 8px;
-  padding: 15px;
-  overflow-x: auto;
-  outline: 1px solid #333;
+    margin-top: 8px; /* Reduced margin */
+    background-color: #1c1c28;
+    border-radius: 5px;
+    padding: 10px; /* Reduced padding */
+    overflow-x: auto;
+    outline: 1px solid #333;
 
 }
 
 
 .ohlc-body {
-  padding: 20px
+    padding: 12px /* Reduced padding */
+}
+
+
+/* Error message styling */
+#error-message,
+#buy-error {
+    color: #ff4d4f; 
+    font-weight: 500;
+    margin-top: 3px; /* Reduced margin */
+    font-size: 0.8rem;
+}
+
+/* Success message styling */
+#success-message,
+#create-success {
+    color: #52c41a; 
+    font-weight: 500;
+    margin-top: 3px; /* Reduced margin */
+    font-size: 0.8rem;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background: #000000;
+    padding: 12px 16px; /* Reduced padding */
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.2);
+    outline: #323232 1px solid;
+}
+
+.popup-content button {
+    margin: 0 6px; /* Reduced margin */
+    padding: 5px 10px; /* Reduced padding */
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+#confirm-yes {
+    padding-top: 6px; /* Reduced padding */
+    background-color: #53c41ac8; 
+    color: white;
+}
+
+#confirm-no {
+    padding-top: 6px; /* Reduced padding */
+    background-color: #f94a4dca; 
+    color: white;
+}
+
+/* ===== Toast Styles ===== */
+.toast {
+    position: fixed;
+    bottom: 15px; /* Reduced position */
+    right: 15px; /* Reduced position */
+    background: #333;
+    color: #fff;
+    padding: 8px 12px; /* Reduced padding */
+    border-radius: 5px;
+    font-size: 12px; /* Reduced font size */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+ .toast.success {
+    background: linear-gradient(90deg, #00c851 0%, #000000 60%, #000000 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-weight: 300;
+} 
+
+.toast.error {
+    background-color: #dc3545; 
 }

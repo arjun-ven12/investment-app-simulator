@@ -1,6 +1,7 @@
 
 
 
+
 const optionsModel = require('../models/options');
 
 const { Parser } = require('json2csv'); // make sure json2csv is installed
@@ -106,7 +107,7 @@ module.exports.placeBuyCallOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -176,7 +177,7 @@ module.exports.placeSellCallOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -256,7 +257,7 @@ module.exports.placeBuyPutOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -325,7 +326,7 @@ module.exports.placeSellPutOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 

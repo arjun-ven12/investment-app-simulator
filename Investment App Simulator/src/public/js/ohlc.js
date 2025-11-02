@@ -1,4 +1,5 @@
 
+
 window.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById('back-button');
   backButton.addEventListener('click', (e) => {
@@ -609,6 +610,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const buyRadio = document.querySelector("input[name='side'][value='buy']");
   const sellRadio = document.querySelector("input[name='side'][value='sell']");
   const errorMessage = document.querySelector('#buy-error');
+  const successMessage = document.querySelector('#create-success');
+
 
   function getContractSymbolFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -664,6 +667,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   tradingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorMessage.textContent = '';
+successMessage.textContent = '';
 
     const contractSymbol = getContractSymbolFromURL();
     if (!contractSymbol) {
@@ -748,7 +752,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Order failed');
 
-      alert(data.message);
+      // alert(data.message);
+      successMessage.textContent = `${data.message}`;
+    successMessage.classList.remove('hidden'); // in case you hide it with CSS
+      errorMessage.textContent = ''; // clear any previous errors
+
       tradingForm.reset();
       amountInput.value = '--';
       limitAmountInput.value = '--';
