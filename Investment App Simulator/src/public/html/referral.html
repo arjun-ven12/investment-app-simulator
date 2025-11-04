@@ -13,11 +13,39 @@
 </head>
 
 <body>
+
   <div id="navbar-container"></div>
+  <div class="bg-auras">
+    <div class="aura aura-left"></div>
+    <div class="aura aura-right"></div>
+  </div>
 
   <main class="container">
-    <h1>Referral Riches Await, Join the<br> Winning Circle and Amplify <br>Your Gains!</h1>
-    <p>Earn up to 5000 dollars as reward for successful referrals.</p>
+    <section class="hero-section fade-up">
+      <h1>Referrals</h1>
+      <p class="subtitle">Rewards Program</p>
+      <p class="desc">
+        Join the Circle of Insight — earn, empower, and expand.<br>
+        Earn up to <strong>$5000</strong> in exclusive rewards for successful referrals.<br>
+        <span class="muted">Built for investors who believe success grows when it’s shared.</span>
+      </p>
+    </section>
+
+    <section class="sealed-path">
+      <div class="sealed-bg">
+        <div class="path-flare"></div>
+        <div class="planet planet-left"></div>
+        <div class="sealed-line">
+          <div class="sealed-progress" id="sealedProgress"></div>
+        </div>
+        <div class="planet planet-right"></div>
+      </div>
+      <p class="sealed-caption" id="sealedCaption">
+        Progress Through the Sealed Path
+      </p>
+    </section>
+
+
 
 
     <div class="inner-container">
@@ -41,7 +69,7 @@
           <div class="referral-code-section">
             <h4>Referral Link</h4>
             <div class="referral-row">
-              <input type="text" id="referralCode"readonly>
+              <input type="text" id="referralCode" readonly>
               <i class="fas fa-copy copy-icon" id="copyReferral"></i>
             </div>
           </div>
@@ -94,18 +122,18 @@
     <section class="history-section">
       <h3>Referral Usage History</h3>
       <div class="table-wrapper">
-<table id="referralTable">
-  <thead>
-    <tr>
-      <th>Action</th>
-      <th>Used By</th>
-      <th>Owner</th>
-      <th>Timestamp</th>
+        <table id="referralTable">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Used By</th>
+              <th>Owner</th>
+              <th>Timestamp</th>
 
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
 
 
     </section>
@@ -115,10 +143,41 @@
     </div>
   </main>
 
-<script src="../js/chatbot.js" defer></script>
+  <script src="../js/chatbot.js" defer></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="../js/navbar.js"></script>
   <script src="../js/referral.js"></script>
+  <!-- Load GSAP first -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const comet = document.getElementById("comet");
+      const planetB = document.getElementById("destination");
+      const text = document.getElementById("journeyText");
+
+      const maxCap = 5000;
+      const creditsEarned = 1500; // Example data
+      const progress = Math.min((creditsEarned / maxCap) * 100, 100);
+
+      // comet movement across the screen
+      const journeyWidth = document.querySelector(".starfield-journey").offsetWidth - 160; // padding both sides
+      const cometX = (journeyWidth * progress / 100);
+      comet.style.transform = `translate(${cometX}px, -50%)`;
+
+      // destination planet glow + zoom
+      const scale = 1 + progress / 250; // subtle zoom
+      planetB.style.transform = `translateY(-50%) scale(${scale})`;
+      planetB.style.filter = `drop-shadow(0 0 ${10 + progress / 5}px rgba(255,111,207,${0.3 + progress / 200}))`;
+
+      // update text
+      text.textContent = `${Math.round(progress)}% through your journey`;
+    });
+  </script>
+
+
+
+
+
+
 </body>
 
 </html>

@@ -105,19 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return rewardTiers[rewardTiers.length - 1];
   }
 
-  function updateProgressBar(creditsEarned) {
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const nextRewardElem = document.getElementById('nextReward');
+function updateProgressBar(creditsEarned) {
+  const bar = document.getElementById('sealedProgress');
+  const caption = document.getElementById('sealedCaption');
+  const maxCap = 5000;
+  const progress = Math.min((creditsEarned / maxCap) * 100, 100);
 
-    if (!progressFill || !progressText || !nextRewardElem) return;
+  if (bar) bar.style.width = `${progress}%`;
+  if (caption) caption.textContent = `${Math.round(progress)}% through the sealed path`;
+}
 
-    const maxCap = 5000; // update max cap here
-    const progressPercent = Math.min((creditsEarned / maxCap) * 100, 100);
-    progressFill.style.width = `${progressPercent}%`;
-    progressText.innerText = `${creditsEarned} / ${maxCap}`;
-    nextRewardElem.innerText = `$${getNextTier(creditsEarned)}`;
-  }
 
   function updateReferralHistoryTable(history) {
   const tbody = document.querySelector('#referralTable tbody');
