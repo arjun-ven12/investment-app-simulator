@@ -268,3 +268,35 @@ window.addEventListener("load", adjustTabHeight);
   fetchReferralStats();
   fetchReferralHistory();
 });
+/* STAR BACKGROUND */
+const canvas = document.getElementById('starCanvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const stars = Array.from({ length: 200 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.2 + 0.2,
+    s: Math.random() * 0.02 + 0.005, // slow twinkle
+  }));
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const star of stars) {
+      const flicker = 0.6 + Math.sin(Date.now() * star.s) * 0.4;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${flicker * 0.8})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+}
