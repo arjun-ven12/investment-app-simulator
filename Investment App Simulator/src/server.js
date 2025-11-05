@@ -91,6 +91,7 @@ server.listen(port, () => {
 
 
 require("./middlewares/dailyAIAdviceCron");
+require("./middlewares/dailyImageforNews");
 
 // require('dotenv').config();
 // require('./middlewares/limitOrderCron');

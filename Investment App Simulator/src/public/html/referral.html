@@ -5,22 +5,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Referral Program</title>
+
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="../css/referral.css">
   <link rel="stylesheet" href="/css/chatbot.css">
 </head>
 
 <body>
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- STARS BACKGROUND -->
+  <canvas id="starCanvas"></canvas>
+  <div class="space-bg"></div>
+
+  <!-- AURAS -->
+  <div class="aura aura-blue"></div>
+  <div class="aura aura-pink"></div>
+  <div class="aura aura-center"></div>
 
   <div id="navbar-container"></div>
-  <div class="bg-auras">
-    <div class="aura aura-left"></div>
-    <div class="aura aura-right"></div>
-  </div>
+<!-- MINI REFERRAL WIDGET -->
+<div class="mini-referral">
+  <input type="text" id="miniReferralCode" readonly>
+  <button id="miniCopyReferral" class="mini-copy">
+    <i class="fa-solid fa-copy"></i>
+  </button>
+</div>
 
   <main class="container">
+    <!-- ========================
+         HERO SECTION
+    ========================= -->
     <section class="hero-section fade-up">
       <h1>Referrals</h1>
       <p class="subtitle">Rewards Program</p>
@@ -31,153 +51,146 @@
       </p>
     </section>
 
+    <!-- ========================
+         SEALED PATH PROGRESS
+    ========================= -->
     <section class="sealed-path">
+      <div class="aurora-layer"></div>
       <div class="sealed-bg">
-        <div class="path-flare"></div>
-        <div class="planet planet-left"></div>
-        <div class="sealed-line">
-          <div class="sealed-progress" id="sealedProgress"></div>
-        </div>
-        <div class="planet planet-right"></div>
-      </div>
-      <p class="sealed-caption" id="sealedCaption">
-        Progress Through the Sealed Path
-      </p>
-    </section>
-
-
-
-
-    <div class="inner-container">
-      <section class="progress-section">
-        <h2>Your Reward Progress</h2>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <span id="progressText">0 / 300</span>
-
-        <!-- Next reward display for JS -->
-        <div class="next-reward">
-          Next Reward: <span id="nextReward">$0</span>
-        </div>
-      </section>
-
-      <div class="referral-cards">
-
-        <!-- Referral code + QR code: same row -->
-        <div class="card referral-full">
-          <div class="referral-code-section">
-            <h4>Referral Link</h4>
-            <div class="referral-row">
-              <input type="text" id="referralCode" readonly>
-              <i class="fas fa-copy copy-icon" id="copyReferral"></i>
-            </div>
-          </div>
-
-          <div class="friend-referral-section">
-            <h4>QR Code</h4>
-            <div class="qr-placeholder">
-            </div>
-          </div>
+        <div class="planet-wrapper left-wrapper">
+          <div class="planet planet-left"></div>
         </div>
 
-        <!-- How It Works card: separate block below -->
-        <div class="how-it-works-card">
-          <h4>How It Works</h4>
-          <div class="steps-container-card">
-            <div class="step-wrapper">
-              <div class="step">
-                <div class="step-icon"><i class="fas fa-paper-plane"></i></div>
-                <span>Share your referral code, link or QR Code with friends.</span>
-              </div>
-              <div class="step-line"></div>
-              <div class="step">
-                <div class="step-icon"><i class="fas fa-user-plus"></i></div>
-                <span>Your friends sign up successfully with your referral code.</span>
-              </div>
-              <div class="step-line"></div>
-              <div class="step">
-                <div class="step-icon"><i class="fas fa-money-bill-wave"></i></div>
-                <span>You will receive 100 dollars with an increment of 50 dollars, capped at 300 dollars</span>
-              </div>
-            </div>
-          </div>
+        <svg class="sealed-curve" viewBox="0 0 1000 300" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sealedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7caaff" />
+              <stop offset="50%" stop-color="#b8c6ff" />
+              <stop offset="100%" stop-color="#ff6fcf" />
+            </linearGradient>
+          </defs>
 
-          <!-- Toggle now on its own line -->
-          <div class="how-it-works-toggle" id="toggleHowItWorks">
-            <i class="fas fa-chevron-up"></i> Hide Tip
-          </div>
+          <!-- Faint base path -->
+          <path d="M-53,180 C500,60 1100,280 1350,190" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none" />
+
+          <!-- Animated progress path -->
+          <path id="sealedProgressPath" d="M-60,180 C500,60 1100,280 1350,190" stroke="url(#sealedGradient)"
+            stroke-width="2.8" fill="none" stroke-linecap="round" stroke-dasharray="1500" stroke-dashoffset="1500" />
+        </svg>
+
+        <circle id="sealedOrbiter" r="6" fill="#fff" filter="url(#glow)"></circle>
+        <div class="planet-wrapper right-wrapper">
+          <div class="planet planet-right"></div>
         </div>
-
       </div>
 
+      <p class="sealed-caption" id="sealedCaption">THROUGH THE SEALED PATH</p>
+    </section>
+<p class="transition-text">
+  Continue your journey — invite others into the Sealed Circle.
+</p>
+    <!-- ========================
+         REFERRAL CARD SECTION
+    ========================= -->
+<section class="sealed-console">
+  <div class="referral-key sleek">
+    <h2>Your Referral Key</h2>
+    <p class="subtext">
+      Invite others into the Sealed Circle — your gateway to exclusive rewards.
+    </p>
+
+<div class="referral-bar">
+  <input type="text" id="referralCode" readonly value="https://www.sealed-fi.com/referral/saranya-abc123">
+  <button id="copyReferral" type="button" class="copy-btn">
+    <i class="fa-solid fa-copy"></i>
+  </button>
+</div>
 
 
+    <p class="hint">
+      Share this link to earn rewards securely through Sealed.
+    </p>
+  </div>
+
+  <div class="console-divider"></div>
+
+  <div class="info-tabs linked">
+    <div class="tab-header">
+      <button class="tab-btn active" data-tab="how">How It Works</button>
+      <button class="tab-btn" data-tab="why">Why Share Sealed?</button>
     </div>
 
-    </section>
-
-
-    <!-- Referral History Table -->
-    <section class="history-section">
-      <h3>Referral Usage History</h3>
-      <div class="table-wrapper">
-        <table id="referralTable">
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Used By</th>
-              <th>Owner</th>
-              <th>Timestamp</th>
-
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-
-    </section>
-
-
-
+    <div class="tab-content active" id="how">
+      <div class="how-works-flow">
+        <div class="how-card">
+          <div class="how-icon"><i class="fa-solid fa-paper-plane"></i></div>
+          <p>Share your referral link or QR code with friends.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-icon"><i class="fa-solid fa-user-plus"></i></div>
+          <p>Friends sign up successfully using your referral.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+          <p>Earn up to <strong>$5000</strong> in rewards.</p>
+        </div>
+      </div>
     </div>
+
+    <div class="tab-content" id="why">
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon"><i class="fa-solid fa-network-wired"></i></div>
+          <h4>Expand Your Network</h4>
+          <p>Bring investors together under one intelligent platform.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h4>Grow Your Earnings</h4>
+          <p>Each referral moves you closer to your next reward tier.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h4>Share With Confidence</h4>
+          <p>Every Sealed account is verified and protected.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    <!-- ========================
+         REFERRAL HISTORY
+    ========================= -->
+<section class="history-section">
+  <h3>Referral Usage History</h3>
+
+  <div class="history-wrapper">
+    <table class="referral-table sleek">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Owner</th>
+          <th>Date & Time</th>
+        </tr>
+      </thead>
+      <tbody id="referralHistory">
+        <!-- dynamically populated -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
   </main>
 
+  <!-- ========================
+       JS SCRIPTS
+  ========================= -->
   <script src="../js/chatbot.js" defer></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="../js/navbar.js"></script>
   <script src="../js/referral.js"></script>
-  <!-- Load GSAP first -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const comet = document.getElementById("comet");
-      const planetB = document.getElementById("destination");
-      const text = document.getElementById("journeyText");
-
-      const maxCap = 5000;
-      const creditsEarned = 1500; // Example data
-      const progress = Math.min((creditsEarned / maxCap) * 100, 100);
-
-      // comet movement across the screen
-      const journeyWidth = document.querySelector(".starfield-journey").offsetWidth - 160; // padding both sides
-      const cometX = (journeyWidth * progress / 100);
-      comet.style.transform = `translate(${cometX}px, -50%)`;
-
-      // destination planet glow + zoom
-      const scale = 1 + progress / 250; // subtle zoom
-      planetB.style.transform = `translateY(-50%) scale(${scale})`;
-      planetB.style.filter = `drop-shadow(0 0 ${10 + progress / 5}px rgba(255,111,207,${0.3 + progress / 200}))`;
-
-      // update text
-      text.textContent = `${Math.round(progress)}% through your journey`;
-    });
-  </script>
-
-
-
-
-
-
 </body>
 
 </html>

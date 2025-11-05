@@ -1,18 +1,28 @@
-/* ========== GLOBAL ========== */
-* { box-sizing: border-box; }
+/* ============================================================
+   PART 1 — GLOBAL, LAYOUT & TYPOGRAPHY
+============================================================ */
+
+/* ----------------------------
+   GLOBAL RESET
+---------------------------- */
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* no horizontal scroll */
+  overflow-x: hidden;
   font-family: 'Outfit', sans-serif;
-  background: #0a0a0a;
+  background: #000000;
   color: #fff;
 }
 
-/* ========== LAYOUT CONTAINER ========== */
-/* NOTE: avoid nested .container classes in HTML (see HTML changes below) */
+/* ----------------------------
+   CONTAINER LAYOUT
+---------------------------- */
 .container {
   max-width: 1300px;
   width: 100%;
@@ -23,10 +33,10 @@ html, body {
   gap: 30px;
 }
 
-.container h1{
+.container h1 {
   padding-top: 40px;
 }
-/* use a separate inner wrapper if you need nested spacing */
+
 .inner-container {
   display: flex;
   flex-direction: column;
@@ -34,385 +44,22 @@ html, body {
   width: 100%;
 }
 
-/* HEADINGS */
+/* ----------------------------
+   TYPOGRAPHY
+---------------------------- */
 h1, h2, h3, h4 {
   color: #fff;
   margin: 0 0 10px 0;
-}
-
-/* ========== PROGRESS BAR ========== */
-.progress-section { width: 100%; text-align: center; padding-bottom: 10px; }
-.progress-bar {
-  width: 100%;
-  height: 25px;
-  background-color: #000;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid #E0EBFF;
-  margin-top: 10px;
-}
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: #E0EBFF;
-  transition: width 0.8s ease-in-out;
-}
-#progressText {
-  display: block;
-  margin-top: 5px;
-  color: #fff;
-  font-weight: 500;
-  padding-top: 10px;
-}
-
-/* ========== REFERRAL CARDS ========== */
-.referral-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  width: 100%;
-}
-
-/* referral row can wrap on smaller screens */
-.card.referral-full {
-  display: flex;
-  gap: 20px;
-  background: #7f94c3;
-  border-radius: 15px;
-  padding: 30px;
-  margin-bottom: 0;
-  align-items: center;
-  flex-wrap: wrap;           /* allow wrapping to avoid overflow */
-}
-
-/* make sections flexible but shrinkable */
-.referral-code-section { flex: 1 1 420px; min-width: 0; }
-.friend-referral-section { flex: 0 0 180px; }
-
-/* input + copy icon */
-.referral-row { position: relative; display: flex; align-items: center; color: white; width: 100%; }
-.referral-row input {
-  flex: 1 1 auto;
-  min-width: 0; /* critical so flex items can shrink */
-  padding: 10px 36px 10px 12px;
-  border-radius: 8px;
-  background: #7f94c3;
-  color: #ffffff;
-  font-size: 0.95rem;
-  border: 1px solid #fff;
-  outline: none;
-  overflow: hidden;
-  text-overflow: ellipsis;  /* critical: prevent URL overflow */
-  white-space: nowrap;
-}
-.referral-row input:focus { border: 2px solid #fff; outline: none; }
-.referral-row .copy-icon {
-  position: absolute; right: 10px; cursor: pointer; transition: transform 0.2s;
-}
-.referral-row .copy-icon:hover { transform: scale(1.15); }
-
-/* QR */
-.qr-placeholder {
-  width: 100px; height: 100px;
-  background: #7f94c3;
-  border: 2px dashed #fff;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 12px; color: #fff; font-size: 0.85rem;
-}
-
-/* ========== HOW IT WORKS (collapsible) ========== */
-/* card always participates in layout but collapses via max-height */
-.how-it-works-card {
-  background: #000;
-  border-radius: 15px;
-  padding: 18px;
-  overflow: hidden;
-  transition: max-height 0.45s cubic-bezier(.2,.9,.2,1), padding 0.25s;
-  max-height: 520px; /* when open */
-}
-.how-it-works-card.closed { 
-  max-height: 68px; /* collapsed - still shows header + toggle */
-  padding-bottom: 12px;
-}
-
-/* steps */
-.steps-container-card { display: flex; gap: 15px; align-items: center; justify-content: space-between; }
-.step-wrapper { display: flex; align-items: center; gap: 10px; width: 100%; flex-wrap: nowrap; }
-.step { display: flex; flex-direction: column; align-items: center; flex: 1 1 0; transition: transform .25s }
-.step:hover { transform: translateY(-5px) }
-.step-icon { color:#fff; font-size:1.5rem; margin-bottom:5px; animation: bounce 1.2s infinite alternate; }
-.step span { font-size: 0.75rem; text-align:center; }
-.step-line { height: 2px; background: #fff; flex: 1; min-width: 32px; }
-
-/* toggle */
-.how-it-works-toggle { display: inline-block; text-align: center; cursor: pointer; color: #fff; font-size: 0.85rem; margin-top: 12px; }
-.how-it-works-toggle i { margin-right: 6px; }
-
-/* ========== STATS & TABLE ========== */
-.stats-section { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
-.stat-box { flex:1 1 220px; background:#1a1a1a; padding: 20px; border-radius:15px; text-align:center; box-shadow:0 8px 25px rgba(255,255,255,0.03); }
-.stat-box h4 { font-size:2rem; margin-bottom:5px; }
-.stat-box p { color:#ccc }
-
-/* table wrapper — enables horizontal scroll on mobile */
-.table-wrapper { width:100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-#referralTable {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #E0EBFF;
-  border-radius: 10px;
-  overflow: hidden;
-  min-width: 600px; /* keeps table readable on wide screens */
-}
-#referralTable th, #referralTable td { padding: 12px 15px; border-bottom: 1px solid #E0EBFF; text-align:left; }
-#referralTable th { background: #000; color: #E0EBFF; font-weight:600; }
-#referralTable td { background: #000; color: #fff; }
-#referralTable tr:hover td { background: #1a1a1a; }
-
-/* ========== SMALL ELEMENT ADJUSTMENTS ========== */
-a, img, svg, input, button, textarea { max-width: 100%; height: auto; }
-
-/* ========== RESPONSIVE ========== */
-/* Medium screens / small laptops */
-@media (max-width: 1024px) {
-  .container { padding: 18px; max-width: 1000px; }
-  .card.referral-full { padding: 20px; gap: 16px; }
-  .friend-referral-section { flex-basis: 170px; }
-}
-
-/* Mobile phones */
-@media (max-width: 768px) {
-  .container { padding: 14px; }
-  .card.referral-full { padding: 16px; gap: 12px; }
-  .referral-code-section { flex: 1 1 100%; }
-  .friend-referral-section { flex: 1 1 100%; order: 2; display:flex; justify-content:center; }
-  .steps-container-card { flex-direction: column; align-items: center; gap: 18px; }
-  .step-line { display:none; }
-  .qr-placeholder { width: 80px; height: 80px; }
-  #referralTable { min-width: 520px; } /* table still scrolls */
-  h1 { font-size: 1.4rem; text-align: center; }
-}
-
-/* Extra small phones */
-@media (max-width: 420px) {
-  .progress-bar { height: 16px; }
-  .referral-row input { font-size: 0.82rem; padding: 8px 36px 8px 10px; }
-  .qr-placeholder { width: 68px; height: 68px; }
-}
-
-
-/* ============================================================
-   BLACKSEALED — Cinematic Aurora Path (Blue ↔ Pink Planets)
-============================================================ */
-.sealed-path {
-  position: relative;
-  width: 100%;
-  text-align: center;
-  margin: 80px 0;
-}
-
-.sealed-bg {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 90%;
-  max-width: 950px;
-  margin: 0 auto;
-  height: 100px;
-  overflow: visible;
-}
-
-/* --- Planets --- */
-.planet {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  filter: blur(0.2px);
-  z-index: 2;
-}
-
-.planet-left {
-  background: radial-gradient(circle at 30% 30%, #cfe0ff, #3a7be0 60%, #0a1020 100%);
-  box-shadow:
-    0 0 40px rgba(124,170,255,0.6),
-    0 0 80px rgba(124,170,255,0.3);
-  position: absolute;
-  left: 0;
-  transform: translateX(-40%);
-}
-
-.planet-right {
-  background: radial-gradient(circle at 30% 30%, #ffd2f7, #c05fab 60%, #1a0615 100%);
-  box-shadow:
-    0 0 40px rgba(255,111,207,0.5),
-    0 0 80px rgba(255,111,207,0.25);
-  position: absolute;
-  right: 0;
-  transform: translateX(40%);
-}
-
-/* --- Central line --- */
-.sealed-line {
-  position: relative;
-  flex: 1;
-  height: 1.6px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, rgba(124,170,255,0.15), rgba(255,111,207,0.15));
-  box-shadow: 0 0 15px rgba(255,255,255,0.02);
-  overflow: hidden;
-}
-
-.sealed-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #7caaff, #b8c6ff, #ff6fcf);
-  background-size: 200%;
-  animation: auroraShift 6s ease-in-out infinite;
-  box-shadow: 0 0 25px rgba(124,170,255,0.4),
-              0 0 40px rgba(255,111,207,0.2);
-  transition: width 0.9s ease-in-out;
-}
-
-@keyframes auroraShift {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* --- Text --- */
-.sealed-caption {
-  margin-top: 40px;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-}
-
-/* --- Glow breathing animation --- */
-@keyframes planetPulse {
-  0%,100% { filter: brightness(1); transform: scale(1); }
-  50% { filter: brightness(1.3); transform: scale(1.05); }
-}
-
-.planet-left, .planet-right {
-  animation: planetPulse 5s ease-in-out infinite;
-}
-
-/* --- Responsive --- */
-@media (max-width: 768px) {
-  .planet { width: 65px; height: 65px; }
-  .sealed-line { height: 1.2px; }
-  .sealed-caption { font-size: 0.7rem; }
-}
-
-
-.path-line {
-  position: relative;
-  height: 2px;
-  width: 60%;
-  margin: 0 auto;
-  background: linear-gradient(90deg, #3a7be0, #ff6fcf);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.path-line::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #7caaff, #ff6fcf, #7caaff);
-  background-size: 300%;
-  animation: flow 5s linear infinite;
-  filter: blur(3px);
-}
-
-@keyframes flow {
-  0% { background-position: 0%; }
-  100% { background-position: 300%; }
-}
-
-
-.node {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #7caaff, #2b3f87);
-  box-shadow: 0 0 25px #7caaff66, 0 0 50px #7caaff33;
-  animation: pulse 4s ease-in-out infinite;
-}
-
-.node.pink {
-  background: radial-gradient(circle at 30% 30%, #ff6fcf, #882e7a);
-  box-shadow: 0 0 25px #ff6fcf66, 0 0 50px #ff6fcf33;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.95; }
-  50% { transform: scale(1.08); opacity: 1; }
-}
-
-
-.progress-text {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 2px;
-  color: var(--text-muted);
-  animation: fadeInUp 1s ease forwards;
-}
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-
-.aura {
-  position: absolute;
-  width: 250px;
-  height: 250px;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.4;
-  z-index: -1;
-}
-
-.aura-blue { background: #3a7be0; left: 15%; top: 20%; }
-.aura-pink { background: #ff6fcf; right: 15%; top: 20%; }
-
-
-.progress-capsule {
-  width: 30%;
-  height: 6px;
-  background: linear-gradient(90deg, #3a7be0 30%, #ff6fcf33);
-  border-radius: 3px;
-  margin: 2rem auto;
-  transition: width 1s ease;
-}
-
-
-body {
-  font-family: "Outfit", sans-serif;
-  color: #eef4ff;
-  background: radial-gradient(circle at 20% 40%, rgba(30, 60, 120, 0.35), transparent 65%),
-              radial-gradient(circle at 80% 60%, rgba(120, 30, 90, 0.35), transparent 65%),
-              #06080f;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
 h1 {
   font-weight: 600;
   font-size: 2.8rem;
   text-align: center;
-  background: linear-gradient(90deg, #ffffff, #ffffff);
+  background: linear-gradient(90deg, #e5ebff, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(180,200,255,0.15));
   margin-bottom: 0.4rem;
   margin-top: 120px;
 }
@@ -432,126 +79,20 @@ h1 {
   max-width: 700px;
   margin: 1.2rem auto 3rem;
   line-height: 1.6;
-}
-
-
-.aura {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.35;
-  z-index: -1;
-}
-.aura-left { background: #3a7be0; left: 10%; top: 40%; }
-.aura-right { background: #ff6fcf; right: 10%; top: 40%; }
-
-
-
-.path-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 5rem 0 2rem;
-  position: relative;
-}
-
-.path-line {
-  width: 60%;
-  height: 2px;
-  background: linear-gradient(90deg, #3a7be0, #ff6fcf);
-  opacity: 0.5;
-  border-radius: 2px;
-  position: relative;
-  overflow: hidden;
-}
-
-.path-line::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #7caaff, #ff6fcf, #7caaff);
-  background-size: 300%;
-  animation: beam 5s linear infinite;
-}
-
-@keyframes beam {
-  0% { background-position: 0%; }
-  100% { background-position: 300%; }
-}
-
-.orb {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #7caaff, #2b3f87);
-  box-shadow: 0 0 40px #7caaff66, 0 0 80px #7caaff22;
-  animation: float 4s ease-in-out infinite alternate;
-}
-
-.orb.pink {
-  background: radial-gradient(circle at 30% 30%, #ff6fcf, #882e7a);
-  box-shadow: 0 0 40px #ff6fcf66, 0 0 80px #ff6fcf22;
-  animation-delay: 2s;
-}
-
-@keyframes float {
-  from { transform: translateY(0px); }
-  to { transform: translateY(-10px); }
-}
-
-.aura {
-  position: absolute;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  filter: blur(140px);
-  opacity: 0.3;
-  z-index: -1;
-}
-
-.aura-left { background: #3a7be0; left: 5%; top: 35%; }
-.aura-right { background: #ff6fcf; right: 5%; top: 35%; }
-
-
-.muted {
-  color: rgba(183, 194, 218, 0.55); /* subtle grey tone */
-  font-weight: 400;
-  font-size: 0.95rem;
-}
-
-h1 {
-  background: linear-gradient(90deg, #e5ebff, #ffffff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 8px rgba(180,200,255,0.15));
-}
-
-
-
-.path-flare {
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 120px; height: 120px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 70%);
-  filter: blur(25px);
-}
-
-.muted {
-  color: #8d93a7;
-  opacity: 0.7;
-  font-style: italic;
-}
-
-.desc {
-  line-height: 1.5;
   letter-spacing: 0.4px;
 }
 
+.muted {
+  color: rgba(183, 194, 218, 0.55);
+  font-weight: 400;
+  font-size: 0.95rem;
+  font-style: italic;
+  opacity: 0.7;
+}
 
+/* ----------------------------
+   HERO SECTION BACKDROP (LEGACY)
+---------------------------- */
 .hero-section::after {
   content: "";
   position: absolute;
@@ -565,52 +106,2313 @@ h1 {
   z-index: -1;
 }
 
-.sealed-line {
-  background: linear-gradient(90deg, rgba(124,170,255,0.2), rgba(255,111,207,0.15));
-  height: 2px;
-  border-radius: 6px;
-  box-shadow: 0 0 30px rgba(124,170,255,0.1);
+/* ----------------------------
+   GENERAL ELEMENT ADJUSTMENTS
+---------------------------- */
+a, img, svg, input, button, textarea {
+  max-width: 100%;
+  height: auto;
 }
 
+/* ============================================================
+   END OF PART 1
+============================================================ */
+/* ============================================================
+   PART 2 — REFERRAL PROGRAM COMPONENTS
+============================================================ */
+
+/* ----------------------------
+   PROGRESS BAR SECTION
+---------------------------- */
+.progress-section {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 25px;
+  background-color: #000;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #E0EBFF;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #E0EBFF;
+  transition: width 0.8s ease-in-out;
+}
+
+#progressText {
+  display: block;
+  margin-top: 5px;
+  color: #fff;
+  font-weight: 500;
+  padding-top: 10px;
+}
+
+/* ----------------------------
+   REFERRAL CARDS
+---------------------------- */
+.referral-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+}
+
+/* --- Card Layout --- */
 .card.referral-full {
+  display: flex;
+  gap: 20px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(12px);
   border-radius: 18px;
   padding: 40px 30px;
   box-shadow: 0 0 25px rgba(255,255,255,0.05);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* --- Referral Link + QR Columns --- */
+.referral-code-section {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.friend-referral-section {
+  flex: 0 0 180px;
+}
+
+/* --- Referral Input Row --- */
+.referral-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: white;
+  width: 100%;
+}
+
+.referral-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 36px 10px 12px;
+  border-radius: 8px;
+  background: #7f94c3;
+  color: #ffffff;
+  font-size: 0.95rem;
+  border: 1px solid #fff;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referral-row input:focus {
+  border: 2px solid #fff;
+  outline: none;
+}
+
+.referral-row .copy-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.referral-row .copy-icon:hover {
+  transform: scale(1.15);
+}
+
+/* --- QR Placeholder --- */
+.qr-placeholder {
+  width: 100px;
+  height: 100px;
+  background: #7f94c3;
+  border: 2px dashed #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+/* ----------------------------
+   HOW IT WORKS — COLLAPSIBLE
+---------------------------- */
+.how-it-works-card {
+  background: #000;
+  border-radius: 15px;
+  padding: 18px;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(.2,.9,.2,1), padding 0.25s;
+  max-height: 520px; /* when open */
+}
+
+.how-it-works-card.closed {
+  max-height: 68px; /* collapsed */
+  padding-bottom: 12px;
+}
+
+/* Steps Layout */
+.steps-container-card {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 0;
+  transition: transform .25s;
+}
+
+.step:hover {
+  transform: translateY(-5px);
+}
+
+.step-icon {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  animation: bounce 1.2s infinite alternate;
+}
+
+.step span {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.step-line {
+  height: 2px;
+  background: #fff;
+  flex: 1;
+  min-width: 32px;
+}
+
+/* Toggle Button */
+.how-it-works-toggle {
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.85rem;
+  margin-top: 12px;
+}
+
+.how-it-works-toggle i {
+  margin-right: 6px;
+}
+
+/* ----------------------------
+   STATS SECTION + TABLE
+---------------------------- */
+.stats-section {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  flex: 1 1 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(255,255,255,0.03);
+}
+
+.stat-box h4 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.stat-box p {
+  color: #ccc;
+}
+
+/* --- Table --- */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#referralTable {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #E0EBFF;
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 600px;
+}
+
+#referralTable th,
+#referralTable td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #E0EBFF;
+  text-align: left;
+}
+
+#referralTable th {
+  background: #000;
+  color: #E0EBFF;
+  font-weight: 600;
+}
+
+#referralTable td {
+  background: #000;
+  color: #fff;
+}
+
+#referralTable tr:hover td {
+  background: #1a1a1a;
+}
+
+/* ----------------------------
+   RESPONSIVE ADJUSTMENTS
+---------------------------- */
+
+/* --- Medium Screens --- */
+@media (max-width: 1024px) {
+  .container {
+    padding: 18px;
+    max-width: 1000px;
+  }
+  .card.referral-full {
+    padding: 20px;
+    gap: 16px;
+  }
+  .friend-referral-section {
+    flex-basis: 170px;
+  }
+}
+
+/* --- Tablets & Mobile --- */
+@media (max-width: 768px) {
+  .container {
+    padding: 14px;
+  }
+
+  .card.referral-full {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .referral-code-section {
+    flex: 1 1 100%;
+  }
+
+  .friend-referral-section {
+    flex: 1 1 100%;
+    order: 2;
+    display: flex;
+    justify-content: center;
+  }
+
+  .steps-container-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .step-line {
+    display: none;
+  }
+
+  .qr-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+
+  #referralTable {
+    min-width: 520px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    text-align: center;
+  }
+}
+
+/* --- Extra Small Phones --- */
+@media (max-width: 420px) {
+  .progress-bar {
+    height: 16px;
+  }
+  .referral-row input {
+    font-size: 0.82rem;
+    padding: 8px 36px 8px 10px;
+  }
+  .qr-placeholder {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+/* ============================================================
+   END OF PART 2
+============================================================ */
+/* ============================================================
+   PART 3 — SEALED PATH / PLANETS / SPACE THEME
+============================================================ */
+
+/* ------------------------------------------------------------
+   ACTIVE VERSION — Space-Themed Fixed Planets
+   (Stays visible as you scroll; includes stars + auras)
+------------------------------------------------------------ */
+
+.sealed-path {
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  margin: 6rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  margin-top: -100px;
+  margin-bottom: 200px;
+}
+/* ===============================
+   BlackSealed — Refined Planets (Sharp Cinematic)
+================================ */
+
+.planet-left,
+.planet-right {
+  position: fixed;
+  top: 30%;
+  transform: translateY(-50%);
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  filter: blur(4px);            /* much lighter blur */
+  opacity: 0.85;                /* richer contrast */
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Blue planet */
+.planet-left {
+  left: -190px;
+  background: radial-gradient(circle at 60% 40%, #d6e4ff, #3a7be0 55%, #05070f 100%);
+  box-shadow:
+    0 0 30px rgba(124,170,255,0.35),
+    0 0 60px rgba(124,170,255,0.2);
+}
+
+/* Pink planet */
+.planet-right {
+  right: -160px;
+  background: radial-gradient(circle at 40% 40%, #ffd6f8, #b84ea0 55%, #12020d 100%);
+  box-shadow:
+    0 0 30px rgba(255,111,207,0.35),
+    0 0 60px rgba(255,111,207,0.2);
+}
+
+/* Aura glow (subtle, not hazy) */
+.planet-left::before,
+.planet-right::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.25;
+  z-index: -1;
+}
+
+.planet-left::before {
+  background: radial-gradient(circle, rgba(124,170,255,0.3), transparent 70%);
+}
+
+.planet-right::before {
+  background: radial-gradient(circle, rgba(255,111,207,0.3), transparent 70%);
+}
+
+/* Line sharper too */
+.sealed-line {
+  height: 1.2px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.3), rgba(255,111,207,0.3));
+  box-shadow: 0 0 8px rgba(255,255,255,0.05);
+}
+
+.planet-left,
+.planet-right {
+  filter: blur(2px);        /* was 4–6px */
+  opacity: 0.9;             /* was 0.7–0.8 */
+}
+
+.planet-left::before,
+.planet-right::before {
+  filter: blur(40px);       /* was 80–100px */
+  opacity: 0.25;            /* was 0.4–0.45 */
+}
+
+.nebula-bg {
+  filter: blur(30px);       /* was 60px */
+  opacity: 0.35;            /* was 0.6 */
 }
 
 
+/* ---- Connecting Progress Beam ---- */
 .sealed-line {
   position: relative;
+  width: 60vw;
   height: 2px;
-  background: linear-gradient(90deg, rgba(124,170,255,0.08), rgba(255,111,207,0.08));
-  box-shadow: 0 0 15px rgba(255,255,255,0.02);
-  overflow: visible;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.12), rgba(255,111,207,0.12));
+  overflow: hidden;
+  z-index: 2;
 }
 
 .sealed-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%; /* updated by JS */
+  background: linear-gradient(90deg, #9fc8ff, #b8c6ff, #ff6fcf);
+  background-size: 300%;
+  animation: auroraShift 6s ease-in-out infinite;
+  box-shadow:
+    0 0 15px rgba(124,170,255,0.4),
+    0 0 30px rgba(255,111,207,0.25);
+  transition: width 0.8s ease-in-out;
+}
+
+
+/* ---- Caption ---- */
+.sealed-caption {
+  margin-top:400px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.65);
+  z-index: 3;
+    position: relative;
+  transform: translateX(-500px); /* adjust this value */
+}
+
+/* ---- Starry Space Background ---- */
+.space-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(10,15,25,0.9), #010208 85%),
+    url('https://www.transparenttextures.com/patterns/stardust.png');
+  background-size: cover;
+  opacity: 0.18;
+  z-index: 0;
+  animation: driftStars 120s linear infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+@keyframes driftStars {
+  0%   { background-position: 0 0; }
+  100% { background-position: 2000px 1000px; }
+}
+
+/* ---- Aura Flares around Planets ---- */
+.planet-left::before,
+.planet-right::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.3;
+  animation: pulseAura 6s ease-in-out infinite;
+  z-index: -1;
+}
+
+.sealed-line {
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.2), rgba(255,111,207,0.2));
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+/* ============================================================
+   LEGACY VERSION — Hemisphere Planets (Centered)
+============================================================ */
+
+.sealed-path.hemisphere {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  overflow: hidden;
+  margin: 6rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planet-left.hemisphere,
+.planet-right.hemisphere {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  width: 700px;
+  height: 700px;
+  filter: blur(20px);
+  opacity: 0.65;
+  z-index: 1;
+}
+
+.planet-left.hemisphere {
+  left: -350px;
+  background: radial-gradient(circle at 60% 40%, #bcd8ff, #3a7be0 55%, #0a1020 100%);
+  box-shadow: 0 0 200px 60px rgba(124,170,255,0.35);
+}
+
+.planet-right.hemisphere {
+  right: -350px;
+  background: radial-gradient(circle at 40% 40%, #ffd2f7, #b84ea0 55%, #1a0615 100%);
+  box-shadow: 0 0 200px 60px rgba(255,111,207,0.3);
+}
+
+.sealed-line.hemisphere {
+  position: relative;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.1), rgba(255,111,207,0.1));
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.sealed-progress.hemisphere {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
   width: 30%;
   background: linear-gradient(90deg, #9fc8ff, #b8c6ff, #ff6fcf);
   background-size: 300%;
-  filter: blur(0.5px);
+  animation: auroraShift 6s ease-in-out infinite;
+  filter: blur(0.4px);
+  box-shadow:
+    0 0 25px rgba(124,170,255,0.4),
+    0 0 40px rgba(255,111,207,0.2);
+}
+
+.path-flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+  filter: blur(80px);
+  z-index: 0;
+}
+
+/* ============================================================
+   LEGACY VERSION — Centered Aurora Path (Original)
+============================================================ */
+
+.sealed-path.centered {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  margin: 80px 0;
+}
+
+.sealed-bg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 950px;
+  margin: 0 auto;
+  height: 100px;
+  overflow: visible;
+}
+
+.planet.centered {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  filter: blur(0.2px);
+  z-index: 2;
+}
+
+.planet-left.centered {
+  background: radial-gradient(circle at 30% 30%, #cfe0ff, #3a7be0 60%, #0a1020 100%);
+  box-shadow:
+    0 0 40px rgba(124,170,255,0.6),
+    0 0 80px rgba(124,170,255,0.3);
+  position: absolute;
+  left: 0;
+  transform: translateX(-40%);
+}
+
+.planet-right.centered {
+  background: radial-gradient(circle at 30% 30%, #ffd2f7, #c05fab 60%, #1a0615 100%);
+  box-shadow:
+    0 0 40px rgba(255,111,207,0.5),
+    0 0 80px rgba(255,111,207,0.25);
+  position: absolute;
+  right: 0;
+  transform: translateX(40%);
+}
+
+.sealed-line.centered {
+  position: relative;
+  flex: 1;
+  height: 1.6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.15), rgba(255,111,207,0.15));
+  box-shadow: 0 0 15px rgba(255,255,255,0.02);
+  overflow: hidden;
+}
+
+.sealed-progress.centered {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7caaff, #b8c6ff, #ff6fcf);
+  background-size: 200%;
   animation: auroraShift 6s ease-in-out infinite;
   box-shadow:
     0 0 25px rgba(124,170,255,0.4),
-    0 0 40px rgba(255,111,207,0.25),
-    inset 0 0 8px rgba(255,255,255,0.1);
+    0 0 40px rgba(255,111,207,0.2);
+  transition: width 0.9s ease-in-out;
+}
+
+.sealed-caption.centered {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ============================================================
+   RESPONSIVE (All Planet Versions)
+============================================================ */
+@media (max-width: 1024px) {
+  .planet-left,
+  .planet-right {
+    width: 200px;
+    height: 200px;
+    opacity: 0.45;
+  }
+  .sealed-line {
+    width: 75vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .planet-left,
+  .planet-right {
+    width: 150px;
+    height: 150px;
+    opacity: 0.35;
+  }
+  .sealed-line {
+    width: 85vw;
+  }
+}
+
+/* ============================================================
+   END OF PART 3 — COMPLETE FILE
+============================================================ */
+
+
+.sealed-curve {
+  width: 1000vw;        /* was 80vw */
+  height: 360px;       /* slightly taller for smoother curvature */
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
+  margin: 2rem 0;
+  z-index: -2;
+}
+
+#sealedProgressPath {
+  animation: auroraFlow 6s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(124,170,255,0.3))
+          drop-shadow(0 0 25px rgba(255,111,207,0.2));
+  transition: stroke-dashoffset 0.8s ease;
 }
 
 
-.planet-left {
+.hero-section::before {
+  content:"";
+  position:absolute;
+  width:600px;
+  height:300px;
+  left:50%;
+  top:360px;
+  transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+  filter:blur(80px);
+  pointer-events:none;
+}
+.space-bg::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url('/img/particles.png'); /* tiny grain pattern */
+  opacity:0.05;
+  animation: driftStars 120s linear infinite;
+}
+.space-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(10, 15, 25, 0.9), #010208 90%);
+  z-index: 0;
+}
+
+.space-bg::before, .space-bg::after {
+  content: "";
+  position: absolute;
+  width: 400%;
+  height: 400%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px);
+  background-size: 3px 3px;
+  animation: starDrift 240s linear infinite;
+  opacity: 0.25;
+}
+
+.space-bg::after {
+  animation-direction: reverse;
+  opacity: 0.15;
+}
+
+@keyframes starDrift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-500px, -500px); }
+}
+
+
+#starCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+}
+
+
+.card.referral-full, .how-it-works-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 35px rgba(255,255,255,0.05);
+  border-radius: 20px;
+  transition: all 0.4s ease;
+}
+
+.card.referral-full:hover, .how-it-works-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 45px rgba(124,170,255,0.15);
+}
+.referral-row input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #eaf0ff;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.referral-row input:hover {
+  border-color: rgba(124,170,255,0.3);
+  box-shadow: 0 0 10px rgba(124,170,255,0.2);
+}
+
+.copy-icon {
+  color: #b6c8ff;
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+.copy-icon:hover {
+  transform: scale(1.15);
+  color: #ff6fcf;
+}
+.step-line {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.3), rgba(255,111,207,0.3));
+  box-shadow: 0 0 10px rgba(124,170,255,0.15);
+}
+
+.step-icon {
+  font-size: 1.4rem;
+  color: #fff;
+  text-shadow: 0 0 6px rgba(124,170,255,0.4);
+}
+
+.step span {
+  color: rgba(220,225,245,0.85);
+  font-size: 0.8rem;
+}
+/* ===============================
+   WHY SHARE SEALED (B&W Minimal)
+================================= */
+.why-share {
+  margin: 120px auto;
+  text-align: center;
+  max-width: 1100px;
+}
+
+.why-share h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 60px;
+  letter-spacing: 0.6px;
+}
+
+.why-grid {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.why-card {
+  flex: 1 1 300px;
+  max-width: 330px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  color: #f2f2f2;
+  transition: all 0.4s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.why-icon {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 18px;
+  background: rgba(255,255,255,0.06);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin-left: 125px;
+}
+
+.why-card:hover .why-icon {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.1);
+}
+
+.why-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.why-card p {
+  color: rgba(220,220,220,0.75);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Responsive fix */
+@media (max-width: 900px) {
+  .why-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .why-card {
+    width: 90%;
+    max-width: 400px;
+  }
+}
+
+/* Hide/show tab content cleanly */
+.tab-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  position: relative;
+  z-index: 25;
+}
+
+.tab-content.active {
+  display: block;
+  opacity: 1;
+}
+
+/* --- Ensure nothing blocks clicks --- */
+#starCanvas,
+.space-bg,
+.aura,
+.sealed-path {
+  pointer-events: none;
+}
+
+.container, main, .info-tabs, button, input {
+  pointer-events: auto;
+}
+/* ========================================
+   Executive Tab Layout — BlackSealed Aesthetic
+======================================== */
+/* ========================================
+   Executive Underline Tabs — matches navbar
+======================================== */
+.info-tabs {
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  z-index: 15;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+}
+
+.tab-btn {
+  position: relative;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  font-family: "Outfit", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: #fff;
+}
+
+.tab-btn.active {
+  color: #fff;
+  font-weight: 500;
+}
+
+.tab-btn::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 0%;
+  height: 1.6px;
+  background: rgba(255,255,255,0.85);
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.tab-btn.active::after {
+  width: 70%;
+}
+
+/* ========================================
+   Card Grid — Classy Minimalist Design
+======================================== */
+.how-works-flow,
+.why-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 28px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.how-card,
+.why-card {
+  flex: 1 1 260px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 38px 26px;
+  text-align: center;
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter: blur(22px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.how-card:hover,
+.why-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+/* Subtle white light shimmer on hover */
+.how-card::before,
+.why-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.how-card:hover::before,
+.why-card:hover::before {
+  opacity: 1;
+}
+
+.how-icon,
+.why-icon {
+  font-size: 28px;
+  margin-bottom: 18px;
+  color: rgba(255,255,255,0.85);
+}
+
+.how-card p,
+.why-card p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.why-card h4 {
+  font-size: 15px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+
+/* Fade transition between tab contents */
+.tab-content {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.tab-content.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ensure clickability */
+#starCanvas,
+.space-bg,
+.aura,
+.sealed-path {
+  pointer-events: none;
+}
+/* ==========================================
+   BLACKSEALED — Cinematic Flow Alignment
+========================================== */
+.how-works-flow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  position: relative;
+  flex-wrap: nowrap;
+  margin: 80px auto 40px;
+  max-width: 1200px;
+}
+
+/* --- each card --- */
+.how-card {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 320px;
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 46px 28px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.how-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+}
+
+.how-icon {
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.how-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+/* --- connector line between cards --- */
+.how-card::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -40px;
+  width: 80px;
+  height: 1.4px;
+  background: linear-gradient(90deg, rgba(124,170,255,0.05), rgba(124,170,255,0.8), rgba(124,170,255,0.05));
+  transform: translateY(-50%);
+  animation: beamFlow 3s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+.how-card:last-child::after {
+  display: none;
+}
+
+/* --- animated gradient movement --- */
+@keyframes beamFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* --- make it responsive --- */
+@media (max-width: 900px) {
+  .how-works-flow {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .how-card {
+    max-width: 360px;
+  }
+
+  .how-card::after {
+    display: none;
+  }
+}
+/* =============================================
+   BlackSealed — Executive Refinement Upgrade
+============================================= */
+
+/* --- Tabs refinement --- */
+.info-tabs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+  gap: 60px;
+}
+
+.tab-header {
+  display: flex;
+  gap: 60px;
+  justify-content: center;
+}
+
+.tab-btn {
+  position: relative;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  font-family: "Outfit", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+  font-size: 15px;
+  transition: color 0.3s ease;
+}
+
+.tab-btn:hover { color: #fff; }
+
+.tab-btn.active {
+  color: #fff;
+  font-weight: 500;
+}
+
+.tab-btn::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.9), rgba(255,255,255,0));
+  transition: width 0.35s ease;
+}
+
+.tab-btn.active::after { width: 70%; }
+
+/* --- Cards enhancement --- */
+.how-card,
+.why-card {
+  position: relative;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 46px 30px;
+  flex: 1 1 300px;
+  text-align: center;
+  backdrop-filter: blur(18px);
+  box-shadow: inset 0 0 15px rgba(255,255,255,0.02),
+              0 10px 35px rgba(0,0,0,0.45);
+  transition: all 0.35s ease;
+}
+
+.how-card:hover,
+.why-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5),
+              inset 0 0 25px rgba(255,255,255,0.04);
+}
+
+.how-icon,
+.why-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  color: rgba(255,255,255,0.9);
+}
+
+.how-card p,
+.why-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.75);
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+.why-card h4 {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 8px;
+}
+
+.why-icon{
+  margin-left: 110px;
+}
+/* --- Flow connector refinement --- */
+.how-card::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -40px;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg,
+              rgba(255,255,255,0),
+              rgba(255,255,255,0.35),
+              rgba(255,255,255,0));
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+.how-card:last-child::after { display: none; }
+
+@keyframes subtlePulse {
+  0%,100% { opacity: 0.25; }
+  50% { opacity: 0.8; }
+}
+
+/* --- Unified layout rhythm --- */
+.how-works-flow,
+.why-grid {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 50px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .how-works-flow,
+  .why-grid { flex-direction: column; gap: 36px; }
+  .how-card::after { display: none; }
+}
+
+
+/* ================================
+   Signature Referral Card — Hero Presence Upgrade
+================================ */
+.referral-full {
+  position: relative;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 24px;
+  padding: 60px 70px;
+  max-width: 1050px;
+  width: 90%;
+  margin: 160px auto 120px;
+  backdrop-filter: blur(25px);
   box-shadow:
-    0 0 35px rgba(124,170,255,0.55),
-    0 0 70px rgba(124,170,255,0.25);
+    0 10px 50px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  transition: all 0.4s ease;
 }
+
+.referral-full:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 12px 60px rgba(0,0,0,0.8),
+    inset 0 0 35px rgba(255,255,255,0.06);
+  transform: scale(1.01);
+}
+
+/* Add cinematic aura that breathes slowly */
+.referral-full::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 15%, rgba(255,255,255,0.06), transparent 65%);
+  animation: slowPulse 6s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes slowPulse {
+  0% { opacity: 0.45; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Referral header */
+.referral-code-section {
+  position: relative;
+  z-index: 1;
+}
+
+.referral-header {
+  margin-bottom: 22px;
+}
+
+.referral-header h4 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.referral-subtitle {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+}
+
+/* The main referral input box */
+.referral-row {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 18px 24px;
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.referral-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.02) 0%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.02) 100%);
+  animation: shimmer 3s linear infinite;
+  background-size: 300% 100%;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+#referralCode {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255,255,255,0.9);
+  font-size: 17px;
+  font-family: 'Outfit', sans-serif;
+  z-index: 2;
+}
+
+.copy-icon {
+  color: rgba(255,255,255,0.6);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  margin-left: 14px;
+}
+
+.copy-icon:hover {
+  color: #fff;
+  transform: scale(1.15);
+}
+
+.referral-tagline {
+  margin-top: 20px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  z-index: 2;
+}
+
+.referral-tagline i {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 900px) {
+  .referral-full {
+    padding: 40px 28px;
+    margin: 100px auto 80px;
+  }
+  #referralCode { font-size: 15px; }
+}
+.referral-full::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    rgba(124,170,255,0.6) 0%,
+    rgba(255,111,207,0.4) 100%);
+  opacity: 0.8;
+  border-radius: 0 0 12px 12px;
+  filter: blur(2px);
+}
+.referral-glass {
+  position: relative;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 22px;
+  padding: 40px 50px;
+  max-width: 760px; /* reduced from 1000px */
+  width: 85%;
+  margin: 100px auto;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 15px 60px rgba(0,0,0,0.7),
+    inset 0 0 25px rgba(255,255,255,0.03);
+  text-align: center;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.referral-glass::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(124,170,255,0.7) 0%,
+    rgba(255,111,207,0.6) 100%);
+  filter: blur(2px);
+  opacity: 0.8;
+}
+
+.console-title {
+  font-size: 26px; /* was 32px */
+  margin-bottom: 6px;
+}
+
+.console-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 25px;
+}
+
+.console-input {
+  padding: 14px 22px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+
+#referralCode {
+  font-size: 15px;
+}
+
+.console-footer {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.planet-left, .planet-right {
+  transform-origin: center;
+}
+
+#sealedProgressPath {
+  transition: opacity 0.3s ease-out;
+}
+#sealedProgressPath {
+  transition: opacity 0.6s ease;
+}
+
+/* === Allow planets and curve to scroll, shrink, and fade === */
+.sealed-bg {
+  position: relative;
+  display: block; /* remove center locking */
+  height: 60vh;   /* gives room to scroll */
+  overflow: visible;
+}
+
+.planet-wrapper {
+  position: absolute;
+  top: 30%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.left-wrapper { left: 0; }
+.right-wrapper { right: 0; }
+
+.planet-left,
 .planet-right {
-  box-shadow:
-    0 0 45px rgba(255,111,207,0.6),
-    0 0 85px rgba(255,111,207,0.3);
+  position: absolute !important;
+  transform-origin: center;
+  will-change: transform, opacity;
+  margin-top: 200px;
+}
+
+.planet-left{
+  left: -512px;
+  margin-top: 100px;
+}
+
+.planet-right{
+  right: -790px;
+  margin-top: 100px;
+}
+
+/* ============================================
+   SCROLLBAR REMOVAL — BlackSealed Clean Mode
+============================================ */
+
+/* Works on Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: none; /* hides scrollbar */
+}
+
+/* ensures scrolling still works */
+body {
+  overflow-y: scroll; /* still allows scroll */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+/* ============================================================
+   SLEEK REFERRAL HISTORY TABLE — Editorial Fintech Style
+============================================================ */
+.history-section {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.history-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 28px;
+  color: #fff;
+  letter-spacing: 0.5px;
+  margin-right: 30px;
+}
+
+.history-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+}
+
+.referral-table.sleek {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Outfit', sans-serif;
+  text-align: left;
+}
+
+.referral-table.sleek thead {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.referral-table.sleek th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 14px 20px;
+}
+
+.referral-table.sleek td {
+  padding: 16px 20px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.25s ease;
+}
+
+.referral-table.sleek tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* User cell styling */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-cell i {
+  color: #7caaff;
+  opacity: 0.8;
+  font-size: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.username {
+  font-weight: 500;
+  color: #fff;
+}
+
+.action-sub {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Date column style */
+.referral-table.sleek td:last-child {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .referral-table.sleek th,
+  .referral-table.sleek td {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+  }
+
+  .username {
+    font-size: 0.9rem;
+  }
+
+  .action-sub {
+    font-size: 0.75rem;
+  }
+}
+
+
+
+/* ============================================================
+   REFINED REFERRAL KEY SECTION — Minimal Cinematic Design
+============================================================ */
+.referral-key.sleek {
+  text-align: center;
+  margin: 120px auto 80px;
+  max-width: 700px;
+  padding: 40px 30px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
+  animation: fadeUp 0.8s ease forwards;
+}
+
+.referral-key h2 {
+  font-size: 1.4rem;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.referral-key .subtext {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+
+
+.referral-bar:hover {
+  border-color: rgba(124,170,255,0.4);
+  box-shadow: 0 0 25px rgba(124,170,255,0.25);
+}
+
+.referral-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  margin-left: 10px;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.copy-btn:hover {
+  color: #9dbfff;
+  transform: scale(1.15);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 8px;
+}
+
+/* Animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .referral-key.sleek {
+    padding: 28px 18px;
+  }
+  .referral-bar input {
+    font-size: 0.9rem;
+  }
+}
+/* ============================================================
+   BRIDGING ELEMENTS — Flow & Continuity
+============================================================ */
+
+/* Subtle narrative text between sections */
+.transition-text {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 1px;
+  margin-top: 90px;
+  margin-bottom: 40px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  animation: fadeUp 1s ease forwards;
+}
+
+/* Refined spacing so it feels cohesive with path & tabs */
+.sealed-path {
+  margin-bottom: 40px;
+}
+.referral-key.sleek {
+  margin-top: 0;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient glow under the referral key */
+.referral-key.sleek::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at center,
+    rgba(124, 170, 255, 0.15),
+    rgba(255, 111, 207, 0.08),
+    transparent 70%
+  );
+  z-index: -1;
+  filter: blur(100px);
+  opacity: 0.8;
+  animation: subtlePulse 6s ease-in-out infinite;
+}
+
+/* Smooth fade-in + pulse animation */
+@keyframes subtlePulse {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+/* Make sure the next section follows smoothly */
+.info-tabs {
+  margin-top: 30px;
+}
+
+/* Small upward fade animation reused */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* ============================================================
+   REFERRAL KEY — Elevated Dashboard Scale
+============================================================ */
+
+.referral-key.sleek {
+  max-width: 900px;                /* was ~700px */
+  padding: 60px 50px;              /* more breathing room */
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  margin: 0 auto 80px;
+  text-align: center;
+  backdrop-filter: blur(18px);
+  animation: fadeUp 0.8s ease forwards;
+}
+
+/* Make the input bar feel like a real “key” */
+.referral-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 22px;
+  max-width: 1000px;
+  margin: 0 auto 28px;
+  transition: all 0.3s ease;
+}
+
+.referral-bar:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 40px rgba(124, 170, 255, 0.25);
+}
+
+/* Larger, centered referral link */
+.referral-bar input {
+  flex: 1;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #fff;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.copy-btn {
+  color: rgba(255,255,255,0.7);
+  font-size: 1.3rem;
+  margin-left: 14px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.copy-btn:hover {
+  color: #9dbfff;
+  transform: scale(1.15);
+}
+
+/* Add a subtle animated gradient border around the whole box */
+.referral-key.sleek::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  padding: 1px;
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderGlow 6s linear infinite;
+}
+
+@keyframes borderGlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.subtext {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 35px;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 12px;
+}
+/* ============================================================
+   MINI REFERRAL WIDGET — Quick Access Pill
+============================================================ */
+.mini-referral {
+  position: fixed;
+  top: 20px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 40px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 25px rgba(0,0,0,0.4);
+  padding: 6px 14px;
+  z-index: 9999;
+  transition: all 0.3s ease;
+  margin-top: 100px;
+}
+
+.mini-referral:hover {
+  border-color: rgba(124,170,255,0.3);
+  box-shadow: 0 0 35px rgba(124,170,255,0.25);
+}
+
+.mini-referral input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255,255,255,0.8);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  width: 280px;
+  text-overflow: ellipsis;
+}
+
+.mini-copy {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.9rem;
+  margin-left: 6px;
+  transition: color 0.3s ease;
+}
+
+.mini-copy:hover {
+  color: #9dbfff;
+}
+/* ============================================================
+   COPY SUCCESS POPUP — Floating Toast
+============================================================ */
+.copy-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 40px;
+  background: rgba(20, 25, 35, 0.9);
+  border: 1px solid rgba(124,170,255,0.25);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.35s ease;
+  z-index: 9999;
+  box-shadow: 0 0 30px rgba(124,170,255,0.25);
+  backdrop-filter: blur(12px);
+}
+
+.copy-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.copy-toast i {
+  color: #9dbfff;
+  font-size: 1.1rem;
+}
+.copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(20,25,35,0.9);
+  border: 1px solid rgba(124,170,255,0.3);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  padding: 14px 26px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 25px rgba(124,170,255,0.25);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: all 0.35s ease;
+  z-index: 9999;
+}
+
+.copy-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+#sealedProgressPath {
+  transition: stroke 0.6s ease, opacity 0.6s ease;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(180,200,255,0.25));
+}
+
+#sealedProgressPath:hover {
+  opacity: 0.95;
+  filter: drop-shadow(0 0 12px rgba(180,200,255,0.45));
+}
+
+#referralCode.copied-glow {
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  transition: box-shadow 0.6s ease;
+}
+
+
+/* Tab animation */
+.tab-content {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.tab-content.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.copy-btn {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+.aurora-layer,
+.space-bg,
+.aura {
+  pointer-events: none;
+}
+
+
+/* ==========================================
+   TABS TRANSITION FIX — NO LAYOUT SHIFT
+========================================== */
+.tab-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Ensure parent reserves space for the tallest tab */
+.info-tabs {
+  position: relative;
+  min-height: 220px; /* adjust depending on tab height */
+}
+
+/* Active tab is visible and clickable */
+.tab-content.active {
+  position: relative;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Fade animations */
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-6px); }
+}
+.info-tabs {
+  position: relative;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+/* ============================
+   TAB HEIGHT STABILIZER
+============================ */
+.info-tabs {
+  position: relative;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+/* keep tab content absolutely stacked */
+.tab-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.tab-content.active {
+  position: relative;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+
+/* ============================================================
+   FIX: Tab container stays stable, no bounce
+============================================================ */
+.info-tabs {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 360px; /* Reserve height for tallest tab */
+  transition: min-height 0.4s ease;
+}
+
+.tab-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tab-content.active {
+  position: relative;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.tab-header {
+  position: relative;
+  z-index: 3;
+}
+
+/* Optional polish for smoother visuals */
+.info-tabs.fade-smooth {
+  transition: height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }

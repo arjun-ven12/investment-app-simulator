@@ -17,7 +17,7 @@ const tradeOrderRouter = require('./routers/tradeOrder');
 
 const tradeRouter = require('./routers/trades');
 const limitOrderRouter = require('./routers/limitOrder');
-
+const fallbackImageRouter = require("./routers/fallBackImage");
 const loginRegisterRouter = require('./routers/Login.register.router');
 const referralRouter = require('./routers/referral');
 const dashboardRouter = require('./routers/Dashboard');
@@ -85,7 +85,7 @@ app.use('/tradeOrder', tradeOrderRouter);
 app.use('/leaderboard', leaderboardRouter)
 app.use('/options', optionsRouter)
 app.use('/blockchain', blockchainRouter)
-
+app.use("/api/fallback-image", fallbackImageRouter);
 
 app.use('/referral', referralRouter);
 app.use('/dashboard', dashboardRouter);
