@@ -278,4 +278,10 @@ document.getElementById("googleSignInBtn").addEventListener("click", () => {
 document.getElementById("microsoftSignInBtn").addEventListener("click", () => {
   window.location.href = "http://localhost:3000/auth/microsoft";
 });
+document.addEventListener("mousemove", (e) => {
+  const blob = document.querySelector(".blob-focus");
+  const x = (e.clientX / window.innerWidth - 0.5) * 30;  // range
+  const y = (e.clientY / window.innerHeight - 0.5) * 30;
+  blob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1.1)`;
+});
 
