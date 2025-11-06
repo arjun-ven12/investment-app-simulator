@@ -20,7 +20,7 @@ html, body {
 
 /* Left Panel */
 .left-panel {
-  flex: 2;
+  flex: 1;
   background: url('https://cdn.wallpapersafari.com/37/23/p5Bt5t.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
@@ -28,11 +28,11 @@ html, body {
   position: relative;
 }
 
-.left-panel .overlay {
+/* .left-panel .overlay {
   background: rgba(0,0,0,0.7);
   padding: 60px;
   text-align: center;
-}
+} */
 
 .left-panel h1 {
   font-size: 3rem;
@@ -855,13 +855,6 @@ body{
 }
 
 
-.left-panel .overlay {
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-}
-
-
 
 .lava {
   position: absolute;
@@ -900,56 +893,8 @@ body{
   filter: url("#goo");
   overflow: hidden;
 }
-.form-card {
-  width: 520px;
-  padding: 40px;
-  border-radius: 18px;
 
-  /* translucent "blackglass" effect */
-  background: rgba(8, 8, 8, 0.55);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 35px rgba(0, 0, 0, 0.6);
-
-  color: #fff;
-  text-align: center;
-  transition: all 0.4s ease;
-}
-.form-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  padding: 1px;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-.form-card {
-  width: 700px;
-  height: 600px;
-  padding: 40px;
-  border-radius: 18px;
-  background: rgba(12, 12, 12, 0.55);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-
-  /* key separation without border */
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.75),   /* base drop shadow for depth */
-    0 0 60px rgba(255, 0, 130, 0.08);  /* soft color aura */
-  transition: all 0.5s ease;
-  margin-right: 30px;
-}
-.form-card:hover {
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.8),
-    0 0 80px rgba(255, 0, 130, 0.12);
-  transform: translateY(-3px);
-}
 .right-panel {
   position: relative;
   display: flex;
@@ -1035,10 +980,11 @@ body{
 .form-card {
   position: relative;
   z-index: 2;
-  background: rgba(12,12,12,0.55);
+  /* background: rgba(12,12,12,0.55);
   backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%); */
   transition: background 0.3s ease;
+  background: transparent;
 }
 #rightBlob {
   background: radial-gradient(circle at 35% 35%, #007cff 0%, #00f0ff 60%, transparent 100%);
@@ -1103,4 +1049,70 @@ body{
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.3s ease;
+}/* ===========================
+   LEFT PANEL — DARK OCEAN THEME
+=========================== */
+.left-panel {
+  flex: 2;
+  position: relative;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.85)),
+    url("https://images.unsplash.com/photo-1558865869-c93f6f8482af?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=881&auto=format&fit=crop&q=80&w=736&auto=format&fit=crop&q=80&w=687&auto=format&fit=crop&w=2000&q=80")
+      center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Glassy text overlay
+.left-panel .overlay {
+  background: rgba(10, 10, 10, 0.45);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-radius: 18px;
+  padding: 80px 60px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: fadeUp 1.2s ease forwards;
+} */
+
+.left-panel h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.left-panel p {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #b5b5b5;
+}
+
+/* simple cinematic entrance */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.right-panel {
+  background: radial-gradient(circle at 80% 50%, rgba(14,14,20,0.9), rgba(0,0,0,1));
+}
+body {
+  background: linear-gradient(160deg, #020202 0%, #06080d 100%);
+}
+
+.left-panel h1{
+  margin-left: 100px;
+}
+
+.desc{
+  margin-left: 100px;
+}
+
+.tagline{
+  margin-left: 100px;
 }

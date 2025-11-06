@@ -10,60 +10,38 @@
 </head>
 
 <body>
-  <!-- 🌋 LAVA LAMP BACKGROUND -->
-  <div class="lamp">
-    <div class="lava">
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-      <div class="blob"></div>
-    </div>
-
-    <!-- single goo filter shared across the whole page -->
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-      <defs>
-        <filter id="goo">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-          <feColorMatrix in="blur" mode="matrix"
-            values="1 0 0 0 0  
-                    0 1 0 0 0  
-                    0 0 1 0 0  
-                    0 0 0 18 -7" result="goo" />
-          <feBlend in="SourceGraphic" in2="goo" />
-        </filter>
-      </defs>
-    </svg>
-  </div>
 
   <div class="container">
-    <!-- LEFT PANEL -->
-     <div class="left-lava">
-  <div class="left-blob"></div>
-  <div class="left-blob"></div>
+<!-- LEFT PANEL -->
+<div class="left-panel">
+<div class="overlay">
+  <h1>BlackSealed</h1>
+  <p class="tagline">AI-Powered. Blockchain-Verified.</p>
+
+  <p class="desc">
+    Experience the next evolution of trading —
+    a secure, risk-free environment where 
+    <strong>artificial intelligence</strong> guides your portfolio 
+    and every trade is <strong>sealed on the chain</strong>.
+  </p>
+
+  <!-- <small class="microcaption">Simulate • Strategize • Evolve</small> -->
 </div>
-    <div class="left-panel">
-      <div class="edge-light"></div>
-      <div class="overlay">
-        <h1>Paper Trading</h1>
-        <p>Practice trading risk-free and grow your portfolio skills in a safe environment.</p>
-      </div>
-    </div>
+</div>
+
 
     <!-- RIGHT PANEL -->
     <div class="right-panel">
-      <!-- ✅ mini lava blob specific to right panel -->
+      <!-- ✅ mini lava blob specific to right panel
       <div class="mini-lava">
         <div class="blob" id="rightBlob"></div>
-      </div>
+      </div> -->
 
       <div class="form-card">
-        <h1>Login to Your Account</h1>
-        <p class="login-link">Don't have an account? <a href="register.html">Sign up</a></p>
-        <p class="login-link"><a href="forgot-password.html">Forgot your password?</a></p>
+        <h1>Welcome Back</h1>
+      
+        <p class="login-link">New to Blacksealed? <a href="register.html">Join Now</a></p>
+        <p class="login-link"><a href="forgot-password.html">Forgot Password?</a></p>
 
         <form id="loginForm">
           <div class="form-row">
@@ -85,7 +63,7 @@
           <div class="cf-challenge" data-sitekey="0x4AAAAAAB8YN75ek6-FFt-N" data-theme="dark"
             data-callback="onCaptchaSuccess"></div>
 
-          <button type="submit">Login</button>
+          <button type="submit">→ Enter Platform</button>
         </form>
 
         <div class="divider"><hr><span>or</span><hr></div>
