@@ -97,26 +97,23 @@ async function renderScenarios(scenarios) {
 
     <div style="display: flex; gap: 20px; margin: 5px 0 15px 0;">
       <span><strong>Start:</strong> ${new Date(
-        s.startDate
-      ).toLocaleDateString()}</span>
+      s.startDate
+    ).toLocaleDateString()}</span>
       <span><strong>End:</strong> ${new Date(
-        s.endDate
-      ).toLocaleDateString()}</span>
+      s.endDate
+    ).toLocaleDateString()}</span>
     </div>
 
     <div style="display: flex; gap: 20px; margin: 0 0 15px 0;">
-      <span><strong>Starting Balance:</strong> $${
-        s.startingBalance?.toLocaleString() || "N/A"
+      <span><strong>Starting Balance:</strong> $${s.startingBalance?.toLocaleString() || "N/A"
       }</span>
-      <span><strong>Recommended Stocks:</strong> ${
-        s.allowedStocks?.join(", ") || "N/A"
+      <span><strong>Recommended Stocks:</strong> ${s.allowedStocks?.join(", ") || "N/A"
       }</span>
     </div>
 
     <p style="color: red; margin-top: 10px;">
-  <strong>Rules:</strong> ${
-    typeof s.rules === "string" ? s.rules : s.rules?.note || "N/A"
-  }
+  <strong>Rules:</strong> ${typeof s.rules === "string" ? s.rules : s.rules?.note || "N/A"
+      }
 </p>
 
 
@@ -180,15 +177,7 @@ async function renderMyScenarios(filter = "all") {
       s.status || s.participantStatus || s.latestAttemptStatus || "NOT_STARTED";
 
     const card = document.createElement("div");
-    card.style.backgroundColor = "#000000";
-    card.style.border = "1px solid #53596B";
-    card.style.borderRadius = "10px";
-    card.style.padding = "12px 16px";
-    card.style.marginBottom = "12px";
-    card.style.display = "flex";
-    card.style.flexDirection = "column";
-    card.style.gap = "6px";
-    card.style.color = "#FFFFFF";
+    card.className = "scenario-card";
 
     // Title + desc
     const title = document.createElement("h4");
@@ -345,18 +334,14 @@ async function showInsightsPopup(scenarioId) {
         <h3>${parsed.title || "Scenario Insights"}</h3>
         <p>${parsed.recap || ""}</p>
         <ul>
-          <li><b>Top Gainers:</b> ${
-            parsed.portfolioHighlights?.topGainers?.join(", ") || "-"
-          }</li>
-          <li><b>Top Losers:</b> ${
-            parsed.portfolioHighlights?.topLosers?.join(", ") || "-"
-          }</li>
-          <li><b>Total Unrealized P/L:</b> ${
-            parsed.portfolioHighlights?.totalUnrealizedPL || "-"
-          }</li>
-          <li><b>Cash Remaining:</b> ${
-            parsed.portfolioHighlights?.cashRemaining || "-"
-          }</li>
+          <li><b>Top Gainers:</b> ${parsed.portfolioHighlights?.topGainers?.join(", ") || "-"
+        }</li>
+          <li><b>Top Losers:</b> ${parsed.portfolioHighlights?.topLosers?.join(", ") || "-"
+        }</li>
+          <li><b>Total Unrealized P/L:</b> ${parsed.portfolioHighlights?.totalUnrealizedPL || "-"
+        }</li>
+          <li><b>Cash Remaining:</b> ${parsed.portfolioHighlights?.cashRemaining || "-"
+        }</li>
         </ul>
         <h4>Next Time, Try:</h4>
         <ul>${(parsed.nextTimeTry || [])
@@ -402,3 +387,4 @@ async function refreshAllScenariosUI() {
     console.error("⚠️ Failed to refresh all scenarios:", err);
   }
 }
+

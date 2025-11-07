@@ -520,7 +520,10 @@ model Scenario {
   startingBalance Decimal  @db.Decimal(10, 2) // <-- two decimal places
   allowedStocks   String[]
   rules           Json?
-
+  region          String?  // e.g., "Asia", "Europe", "US"
+  lat             Float?
+  lng             Float?
+  volatility      String?  // "low" | "medium" | "high"
   participants ScenarioParticipant[]
 
   createdAt                DateTime                   @default(now())
@@ -738,10 +741,10 @@ model ChatSession {
   id        Int           @id @default(autoincrement())
   userId    Int
   title     String?
-  active    Boolean        @default(true)      // ✅ add this
-  endedAt   DateTime?                         // ✅ add this
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  active    Boolean       @default(true) // ✅ add this
+  endedAt   DateTime? // ✅ add this
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   messages  ChatMessage[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -760,4 +763,21 @@ model ChatMessage {
 
   @@index([userId])
   @@index([sessionId])
+}
+
+// ===========================================
+// Fallback / Pexels Image Cache
+// ===========================================
+
+model FallbackImage {
+  id              Int      @id @default(autoincrement())
+  category        String
+  url             String   @unique
+  alt             String?
+  photographer    String?
+  photographerUrl String?
+  avgColor        String?
+  createdAt       DateTime @default(now())
+
+  @@index([category])
 }
