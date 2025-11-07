@@ -669,6 +669,9 @@ body {
   border: none;
 }
 
+#microsoftSignInBtn:hover {
+  background: white important !;
+}
 
 
 .oauth-icon {
@@ -1665,6 +1668,10 @@ body {
   transform: translateX(0);
 }
 
+#microsoftSignInBtn:not(:hover)::before {
+  transform: translateX(-100%);
+}
+
 
 
 #microsoftSignInBtn .oauth-icon {
@@ -1833,8 +1840,57 @@ body {
   height: 17px !important;
 }
 
-
+/* subtle hover lift for both */
+#googleSignInBtn:hover,
+#microsoftSignInBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(194, 194, 194, 0.12);
+  transition: all 0.3s ease;
+}
 
 .form-card{
   margin-bottom: 30px;
+}
+
+
+
+
+
+
+
+
+/* --- FINAL OVERRIDES: make BOTH OAuth buttons move identically --- */
+.oauth-btn,
+#googleSignInBtn,
+#microsoftSignInBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 50px;
+  border-radius: 10px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+  will-change: transform;
+  transform-origin: center;
+}
+
+/* identical hover motion for both */
+.oauth-btn:hover,
+#googleSignInBtn:hover,
+#microsoftSignInBtn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important;
+}
+
+/* optional: active press state so they drop back down */
+.oauth-btn:active,
+#googleSignInBtn:active,
+#microsoftSignInBtn:active {
+  transform: translateY(0) !important;
+}
+
+/* If any earlier rule disabled hover/transition, neutralize it */
+#googleSignInBtn,
+#microsoftSignInBtn {
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
