@@ -284,7 +284,8 @@ if (canvas) {
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 1.2 + 0.2,
-    s: Math.random() * 0.02 + 0.005, // slow twinkle
+    s: Math.random() * 0.008 + 0.0015,
+
   }));
 
   function drawStars() {
