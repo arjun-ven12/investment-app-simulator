@@ -669,9 +669,6 @@ body {
   border: none;
 }
 
-#microsoftSignInBtn:hover {
-  background: white important !;
-}
 
 
 .oauth-icon {
@@ -1369,16 +1366,16 @@ body {
 }
 
 .left-panel h1 {
-  margin-left: -170px;
+  margin-left: -280px;
   font-size: 90px;
 }
 
 .desc {
-  margin-left: -170px;
+ margin-left: -280px;
 }
 
 .tagline {
-  margin-left: -170px;
+  margin-left: -280px;
 }
 
 .right-panel {
@@ -1528,7 +1525,7 @@ body {
   padding: 14px 16px;
   border-radius: 10px;
   border: 2px solid rgba(0, 0, 0, 0.15);
-  background: transparent;
+  background: white;
   color: #000;
   font-weight: 600;
   font-size: 1rem;
@@ -1668,14 +1665,6 @@ body {
   transform: translateX(0);
 }
 
-#microsoftSignInBtn:not(:hover)::before {
-  transform: translateX(-100%);
-}
-
-#microsoftSignInBtn:hover {
-  color: #fff;
-  transform: translateY(-2px);
-}
 
 
 #microsoftSignInBtn .oauth-icon {
@@ -1693,7 +1682,8 @@ body {
   /* ↑ adds more top space */
   color: #000000;
   font-family: 'Outfit', sans-serif;
-  margin-top: 100px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .divider hr {
@@ -1843,10 +1833,8 @@ body {
   height: 17px !important;
 }
 
-/* subtle hover lift for both */
-#googleSignInBtn:hover,
-#microsoftSignInBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
+
+
+.form-card{
+  margin-bottom: 30px;
 }

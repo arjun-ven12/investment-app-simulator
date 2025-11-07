@@ -151,3 +151,9 @@ function smoothToggle(input, type) {
     });
   });
 });
+// --- Microsoft Sign-In ---
+document
+  .getElementById("microsoftSignInBtn")
+  .addEventListener("click", () => {
+    window.location.href = "http://localhost:3000/auth/microsoft";
+  });

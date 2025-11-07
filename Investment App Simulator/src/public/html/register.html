@@ -15,20 +15,27 @@
     <!-- Left panel with branding -->
     <div class="left-panel">
       <div class="overlay">
-        <h1>Paper Trading</h1>
-        <p>
-          Practice trading risk-free and grow your portfolio skills in a safe
-          environment.
+        <h1>BlackSealed</h1>
+        <p class="tagline">AI-Powered. Blockchain-Verified.</p>
+
+        <p class="desc">
+          Experience the next evolution of trading — a secure, risk-free environment<br> where
+          <strong>artificial intelligence</strong> guides your portfolio<br> and every trade is
+          <strong>sealed on the chain</strong>.
         </p>
+
+        <!-- <small class="microcaption">Simulate • Strategize • Evolve</small> -->
       </div>
     </div>
 
     <!-- Right panel: registration form -->
     <div class="right-panel">
       <div class="form-card">
-        <h1>Create Your Account</h1>
+        <h1>Join BlackSealed</h1>
+        <p class="subtitle">Begin your journey in AI-powered paper trading — master strategies and grow your skills
+          without risk.</p>
         <p class="login-link">
-          Already have an account? <a href="login.html">Log in</a>
+          Already trading with us? <a href="login.html">Log in</a>
         </p>
         <form id="registerForm">
           <div class="form-row">
@@ -36,13 +43,12 @@
             <input type="email" id="email" placeholder="Email" required />
           </div>
 
-<div class="form-row password-row">
+          <div class="form-row password-row">
             <input type="password" id="password" placeholder="Password" required />
             <span id="togglePassword" class="password-toggle" aria-label="Toggle password">
-              <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5
+              <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5
                      c4.478 0 8.268 2.943 9.542 7
                      -1.274 4.057-5.064 7-9.542 7
                      -4.477 0-8.268-2.943-9.542-7z" />
@@ -55,10 +61,9 @@
           <div class="form-row password-row">
             <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
             <span id="toggleConfirmPassword" class="password-toggle" aria-label="Toggle password">
-              <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5
+              <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5
                      c4.478 0 8.268 2.943 9.542 7
                      -1.274 4.057-5.064 7-9.542 7
                      -4.477 0-8.268-2.943-9.542-7z" />
@@ -73,16 +78,23 @@
 
           <button type="submit">Sign Up</button>
         </form>
-                <div class="divider">
+        <div class="divider">
           <hr><span>or</span>
           <hr>
         </div>
 
-        <button id="googleSignInBtn" class="google-btn google-dark">
-          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-icon">
-          <span>Sign in with Google</span>
-        </button>
-        
+        <div class="oauth-container">
+          <button id="googleSignInBtn" class="oauth-btn google-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="oauth-icon">
+            <span>Sign in with Google</span>
+          </button>
+
+          <button id="microsoftSignInBtn" class="oauth-btn microsoft-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Microsoft logo" class="oauth-icon">
+            <span>Sign in with Microsoft</span>
+          </button>
+        </div>
+
         <div id="successCard" class="success-card d-none">
           <span id="successText"></span>
         </div>

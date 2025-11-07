@@ -29,7 +29,6 @@ html, body {
 }
 
 .left-panel .overlay {
-  background: rgba(0,0,0,0.7);
   padding: 60px;
   text-align: center;
 }
@@ -76,9 +75,7 @@ html, body {
   font-weight: 600;
 }
 
-.login-link a:hover {
-  text-decoration: underline;
-}
+
 
 
 .form-card h1 {
@@ -136,9 +133,6 @@ html, body {
   text-decoration: none;
 }
 
-.login-link a:hover {
-  text-decoration: underline;
-}
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -394,3 +388,21 @@ input[type="text"] {
   transform: scale(0.9);
   opacity: 0.8;
 }
+
+
+
+.left-panel .desc{
+  text-align: left;
+}
+
+.left-panel .tagline{
+  text-align: left;
+}
+
+.overlay h1 {
+  text-align: left;
+  width: 100%;
+  margin-left: 0;
+}
+
+
