@@ -2,6 +2,7 @@
 
 
 
+
 window.currentStockId = null;
 
 ////////////////////////////////////////////////////
@@ -556,62 +557,110 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Function to render the chart using Chart.js
-  function renderChart(data) {
-    const labels = data.map(item => item.period);
-    const categories = ['strongBuy', 'buy', 'hold', 'sell', 'strongSell'];
+function renderChart(data) {
+  const labels = data.map(item => item.period);
+  const categories = ['strongBuy', 'buy', 'hold', 'sell', 'strongSell'];
 
-    const colors = [
-      'rgba(224, 235, 255, 0.9)',  // Strong Buy → light accent (#E0EBFF)
-      'rgba(180, 200, 230, 0.9)',  // Buy → slightly darker blue
-      'rgba(140, 160, 200, 0.9)',  // Hold → medium blue
-      'rgba(80, 100, 150, 0.9)',   // Sell → dark blue
-      'rgba(40, 50, 80, 0.9)'      // Strong Sell → darkest blue
-    ];
-    const borderColors = colors.map(c => c.replace('0.7', '1'));
+  const baseColors = [
+    '#8FAFFD', // Strong Buy
+    '#6D93FA', // Buy
+    '#5277E5', // Hold
+    '#3C5EC9', // Sell
+    '#2A3E73'  // Strong Sell
+  ];
 
-    const datasets = categories.map((cat, i) => ({
-      label: cat,
-      data: data.map(item => item[cat]),
-      backgroundColor: colors[i],
-      borderColor: borderColors[i],
-      borderWidth: 1
-    }));
+  const borderShade = 'rgba(255, 255, 255, 0)'; // 🌌 subtle metallic tone
 
-    if (recommendationChart) recommendationChart.destroy();
+  const datasets = categories.map((cat, i) => ({
+    label: cat,
+    data: data.map(item => item[cat]),
+    backgroundColor: (context) => {
+      const chart = context.chart;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return baseColors[i];
 
-    recommendationChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        scales: {
-          x: { stacked: false },
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: 'Number of Recommendations' }
+      // 🎨 Bar gradient: solid → transparent
+      const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      gradient.addColorStop(0, baseColors[i]);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      return gradient;
+    },
+    borderColor: borderShade,
+    borderWidth: 1.5,
+    borderRadius: 4
+  }));
+
+  if (recommendationChart) recommendationChart.destroy();
+
+  recommendationChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: { color: '#E0EBFF' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
           }
         },
-        plugins: {
-          title: {
-            display: true,
-            text: `${symbolInput.value.toUpperCase()} Recommendations Over Time`
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const idx = context.dataIndex;
-                const category = context.dataset.label;
-                const rawValue = context.raw;
-                const total = data[idx].totalRecommendations;
-                const percentage = data[idx].percentages[category];
-                return `${category}: ${rawValue} (${percentage}% of ${total})`;
-              }
+        y: {
+          beginAtZero: true,
+          title: { display: false, color: '#E0EBFF' },
+          ticks: { color: '#E0EBFF' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: `${symbolInput.value.toUpperCase()} Recommendations Over Time`,
+          color: '#E0EBFF',
+          font: { size: 16 }
+        },
+        legend: {
+          labels: { color: '#E0EBFF' }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const idx = context.dataIndex;
+              const category = context.dataset.label;
+              const rawValue = context.raw;
+              const total = data[idx].totalRecommendations;
+              const percentage = data[idx].percentages[category];
+              return `${category}: ${rawValue} (${percentage}% of ${total})`;
             }
           }
         }
       }
-    });
-  }
+    }
+  });
+}
+
 
   // Load recommendations when symbol input changes
   symbolInput.addEventListener('change', function () {
@@ -748,73 +797,94 @@ window.addEventListener('DOMContentLoaded', function () {
 
       // Chart configuration
       let config;
-      if (chartType === 'line') {
-        config = {
-          type: 'line',
-          data: {
-            labels: formattedData.map(d => new Date(d.x)),
-            datasets: [{
-              label: `${symbolValue} Close Price`,
-              data: formattedData.map(d => d.c),
-              borderColor: '#E0EBFF', // line color
-              fill: true,
-              tension: 0.1,
-              backgroundColor: function(context) {
-                const chart = context.chart;
-                const {ctx, chartArea} = chart;
-      
-                if (!chartArea) {
-                  return null; // Chart not fully initialized yet
-                }
-      
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, 'rgba(143,173,253,0.4)'); // top: semi-transparent, more blue
-                gradient.addColorStop(1, 'rgba(143,173,253,0)');   // bottom: fully transparent
-                
-                return gradient;
-              }
-            }]
-          },
-options: {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    x: {
-      type: 'time',
-      time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-      ticks: { color: 'white' },
-      grid: { color: 'rgba(255,255,255,0.2)' },
-      title: { display: true, text: 'Date', color: 'white' }
+if (chartType === 'line') {
+  config = {
+    type: 'line',
+    data: {
+      labels: formattedData.map(d => new Date(d.x)),
+      datasets: [{
+        label: `${symbolValue} Close Price`,
+        data: formattedData.map(d => d.c),
+        borderColor: '#E0EBFF', // line color
+        fill: true,
+        tension: 0.1,
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+
+          if (!chartArea) {
+            return null; // Chart not fully initialized yet
+          }
+
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
+          gradient.addColorStop(1, 'rgba(143,173,253,0)');
+          return gradient;
+        }
+      }]
     },
-    y: {
-      ticks: { color: 'white' },
-      grid: { color: 'rgba(255,255,255,0.2)' },
-      title: { display: true, text: 'Price', color: 'white' }
-    }
-  },
-  plugins: {
-    legend: { labels: { color: 'white' } },
-    zoom: {
-      pan: {
-        enabled: true,
-        mode: 'xy', // allow panning both X & Y
-        modifierKey: 'ctrl' // optional: require Ctrl key
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+          ticks: { color: 'white' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
+          },
+          title: { display: true, text: 'Date', color: 'white' }
+        },
+        y: {
+          ticks: { color: 'white' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
+          },
+          title: { display: true, text: 'Price', color: 'white' }
+        }
       },
-      zoom: {
-        wheel: {
-          enabled: true
-        },
-        pinch: {
-          enabled: true
-        },
-        mode: 'xy'
+      plugins: {
+        legend: { labels: { color: 'white' } },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'xy',
+            modifierKey: 'ctrl'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'xy'
+          }
+        }
       }
     }
-  }
+  };
 }
 
-        };
-      }
+
+      
       
       
 
@@ -1091,7 +1161,13 @@ portfolioContainer.innerHTML = `
         labels,
         datasets: [{
           data,
-          backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
+          backgroundColor:  [
+          '#8faefd9a', // Strong Buy
+          '#6d93fa61', // Buy
+          '#5277e541', // Hold
+          '#3c5dc9a8', // Sell
+          '#2a3d7399'  // Strong Sell
+        ],
           hoverOffset: 6
         }]
       },
@@ -1099,7 +1175,7 @@ portfolioContainer.innerHTML = `
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top' },
+          legend: { position: 'top', labels: { color: '#fff' } },
           tooltip: {
             callbacks: {
               label: function (context) {
@@ -1221,6 +1297,7 @@ fetchPortfolio();
 //     errorEl.textContent = `Failed to fetch stock info: ${err.message}`;
 //   }
 // });
+
 
 // ------------------------------
 // ===== TRADE DOM =====

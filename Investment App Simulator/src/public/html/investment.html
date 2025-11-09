@@ -35,7 +35,7 @@
     <input type="hidden" id="current-stock-id" value="" />
     <!-- Sidebar -->
     <div class="sidebar">
-      <h1>WatchList</h1>
+      <!-- <h3>WatchList</h3> -->
       <div class="search-container">
         <input
           type="text"
@@ -45,10 +45,10 @@
         <button id="search-button" style="margin-top: 10px;">Search</button>
       </div>
       <br />      
-      <h3>Search Results</h3>
+      <h2>Search Results</h2>
       <ul id="stock-list"></ul>
       <br>
-      <h4>Favorited Stocks</h4>
+      <h2>Favorited Stocks</h2>
       <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
       <div id="favorites-error-message" class="error-message"></div>
       <div
@@ -79,39 +79,42 @@
 
     <div id="stock-dashboard" class="tab-content active">
 
-      <div class="content">
+      <!-- <div class="content"> -->
+        <br>
         <br />
         <h1>Stock Dashboard</h1>
-      </div>
+      <!-- </div> -->
       <!-- Chart + Trading Form -->
       <div class="container">
-        <div class="chart-container">
-          <form id="chart-form-intraday" class="chart-form">
-            <input
-              type="text"
-              name="chartSymbol"
-              placeholder="Enter symbol (e.g. AAPL)"
-              required
-            />
-            <div class="options-wrap">
-            <!-- <label for="range">Select Range:</label> -->
-            <select name="range" id="range">
-              <option value="1d">Last 1 Day</option>
-              <option value="1w" selected>Last 1 Week</option>
-              <option value="1m">Last 1 Month</option>
-              <option value="6m">Last 6 Months</option>
-              <option value="1y">Last 1 Year</option>
-            </select>
-            <div class="select-wrapper">
-              <select name="chartType" id="chartType">
-                <option value="line">Line (Close Price)</option>
-                <option value="candlestick">Candlestick</option>
+        <div class="chart-wrapper">
+          <div class="chart-container">
+            <form id="chart-form-intraday" class="chart-form">
+              <input
+                type="text"
+                name="chartSymbol"
+                placeholder="Enter symbol (e.g. AAPL)"
+                required
+              />
+              <div class="options-wrap">
+              <!-- <label for="range">Select Range:</label> -->
+              <select name="range" id="range">
+                <option value="1d">Last 1 Day</option>
+                <option value="1w" selected>Last 1 Week</option>
+                <option value="1m">Last 1 Month</option>
+                <option value="6m">Last 6 Months</option>
+                <option value="1y">Last 1 Year</option>
               </select>
-            </div>
-            </div>
-            <button type="submit">Generate Chart</button>
-          </form>
-          <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
+              <div class="select-wrapper">
+                <select name="chartType" id="chartType">
+                  <option value="line">Line (Close Price)</option>
+                  <option value="candlestick">Candlestick</option>
+                </select>
+              </div>
+              </div>
+              <button type="submit">Generate Chart</button>
+            </form>
+            <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
+          </div>
         </div>
         <div class="trading-card">
           <form id="trading-form">
@@ -230,22 +233,24 @@
 
       <!-- Portfolio / Investment Recommendations -->
       <div class="portfolio-container">
-        <div class="chart-container">
+        <div class="trading-card">
           <div class="content fullscreen-chart">
-            <h1>Investment Recommendations</h1>
+            <h2>Investment Recommendations</h2>
             <div id="recommendation-error" class="error-message"></div>
             <canvas id="recommendationChart"></canvas>
           </div>
         </div>
-        <div class="chart-container">
-          <!-- <div class="content trading-card2"></div> -->
-          <div class="company-card"></div>
+        <div class="chart-wrapper">
+          <div class="chart-container">
+            <!-- <div class="content trading-card2"></div> -->
+            <div class="company-card"></div>
+          </div>
         </div>
       </div>
       <!-- Trade History + Limit Orders -->
       <div class="history-container">
         <div class="history-column">
-          <h1>Your Trade History</h1>
+          <h2>Your Trade History</h2>
           <div id="trades-error" class="error-message"></div>
           <button id="export-trades" class="submit-button">
             Export Trade History
@@ -266,7 +271,7 @@
           <div id="trades-pagination" style="margin-top: 10px"></div>
         </div>
         <div class="history-column">
-          <h1>Your Limit Order History</h1>
+          <h2>Your Limit Order History</h2>
           <div id="limit-orders-error" class="error-message"></div>
           <button id="export-limit-orders" class="submit-button">
             Export Limit Order History
@@ -281,6 +286,7 @@
                 <th>Limit Price</th>
                 <th>Total Amount</th>
                 <th>Status</th>
+                <th class="actioncolumn">Action</th>
               </tr>
             </thead>
             <tbody id="limit-orders-table-body"></tbody>
@@ -292,7 +298,7 @@
       <div class="history-container">
 
         <div class="history-column">
-          <h1>Your Stop-Market Orders</h1>
+          <h2>Your Stop-Market Orders</h2>
           <button id="export-stop-market" class="export-btn submit-button">Export Stop Market History</button>
 
           <div id="stop-market-error" class="error-message"></div>
@@ -305,6 +311,7 @@
                 <th>Quantity</th>
                 <th>Trigger Price</th>
                 <th>Status</th>
+                <th class="actioncolumn">Action</th>
               </tr>
             </thead>
             <tbody id="stop-market-table-body"></tbody>
@@ -315,7 +322,7 @@
 
         </div>
         <div class="history-column">
-          <h1>Your Stop-Limit Orders</h1>
+          <h2>Your Stop-Limit Orders</h2>
           <button id="export-stop-limit" class="export-btn submit-button">Export Stop Limit History</button>
 
           <div id="stop-limit-error" class="error-message"></div>
@@ -329,6 +336,7 @@
                 <th>Trigger Price</th>
                 <th>Limit Price</th>
                 <th>Status</th>
+                <th class="actioncolumn">Action</th>
               </tr>
             </thead>
             <tbody id="stop-limit-table-body"></tbody>
@@ -354,8 +362,10 @@
 <div id="toast" class="toast hidden"></div>
 
 
-      <div class="chart-container">
-        <div class="content trading-card2"></div>
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <div class="content trading-card2"></div>
+        </div>
       </div>
 
       <!-- Stock Comments
@@ -391,23 +401,23 @@
 <!-- OPTIONS DASHBOARD -->
 
     <div id="options-dashboard" class="tab-content">
-      <div class="content">
-        <br />
+        <br /><br>
         <h1>Options Dashboard</h1>
-        <br>
-      <div class="options-card">
-        <form id="options-form">
-          <input type="text" name="optionSymbol" placeholder="Enter stock symbol (e.g. AAPL)" />
-          <button type="submit">Get Option Contracts</button>
-        </form>
+        <br>      
 
-        <div class="options-container"></div>
-
-              
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <form id="options-form">
+            <input type="text" name="optionSymbol" placeholder="Enter stock symbol (e.g. AAPL)" />
+            <button type="submit">Get Option Contracts</button>
+          </form>
+          <div class="options-container"></div>
+        
+        </div>
       </div>
                
 
-      <div class="options-card">
+      <div class="options-card history-column">
               <h1>Your Option Trades</h1>
 
                 <button id="export-option-trades" class="submit-button">Export Option Trades</button>
@@ -426,6 +436,7 @@
                 <th>Total Amount (Premium)</th>
                 <th>Strike Price</th>
                 <th>Expiry</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="options-trades-table-body"></tbody>
@@ -444,7 +455,6 @@
         <span id="market-status">Loading market status...</span>
       </div> -->
 
-      </div>
 
 
       <!-- <div class="chart-container">

@@ -1,4 +1,5 @@
 
+
 const limitPriceInput = document.getElementById("limitPrice");
 const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
 let currentSymbol = null; // global
@@ -270,48 +271,95 @@ tradeSymbolSelect.addEventListener("change", async (e) => {
     }
 });
 function initializeChart(chartType = "line") {
-    const ctx = document.getElementById("myChart2").getContext("2d");
+  const ctx = document.getElementById("myChart3").getContext("2d");
 
-    // Destroy previous chart if exists
-    if (scenarioChart) scenarioChart.destroy();
+  // Destroy previous chart if exists
+  if (scenarioChart) scenarioChart.destroy();
 
-    // Register the zoom plugin (make sure ChartZoom is loaded globally)
-    if (typeof ChartZoom !== "undefined") Chart.register(ChartZoom);
+  // Register the zoom plugin (if available)
+  if (typeof ChartZoom !== "undefined") Chart.register(ChartZoom);
 
-    scenarioChart = new Chart(ctx, {
-        type: chartType,
-        data: {
-            labels: [],
-            datasets: []
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: { unit: 'minute' } // adjust as needed
-                },
-                y: {
-                    beginAtZero: false
-                }
-            },
-            plugins: {
-                zoom: {
-                    pan: {
-                        enabled: true,
-                        mode: 'xy',
-                        threshold: 5
-                    },
-                    zoom: {
-                        wheel: { enabled: true },
-                        pinch: { enabled: true },
-                        mode: 'xy'
-                    }
-                }
-            }
+  scenarioChart = new Chart(ctx, {
+    type: chartType,
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Scenario Data",
+        data: [],
+        borderColor: "#E0EBFF", // same blue line color
+        borderWidth: 2,
+        fill: true,
+        tension: 0.1,
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return null;
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, "rgba(143,173,253,0.4)");
+          gradient.addColorStop(1, "rgba(143,173,253,0)");
+          return gradient;
         }
-    });
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'minute', tooltipFormat: 'MMM dd, yyyy HH:mm' },
+          ticks: { color: 'white' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
+          },
+          title: { display: true, text: 'Date', color: 'white' }
+        },
+        y: {
+          beginAtZero: false,
+          ticks: { color: 'white' },
+          grid: {
+            drawOnChartArea: true,
+            color: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(255,255,255,0.1)';
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+              return gradient;
+            }
+          },
+          title: { display: true, text: 'Price', color: 'white' }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: 'white' } },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'xy',
+            modifierKey: 'ctrl'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'xy'
+          }
+        }
+      }
+    }
+  });
 }
 
 
@@ -580,11 +628,75 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function startReplay() {
-        if (!fullData.length) return alert("Generate the chart first!");
+    function showPopupConfirmation(message, callback) {
+    const popup = document.getElementById("cancel-popup");
+    const popupText = popup.querySelector("p");
+    const yesBtn = document.getElementById("confirm-yes");
+    const noBtn = document.getElementById("confirm-no");
 
-        // Prompt user before starting
-        if (!confirm("Replay will start now. Are you ready?")) return;
+    popupText.textContent = message;
+    yesBtn.textContent = "Yes";
+    noBtn.style.display = "inline-block";
+    popup.classList.remove("hidden");
+
+    function handleYes() {
+        cleanup();
+        callback(true);
+    }
+    function handleNo() {
+        cleanup();
+        callback(false);
+    }
+    function cleanup() {
+        popup.classList.add("hidden");
+        yesBtn.removeEventListener("click", handleYes);
+        noBtn.removeEventListener("click", handleNo);
+    }
+
+    yesBtn.addEventListener("click", handleYes);
+    noBtn.addEventListener("click", handleNo);
+}
+
+function showPopupMessage(message, autoClose = true, duration = 2000) {
+    const popup = document.getElementById("cancel-popup");
+    const popupText = popup.querySelector("p");
+    const yesBtn = document.getElementById("confirm-yes");
+    const noBtn = document.getElementById("confirm-no");
+
+    popupText.textContent = message;
+    yesBtn.textContent = "OK";
+    noBtn.style.display = "none";
+    popup.classList.remove("hidden");
+
+    function handleOk() {
+        cleanup();
+    }
+    function cleanup() {
+        popup.classList.add("hidden");
+        yesBtn.removeEventListener("click", handleOk);
+        noBtn.style.display = "inline-block";
+        yesBtn.textContent = "Yes";
+    }
+
+    yesBtn.addEventListener("click", handleOk);
+
+    if (autoClose) {
+        setTimeout(() => {
+            cleanup();
+        }, duration);
+    }
+}
+
+
+function startReplay() {
+    if (!fullData.length) {
+        showPopupMessage("Generate the chart first!", false);
+        return;
+    }
+
+    // Use popup confirmation instead of confirm()
+    showPopupConfirmation("Replay will start now. Are you ready?", async (confirmed) => {
+        if (!confirmed) return; // user clicked No
 
         pauseReplay();
         isPaused = false;
@@ -606,7 +718,11 @@ document.addEventListener("DOMContentLoaded", () => {
             plotNextDataPoint();
             remainingTime = intervalMs / 1000;
         }, intervalMs);
-    }
+    });
+}
+
+
+
     function pauseReplay() {
         isPaused = true;
         if (replayInterval) clearInterval(replayInterval);
@@ -681,69 +797,80 @@ document.addEventListener("DOMContentLoaded", () => {
     // Call this whenever a new symbol is added to the chart
     populateTradeDropdown();
     updateReplayProgress();
-    tradingForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        buyErrorDiv.textContent = "";
+tradingForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-        const sideInput = document.querySelector('input[name="side"]:checked');
-        const side = sideInput ? sideInput.value.toLowerCase() : null;
-        const orderType = orderTypeSelect.value;
+  const buyErrorDiv = document.getElementById("buy-error");
+  const successDiv = document.getElementById("create-success");
+  buyErrorDiv.textContent = "";
+  successDiv.textContent = "";
 
-        const quantity = Number(qtyInput.value);
-        const limitPrice = parseFloat(limitPriceInput.value);
+  const sideInput = document.querySelector('input[name="side"]:checked');
+  const side = sideInput ? sideInput.value.toLowerCase() : null;
+  const orderType = orderTypeSelect.value;
 
-        const symbol = currentSymbol || tradeSymbolSelect.value;
-        if (!symbol) return (buyErrorDiv.textContent = "Please generate a chart / select a symbol first.");
-        if (!side || !orderType || !quantity || quantity <= 0) {
-            return (buyErrorDiv.textContent = "Please fill in all required fields.");
-        }
+  const quantity = Number(qtyInput.value);
+  const limitPrice = parseFloat(limitPriceInput.value);
 
-        const submitBtn = document.getElementById("submit-order");
-        if (submitBtn) submitBtn.disabled = true;
+  const symbol = currentSymbol || tradeSymbolSelect.value;
+  if (!symbol) {
+    buyErrorDiv.textContent = "Please generate a chart / select a symbol first.";
+    return;
+  }
+  if (!side || !orderType || !quantity || quantity <= 0) {
+    buyErrorDiv.textContent = "Please fill in all required fields.";
+    return;
+  }
 
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) throw new Error("Missing auth token");
+  const submitBtn = document.getElementById("submit-order");
+  if (submitBtn) submitBtn.disabled = true;
 
-            const latestPrice = parseFloat(priceInput.value);
-            if (!isFinite(latestPrice)) throw new Error("Invalid current price");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Missing auth token");
 
-            let payload, endpoint;
-            if (orderType === "market") {
-                endpoint = `/scenarios/${scenarioId}/market-order`;
-                payload = { side, symbol, quantity, price: latestPrice, currentIndex };
-            } else if (orderType === "limit") {
-                if (!isFinite(limitPrice)) return (buyErrorDiv.textContent = "Please enter a valid limit price.");
-                endpoint = `/scenarios/${scenarioId}/limit-orders`;
-                payload = { side, symbol, quantity, limitPrice, price: latestPrice, currentIndex };
-            } else {
-                throw new Error("Invalid order type");
-            }
+    const latestPrice = parseFloat(priceInput.value);
+    if (!isFinite(latestPrice)) throw new Error("Invalid current price");
 
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify(payload),
-            });
+    let payload, endpoint;
+    if (orderType === "market") {
+      endpoint = `/scenarios/${scenarioId}/market-order`;
+      payload = { side, symbol, quantity, price: latestPrice, currentIndex };
+    } else if (orderType === "limit") {
+      if (!isFinite(limitPrice)) throw new Error("Please enter a valid limit price.");
+      endpoint = `/scenarios/${scenarioId}/limit-orders`;
+      payload = { side, symbol, quantity, limitPrice, price: latestPrice, currentIndex };
+    } else {
+      throw new Error("Invalid order type");
+    }
 
-            const resData = await res.json();
-            if (!res.ok || resData.success === false) throw new Error(resData.message || "Trade failed");
-
-            alert(`${orderType === "market" ? "Market" : "Limit"} order submitted successfully!`);
-
-            qtyInput.value = "";
-            amountInput.value = "";
-            limitPriceInput.value = "";
-            await fetchWalletBalance();
-            if (typeof fetchOrderHistory === "function") await fetchOrderHistory();
-
-        } catch (err) {
-            console.error(err);
-            buyErrorDiv.textContent = err.message || "An error occurred";
-        } finally {
-            if (submitBtn) submitBtn.disabled = false;
-        }
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
     });
+
+    const resData = await res.json();
+    if (!res.ok || resData.success === false) throw new Error(resData.message || "Trade failed");
+
+    successDiv.textContent = `${orderType === "market" ? "Market" : "Limit"} order submitted successfully!`;
+
+    qtyInput.value = "";
+    amountInput.value = "";
+    limitPriceInput.value = "";
+    await fetchWalletBalance();
+    if (typeof fetchOrderHistory === "function") await fetchOrderHistory();
+  } catch (err) {
+    console.error(err);
+    buyErrorDiv.textContent = err.message || "An error occurred";
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+});
+
 
 
     document.getElementById("chart-form-intraday").addEventListener("submit", async e => {
@@ -763,18 +890,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btn-play").addEventListener("click", startReplay);
     document.getElementById("btn-pause").addEventListener("click", pauseReplay);
-    document.getElementById("btn-finish").addEventListener("click", async () => {
-        pauseReplay(); // stop replay immediately
-        await showEndScreen(); // show modal + mark scenario finished
-    });
+    // document.getElementById("btn-finish").addEventListener("click", async () => {
+    //     pauseReplay(); // stop replay immediately
+    //     await showEndScreen(); // show modal + mark scenario finished
+    // });
 });
 
-document.getElementById("btn-finish").addEventListener("click", async () => {
-    if (confirm("Are you sure you want to finish this scenario?")) {
-        pauseReplay();
-        await showEndScreen();
+// document.getElementById("btn-finish").addEventListener("click", async () => {
+//     if (confirm("Are you sure you want to finish this scenario?")) {
+//         pauseReplay();
+//         await showEndScreen();
+//     }
+// });
+
+// Reusable confirmation popup
+async function showPopupConfirmation(message) {
+  const popup = document.getElementById("cancel-popup");
+  const popupText = popup.querySelector("p");
+  const yesBtn = document.getElementById("confirm-yes");
+  const noBtn = document.getElementById("confirm-no");
+
+  popupText.textContent = message;
+  popup.classList.remove("hidden");
+
+  return new Promise((resolve) => {
+    const handleYes = () => cleanup(true);
+    const handleNo = () => cleanup(false);
+
+    function cleanup(result) {
+      popup.classList.add("hidden");
+      yesBtn.removeEventListener("click", handleYes);
+      noBtn.removeEventListener("click", handleNo);
+      resolve(result);
     }
+
+    yesBtn.addEventListener("click", handleYes);
+    noBtn.addEventListener("click", handleNo);
+  });
+}
+
+// Finish button logic
+document.getElementById("btn-finish").addEventListener("click", async () => {
+  const confirmed = await showPopupConfirmation("Are you sure you want to finish this scenario?");
+  if (confirmed) {
+    pauseReplay();
+    await showEndScreen();
+  }
 });
+
 document.addEventListener("DOMContentLoaded", () => {
     const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
     const tradesTableBody = document.getElementById("trades-table-body");
@@ -783,8 +946,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const limitOrdersErrorDiv = document.getElementById("limit-orders-error");
     const exportTradesBtn = document.getElementById("export-trades");
     const exportLimitOrdersBtn = document.getElementById("export-limit-orders");
+    const tradesPaginationContainer = document.getElementById("trades-pagination");
+    const limitPaginationContainer = document.getElementById("limit-orders-pagination");
+
     let marketOrders = [];
     let limitOrders = [];
+
+    const pageSize = 10;
+    let currentMarketPage = 1;
+    let currentLimitPage = 1;
 
     async function fetchOrderHistory() {
         try {
@@ -796,8 +966,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!res.ok) throw new Error(data.message || "Failed to fetch order history");
             marketOrders = data.marketOrders || [];
             limitOrders = data.limitOrders || [];
-            renderMarketOrders();
-            renderLimitOrders();
+
+            renderMarketOrders(currentMarketPage);
+            renderLimitOrders(currentLimitPage);
+            renderMarketPaginationControls();
+            renderLimitPaginationControls();
+
             if (currentSymbol && fullData.length > 0) {
                 const latestPrice = parseFloat(priceInput.value);
                 if (isFinite(latestPrice)) processLimitOrders(currentSymbol, latestPrice);
@@ -810,13 +984,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     window.fetchOrderHistory = fetchOrderHistory;
 
-    function renderMarketOrders() {
+    // ===== MARKET ORDERS =====
+    function renderMarketOrders(page = 1) {
         tradesTableBody.innerHTML = "";
         if (!marketOrders.length) {
             tradesTableBody.innerHTML = `<tr><td colspan="6">No market orders found.</td></tr>`;
             return;
         }
-        marketOrders.forEach(order => {
+
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const ordersToShow = marketOrders.slice(start, end);
+
+        ordersToShow.forEach(order => {
             const price = order.executedPrice ? Number(order.executedPrice.toString()) : 0;
             const quantity = order.quantity ? Number(order.quantity.toString()) : 0;
             const total = (price * quantity).toFixed(2);
@@ -833,13 +1013,55 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderLimitOrders() {
+    function renderMarketPaginationControls() {
+        tradesPaginationContainer.innerHTML = "";
+        const totalPages = Math.max(1, Math.ceil(marketOrders.length / pageSize));
+
+        tradesPaginationContainer.style.display = "flex";
+        tradesPaginationContainer.style.alignItems = "center";
+        tradesPaginationContainer.style.gap = "8px";
+        tradesPaginationContainer.style.justifyContent = "flex-start";
+
+        if (currentMarketPage > 1) {
+            const prevBtn = document.createElement("button");
+            prevBtn.textContent = "Previous";
+            prevBtn.addEventListener("click", () => {
+                currentMarketPage--;
+                renderMarketOrders(currentMarketPage);
+                renderMarketPaginationControls();
+            });
+            tradesPaginationContainer.appendChild(prevBtn);
+        }
+
+        const pageIndicator = document.createElement("span");
+        pageIndicator.textContent = `Page ${currentMarketPage} of ${totalPages}`;
+        tradesPaginationContainer.appendChild(pageIndicator);
+
+        if (currentMarketPage < totalPages) {
+            const nextBtn = document.createElement("button");
+            nextBtn.textContent = "Next";
+            nextBtn.addEventListener("click", () => {
+                currentMarketPage++;
+                renderMarketOrders(currentMarketPage);
+                renderMarketPaginationControls();
+            });
+            tradesPaginationContainer.appendChild(nextBtn);
+        }
+    }
+
+    // ===== LIMIT ORDERS =====
+    function renderLimitOrders(page = 1) {
         limitOrdersTableBody.innerHTML = "";
         if (!limitOrders.length) {
             limitOrdersTableBody.innerHTML = `<tr><td colspan="7">No limit orders found.</td></tr>`;
             return;
         }
-        limitOrders.forEach(order => {
+
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const ordersToShow = limitOrders.slice(start, end);
+
+        ordersToShow.forEach(order => {
             const limitPrice = order.limitPrice ? Number(order.limitPrice) : 0;
             const quantity = order.quantity ? Number(order.quantity) : 0;
             const total = (limitPrice * quantity).toFixed(2);
@@ -857,6 +1079,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function renderLimitPaginationControls() {
+        limitPaginationContainer.innerHTML = "";
+        const totalPages = Math.max(1, Math.ceil(limitOrders.length / pageSize));
+
+        limitPaginationContainer.style.display = "flex";
+        limitPaginationContainer.style.alignItems = "center";
+        limitPaginationContainer.style.gap = "8px";
+        limitPaginationContainer.style.justifyContent = "flex-start";
+
+        if (currentLimitPage > 1) {
+            const prevBtn = document.createElement("button");
+            prevBtn.textContent = "Previous";
+            prevBtn.addEventListener("click", () => {
+                currentLimitPage--;
+                renderLimitOrders(currentLimitPage);
+                renderLimitPaginationControls();
+            });
+            limitPaginationContainer.appendChild(prevBtn);
+        }
+
+        const pageIndicator = document.createElement("span");
+        pageIndicator.textContent = `Page ${currentLimitPage} of ${totalPages}`;
+        limitPaginationContainer.appendChild(pageIndicator);
+
+        if (currentLimitPage < totalPages) {
+            const nextBtn = document.createElement("button");
+            nextBtn.textContent = "Next";
+            nextBtn.addEventListener("click", () => {
+                currentLimitPage++;
+                renderLimitOrders(currentLimitPage);
+                renderLimitPaginationControls();
+            });
+            limitPaginationContainer.appendChild(nextBtn);
+        }
+    }
+
+    // ===== CSV EXPORT =====
     function exportToCSV(data, filename) {
         if (!data.length) return alert("No data to export.");
         const headers = Object.keys(data[0]);
@@ -878,6 +1137,8 @@ document.addEventListener("DOMContentLoaded", () => {
     exportLimitOrdersBtn.addEventListener("click", () => exportToCSV(limitOrders, "limit_orders.csv"));
     fetchOrderHistory();
 });
+
+
 
 // ===== SAVE & LOAD REPLAY PROGRESS =====
 async function saveReplayProgress() {
@@ -993,19 +1254,61 @@ document.addEventListener("DOMContentLoaded", async () => {
         saveReplayProgress();
     });
 });
-
 document.addEventListener("DOMContentLoaded", () => {
-    const saveBtn = document.getElementById("btn-save");
+  const saveBtn = document.getElementById("btn-save");
+  const popup = document.getElementById("cancel-popup");
+  const popupText = popup.querySelector("p");
+  const yesBtn = document.getElementById("confirm-yes");
+  const noBtn = document.getElementById("confirm-no");
 
-    saveBtn.addEventListener("click", async () => {
-        // Pause replay, but don't auto-save on pause
-        pauseReplay();
+  saveBtn.addEventListener("click", async () => {
+    pauseReplay();
 
-        // Save explicitly for Save & Exit
-        await saveReplayProgress();
-        alert("Progress saved! You can now exit.");
-        window.location.href = "/html/scenarios.html"; // optional redirect
-    });
+    try {
+      await saveReplayProgress();
+
+      // Change popup content for success
+      popupText.textContent = "Progress saved! You can now exit.";
+      yesBtn.textContent = "OK";
+      noBtn.style.display = "none"; // hide the No button for this case
+      popup.classList.remove("hidden");
+
+      // Wait for user to click OK
+      await new Promise((resolve) => {
+        const handleOk = () => {
+          cleanup();
+          resolve();
+        };
+        function cleanup() {
+          yesBtn.removeEventListener("click", handleOk);
+          popup.classList.add("hidden");
+          noBtn.style.display = "inline-block"; // restore for future confirmations
+          yesBtn.textContent = "Yes";
+        }
+        yesBtn.addEventListener("click", handleOk);
+      });
+
+      // Redirect after confirmation
+      window.location.href = "/html/scenarios.html";
+    } catch (err) {
+      console.error("Save error:", err);
+      popupText.textContent = "Failed to save progress. Please try again.";
+      yesBtn.textContent = "OK";
+      noBtn.style.display = "none";
+      popup.classList.remove("hidden");
+
+      await new Promise((resolve) => {
+        const handleOk = () => {
+          yesBtn.removeEventListener("click", handleOk);
+          popup.classList.add("hidden");
+          noBtn.style.display = "inline-block";
+          yesBtn.textContent = "Yes";
+          resolve();
+        };
+        yesBtn.addEventListener("click", handleOk);
+      });
+    }
+  });
 });
 
 
@@ -1146,14 +1449,8 @@ window.addEventListener('DOMContentLoaded', function () {
             let card = document.querySelector(`[data-symbol="${pos.symbol}"]`);
             if (!card) {
                 card = document.createElement('div');
-                card.className = 'company-card-content animate-slideup';
+                card.className = 'company-card-content stock-column animate-slideup';
                 card.dataset.symbol = pos.symbol;
-                card.style.padding = '12px';
-                card.style.border = '1px solid #636363ff';
-                card.style.borderRadius = '10px';
-                card.style.backgroundColor = '#000';
-                card.style.color = '#fff';
-                card.style.width = '100%';
                 card.style.transition = 'all 0.3s ease';
                 stockCardsContainer.appendChild(card);
             }
@@ -1183,16 +1480,21 @@ window.addEventListener('DOMContentLoaded', function () {
                     labels: positions.map(p => p.symbol),
                     datasets: [{
                         data: positions.map(p => parseFloat(p.currentValue)),
-                        backgroundColor: ['#E0EBFF', '#A3C1FF', '#7993FF', '#5368A6', '#2A3C6B', '#0D1A33'],
-                        borderWidth: 1
+          backgroundColor:  [
+    '#8faefd9a', // Strong Buy
+    '#6d93fa61', // Buy
+    '#5277e541', // Hold
+    '#3c5dc9a8', // Sell
+    '#2a3d7399'  // Strong Sell
+  ],                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     animation: { duration: 500 },
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#fff' } },
-                        title: { display: true, text: 'Portfolio Distribution', color: '#E0EBFF', font: { size: 18 } }
+                        legend: { position: 'top', labels: { color: '#fff' } },
+                        title: { display: false}
                     }
                 }
             });

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +15,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="../css/settings.css" />
-  <link rel="stylesheet" href="../css/investment.css" />
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
@@ -28,81 +28,100 @@
 <body>
   <div id="navbar-container"></div>
 
-  <div class="content">
-    <h1 class="text-center">Welcome, <span id="username">User</span>!</h1>
+<div class="sidebar">
 
-    <!-- Wallet Section -->
     <div class="portfolio-section">
       <div class="trading-card2">
-        <h3>Your Wallet Balance</h3>
+        <h2>Your Wallet Balance</h2>
         <p id="wallet" data-value="0" style="font-size: 2rem; font-weight: bold;">****</p>
         <button id="walletToggle" class="submit-button">
           <i class="fas fa-eye-slash"></i>
         </button>
       </div>
+    </div>  
+    <br>
+    <br>  
+    <nav class="in-page-nav">
+        <a href="#ai-advice-section" class="sidebar-link"> AI Advice</a>
+        <a href="#portfolio-section" class="sidebar-link"> Portfolio</a>
+        <a href="#leaderboard-section" class="sidebar-link"> Leaderboard</a>
+        </nav>
+  </div>
+
+
+  <div class="main-content">
+    <div class="top">
+      <h1 class="page-h1">Welcome, <span id="username" class="page-h1">User</span></h1>
+      <p class="page-label">Dashboard</p>
+      <p class="page-para">Get personalised AI advice, track your trades, and see where you stand on the leaderboard.</p>
     </div>
+
+    <!-- Wallet Section -->
+
     <!-- ================= AI ADVICE SECTION ================= -->
-    <div class="portfolio-section content chart-container">
-      <h1>AI Advice</h1>
-      <div class="tab-container">
-        <button id="tab-ai-stocks" class="tab-button active">Stocks</button>
-        <button id="tab-ai-options" class="tab-button">Options</button>
-      </div>
-
-      <div id="ai-stocks" class="tab-content active">
-        <br>
-        <div id="ai-stocks-card"></div>
-      </div>
-
-      <div id="ai-options" class="tab-content">
-        <br>
-        <div id="ai-options-card"></div>
-      </div>
-    </div>
-    <!-- Leaderboard Section -->
-    <div class="content">
-      <h2>Leaderboard</h2>
-      <div class="history-column">
-        <table class="history-column table">
-          <thead>
-            <tr>
-              <th class="history-column th">Rank</th>
-              <th class="history-column th">Username</th>
-              <th class="history-column th">Profit/Loss %</th>
-              <th class="history-column th">Last Trade</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboard-body">
-            <!-- Dynamically injected -->
-          </tbody>
-        </table>
+    <div class="sections" id="ai-advice-section">
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <h1>AI Advice</h1>
+          <div class="tab-container">
+            <button id="tab-ai-stocks" class="tab-button active">Stocks</button>
+            <button id="tab-ai-options" class="tab-button">Options</button>
+          </div>
+          <div id="ai-stocks" class="tab-content active">
+            <br>
+            <div id="ai-stocks-card"></div>
+          </div>
+          <div id="ai-options" class="tab-content">
+            <br>
+            <div id="ai-options-card"></div>
+          </div>
+        </div>
       </div>
     </div>
+<br>
 
     <!-- Portfolio Section -->
-    <div class="portfolio-section content chart-container">
-      <h1>Your Portfolio</h1>
-
-      <!-- Tabs -->
-      <div class="tab-container">
-        <button id="tab-stocks" class="tab-button active">Stocks</button>
-        <button id="tab-options" class="tab-button">Options</button>
-      </div>
-
-      <!-- Portfolio Content -->
-      <div id="portfolio-stocks" class="tab-content active">
-        <div class="trading-card2"><!-- Stocks will render here --></div>
-      </div>
-
-      <div id="portfolio-options" class="tab-content">
-        <div id="options-portfolio-card"><!-- Options will render here --></div>
+    <div class="sections" id="portfolio-section">
+      <div class="portfolio-section chart-container">
+        <h1>Your Portfolio</h1>
+        <!-- Tabs -->
+        <div class="tab-container">
+          <button id="tab-stocks" class="tab-button active">Stocks</button>
+          <button id="tab-options" class="tab-button">Options</button>
+        </div>
+        <br>
+        <!-- Portfolio Content -->
+        <div id="portfolio-stocks" class="tab-content active">
+          <div class="trading-card2"><!-- Stocks will render here --></div>
+        </div>
+        <div id="portfolio-options" class="tab-content">
+          <div id="options-portfolio-card" ><!-- Options will render here --></div>
+        </div>
       </div>
     </div>
 
     <!-- Goals Section -->
-    <div class="portfolio-section">
-    </div>
-<div class="portfolio-section content chart-container">
+          <div class="sections" id="leaderboard-section">
+            <div>
+                  <div class="history-column">
+            <h2>Leaderboard</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th >Rank</th>
+                  <th>Username</th>
+                  <th>Profit/Loss %</th>
+                  <th>Last Trade</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+                <!-- Dynamically injected -->
+              </tbody>
+            </table>
+                  </div>
+                </div>
+          </div>
+<!-- <div class="portfolio-section content chart-container">
   <h1>My Scenarios</h1>
   <div id="homepage-scenarios">
     <p style="color:#E0EBFF;">Loading your scenarios...</p>
@@ -112,7 +131,7 @@
     View All Scenarios
   </button>
 </div>
-</div>
+</div> -->
     <!-- Navbar JS -->
     <script src="../js/navbar.js"></script>
 

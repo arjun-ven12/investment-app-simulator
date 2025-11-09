@@ -2,6 +2,7 @@
 
 
 
+
 window.addEventListener('pageshow', (event) => {
   if (event.persisted) {
     // Page was restored from the cache, force a reload
@@ -557,7 +558,7 @@ window.addEventListener('DOMContentLoaded', () => {
     wrapper.appendChild(heading);
 
     const table = document.createElement('table');
-    table.className = 'options-table';
+    table.className = 'options-table ';
     table.innerHTML = `
       <thead>
         <tr>
@@ -1209,16 +1210,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     table.style.marginTop = '10px';
     table.innerHTML = `
       <thead>
-        <tr style="background-color:#000000ff; color:#E0EBFF;">
-          <th style="padding:8px; border:1px solid #E0EBFF;">Underlying Stock</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Total Contracts</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Total Shares</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Active</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Expired</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Open</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Closed</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Realized PnL</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Unrealized PnL</th>
+        <tr>
+          <th>Underlying Stock</th>
+          <th>Total Contracts</th>
+          <th>Total Shares</th>
+          <th>Active</th>
+          <th>Expired</th>
+          <th>Open</th>
+          <th>Closed</th>
+          <th>Realized PnL</th>
+          <th>Unrealized PnL</th>
         </tr>
       </thead>
       <tbody></tbody>

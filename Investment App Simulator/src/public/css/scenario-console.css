@@ -1,3 +1,4 @@
+
 .replay-controls {
   margin-top: 50px; /* space from the chart/form above */
   display: flex;
@@ -280,29 +281,7 @@
   flex: 1;
 }
 
-.fullscreen-chart {
-  width: 100% !important;
-  height: 100%;
-  background-color: #000;
-  border-radius: 12px;
-  padding: 10px;
-}
 
-/* Stock card styling already follows your company-card-content theme */
-.company-card-content {
-  background-color: #000000;
-  color: #E0EBFF;
-  padding: 15px 20px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-  outline: 1px solid #53596B;
-}
-
-/* Hover effect */
-.company-card-content:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-}
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -380,6 +359,17 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+    border-radius: 12px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.876);
+    color: #fff;
+    margin: 10px 0px;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
 }
 
 /* Layout for chart + stocks */
@@ -431,13 +421,7 @@
   height: 400px; /* give it an explicit height */
 }
 
-.fullscreen-chart {
-  width: 100% !important;
-  height: 100% !important; /* make canvas fill container */
-  background-color: #000;
-  border-radius: 12px;
-  padding: 10px;
-}
+
 
 .loading-dots::after {
     content: '';
@@ -514,3 +498,2112 @@
   .btn.secondary { background:#445; }
   .btn.ghost { background:transparent; border:1px solid #555; }
   .end-actions { display:flex; gap:10px; margin-top:12px; }
+
+
+
+
+
+
+  /* Ensure chart container has a fixed height */
+#myChart3.canvas3 {
+    width: 100% !important;
+    height: 475px !important; /* Setting a fixed height for a bigger chart appearance, or a percentage if the parent is fixed */
+}
+
+
+/* Import Outfit font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
+
+/* General Reset & Fonts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px; /* Increased base font from 10px to 13px */
+}
+
+body {
+    background-color: #0a0a0f; /* deeper black */
+    color: #ffffff;
+    line-height: 1.6; /* Increased line height from 1.4 to 1.6 */
+}
+
+h1 {
+    font-size: 2.2rem; /* Increased from 1.5rem to 2.2rem */
+    font-weight: 700;
+    margin-bottom: 10px; /* Increased margin from 5px to 10px */
+    color: #ffffff;
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-top: 12px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
+    text-transform: uppercase; /* Make text uppercase */
+    letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
+}
+
+h4 {
+    font-size: 1.2rem; /* Increased from 0.9rem to 1.2rem */
+    font-weight: 700;
+    margin-bottom: 6px; /* Increased margin from 4px to 6px */
+    color: #ffffff;
+}
+
+/* Container & Layout */
+.content {
+    width: 100%;
+    margin: 15px auto; /* Increased margin from 8px to 15px */
+    padding: 15px; /* Increased padding from 10px to 15px */
+    background-color: #00000080; /* ultra-dark card background */
+    border-radius: 12px; /* Increased border radius from 8px to 12px */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7); /* Adjusted shadow for bigger look */
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 75% 25%;
+    gap: 12px; /* Increased gap from 6px to 12px */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.container2 {
+    display: grid;
+    grid-template-columns: 75% 25%;
+    gap: 12px; /* Increased gap from 6px to 12px */
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.trading-card {
+    padding: 10px 15px; 
+    border-radius: 12px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: 100%;
+    margin: 10px 0px;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+.trading-card select {
+        padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: #12121ABF;
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- CHART WRAPPER: Used to create the strong external aura glow --- */
+.chart-wrapper {
+    position: relative;
+    z-index: 1; /* Establishes a stacking context */
+    margin: 10px 0; /* Controls the spacing outside the whole component */
+    padding: 1px; /* Small padding to ensure the blur isn't clipped */
+    border-radius: 12px;
+    overflow: visible; /* Allows the glow to extend past the wrapper bounds */
+    height: 100%;
+}
+
+/* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
+.chart-wrapper::before {
+    content: '';
+    position: absolute;
+    /* Position slightly outside the bounds of the wrapper */
+    top: -5%;
+    left: -5%;
+    width: 120%;
+    height: 120%;
+    border-radius: 12px;
+    z-index: 0; /* Pushed behind the chart container (z-index 10) */
+    pointer-events: none;
+    
+    /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
+    background: 
+        radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
+        radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);
+    
+    filter: blur(80px); /* Heavy blur for soft, radiating effect */
+    mix-blend-mode: screen; 
+    opacity: 0.8;
+}
+
+/* --- CHART CONTAINER: Combines Frosted Glass, Noise Overlay, and Internal Glow --- */
+.chart-container {
+    /* 1. LAYOUT & STACKING */
+    position: relative; 
+    overflow: hidden; 
+    z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
+    width: 100%;
+    /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
+    border-radius: 12px;
+    /* height: 100%;
+    margin-bottom: 10px; */
+
+    /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
+    /* The external aura is now handled by .chart-wrapper::before */
+    
+    /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
+    background: 
+        /* Layer 1: Inner Dark Fill (Solid color) */
+        #0a0b1f, 
+        /* Layer 2: Frosted Background (Light translucent layer) */
+        linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
+        /* Layer 3: Border Gradient (The thin, fading white border line) */
+        linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.4) 0%,   
+            rgba(255, 255, 255, 0.8) 25%,  
+            rgba(255, 255, 255, 0.8) 75%,  
+            rgba(255, 255, 255, 0.4) 100% 
+        );
+
+    background-clip: content-box, content-box, border-box;
+    background-origin: border-box;
+    padding: 21px; 
+
+    /* Apply the visual frosted effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+/* --- Digital Noise Texture (::before on .chart-container) --- */
+/* Creates the fine, static noise texture over the chart area */
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* SVG data URL for the noise pattern */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+    
+    opacity: 0.3;
+    z-index: 2; 
+    pointer-events: none;
+    border-radius: 12px;
+    -webkit-mask: linear-gradient(#fff, #fff);
+    mask: linear-gradient(#fff, #fff);
+}
+
+/* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
+/* Creates the soft, internal colored glow blobs behind the content */
+.chart-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    width: 150%; 
+    height: 150%;
+    border-radius: 50%; 
+    
+    /* Two radial gradients for the dual-color effect */
+    background: 
+        /* Blue Blob: Top-Left Corner */
+        radial-gradient(circle at 20% 20%, 
+            rgba(0, 200, 255, 0.25) 0%, 
+            transparent 35% 
+        ),
+        /* Purple Blob: Bottom-Right Corner */
+        radial-gradient(circle at 80% 80%, 
+            rgba(255, 0, 251, 0.25) 0%, 
+            transparent 35% 
+        );
+    
+    z-index: -1; 
+    pointer-events: none;
+    mix-blend-mode: screen; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Side-by-side container */
+.history-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 equal columns */
+    gap: 12px; /* Increased gap from 6px to 12px */
+    width: 100%;
+    margin: 10px 0; /* Increased margin from 6px to 10px */
+}
+
+/* Column styling */
+.history-column {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+/* Table styling */
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+.history-column table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+.history-column th, .history-column td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+.history-column th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+.history-column tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.25); 
+}
+/* Row hover styling */
+.history-column tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+.history-column tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+.options-table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+.options-table th, .options-table td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+.options-table th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+.options-table tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.103); 
+}
+/* Row hover styling */
+.options-table tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+.options-table tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+#options-portfolio-card table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+#options-portfolio-card th, #options-portfolio-card td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+#options-portfolio-card th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+#options-portfolio-card tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.103); 
+}
+/* Row hover styling */
+#options-portfolio-card tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+#options-portfolio-card tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 1200px) { /* Increased breakpoint from 1000px to 1200px */
+    .history-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Increased gap from 6px to 10px */
+    font-size: 1rem; /* Increased font size from 0.8rem */
+}
+
+textarea, button {
+    padding: 12px 12px; /* Increased padding from 8px 8px */
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    border: none;
+    font-size: 1rem; /* Increased input text size from 0.75rem */
+    background-color: #1c1c28;
+    color: #fff;
+    width: auto
+}
+
+/* --- SELECT INPUT STYLING (Translucent with Subtle Border) --- */
+select {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+select:hover {
+    background-color: rgba(18, 18, 26, 0.9);
+    border-color: rgba(83, 89, 107, 0.8);
+}
+
+
+input {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: 100%;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border: 2px solid #4a90e2; /* Increased border thickness */
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    font-size: 0.85rem; /* Increased placeholder font from 0.8rem */
+    color: #aaa; 
+    font-weight: 300;
+}
+
+
+/* Buttons */
+button {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    border: none;
+    margin: 2px; /* Increased margin from 1px to 2px */
+}
+
+#submit-comment-button2 {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px;
+    border: none;
+    margin: 2px;
+    width: 100%;
+}
+
+
+.submit-button {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px;
+    border: none;
+    margin: 2px;
+    width: 100%;
+}
+
+button:hover, .submit-button:hover {
+    background-color: #94cdff;
+    transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
+}
+
+button:active, .submit-button:active {
+    transform: translateY(0);
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #1c1c28;
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    overflow: hidden;
+    font-size: 1rem; /* Increased table text size from 0.75rem */
+}
+
+ thead {
+    /* Base background color, very subtle */
+    background-color: rgba(37, 37, 37, 0.238); 
+    /* Removed box-shadow */
+    position: relative; /* CRITICAL: Needed for the pseudo-element positioning */
+    z-index: 1; /* Ensure header is above table body */
+    overflow: hidden; /* Ensures the blurred aura doesn't escape the header bounds */
+}
+
+/* Pseudo-element to create the background aura glow */
+ thead::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Pushes the glow behind the <th> content */
+    pointer-events: none;
+    
+    /* Dual-Color Background: Cyan and Magenta spots */
+    background: 
+        radial-gradient(circle at 10% 80%, rgba(0, 200, 255, 0.15) 0%, transparent 40%), /* Cyan spot */
+        radial-gradient(circle at 90% 20%, rgba(255, 0, 251, 0.15) 0%, transparent 40%); /* Magenta spot */
+    
+    filter: blur(25px); /* Heavy blur for soft, radiating effect */
+    opacity: 0.8;
+}
+
+
+th, td {
+    padding: 8px; /* Increased padding from 5px to 8px */
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+tr:hover {
+    background-color: #2e2e40;
+}
+
+
+
+/* Search */
+
+
+#stock-search {
+    flex: 1;
+    font-size: 1rem; /* Increased font size from 0.75rem */
+    width: 100% !important;
+}
+
+/* Stock/Favorites List */
+#stock-list, #favorite-stocks, #comments-list {
+    list-style: none;
+    margin-top: 8px; /* Increased margin from 5px to 8px */
+    padding-left: 0;
+}
+
+
+
+
+/* Comments Section */
+.stock-symbol-search {
+    display: flex;
+    gap: 8px; /* Increased gap from 4px to 8px */
+    margin-bottom: 8px; /* Increased margin from 5px to 8px */
+}
+
+.new-comment textarea {
+    width: 100%;
+    resize: none;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px; /* Increased width from 5px to 8px */
+}
+
+::-webkit-scrollbar-track {
+    background: #12121a;
+    border-radius: 8px; /* Increased border radius from 6px to 8px */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 8px; /* Increased border radius from 6px to 8px */
+}
+
+/* Stock List Styling */
+#stock-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px; /* Increased margin from 6px to 10px */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Increased gap from 6px to 10px */
+}
+
+#stock-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+#stock-list li:hover {
+    background-color: #2a2a38;
+    transform: translateY(-2px); /* Increased hover lift */
+}
+
+#stock-list li span {
+    font-size: 1rem; /* Increased text size from 0.8rem */
+    color: #ffffff;
+    font-weight: 500;
+}
+
+#stock-list li button {
+    padding: 8px 10px; /* Increased padding from 4px 8px */
+    border-radius: 6px;
+    border: none;
+    background-color: #E0EBFF;
+    color: black;
+    font-size: 0.85rem !important; /* Increased font size from 0.75rem */
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#stock-list li button:hover {
+    background-color: #181c1f;
+    transform: translateY(-2px);
+}
+
+#stock-list li button:active {
+    transform: translateY(0);
+}
+
+
+/* Responsive */
+@media (max-width: 1100px) { /* Increased breakpoint from 900px to 1100px */
+    .container {
+        grid-template-columns: 1fr; /* stacked on smaller screens */
+        padding: 0 15px; /* Increased padding from 10px to 15px */
+    }
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    .main-content {
+        margin-left: 0; /* Remove margin when stacked */
+    }
+    .sidebar {
+        position: flex;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #53596B;
+    }
+}
+
+
+.replay-controls {
+  margin-top: 50px; /* space from the chart/form above */
+  display: flex;
+  gap: 10px; /* space between buttons */
+  align-items: center;
+  flex-wrap: wrap; /* wraps buttons if screen is small */
+}
+
+
+
+.replay-controls button:hover {
+  background-color: #303f9f;
+}
+
+.replay-controls label {
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.replay-controls select {
+  padding: 4px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+
+
+.wallet-balance {
+  font-size: 2rem;
+  color: #fff;
+}
+
+.wallet-balance h3 {
+  font-size: 1.2rem;
+  color: #fff;
+  margin: 0;
+}
+
+.portfolio-container {
+    width: 100%;
+    margin-top: 20px; /* spacing from chart */
+    clear: both; /* if floats are used */
+}
+.speed-bar-wrapper {
+  display: inline-block;
+  position: relative;
+  margin: 20px;
+  border-color: #E0EBFF;
+}
+
+#speed-select {
+  display: none; /* hide the dropdown itself */
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 30px;
+}
+
+.speed-buttons button.active,
+.speed-buttons button:hover {
+  background: #E0EBFF;
+  color: #000000 ;
+  border: 2px solid #E0EBFF
+}
+
+.speed-buttons button {
+  padding: 4px 8px;
+  background: #000000;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 0.1px solid #E0EBFF
+}
+
+.speed-buttons button p{
+  font-size: 30px;
+}
+
+/* Flex container for wallet and scenario */
+.wallet-scenario-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Scenario card styling */
+.scenario-card {
+  flex: 10;
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px; /* optional: keeps the card from getting too wide */
+}
+
+/* Optional: make wrapper responsive */
+@media (max-width: 900px) {
+  .wallet-scenario-wrapper {
+    flex-direction: column;
+  }
+  .scenario-card {
+    max-width: 100%;
+  }
+}
+
+
+
+#reset-zoom {
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#reset-zoom:hover {
+    color: #9ec6f0;
+}
+
+
+.replay-controls {
+  margin-top: 50px; /* space from the chart/form above */
+  display: flex;
+  gap: 10px; /* space between buttons */
+  align-items: center;
+  flex-wrap: wrap; /* wraps buttons if screen is small */
+}
+
+
+
+.replay-controls button:hover {
+  background-color: #303f9f;
+}
+
+.replay-controls label {
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.replay-controls select {
+  padding: 4px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+
+
+.wallet-balance {
+  font-size: 2rem;
+  color: #fff;
+}
+
+.wallet-balance h3 {
+  font-size: 1.2rem;
+  color: #fff;
+  margin: 0;
+}
+
+.portfolio-container {
+    width: 100%;
+    margin-top: 20px; /* spacing from chart */
+    clear: both; /* if floats are used */
+}
+.speed-bar-wrapper {
+  display: inline-block;
+  position: relative;
+  margin: 20px;
+  border-color: #E0EBFF;
+}
+
+#speed-select {
+  display: none; /* hide the dropdown itself */
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 30px;
+}
+
+.speed-buttons button.active,
+.speed-buttons button:hover {
+  background: #E0EBFF;
+  color: #000000 ;
+  border: 2px solid #E0EBFF
+}
+
+.speed-buttons button {
+  padding: 4px 8px;
+  background: #000000;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 0.1px solid #E0EBFF
+}
+
+.speed-buttons button p{
+  font-size: 30px;
+}
+
+/* Flex container for wallet and scenario */
+.wallet-scenario-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Scenario card styling */
+.scenario-card {
+  flex: 10;
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px; /* optional: keeps the card from getting too wide */
+}
+
+/* Optional: make wrapper responsive */
+@media (max-width: 900px) {
+  .wallet-scenario-wrapper {
+    flex-direction: column;
+  }
+  .scenario-card {
+    max-width: 100%;
+  }
+}
+
+
+
+#reset-zoom {
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#reset-zoom:hover {
+    color: #9ec6f0;
+}
+
+
+
+.portfolio-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.positions-section {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.portfolio-chart-container {
+  flex: 1;
+}
+
+
+
+/* Responsive */
+@media (max-width: 900px) {
+  .portfolio-layout {
+    flex-direction: column;
+  }
+}
+
+#stockCardsContainer {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* ===== End Screen Modal ===== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+}
+
+/* Modal content */
+.modal-content {
+  background-color: #1b1b1b;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  color: #fff;
+  width: 90%;
+  max-width: 800px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 20px;
+}
+
+.buttons button {
+  margin: 0 10px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  background-color: #444;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.buttons button:hover {
+  background-color: #666;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Modal content wider */
+.modal-content.endgame {
+  width: 95%;
+  max-width: 1000px; /* allow wider view for portfolio */
+  max-height: 90vh; /* limit vertical growth */
+  overflow-y: auto; /* scroll if content is too tall */
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+    border-radius: 12px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.876);
+    color: #fff;
+    margin: 10px 0px;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+/* Layout for chart + stocks */
+.portfolio-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Chart section */
+.portfolio-chart-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 450px;
+}
+
+/* Stock cards section */
+.positions-section {
+  flex: 2;
+  min-width: 250px;
+  max-height: 400px; /* scroll if too many */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* AI advice container below everything */
+#aiAdviceContainer {
+  margin-top: 15px;
+  text-align: left;
+}
+
+/* Optional: smaller scrollbar */
+.positions-section::-webkit-scrollbar {
+  width: 6px;
+}
+.positions-section::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 3px;
+}
+
+
+.portfolio-chart-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 450px;
+  height: 400px; /* give it an explicit height */
+}
+
+
+
+.loading-dots::after {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    text-align: left;
+    animation: dots 1s steps(3, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+/* Sidebar-safe layout */
+.scenario-details { max-width: 100%; }
+.scenario-details .kv{
+  display:grid;
+  gap:6px 10px;
+  align-items:baseline;
+  margin:4px 0;
+}
+
+
+/* Recommended symbols as wrapping chips */
+.chip-row{
+  display:flex;
+  flex-wrap:wrap;           /* wrap within sidebar width */
+  gap:6px;
+  max-width:100%;
+}
+.chip{
+  padding:2px 8px;
+  border:1px solid #444;
+  border-radius:999px;
+  color:#e0e0e0;
+  background:#111;
+  font-size:12px;
+  max-width:100%;
+}
+
+/* Optional: clamp long descriptions to 3 lines */
+#scenario-description{
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  white-space:normal;        /* allow multi-line, then clamp */
+}
+
+.scenario-details .k {
+  color: rgb(255, 255, 255);
+  font-weight: 600; /* semi-bold labels */
+}
+
+
+.end-header h1 { margin: 0 0 6px; }
+  .end-sub { margin: 2px 0; color:#ddd; }
+  .end-sub.soft { color:#bbb; }
+  .end-summary { 
+    display:grid; gap:10px; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    margin:12px 0 18px;
+  }
+  .card.kpi { background:#111; border:1px solid #333; border-radius:10px; padding:12px; }
+  .kpi-label { font-size:12px; color:#aaa; }
+  .kpi-value { font-size:20px; font-weight:600; margin-top:4px; }
+  .pb-badge { display:flex; align-items:center; justify-content:center; font-weight:600; }
+  .ai-block { margin-top:14px; }
+  .muted { color:#999; }
+  .btn { padding:8px 14px; border-radius:8px; border:none; background:#4a4a4a; color:#fff; cursor:pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.secondary { background:#445; }
+  .btn.ghost { background:transparent; border:1px solid #555; }
+  .end-actions { display:flex; gap:10px; margin-top:12px; }
+
+
+
+
+
+
+  /* Ensure chart container has a fixed height */
+#myChart3.canvas3 {
+    width: 100% !important;
+    height: 475px !important; /* Setting a fixed height for a bigger chart appearance, or a percentage if the parent is fixed */
+}
+
+
+/* Import Outfit font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
+
+/* General Reset & Fonts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px; /* Increased base font from 10px to 13px */
+}
+
+body {
+    background-color: #0a0a0f; /* deeper black */
+    color: #ffffff;
+    line-height: 1.6; /* Increased line height from 1.4 to 1.6 */
+}
+
+h1 {
+    font-size: 2.2rem; /* Increased from 1.5rem to 2.2rem */
+    font-weight: 700;
+    margin-bottom: 10px; /* Increased margin from 5px to 10px */
+    color: #ffffff;
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-top: 12px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
+    text-transform: uppercase; /* Make text uppercase */
+    letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
+}
+
+h4 {
+    font-size: 1.2rem; /* Increased from 0.9rem to 1.2rem */
+    font-weight: 700;
+    margin-bottom: 6px; /* Increased margin from 4px to 6px */
+    color: #ffffff;
+}
+
+/* Container & Layout */
+.content {
+    width: 100%;
+    margin: 15px auto; /* Increased margin from 8px to 15px */
+    padding: 15px; /* Increased padding from 10px to 15px */
+    background-color: #00000080; /* ultra-dark card background */
+    border-radius: 12px; /* Increased border radius from 8px to 12px */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7); /* Adjusted shadow for bigger look */
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 75% 25%;
+    gap: 12px; /* Increased gap from 6px to 12px */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.container2 {
+    display: grid;
+    grid-template-columns: 75% 25%;
+    gap: 12px; /* Increased gap from 6px to 12px */
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.trading-card {
+    padding: 10px 15px; 
+    border-radius: 12px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: 100%;
+    margin: 10px 0px;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+.trading-card select {
+        padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: #12121ABF;
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- CHART WRAPPER: Used to create the strong external aura glow --- */
+.chart-wrapper {
+    position: relative;
+    z-index: 1; /* Establishes a stacking context */
+    margin: 10px 0; /* Controls the spacing outside the whole component */
+    padding: 1px; /* Small padding to ensure the blur isn't clipped */
+    border-radius: 12px;
+    overflow: visible; /* Allows the glow to extend past the wrapper bounds */
+    height: 100%;
+}
+
+/* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
+.chart-wrapper::before {
+    content: '';
+    position: absolute;
+    /* Position slightly outside the bounds of the wrapper */
+    top: -5%;
+    left: -5%;
+    width: 120%;
+    height: 120%;
+    border-radius: 12px;
+    z-index: 0; /* Pushed behind the chart container (z-index 10) */
+    pointer-events: none;
+    
+    /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
+    background: 
+        radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
+        radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);
+    
+    filter: blur(80px); /* Heavy blur for soft, radiating effect */
+    mix-blend-mode: screen; 
+    opacity: 0.8;
+}
+
+/* --- CHART CONTAINER: Combines Frosted Glass, Noise Overlay, and Internal Glow --- */
+.chart-container {
+    /* 1. LAYOUT & STACKING */
+    position: relative; 
+    overflow: hidden; 
+    z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
+    width: 100%;
+    /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
+    border-radius: 12px;
+    /* height: 100%;
+    margin-bottom: 10px; */
+
+    /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
+    /* The external aura is now handled by .chart-wrapper::before */
+    
+    /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
+    background: 
+        /* Layer 1: Inner Dark Fill (Solid color) */
+        #0a0b1f, 
+        /* Layer 2: Frosted Background (Light translucent layer) */
+        linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
+        /* Layer 3: Border Gradient (The thin, fading white border line) */
+        linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.4) 0%,   
+            rgba(255, 255, 255, 0.8) 25%,  
+            rgba(255, 255, 255, 0.8) 75%,  
+            rgba(255, 255, 255, 0.4) 100% 
+        );
+
+    background-clip: content-box, content-box, border-box;
+    background-origin: border-box;
+    padding: 21px; 
+
+    /* Apply the visual frosted effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+/* --- Digital Noise Texture (::before on .chart-container) --- */
+/* Creates the fine, static noise texture over the chart area */
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* SVG data URL for the noise pattern */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+    
+    opacity: 0.3;
+    z-index: 2; 
+    pointer-events: none;
+    border-radius: 12px;
+    -webkit-mask: linear-gradient(#fff, #fff);
+    mask: linear-gradient(#fff, #fff);
+}
+
+/* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
+/* Creates the soft, internal colored glow blobs behind the content */
+.chart-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    width: 150%; 
+    height: 150%;
+    border-radius: 50%; 
+    
+    /* Two radial gradients for the dual-color effect */
+    background: 
+        /* Blue Blob: Top-Left Corner */
+        radial-gradient(circle at 20% 20%, 
+            rgba(0, 200, 255, 0.25) 0%, 
+            transparent 35% 
+        ),
+        /* Purple Blob: Bottom-Right Corner */
+        radial-gradient(circle at 80% 80%, 
+            rgba(255, 0, 251, 0.25) 0%, 
+            transparent 35% 
+        );
+    
+    z-index: -1; 
+    pointer-events: none;
+    mix-blend-mode: screen; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Side-by-side container */
+.history-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 equal columns */
+    gap: 12px; /* Increased gap from 6px to 12px */
+    width: 100%;
+    margin: 10px 0; /* Increased margin from 6px to 10px */
+}
+
+/* Column styling */
+.history-column {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+/* Table styling */
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+.history-column table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+.history-column th, .history-column td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+.history-column th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+.history-column tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.25); 
+}
+/* Row hover styling */
+.history-column tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+.history-column tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+.options-table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+.options-table th, .options-table td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+.options-table th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+.options-table tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.103); 
+}
+/* Row hover styling */
+.options-table tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+.options-table tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+#options-portfolio-card table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.75); 
+    
+    /* Apply glass effect */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+#options-portfolio-card th, #options-portfolio-card td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+#options-portfolio-card th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+#options-portfolio-card tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.103); 
+}
+/* Row hover styling */
+#options-portfolio-card tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+#options-portfolio-card tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+
+
+
+
+
+
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 1200px) { /* Increased breakpoint from 1000px to 1200px */
+    .history-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Increased gap from 6px to 10px */
+    font-size: 1rem; /* Increased font size from 0.8rem */
+}
+
+textarea, button {
+    padding: 12px 12px; /* Increased padding from 8px 8px */
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    border: none;
+    font-size: 1rem; /* Increased input text size from 0.75rem */
+    background-color: #1c1c28;
+    color: #fff;
+    width: auto
+}
+
+/* --- SELECT INPUT STYLING (Translucent with Subtle Border) --- */
+select {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+select:hover {
+    background-color: rgba(18, 18, 26, 0.9);
+    border-color: rgba(83, 89, 107, 0.8);
+}
+
+
+input {
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: 100%;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border: 2px solid #4a90e2; /* Increased border thickness */
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    font-size: 0.85rem; /* Increased placeholder font from 0.8rem */
+    color: #aaa; 
+    font-weight: 300;
+}
+
+
+/* Buttons */
+button {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    border: none;
+    margin: 2px; /* Increased margin from 1px to 2px */
+}
+
+#submit-comment-button2 {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px;
+    border: none;
+    margin: 2px;
+    width: 100%;
+}
+
+
+.submit-button {
+    background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px;
+    border: none;
+    margin: 2px;
+    width: 100%;
+}
+
+button:hover, .submit-button:hover {
+    background-color: #94cdff;
+    transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
+}
+
+button:active, .submit-button:active {
+    transform: translateY(0);
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #1c1c28;
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    overflow: hidden;
+    font-size: 1rem; /* Increased table text size from 0.75rem */
+}
+
+ thead {
+    /* Base background color, very subtle */
+    background-color: rgba(37, 37, 37, 0.238); 
+    /* Removed box-shadow */
+    position: relative; /* CRITICAL: Needed for the pseudo-element positioning */
+    z-index: 1; /* Ensure header is above table body */
+    overflow: hidden; /* Ensures the blurred aura doesn't escape the header bounds */
+}
+
+/* Pseudo-element to create the background aura glow */
+ thead::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Pushes the glow behind the <th> content */
+    pointer-events: none;
+    
+    /* Dual-Color Background: Cyan and Magenta spots */
+    background: 
+        radial-gradient(circle at 10% 80%, rgba(0, 200, 255, 0.15) 0%, transparent 40%), /* Cyan spot */
+        radial-gradient(circle at 90% 20%, rgba(255, 0, 251, 0.15) 0%, transparent 40%); /* Magenta spot */
+    
+    filter: blur(25px); /* Heavy blur for soft, radiating effect */
+    opacity: 0.8;
+}
+
+
+th, td {
+    padding: 8px; /* Increased padding from 5px to 8px */
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+tr:hover {
+    background-color: #2e2e40;
+}
+
+
+
+/* Search */
+
+
+#stock-search {
+    flex: 1;
+    font-size: 1rem; /* Increased font size from 0.75rem */
+    width: 100% !important;
+}
+
+/* Stock/Favorites List */
+#stock-list, #favorite-stocks, #comments-list {
+    list-style: none;
+    margin-top: 8px; /* Increased margin from 5px to 8px */
+    padding-left: 0;
+}
+
+
+
+
+/* Comments Section */
+.stock-symbol-search {
+    display: flex;
+    gap: 8px; /* Increased gap from 4px to 8px */
+    margin-bottom: 8px; /* Increased margin from 5px to 8px */
+}
+
+.new-comment textarea {
+    width: 100%;
+    resize: none;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px; /* Increased width from 5px to 8px */
+}
+
+::-webkit-scrollbar-track {
+    background: #12121a;
+    border-radius: 8px; /* Increased border radius from 6px to 8px */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 8px; /* Increased border radius from 6px to 8px */
+}
+
+/* Stock List Styling */
+#stock-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px; /* Increased margin from 6px to 10px */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Increased gap from 6px to 10px */
+}
+
+#stock-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 12px; 
+    border-radius: 6px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    font-size: 1rem; 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+}
+
+#stock-list li:hover {
+    background-color: #2a2a38;
+    transform: translateY(-2px); /* Increased hover lift */
+}
+
+#stock-list li span {
+    font-size: 1rem; /* Increased text size from 0.8rem */
+    color: #ffffff;
+    font-weight: 500;
+}
+
+#stock-list li button {
+    padding: 8px 10px; /* Increased padding from 4px 8px */
+    border-radius: 6px;
+    border: none;
+    background-color: #E0EBFF;
+    color: black;
+    font-size: 0.85rem !important; /* Increased font size from 0.75rem */
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#stock-list li button:hover {
+    background-color: #181c1f;
+    transform: translateY(-2px);
+}
+
+#stock-list li button:active {
+    transform: translateY(0);
+}
+
+
+/* Responsive */
+@media (max-width: 1100px) { /* Increased breakpoint from 900px to 1100px */
+    .container {
+        grid-template-columns: 1fr; /* stacked on smaller screens */
+        padding: 0 15px; /* Increased padding from 10px to 15px */
+    }
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    .main-content {
+        margin-left: 0; /* Remove margin when stacked */
+    }
+    .sidebar {
+        position: flex;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #53596B;
+    }
+}

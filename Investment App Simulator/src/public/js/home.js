@@ -1,3 +1,4 @@
+
 // home.js
 document.addEventListener("DOMContentLoaded", async () => {
   // -------------------------------
@@ -45,19 +46,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+// Utility function to capitalize the first letter of each word in a string.
+// This handles multi-word names (e.g., 'john doe' -> 'John Doe').
+const capitalizeName = (str) => {
+    if (!str) return '';
+    // Ensure string is lowercased first, split by space, capitalize each word, and rejoin.
+    return str.toLowerCase().split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+};
 
-  async function renderUserInfo() {
+async function renderUserInfo() {
+    // Assuming usernameEl and walletEl are defined globally or earlier in this scope
     const user = await fetchUserDetails();
+    
     if (!user) {
       usernameEl.textContent = "Guest";
       walletEl.textContent = "****";
       return;
     }
 
-    usernameEl.textContent = user.username;
+    // Use the utility function to ensure the username is capitalized, regardless of the original data casing.
+    const capitalizedUsername = capitalizeName(user.username);
+
+    // Update the DOM elements
+    usernameEl.textContent = capitalizedUsername;
     walletEl.setAttribute("data-value", user.wallet);
     walletEl.textContent = "****"; // hidden by default
-  }
+}
 
   walletToggle.addEventListener("click", () => {
     const walletValue = walletEl.getAttribute("data-value");
@@ -102,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // -------------------------------
   // STOCKS PORTFOLIO
   // -------------------------------
+
   async function fetchStocksPortfolio() {
     if (!userId) return;
     try {
@@ -168,33 +185,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = openPositions.map(stock => parseFloat(stock.totalInvested));
       const ctx = document.getElementById("portfolioPieChart").getContext("2d");
 
-      portfolioChart = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: ["#E0EBFF", "#A3C1FF", "#7993FF", "#5368A6", "#2A3C6B", "#0D1A33"],
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: "top" },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((context.raw / total) * 100).toFixed(2);
-                  return `${context.label}: $${context.raw} (${percentage}%)`;
-                }
+   portfolioChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor:  [
+          '#8faefd9a', // Strong Buy
+          '#6d93fa61', // Buy
+          '#5277e541', // Hold
+          '#3c5dc9a8', // Sell
+          '#2a3d7399'  // Strong Sell
+        ],
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { color: '#fff' } },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((context.raw / total) * 100).toFixed(2);
+                return `${context.label}: $${context.raw} (${percentage}%)`;
               }
             }
           }
         }
-      });
+      }
+    });
     }
   }
 
@@ -245,16 +268,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     table.style.marginTop = "10px";
     table.innerHTML = `
       <thead>
-        <tr style="background-color:#000000ff; color:#E0EBFF;">
-          <th style="padding:8px; border:1px solid #E0EBFF;">Underlying Stock</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Total Contracts</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Total Shares</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Active</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Expired</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Open</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Closed</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Realized PnL</th>
-          <th style="padding:8px; border:1px solid #E0EBFF;">Unrealized PnL</th>
+        <tr>
+          <th>Underlying Stock</th>
+          <th>Total Contracts</th>
+          <th>Total Shares</th>
+          <th>Active</th>
+          <th>Expired</th>
+          <th>Open</th>
+          <th>Closed</th>
+          <th>Realized PnL</th>
+          <th>Unrealized PnL</th>
         </tr>
       </thead>
       <tbody></tbody>

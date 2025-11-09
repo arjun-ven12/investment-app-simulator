@@ -1,5 +1,6 @@
 
 
+
 window.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById('back-button');
   backButton.addEventListener('click', (e) => {
@@ -33,31 +34,78 @@ window.addEventListener('DOMContentLoaded', async () => {
             }));
 
             // Chart
-            const ctx = document.getElementById('ohlc-chart').getContext('2d');
-            new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                label: `${symbol} Close Price`,
-                data: lineData,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-                tension: 0.2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                legend: { display: true },
-                tooltip: { mode: 'index', intersect: false }
-                },
-                scales: {
-                x: { type: 'time', time: { unit: 'day' }, ticks: { color: 'white' }, title: { display: true, text: 'Date', color: 'white' } },
-                y: { beginAtZero: false, ticks: { color: 'white' }, title: { display: true, text: 'Close Price', color: 'white' } }
-                }
-            }
-            });
+           const ctx = document.getElementById('ohlc-chart').getContext('2d');
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    datasets: [{
+      label: `${symbol} Close Price`,
+      data: lineData,
+      borderColor: '#E0EBFF', // match theme line color
+      fill: true,
+      tension: 0.1,
+      backgroundColor: function(context) {
+        const chart = context.chart;
+        const { ctx, chartArea } = chart;
+
+        if (!chartArea) return null; // Chart not fully initialized
+
+        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        gradient.addColorStop(0, 'rgba(143,173,253,0.4)'); // top translucent blue
+        gradient.addColorStop(1, 'rgba(143,173,253,0)');   // bottom transparent
+        return gradient;
+      }
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: 'white' } },
+      tooltip: { mode: 'index', intersect: false }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'day', tooltipFormat: 'MMM dd, yyyy HH:mm' },
+        ticks: { color: 'white' },
+        grid: {
+          drawOnChartArea: true,
+          color: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return 'rgba(255,255,255,0.1)';
+            const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+            gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+            return gradient;
+          }
+        },
+        title: { display: true, text: 'Date', color: 'white' }
+      },
+      y: {
+        beginAtZero: false,
+        ticks: { color: 'white' },
+        grid: {
+          drawOnChartArea: true,
+          color: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return 'rgba(255,255,255,0.1)';
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
+            gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
+            return gradient;
+          }
+        },
+        title: { display: true, text: 'Close Price', color: 'white' }
+      }
+    }
+  }
+});
 
             // Autofill latest price
             const latestPrice = lineData[lineData.length - 1]?.y ?? 0;
