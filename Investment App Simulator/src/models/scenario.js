@@ -5,15 +5,25 @@ const { ScenarioAttemptStatus } = require("@prisma/client");
 
 // --- SCENARIO CRUD ---
 module.exports.createScenario = async (data) => {
+  // Debug: verify incoming data
+  console.log("🧩 Received Scenario Payload:", data);
+
+  // Basic field validation
+  if (!data.title || !data.startDate || !data.endDate) {
+    throw new Error("Missing required fields (title, startDate, endDate).");
+  }
+
   return prisma.scenario.create({
     data: {
       title: data.title,
-      description: data.description,
-      startDate: new Date(data.startDate),
+      description: data.description || null,
+      startDate: new Date(data.startDate), // safely parse ISO string
       endDate: new Date(data.endDate),
-      startingBalance: data.startingBalance,
-      allowedStocks: data.allowedStocks || [],
-      rules: data.rules || null,
+      startingBalance: new Prisma.Decimal(data.startingBalance || "100000.00"),
+      region: data.region || null,
+      lat: data.lat ?? null,
+      lng: data.lng ?? null,
+      volatility: data.volatility || "medium"
     },
   });
 };

@@ -46,7 +46,6 @@ body {
   z-index: 0;
 }
 #globe-layer canvas {
-  transform: translateX(-25vw);
   transition: transform 0.6s ease;
 }
 
@@ -379,4 +378,26 @@ body {
 }
 .glass-btn:hover {
   background: rgba(255, 255, 255, 0.18);
+}
+.globe-tooltip {
+  background: rgba(20,25,35,0.88);
+  color: #eaf3ff;
+  font-family: 'Outfit', sans-serif;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 13px;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 9999; /* ✅ ensure above globe canvas */
+}
+
+
+#globe-layer canvas {
+  position: relative;
+  z-index: 1;
+}
+#globeTooltip {
+  z-index: 9999 !important;
+  position: fixed;
 }

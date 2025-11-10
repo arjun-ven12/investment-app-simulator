@@ -1,93 +1,136 @@
 // ============================================================
-// BLACKSEALED — Energy Pulse Globe (Cinematic Orb Nodes)
+// BLACKSEALED — Live Scenario Globe (Database Synced + Working Hover Tooltip)
 // ============================================================
 
-console.log("🌌 BlackSealed Globe — Energy Pulse Mode");
-
-const scenarios = [
-  { id: "tsh-2025", name: "Trade Tariff Shock", year: 2025, region: "Asia", lat: 35, lng: 105, volatility: "high" },
-  { id: "oil-2024", name: "Oil Supply Crunch", year: 2024, region: "MENA", lat: 25, lng: 45, volatility: "med" },
-  { id: "cov-2020", name: "Pandemic Recession", year: 2020, region: "US", lat: 40, lng: -95, volatility: "extreme" },
-  { id: "inf-2022", name: "Inflation Reversal", year: 2022, region: "EU", lat: 48, lng: 10, volatility: "low" }
-];
+console.log("🌍 BlackSealed Globe — Live Scenario Nodes");
 
 const VOL_COL = {
   low: "#4ddfb5",
   med: "#4fa8ff",
   high: "#7a88ff",
-  extreme: "#ff66c4"
+  extreme: "#ff66c4",
 };
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const globeEl = document.getElementById("globe-layer");
   if (!globeEl) return console.error("❌ Globe element not found");
 
-  const globe = Globe({ rendererConfig: { alpha: true, antialias: true } })(globeEl)
+  // --- Initialize Globe ---
+  const globe = Globe({
+    rendererConfig: { alpha: true, antialias: true },
+    waitForGlobeReady: true,
+  })(globeEl)
     .globeImageUrl("//unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
     .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
     .showAtmosphere(true)
     .atmosphereColor("#172036")
     .atmosphereAltitude(0.4)
     .backgroundColor("rgba(0,0,0,0)")
-    .pointOfView({ lat: 5, lng: -55, altitude: 2.5 }, 1500)
-    .customThreeObject((d) => {
-      const { THREE } = globe;
-      const group = new THREE.Group();
-      const color = VOL_COL[d.volatility];
+    .pointOfView({ lat: 15, lng: 100, altitude: 2.4 })
+    .pointAltitude(0.06)
+    .pointRadius(0.25)
+    .pointColor((d) => VOL_COL[d.volatility] || "#4fa8ff");
 
-      // 🔮 core energy sphere
-      const core = new THREE.Mesh(
-        new THREE.SphereGeometry(0.06, 32, 32),
-        new THREE.MeshBasicMaterial({
-          color,
-          transparent: true,
-          opacity: 0.95,
-          blending: THREE.AdditiveBlending
-        })
-      );
+// --- Move the actual globe mesh left ---
+globe.object3D().children.forEach(obj => {
+  if (obj.type === "Group" || obj.type === "Mesh") {
+    obj.position.x = -1.5; // move further left if needed
+  }
+});
 
-      // ✧ luminous shell
-      const aura = new THREE.Mesh(
-        new THREE.SphereGeometry(0.11, 32, 32),
-        new THREE.MeshBasicMaterial({
-          color,
-          transparent: true,
-          opacity: 0.2,
-          blending: THREE.AdditiveBlending,
-          side: THREE.BackSide
-        })
-      );
-      core.add(aura);
-      group.add(core);
+  // --- Fetch scenarios from backend ---
+  const token = localStorage.getItem("token");
+  let allScenarios = [];
+  try {
+    const res = await fetch("/scenarios/all", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (data.success) allScenarios = data.scenarios;
+  } catch (err) {
+    console.error("⚠️ Failed to fetch scenarios:", err);
+  }
 
-      // subtle pulse
-      const speed = 0.0012 + Math.random() * 0.0008;
-      function pulse() {
-        const t = Date.now() * speed;
-        const s = 1 + 0.18 * Math.sin(t);
-        aura.scale.set(s, s, s);
-        requestAnimationFrame(pulse);
-      }
-      pulse();
+  if (!allScenarios?.length) {
+    console.warn("⚠️ No scenario data found in database.");
+    return;
+  }
 
-      return group;
-    })
-    .pointsData(scenarios)
-    .pointLat("lat")
-    .pointLng("lng")
-    .pointAltitude(() => 0.015)
-    .pointColor((d) => VOL_COL[d.volatility]);
+  const mapped = allScenarios
+    .filter((s) => s.lat && s.lng)
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      lat: s.lat,
+      lng: s.lng,
+      region: s.region || "Unknown",
+      volatility: s.volatility?.toLowerCase() || "med",
+    }));
 
-  // --- Controls ---
+  globe.pointsData(mapped);
+
+  // --- Create tooltip element ---
+  const tooltip = document.createElement("div");
+  tooltip.id = "globeTooltip";
+  Object.assign(tooltip.style, {
+    position: "fixed",
+    background: "rgba(20,25,35,0.9)",
+    color: "#eaf3ff",
+    padding: "8px 12px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "8px",
+    fontFamily: "Outfit, sans-serif",
+    fontSize: "13px",
+    pointerEvents: "none",
+    backdropFilter: "blur(8px)",
+    zIndex: "9999",
+    display: "none",
+    opacity: "0",
+    transition: "opacity 0.2s ease",
+  });
+  document.body.appendChild(tooltip);
+
+  // --- Enable raycaster interactivity ---
   const controls = globe.controls();
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.25;
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.25;
+  controls.enableZoom = false;
 
-  // --- Transparent background ---
+  // --- Hover logic ---
+  let lastHover = null;
+  globe.onPointHover((point) => {
+    if (point !== lastHover) {
+      lastHover = point;
+      globe.pointAltitude((d) => (d === point ? 0.12 : 0.06));
+      globe.pointRadius((d) => (d === point ? 0.4 : 0.25));
+    }
+
+    if (point) {
+      tooltip.innerHTML = `
+        <strong>${point.title}</strong><br>
+        <span style="color:#9bb5cc;">${point.region}</span><br>
+        Volatility: <span style="color:${VOL_COL[point.volatility]}">
+          ${point.volatility.toUpperCase()}</span>
+      `;
+      tooltip.style.display = "block";
+      tooltip.style.opacity = "1";
+    } else {
+      tooltip.style.opacity = "0";
+      setTimeout(() => (tooltip.style.display = "none"), 150);
+    }
+  });
+
+  // --- Tooltip follows mouse ---
+  window.addEventListener("mousemove", (e) => {
+    tooltip.style.left = e.clientX + 16 + "px";
+    tooltip.style.top = e.clientY + 16 + "px";
+  });
+
+  // --- Renderer cleanup ---
   const renderer = globe.renderer();
   renderer.setClearColor(0x000000, 0);
 
-  console.log("✅ Energy pulse orbs active — no cylinders, transparent background");
+  console.log(`✅ ${mapped.length} scenario nodes visible on globe`);
 });

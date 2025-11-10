@@ -518,8 +518,6 @@ model Scenario {
   startDate       DateTime
   endDate         DateTime
   startingBalance Decimal  @db.Decimal(10, 2) // <-- two decimal places
-  allowedStocks   String[]
-  rules           Json?
   region          String?  // e.g., "Asia", "Europe", "US"
   lat             Float?
   lng             Float?

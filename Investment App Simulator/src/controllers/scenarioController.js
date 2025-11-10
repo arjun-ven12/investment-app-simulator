@@ -4,11 +4,21 @@ const { broadcastScenarioMarketUpdate, broadcastScenarioLimitUpdate, broadcastSc
 // --- CRUD Controllers ---
 module.exports.createScenarioController = async (req, res) => {
   try {
+    console.log("📩 Incoming scenario request:", req.body);
+
     const scenario = await scenarioModel.createScenario(req.body);
-    return res.status(201).json({ success: true, scenario });
+
+    return res.status(201).json({
+      success: true,
+      message: "Scenario created successfully",
+      scenario
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: err.message });
+    console.error("❌ Scenario creation error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 
