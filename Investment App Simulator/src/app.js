@@ -111,6 +111,11 @@ app.use((error, req, res, next) => {
     console.error('Error:', error.message);
     res.status(error.status || 500).json({ error: error.message || 'Unknown Server Error!' });
 });
+app.get("/geo/countries", async (req, res) => {
+  const response = await fetch("https://unpkg.com/three-globe/example/datasets/ne_110m_admin_0_countries.geojson");
+  const data = await response.json();
+  res.json(data);
+});
 
 module.exports = app;
 

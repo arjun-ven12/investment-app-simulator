@@ -21,7 +21,24 @@
       <button id="viewAllBtn" class="glass-btn">View All Scenarios</button>
     </div>
   </section>
+<section id="region-timeline" class="timeline-overlay">
+  <div class="timeline-inner">
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow left" id="timeline-prev">‹</button>
 
+    <!-- Main Line -->
+    <div class="timeline-line">
+      <div id="timeline-nodes"></div>
+    </div>
+
+    <button class="nav-arrow right" id="timeline-next">›</button>
+  </div>
+
+  <!-- Timeline Detail Panel -->
+  <div id="timeline-detail" class="timeline-detail">
+    <!-- dynamically filled by globe.js -->
+  </div>
+</section>
   <!-- 🧭 DASHBOARD -->
   <section id="dashboard-layer" class="view-layer active">
     <div class="dashboard">
