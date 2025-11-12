@@ -687,3 +687,28 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
   background: rgba(255,255,255,0.2);
   transform: rotate(90deg);
 }
+.region-header {
+  position: fixed;
+  top: 40px;
+  left: 80px;
+  z-index: 5;
+  color: #eaf3ff;
+  font-family: 'Outfit', sans-serif;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.region-header.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.region-header h2 {
+  font-size: 1.6rem;
+  color: #4ddfb5;
+  margin: 0 0 6px;
+}
+.region-header p {
+  font-size: 0.9rem;
+  color: #9bb5cc;
+  margin: 0;
+}

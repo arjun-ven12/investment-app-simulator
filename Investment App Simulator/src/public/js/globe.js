@@ -586,30 +586,37 @@ window.addEventListener("DOMContentLoaded", async () => {
   // ============================================================
   let activeRegion = null; // track which continent is selected
 
-  function selectRegion(region) {
-    if (activeRegion === region) return; // already open, ignore
-    activeRegion = region;
+function selectRegion(region) {
+  if (activeRegion === region) return;
+  activeRegion = region;
 
-    // --- Filter region scenarios ---
-    const regionEvents = mapped.filter((s) => {
-      const r = (s.region || "").toLowerCase();
-      const target = region.toLowerCase();
-      if (r.includes("global")) return true;
-      if (r.includes(target) || target.includes(r)) return true;
-      const map = {
-        asia: ["asia", "apac", "asia-pacific", "east asia", "oceania"],
-        europe: ["europe", "eu", "emea"],
-        africa: ["africa", "mena", "middle east", "north africa"],
-        northamerica: ["usa", "america", "north america"],
-        southamerica: ["south america", "latam"],
-        oceania: ["oceania", "australia", "new zealand"],
-      };
-      return map[target]?.some((alias) => r.includes(alias));
-    });
+  // --- Filter region scenarios ---
+  const regionEvents = mapped.filter((s) => {
+    const r = (s.region || "").toLowerCase();
+    const target = region.toLowerCase();
+    if (r.includes("global")) return true;
+    if (r.includes(target) || target.includes(r)) return true;
+    const map = {
+      asia: ["asia", "apac", "asia-pacific", "east asia", "oceania"],
+      europe: ["europe", "eu", "emea"],
+      africa: ["africa", "mena", "middle east", "north africa"],
+      northamerica: ["usa", "america", "north america"],
+      southamerica: ["south america", "latam"],
+      oceania: ["oceania", "australia", "new zealand"],
+    };
+    return map[target]?.some((alias) => r.includes(alias));
+  });
 
-    showRegionTimeline(regionEvents);
-    openTimelineAnimation(region);
-  }
+  // 🪄 Show header
+  const header = document.getElementById("region-header");
+  header.querySelector("#region-name").textContent = region;
+  header.querySelector("#region-meta").textContent = `${regionEvents.length} Scenarios`;
+  header.classList.add("active");
+
+  showRegionTimeline(regionEvents);
+  openTimelineAnimation(region);
+}
+
 
   // 🧭 Animate Globe and Show Timeline
   function openTimelineAnimation(region) {
@@ -643,22 +650,42 @@ window.addEventListener("DOMContentLoaded", async () => {
     activeRegion = null;
   }
 
-  function selectTimelineNode(scenario, index) {
-    const nodes = document.querySelectorAll(".timeline-node");
-    const detail = document.getElementById("timeline-detail");
+function selectTimelineNode(scenario, index) {
+  const nodes = document.querySelectorAll(".timeline-node");
+  const detail = document.getElementById("timeline-detail");
 
-    nodes.forEach((n, i) => n.classList.toggle("active", i === index));
+  nodes.forEach((n, i) => n.classList.toggle("active", i === index));
 
-    detail.classList.remove("show");
-    setTimeout(() => {
-      detail.innerHTML = `
+  const start = new Date(scenario.startDate).toLocaleDateString("en-GB", {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+  const end = new Date(scenario.endDate).toLocaleDateString("en-GB", {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+
+  detail.classList.remove("show");
+  setTimeout(() => {
+    detail.innerHTML = `
       <h3>${String(index + 1).padStart(2, "0")} — ${scenario.title}</h3>
-      <p>${scenario.desc || "Explore market impact and responses."}</p>
+      <p>${scenario.description || "Explore market impact and responses."}</p>
+      
+      <div class="detail-meta">
+        <div><strong>📅</strong> ${start} → ${end}</div>
+        <div><strong>💰</strong> Starting Balance: $${parseFloat(scenario.startingBalance).toFixed(2)}</div>
+        <div><strong>⚡</strong> Volatility: 
+          <span style="color:${VOL_COL[scenario.volatility?.toLowerCase()] || '#58b9ff'}">
+            ${scenario.volatility || 'n/a'}
+          </span>
+        </div>
+        <div><strong>🌍</strong> Region: ${scenario.region || 'Unknown'}</div>
+      </div>
+
       <a href="scenario-console.html?id=${scenario.id}">Open Console</a>
     `;
-      detail.classList.add("show");
-    }, 200);
-  }
+    detail.classList.add("show");
+  }, 200);
+}
+
 
 
   window.openScenario = (id) => {
