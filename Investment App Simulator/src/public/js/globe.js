@@ -372,14 +372,14 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
 
     });
-// Smooth truncation (no word cutting)
-function truncateText(text, maxLength) {
-  if (!text) return "";
-  if (text.length <= maxLength) return text;
-  const trimmed = text.slice(0, maxLength);
-  const lastSpace = trimmed.lastIndexOf(" ");
-  return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "...";
-}
+  // Smooth truncation (no word cutting)
+  function truncateText(text, maxLength) {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    const trimmed = text.slice(0, maxLength);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "...";
+  }
 
   // ============================================================
   // 🧭 Hover Tooltip
@@ -536,17 +536,17 @@ function truncateText(text, maxLength) {
   // ============================================================
   // 🧩 Mission Popup
   // ============================================================
-function showScenarioPopup(data) {
-  let modal = document.getElementById("scenarioPopup");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "scenarioPopup";
-    modal.innerHTML = `
+  function showScenarioPopup(data) {
+    let modal = document.getElementById("scenarioPopup");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "scenarioPopup";
+      modal.innerHTML = `
       <div class="briefing-container">
         <div class="briefing-card">
           <div class="briefing-glow"></div>
           <div class="briefing-header">
-            <span class="region-tag">${data.region || "Global"}</span>
+           <span class="region-tag white">${data.region || "Global"}</span>
             <span class="volatility-tag ${data.volatility?.toLowerCase() || "neutral"}">
               ${(data.volatility || "N/A").toUpperCase()}
             </span>
@@ -556,7 +556,7 @@ function showScenarioPopup(data) {
           <div class="briefing-meta">
             <div><strong>Start:</strong> ${new Date(data.startDate).toLocaleDateString()}</div>
             <div><strong>End:</strong> ${new Date(data.endDate).toLocaleDateString()}</div>
-            <div><strong>Starting Balance:</strong> $${parseFloat(data.startingBalance).toLocaleString()}</div>
+            <div><strong>Starting Balance:</strong> $${Math.round(data.startingBalance).toLocaleString()}</div>
           </div>
           <div class="briefing-actions">
             <button id="joinBtn">Join Mission</button>
@@ -565,30 +565,30 @@ function showScenarioPopup(data) {
         </div>
       </div>
     `;
-    document.body.appendChild(modal);
-  }
-
-  modal.style.display = "flex";
-
-  modal.querySelector("#joinBtn").onclick = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Please log in first.");
-    try {
-      const res = await fetch(`/scenarios/${data.id}/join`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const result = await res.json();
-      if (result.success) {
-        window.open(`scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`, "_blank");
-      } else alert(result.message || "Failed to join scenario.");
-    } catch (err) {
-      console.error("❌ Error joining scenario:", err);
+      document.body.appendChild(modal);
     }
-    modal.remove();
-  };
-  modal.querySelector("#cancelBtn").onclick = () => modal.remove();
-}
+
+    modal.style.display = "flex";
+
+    modal.querySelector("#joinBtn").onclick = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return alert("Please log in first.");
+      try {
+        const res = await fetch(`/scenarios/${data.id}/join`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await res.json();
+        if (result.success) {
+          window.open(`scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`, "_blank");
+        } else alert(result.message || "Failed to join scenario.");
+      } catch (err) {
+        console.error("❌ Error joining scenario:", err);
+      }
+      modal.remove();
+    };
+    modal.querySelector("#cancelBtn").onclick = () => modal.remove();
+  }
 
 
   // ============================================================
@@ -598,6 +598,20 @@ function showScenarioPopup(data) {
     const timeline = document.getElementById("region-timeline");
     const nodeContainer = document.getElementById("timeline-nodes");
     const detail = document.getElementById("timeline-detail");
+    // ✨ define these FIRST
+    const regionNameRaw = activeRegion || scenario.region || "Unknown";
+    const regionName = regionNameRaw.replace(/([a-z])([A-Z])/g, '$1 $2');
+    const total = currentRegionEvents.length;
+    const current = index + 1;
+
+    // 🔽 then create the label
+    const regionLabel = document.getElementById("timeline-region-label");
+    if (regionLabel) regionLabel.remove();
+
+    const newLabel = document.createElement("div");
+    newLabel.id = "timeline-region-label";
+    newLabel.innerHTML = `${regionName} • ${current}/${total}`;
+    document.getElementById("region-timeline").appendChild(newLabel);
     if (!timeline || !nodeContainer) return;
 
     nodeContainer.innerHTML = "";
@@ -677,11 +691,11 @@ function showScenarioPopup(data) {
   function selectRegion(region) {
     if (activeRegion === region) return;
     activeRegion = region;
-// Clear previous continent glow
-if (activeGlow) {
-  scene.remove(activeGlow);
-  activeGlow = null;
-}
+    // Clear previous continent glow
+    if (activeGlow) {
+      scene.remove(activeGlow);
+      activeGlow = null;
+    }
 
     // --- Filter region scenarios ---
     const regionEvents = mapped.filter((s) => {
@@ -738,52 +752,106 @@ if (activeGlow) {
     activeRegion = null;
   }
 
-  function selectTimelineNode(scenario, index) {
-    const nodes = document.querySelectorAll(".timeline-node");
-    const detail = document.getElementById("timeline-detail");
+ async function selectTimelineNode(scenario, index) {
+  const nodes = document.querySelectorAll(".timeline-node");
+  const detail = document.getElementById("timeline-detail");
 
-    nodes.forEach((n, i) => n.classList.toggle("active", i === index));
+  nodes.forEach((n, i) => n.classList.toggle("active", i === index));
 
-    const start = new Date(scenario.startDate).toLocaleDateString("en-GB", {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-    const end = new Date(scenario.endDate).toLocaleDateString("en-GB", {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-
-    // ✨ get region name and total count for that region
+  // === Region label ===
+  const regionTimeline = document.getElementById("region-timeline");
+  if (regionTimeline) {
+    let label = document.getElementById("timeline-region-label");
+    if (!label) {
+      label = document.createElement("div");
+      label.id = "timeline-region-label";
+      regionTimeline.appendChild(label);
+    }
     const regionNameRaw = activeRegion || scenario.region || "Unknown";
     const regionName = regionNameRaw.replace(/([a-z])([A-Z])/g, '$1 $2');
-    const total = currentRegionEvents.length;
-    const current = index + 1;
+    label.innerHTML = `${regionName} • ${index + 1}/${currentRegionEvents.length}`;
+    label.classList.add("show");
+  }
 
-    detail.classList.remove("show");
-    setTimeout(() => {
-      detail.innerHTML = `
+  // === Card fade animation ===
+  detail.classList.remove("show");
+  setTimeout(async () => {
+    const token = localStorage.getItem("token");
+    let joined = false;
+
+    if (token) {
+      try {
+        const res = await fetch("/scenarios/joined", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const joinedIds = data.scenarios?.map((s) => s.id) || [];
+        joined = joinedIds.includes(scenario.id);
+      } catch (err) {
+        console.warn("⚠️ Could not check joined status:", err);
+      }
+    }
+
+    // === Mission Card Content ===
+    detail.innerHTML = `
       <div class="detail-header">
-        <h3>${String(current).padStart(2, "0")} — ${scenario.title}</h3>
-        <span class="detail-region">
-           ${regionName} • ${current}/${total}
-        </span>
+        <h3>${String(index + 1).padStart(2, "0")} — ${scenario.title}</h3>
       </div>
-
       <p>${scenario.description || "Explore market impact and responses."}</p>
-      
+
       <div class="detail-meta">
-        <div><strong></strong> ${start} → ${end}</div>
-        <div><strong></strong> Starting Balance: $${parseFloat(scenario.startingBalance).toFixed(2)}</div>
-        <div><strong></strong> Volatility: 
+        <div><strong>Duration:</strong> ${new Date(scenario.startDate).toLocaleDateString()} → ${new Date(scenario.endDate).toLocaleDateString()}</div>
+        <div><strong>Starting Balance:</strong> $${parseFloat(scenario.startingBalance).toLocaleString()}</div>
+        <div><strong>Volatility:</strong> 
           <span style="color:${VOL_COL[scenario.volatility?.toLowerCase()] || '#58b9ff'}">
             ${scenario.volatility || 'n/a'}
           </span>
         </div>
       </div>
 
-      <a href="scenario-console.html?id=${scenario.id}">Open Console</a>
+      <div class="detail-actions">
+        <button id="joinMissionBtn" class="join-btn ${joined ? 'joined' : ''}">
+          ${joined ? 'Joined' : 'Join Mission'}
+        </button>
+      </div>
     `;
-      detail.classList.add("show");
-    }, 200);
-  }
+
+    // === Button handler ===
+    const joinBtn = document.getElementById("joinMissionBtn");
+    if (!joined) {
+      joinBtn.onclick = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return alert("Please log in first.");
+        joinBtn.disabled = true;
+        joinBtn.textContent = "Joining...";
+        try {
+          const res = await fetch(`/scenarios/${scenario.id}/join`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+          if (result.success) {
+            joinBtn.textContent = "Joined";
+            joinBtn.classList.add("joined");
+          } else {
+            joinBtn.disabled = false;
+            joinBtn.textContent = "Join Mission";
+            alert(result.message || "Failed to join scenario.");
+          }
+        } catch (err) {
+          console.error("❌ Join mission failed:", err);
+          joinBtn.disabled = false;
+          joinBtn.textContent = "Join Mission";
+        }
+      };
+    } else {
+      joinBtn.disabled = true;
+    }
+
+    detail.classList.add("show");
+  }, 150);
+}
+
 
 
 

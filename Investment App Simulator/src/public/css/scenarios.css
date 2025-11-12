@@ -760,7 +760,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
 }
 .timeline-detail {
   position: relative;
-  margin-top: 45px;
+  margin-top: -15px;
   background: rgba(12, 14, 20, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
@@ -1066,4 +1066,69 @@ h2 {
 #joinBtn:active {
   transform: scale(0.97);
   box-shadow: 0 0 15px rgba(77,223,181,0.8);
+}
+#timeline-region-label {
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.05rem;
+  color: #ffffff93;
+  letter-spacing: 0.4px;
+  font-weight: 100;
+  text-shadow: 0 0 12px rgba(77, 223, 181, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  margin-bottom: 350px;
+  font-size: smaller;
+}
+#timeline-region-label.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+.join-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: transparent;
+  color: #ffffffd2;
+  border: 1px rgba(255, 255, 255, 0.452) solid;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.join-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, hsl(0, 0%, 100%), #c8e8ff);
+  color: black;
+}
+.join-btn.joined {
+  background: rgba(255,255,255,0.2);
+  color: #eaf3ff;
+  cursor: default;
+}
+.timeline-detail {
+  font-family: 'Outfit', sans-serif !important;
+  color: #eaf3ff;
+}
+
+.timeline-detail h3,
+.timeline-detail p,
+.timeline-detail strong,
+.timeline-detail span,
+.timeline-detail div,
+.timeline-detail button,
+.timeline-detail a {
+  font-family: 'Outfit', sans-serif !important;
+}/* Hide hover tooltip by default */
+.hover-tooltip {
+  display: none;
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: 'Outfit', sans-serif;
+  color: #eaf3ff;
+  z-index: 50;
 }
