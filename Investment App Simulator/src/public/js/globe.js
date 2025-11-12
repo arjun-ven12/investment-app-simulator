@@ -58,7 +58,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     waitForGlobeReady: true,
   })(globeEl)
     .enablePointerInteraction(true)
-    .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
+    .globeImageUrl("//unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
     .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
     .showAtmosphere(true)
     .atmosphereColor("#0e1525")
@@ -92,61 +92,97 @@ window.addEventListener("DOMContentLoaded", async () => {
       .customLayerData(mapped)
       .customThreeObject((d) => {
         const color = VOL_COL[d.volatility?.toLowerCase()] || "#58b9ff";
+
+        // === Core orb (larger + stronger emissive) ===
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.9, 32, 32),
+          new THREE.SphereGeometry(1.7, 64, 64),
           new THREE.MeshStandardMaterial({
             color,
             emissive: color,
-            emissiveIntensity: 4.5,
-            roughness: 0.25,
-            metalness: 0.7,
+            emissiveIntensity: 7.2,
+            roughness: 0.1,
+            metalness: 0.9,
             transparent: true,
             opacity: 0.95,
           })
         );
 
+        // === Tall energy beam ===
         const beam = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.12, 0.12, 5, 32, 1, true),
-          new THREE.MeshStandardMaterial({
+          new THREE.CylinderGeometry(0.18, 0.06, 8, 48, 1, true),
+          new THREE.MeshBasicMaterial({
             color,
-            emissive: color,
-            emissiveIntensity: 2.5,
             transparent: true,
-            opacity: 0.4,
+            opacity: 0.5,
+            blending: THREE.AdditiveBlending,
             side: THREE.DoubleSide,
             depthWrite: false,
           })
         );
-        beam.position.y = 2.5;
+        beam.position.y = 4;
 
+        // === Breathing aura ===
         const aura = new THREE.Mesh(
-          new THREE.SphereGeometry(1.2, 32, 32),
+          new THREE.SphereGeometry(2.2, 48, 48),
           new THREE.MeshBasicMaterial({
             color,
             transparent: true,
-            opacity: 0.1,
+            opacity: 0.22,
             blending: THREE.AdditiveBlending,
+            depthWrite: false,
           })
         );
 
+        // === Wider glowing ring ===
         const ring = new THREE.Mesh(
-          new THREE.RingGeometry(0.6, 0.85, 64),
+          new THREE.RingGeometry(1.1, 1.6, 128),
           new THREE.MeshBasicMaterial({
             color,
             transparent: true,
-            opacity: 0.3,
+            opacity: 0.45,
             side: THREE.DoubleSide,
             blending: THREE.AdditiveBlending,
+            depthWrite: false,
           })
         );
         ring.rotation.x = -Math.PI / 2;
-        ring.position.y = 0.02;
+        ring.position.y = 0.1;
 
+        // === Spark shimmer ===
+        const spark = new THREE.Points(
+          new THREE.BufferGeometry().setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute([0, 0, 0], 3)
+          ),
+          new THREE.PointsMaterial({
+            size: 3,
+            color,
+            transparent: true,
+            opacity: 1,
+            blending: THREE.AdditiveBlending,
+          })
+        );
+
+        // === Group + animation ===
         const group = new THREE.Group();
-        group.add(orb, beam, aura, ring);
-        group.userData = { orb, beam, aura, ring, data: d };
+        group.add(orb, beam, aura, ring, spark);
+        group.userData = { orb, beam, aura, ring, spark, data: d };
+
+        const clock = new THREE.Clock();
+        const pulseSpeed = { low: 0.6, medium: 1, high: 1.4, extreme: 1.8 }[d.volatility?.toLowerCase()] || 1;
+
+        (function animate() {
+          const t = clock.getElapsedTime() * pulseSpeed;
+          aura.scale.setScalar(1 + 0.08 * Math.sin(t * 2));
+          ring.rotation.z = t * 0.5;
+          beam.material.opacity = 0.35 + 0.2 * Math.sin(t * 2.5);
+          spark.material.opacity = 0.8 + 0.3 * Math.sin(t * 4);
+          requestAnimationFrame(animate);
+        })();
+
         return group;
       })
+
       .customThreeObjectUpdate((obj, d) => {
         if (!d.lat || !d.lng) return;
         const { x, y, z } = globe.getCoords(d.lat, d.lng, 0);
@@ -257,8 +293,8 @@ window.addEventListener("DOMContentLoaded", async () => {
       globe
         .polygonsData(geo.features)
         .polygonCapColor(() => "rgba(30, 40, 60, 0.05)")
-        .polygonSideColor(() => "rgba(255,255,255,0.03)")
-        .polygonStrokeColor(() => "rgba(180,200,255,0.25)")
+        .polygonSideColor(() => "rgba(255, 255, 255, 0.77)")
+        .polygonStrokeColor(() => "rgba(255, 255, 255, 1)")
         .polygonAltitude(0.003)
         .polygonLabel(({ properties: d }) => `${d.ADMIN}`)
       // --- Store hover handler so we can reattach later ---
@@ -268,8 +304,8 @@ window.addEventListener("DOMContentLoaded", async () => {
             d === activeCountry
               ? glowColor
               : d === hoverD
-                ? "rgba(77,223,181,0.8)"
-                : "rgba(180,200,255,0.25)"
+                ? "rgba(77, 145, 223, 0.8)"
+                : "rgba(255, 255, 255, 0.25)"
           )
           .polygonAltitude(d =>
             d === hoverD || d === activeCountry ? 0.01 : 0.003
@@ -280,7 +316,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         .polygonsData(geo.features)
         .polygonCapColor(() => "rgba(30, 40, 60, 0.05)")
         .polygonSideColor(() => "rgba(255,255,255,0.03)")
-        .polygonStrokeColor(() => "rgba(180,200,255,0.25)")
+        .polygonStrokeColor(() => "rgba(0, 0, 0, 0.53)")
         .polygonAltitude(0.003)
         .polygonLabel(({ properties: d }) => `${d.ADMIN}`)
         .onPolygonHover(hoverHandler)
@@ -336,6 +372,14 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
 
     });
+// Smooth truncation (no word cutting)
+function truncateText(text, maxLength) {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  const trimmed = text.slice(0, maxLength);
+  const lastSpace = trimmed.lastIndexOf(" ");
+  return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "...";
+}
 
   // ============================================================
   // 🧭 Hover Tooltip
@@ -343,28 +387,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   let activePoint = null;
-  const tooltip = (() => {
-    const tip = document.createElement("div");
-    Object.assign(tip.style, {
-      position: "fixed",
-      background: "rgba(20,25,35,0.9)",
-      color: "#eaf3ff",
-      padding: "8px 12px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "8px",
-      fontFamily: "Outfit,sans-serif",
-      fontSize: "13px",
-      pointerEvents: "none",
-      backdropFilter: "blur(8px)",
-      zIndex: "9999",
-      display: "none",
-      opacity: "0",
-      transition: "opacity 0.2s ease",
-    });
-    document.body.appendChild(tip);
-    return tip;
-  })();
-
+  const tooltip = document.createElement("div");
+  tooltip.className = "hover-tooltip";
+  document.body.appendChild(tooltip);
   window.addEventListener("mousemove", (e) => {
     if (!globe.camera() || !beaconMeshes.length) return;
     const canvas = globeEl.querySelector("canvas");
@@ -387,13 +412,31 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (d) {
       if (activePoint !== d) {
         activePoint = d;
+        controls.autoRotate = false;
+        const beaconGroup = beaconMeshes.find(b => b.userData?.data?.id === d.id)?.parent;
+        if (beaconGroup) {
+          beaconGroup.children.forEach(child => {
+            if (child.material?.emissiveIntensity)
+              child.material.emissiveIntensity = 6;
+          });
+          setTimeout(() => {
+            beaconGroup.children.forEach(child => {
+              if (child.material?.emissiveIntensity)
+                child.material.emissiveIntensity = 4.5;
+            });
+          }, 600);
+        }
         tooltip.innerHTML = `
-          <strong>${d.title}</strong><br>
-          <span style="color:#9bb5cc;">${d.region ?? "Unknown"}</span><br>
-          Volatility:
-          <span style="color:${VOL_COL[d.volatility?.toLowerCase()] ?? "#58b9ff"}">
-            ${(d.volatility || "n/a").toUpperCase()}
-          </span>`;
+  <div class="hover-header">
+    <span class="hover-title">${d.title}</span>
+    <span class="hover-badge ${d.volatility?.toLowerCase() || 'neutral'}">
+      ${(d.volatility || 'N/A').toUpperCase()}
+    </span>
+  </div>
+  <div class="hover-region">${d.region || 'Global'}</div>
+<div class="hover-desc">${truncateText(d.description || 'Explore this market mission.', 70)}</div>
+  <div class="hover-hint">Click the glowing beacon to open mission ↗</div>
+`;
       }
       Object.assign(tooltip.style, {
         display: "block",
@@ -403,6 +446,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       });
     } else if (activePoint) {
       activePoint = null;
+      controls.autoRotate = true; // ✅ resume rotation
       tooltip.style.opacity = "0";
       setTimeout(() => (tooltip.style.display = "none"), 150);
     }
@@ -492,66 +536,60 @@ window.addEventListener("DOMContentLoaded", async () => {
   // ============================================================
   // 🧩 Mission Popup
   // ============================================================
-  function showScenarioPopup(data) {
-    let modal = document.getElementById("scenarioPopup");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "scenarioPopup";
-      Object.assign(modal.style, {
-        position: "fixed",
-        inset: "0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(12px)",
-        zIndex: "10000",
-      });
-      modal.innerHTML = `
-        <div style="background:rgba(20,25,35,0.85);border:1px solid rgba(255,255,255,0.1);
-          border-radius:16px;padding:28px 32px;color:#eaf3ff;
-          font-family:'Outfit',sans-serif;max-width:420px;
-          box-shadow:0 0 30px rgba(77,223,181,0.25);
-          text-align:center;animation:fadeIn 0.3s ease;">
-          <h2 id="popupTitle" style="margin-bottom:10px;font-size:1.4rem;color:#4ddfb5;"></h2>
-          <p id="popupDesc" style="font-size:0.95rem;color:#b7c6da;margin-bottom:18px;line-height:1.5;"></p>
-          <div style="display:flex;gap:10px;justify-content:center;">
-            <button id="joinBtn" style="padding:10px 20px;border-radius:8px;border:none;background:#4ddfb5;color:#000;font-weight:600;cursor:pointer;">Join Mission</button>
-            <button id="cancelBtn" style="padding:10px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#eaf3ff;cursor:pointer;">Cancel</button>
+function showScenarioPopup(data) {
+  let modal = document.getElementById("scenarioPopup");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "scenarioPopup";
+    modal.innerHTML = `
+      <div class="briefing-container">
+        <div class="briefing-card">
+          <div class="briefing-glow"></div>
+          <div class="briefing-header">
+            <span class="region-tag">${data.region || "Global"}</span>
+            <span class="volatility-tag ${data.volatility?.toLowerCase() || "neutral"}">
+              ${(data.volatility || "N/A").toUpperCase()}
+            </span>
           </div>
-        </div>`;
-      document.body.appendChild(modal);
-    }
-
-    modal.querySelector("#popupTitle").textContent = data.title;
-    modal.querySelector("#popupDesc").textContent = data.description || "No description available.";
-    modal.style.display = "flex";
-
-    modal.querySelector("#joinBtn").onclick = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return alert("Please log in first.");
-      try {
-        const res = await fetch(`/scenarios/${data.id}/join`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await res.json();
-        if (result.success) {
-          console.log(`✅ Joined scenario ${data.id}`);
-          window.open(
-            `scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`,
-            "_blank"
-          );
-        } else alert(result.message || "Failed to join scenario.");
-      } catch (err) {
-        console.error("❌ Error joining scenario:", err);
-        alert("Error joining scenario. Please try again.");
-      }
-      modal.style.display = "none";
-    };
-
-    modal.querySelector("#cancelBtn").onclick = () => (modal.style.display = "none");
+          <h2>${data.title}</h2>
+          <p class="briefing-desc">${data.description || "Explore this market mission."}</p>
+          <div class="briefing-meta">
+            <div><strong>Start:</strong> ${new Date(data.startDate).toLocaleDateString()}</div>
+            <div><strong>End:</strong> ${new Date(data.endDate).toLocaleDateString()}</div>
+            <div><strong>Starting Balance:</strong> $${parseFloat(data.startingBalance).toLocaleString()}</div>
+          </div>
+          <div class="briefing-actions">
+            <button id="joinBtn">Join Mission</button>
+            <button id="cancelBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
   }
+
+  modal.style.display = "flex";
+
+  modal.querySelector("#joinBtn").onclick = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Please log in first.");
+    try {
+      const res = await fetch(`/scenarios/${data.id}/join`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await res.json();
+      if (result.success) {
+        window.open(`scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`, "_blank");
+      } else alert(result.message || "Failed to join scenario.");
+    } catch (err) {
+      console.error("❌ Error joining scenario:", err);
+    }
+    modal.remove();
+  };
+  modal.querySelector("#cancelBtn").onclick = () => modal.remove();
+}
+
 
   // ============================================================
   // 🧭 REGION → CINEMATIC TIMELINE PANEL (Minimal Floating Version)
@@ -585,37 +623,87 @@ window.addEventListener("DOMContentLoaded", async () => {
   // 🎬 TIMELINE STATE MANAGEMENT & GLOBE ANIMATION
   // ============================================================
   let activeRegion = null; // track which continent is selected
+  // ============================================================
+  // ⬅️➡️ Timeline Navigation Controls
+  // ============================================================
+  let currentNodeIndex = 0;
+  let currentRegionEvents = [];
 
-function selectRegion(region) {
-  if (activeRegion === region) return;
-  activeRegion = region;
+  function showRegionTimeline(regionEvents) {
+    const timeline = document.getElementById("region-timeline");
+    const nodeContainer = document.getElementById("timeline-nodes");
+    const detail = document.getElementById("timeline-detail");
 
-  // --- Filter region scenarios ---
-  const regionEvents = mapped.filter((s) => {
-    const r = (s.region || "").toLowerCase();
-    const target = region.toLowerCase();
-    if (r.includes("global")) return true;
-    if (r.includes(target) || target.includes(r)) return true;
-    const map = {
-      asia: ["asia", "apac", "asia-pacific", "east asia", "oceania"],
-      europe: ["europe", "eu", "emea"],
-      africa: ["africa", "mena", "middle east", "north africa"],
-      northamerica: ["usa", "america", "north america"],
-      southamerica: ["south america", "latam"],
-      oceania: ["oceania", "australia", "new zealand"],
-    };
-    return map[target]?.some((alias) => r.includes(alias));
+    nodeContainer.innerHTML = "";
+    detail.innerHTML = "";
+    currentRegionEvents = regionEvents;
+    currentNodeIndex = 0;
+
+    if (!regionEvents.length) {
+      timeline.classList.remove("active");
+      return;
+    }
+
+    regionEvents.forEach((s, i) => {
+      const node = document.createElement("div");
+      node.className = "timeline-node";
+      node.dataset.label = s.year || "";
+      node.addEventListener("click", () => {
+        currentNodeIndex = i;
+        selectTimelineNode(s, i);
+      });
+      nodeContainer.appendChild(node);
+    });
+
+    timeline.classList.add("active");
+    selectTimelineNode(regionEvents[0], 0);
+  }
+
+  // Hook up the arrows
+  document.getElementById("timeline-prev").addEventListener("click", () => {
+    if (!currentRegionEvents.length) return;
+    currentNodeIndex =
+      (currentNodeIndex - 1 + currentRegionEvents.length) %
+      currentRegionEvents.length;
+    selectTimelineNode(currentRegionEvents[currentNodeIndex], currentNodeIndex);
   });
 
-  // 🪄 Show header
-  const header = document.getElementById("region-header");
-  header.querySelector("#region-name").textContent = region;
-  header.querySelector("#region-meta").textContent = `${regionEvents.length} Scenarios`;
-  header.classList.add("active");
+  document.getElementById("timeline-next").addEventListener("click", () => {
+    if (!currentRegionEvents.length) return;
+    currentNodeIndex = (currentNodeIndex + 1) % currentRegionEvents.length;
+    selectTimelineNode(currentRegionEvents[currentNodeIndex], currentNodeIndex);
+  });
 
-  showRegionTimeline(regionEvents);
-  openTimelineAnimation(region);
+  function selectRegion(region) {
+    if (activeRegion === region) return;
+    activeRegion = region;
+// Clear previous continent glow
+if (activeGlow) {
+  scene.remove(activeGlow);
+  activeGlow = null;
 }
+
+    // --- Filter region scenarios ---
+    const regionEvents = mapped.filter((s) => {
+      const r = (s.region || "").toLowerCase();
+      const target = region.toLowerCase();
+      if (r.includes("global")) return true;
+      if (r.includes(target) || target.includes(r)) return true;
+      const map = {
+        asia: ["asia", "apac", "asia-pacific", "east asia", "oceania"],
+        europe: ["europe", "eu", "emea"],
+        africa: ["africa", "mena", "middle east", "north africa"],
+        northamerica: ["usa", "america", "north america"],
+        southamerica: ["south america", "latam"],
+        oceania: ["oceania", "australia", "new zealand"],
+      };
+      return map[target]?.some((alias) => r.includes(alias));
+    });
+
+
+    showRegionTimeline(regionEvents);
+    openTimelineAnimation(region);
+  }
 
 
   // 🧭 Animate Globe and Show Timeline
@@ -650,41 +738,53 @@ function selectRegion(region) {
     activeRegion = null;
   }
 
-function selectTimelineNode(scenario, index) {
-  const nodes = document.querySelectorAll(".timeline-node");
-  const detail = document.getElementById("timeline-detail");
+  function selectTimelineNode(scenario, index) {
+    const nodes = document.querySelectorAll(".timeline-node");
+    const detail = document.getElementById("timeline-detail");
 
-  nodes.forEach((n, i) => n.classList.toggle("active", i === index));
+    nodes.forEach((n, i) => n.classList.toggle("active", i === index));
 
-  const start = new Date(scenario.startDate).toLocaleDateString("en-GB", {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
-  const end = new Date(scenario.endDate).toLocaleDateString("en-GB", {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
+    const start = new Date(scenario.startDate).toLocaleDateString("en-GB", {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+    const end = new Date(scenario.endDate).toLocaleDateString("en-GB", {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
 
-  detail.classList.remove("show");
-  setTimeout(() => {
-    detail.innerHTML = `
-      <h3>${String(index + 1).padStart(2, "0")} — ${scenario.title}</h3>
+    // ✨ get region name and total count for that region
+    const regionNameRaw = activeRegion || scenario.region || "Unknown";
+    const regionName = regionNameRaw.replace(/([a-z])([A-Z])/g, '$1 $2');
+    const total = currentRegionEvents.length;
+    const current = index + 1;
+
+    detail.classList.remove("show");
+    setTimeout(() => {
+      detail.innerHTML = `
+      <div class="detail-header">
+        <h3>${String(current).padStart(2, "0")} — ${scenario.title}</h3>
+        <span class="detail-region">
+           ${regionName} • ${current}/${total}
+        </span>
+      </div>
+
       <p>${scenario.description || "Explore market impact and responses."}</p>
       
       <div class="detail-meta">
-        <div><strong>📅</strong> ${start} → ${end}</div>
-        <div><strong>💰</strong> Starting Balance: $${parseFloat(scenario.startingBalance).toFixed(2)}</div>
-        <div><strong>⚡</strong> Volatility: 
+        <div><strong></strong> ${start} → ${end}</div>
+        <div><strong></strong> Starting Balance: $${parseFloat(scenario.startingBalance).toFixed(2)}</div>
+        <div><strong></strong> Volatility: 
           <span style="color:${VOL_COL[scenario.volatility?.toLowerCase()] || '#58b9ff'}">
             ${scenario.volatility || 'n/a'}
           </span>
         </div>
-        <div><strong>🌍</strong> Region: ${scenario.region || 'Unknown'}</div>
       </div>
 
       <a href="scenario-console.html?id=${scenario.id}">Open Console</a>
     `;
-    detail.classList.add("show");
-  }, 200);
-}
+      detail.classList.add("show");
+    }, 200);
+  }
+
 
 
 
@@ -695,5 +795,5 @@ function selectTimelineNode(scenario, index) {
   window.closeTimeline = closeTimeline;
   window.openTimelineAnimation = openTimelineAnimation;
 
-  
+
 });
