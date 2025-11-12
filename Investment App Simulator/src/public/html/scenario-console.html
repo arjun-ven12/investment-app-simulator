@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <!-- Main CSS -->
   <link rel="stylesheet" href="../css/scenario-console.css" />
+
+  <link rel="stylesheet" href="../css/investment.css" />
   <!-- Socket.IO + Chart libraries -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,19 +31,18 @@
   <input type="hidden" id="current-stock-id" value="" />
   <!-- Sidebar -->
   <div class="sidebar">
-    <h1>Scenario Details</h1>
+    <h1 class="sandboxh1">Scenario Details</h1>
     <div id="scenario-details" class="scenario-details">
   <div class="kv"><span class="k">Title:</span> <span id="scenario-title" class="v">—</span></div>
   <br>
   <div class="kv"><span class="k">Description:</span> <span id="scenario-description" class="v">—</span></div>
   <br>
-  <div class="kv"><span class="k">Start:</span> <span id="scenario-start-date" class="v">—</span></div>
-  <br>
-  <div class="kv"><span class="k">End:</span> <span id="scenario-end-date" class="v">—</span></div>
-  <br>
-  <div class="kv"><span class="k">Duration:</span> <span id="scenario-duration" class="v">—</span></div>
-  <br>
-  <div class="kv"><span class="k">Starting Balance:</span> <span id="scenario-initial-wallet" class="v">—</span></div>
+<div class="scenario-summary-grid">
+    <div class="kv"><span class="k">Start:</span> <span id="scenario-start-date" class="v">—</span></div>
+    <div class="kv"><span class="k">End:</span> <span id="scenario-end-date" class="v">—</span></div>
+    <div class="kv"><span class="k">Duration:</span> <span id="scenario-duration" class="v">—</span></div>
+    <div class="kv"><span class="k">Starting Balance:</span> <span id="scenario-initial-wallet" class="v">—</span></div>
+</div>
 <br>
   <div class="kv"><span class="k">Recommended Symbols:</span></div>
   <div id="scenario-allowed" class="chip-row"></div>
@@ -53,7 +55,7 @@
     <div id="navbar-container"></div>
     <!-- Dashboard Header -->
       <br />
-      <h1>Sandbox Stock Dashboard</h1>
+      <h1 class="sandboxh1">Sandbox Stock Dashboard</h1>
 
 
 
@@ -70,7 +72,7 @@
 
       <!-- Progress bar container -->
       <div
-        style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;">
+        style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;" class="progressbar">
         <div id="replay-progress"
           style="height: 100%; width: 0%; background: #fff; border-radius: 4px; transition: width 0.2s;"></div>
       </div>
@@ -338,6 +340,7 @@
     </div>
   </div>
 </div>
+<!-- </div> -->
 
 </body>
 <script src="/socket.io/socket.io.js"></script>

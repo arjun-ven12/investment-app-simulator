@@ -22,6 +22,7 @@ h1 {
     font-weight: 700;
     margin-bottom: 10px; /* Increased margin from 5px to 10px */
     color: #ffffff;
+    padding-left: 5px;
 }
 
 h2 {
@@ -1246,7 +1247,7 @@ body {
 
 /* Portfolio container */
 #portfolioContainer {
-    margin: 20px auto; /* Increased margin from 12px to 20px */
+    margin: 20px 20px; /* Increased margin from 12px to 20px */
     width: 100%; 
     max-width: 1200px; /* Increased max width from 1000px to 1200px */
     color: #ffffff;
@@ -1268,6 +1269,8 @@ body {
     gap: 12px; /* Increased gap from 8px to 12px */
     margin-bottom: 20px; /* Increased margin from 15px to 20px */
 }
+
+
 
 /* Individual stock card */
 .stock-column {
@@ -1839,4 +1842,332 @@ body {
         rgba(210, 30, 36, 0.527)   /* End: Slightly darker, 85% opacity */
     );
     /* Remove the old background-color: #f94a4dca; */
+}
+
+    .sandboxh1 {
+        padding-left: 0px;
+    }
+
+
+
+
+/* --- Existing 600px Media Query (Modified for better podium and table handling) --- */
+@media (max-width: 600px) {
+    /* Global Font Adjustment */
+    * {
+        font-size: 12px; /* Slight reduction for global base font */
+    }
+
+    /* Main Heading & Paragraph */
+    .page-h1 {
+        font-size: 2rem;
+    }
+    .page-para {
+        font-size: 14px;
+    }
+
+    /* Leaderboard Podium */
+    #leaderboard-podium {
+        margin: 20px 0;
+        min-height: 160px; /* Reduced min-height for small screens */
+    }
+    .podium {
+        gap: 0px; /* Further reduce space between spots */
+    }
+    .podium-spot1, .podium-spot2, .podium-spot3 {
+        min-width: unset; /* Allow spots to shrink more naturally */
+        padding: 10px 5px; /* Reduce padding */
+        margin-bottom: 5px; /* Reduce margin */
+    }
+    /* Set explicit small heights for the podium structure */
+    .podium-spot1.first {
+        height: 140px;
+    }
+    .podium-spot2 {
+        height: 110px;
+    }
+    .podium-spot3 {
+        height: 80px;
+    }
+    
+    /* Podium Content */
+    .podium-rank {
+        font-size: 1.8rem;
+    }
+    .podium-username {
+        font-size: 1.2rem;
+    }
+    .podium-score {
+        font-size: 1rem;
+    }
+    
+    /* Table Responsiveness: Force horizontal scrolling if needed */
+    .history-column, .markdown-body, #options-portfolio-card {
+        overflow-x: auto; /* Allow horizontal scrolling for table containers */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Wrap the actual table in a div if using HTML structure, or apply styles directly to prevent overflow */
+    .history-column table, 
+    .markdown-body table, 
+    #options-portfolio-card table {
+        display: block; /* Allows container to overflow */
+        max-width: 450px; /* Minimum width to prevent column squishing, adjust as needed */
+                overflow-x: auto; /* Allow horizontal scrolling for table containers */
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Form Elements */
+    input, select, textarea, button, .sidebar-link {
+        padding: 10px; /* Slightly reduce padding on inputs/buttons */
+        font-size: 0.95rem;
+    }
+
+    .thead {
+        width: 100%;
+    }
+
+    .sandboxh1 {
+        padding-left: 0px;
+    }
+
+    .progressbar {
+        width: 300px;
+    }
+}
+
+@media(min-width: 1920px) {
+    #myChart2 { 
+    width: 100% !important;
+    height: 550px !important
+    }
+
+    #myChart3.canvas3 {
+    width: 100% !important;
+    height: 500px !important;
+}
+}
+
+@media (max-width: 1000px) {
+    /* CRITICAL: Turn the BODY into the main flex container */
+    body {
+        display: flex;
+        flex-direction: column; 
+        
+        /* 1. Remove any default body padding/margin that might cause overflow */
+        margin: 0; 
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden; /* Prevents the body itself from showing the scrollbar */
+    }
+
+        .podium-username {
+        font-size: 1.2rem;
+        padding: 5px 0px;
+    }
+
+    .portfolio-layout {
+        flex-direction: column;
+    }
+    .canvas {
+        width: 300px !important;
+        height: auto !important;
+    }
+
+    .stock-column {
+        width: 300px;
+    }
+    /* 2. .top (Must be a DIRECT CHILD of body) */
+    .top {
+        order: -2; /* This is the new lowest order, placing it FIRST */
+        width: 100%;
+        padding: 0 15px;
+        margin-top: 20px;
+        margin-bottom: 30px; /* Reduced vertical space for mobile density */
+    }
+    .podium {
+                display: flex;
+        flex-direction: column; 
+        
+    }
+
+    .podium-spot1, .podium-spot2, .podium-spot3 {
+        width: 100%; /* Make them full width to stack */
+        margin: 10px 0; 
+        justify-content: center;
+        min-width: unset; 
+        padding: 15px 5px; 
+        margin-bottom: 5px; 
+        
+        /* Ensure the staggered heights are removed for the stacked view */
+        height: auto !important;
+        
+        /* Force the 1, 2, 3 sequence */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .podium-spot1 {
+        order: 1; /* First spot in the stack */
+    }
+    .podium-spot2 {
+        order: 2; /* Second spot in the stack */
+    }
+    .podium-spot3 {
+        order: 3; /* Third spot in the stack */
+    }
+
+    .podium-container{
+        width: 100%;
+    }
+
+    .podium-wrapper{
+        width:100%
+    }
+
+    /* 3. Sidebar (Now second element) */
+    .sidebar {
+        order: -1; /* This is now the second element */
+        width: 100%; 
+        margin-bottom: 20px; 
+        padding-left: 15px;
+        padding-right: 15px;
+        height: auto !important;
+        position: relative;
+        box-shadow: none;
+        top: 100px;
+    margin-bottom: 80px;
+        margin-top: -90px;
+        border: none;
+    }
+h1 {
+    font-size: 22px;
+}
+    .container {
+        padding: 0px;
+    }
+    #market-status {
+        font-size: 12px;
+    }
+    /* 4. Main Content (Now third element) */
+    .main-content {
+        order: 0; 
+        width: 100%;
+        padding: 0 15px; /* Add horizontal padding to the main content */
+        margin: auto;
+    }
+
+    /* 5. Adjust the link container for scrolling (Unchanged) */
+    .favorite-stocks-grid {
+        display: flex;
+        flex-direction: row; 
+        gap: 10px; 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling:touch; 
+        width: 100%; 
+        padding-bottom: 5px; 
+    }
+
+    .favorite-stocks-grid li {
+        flex-shrink: 0; 
+        width: 160px; 
+        margin-bottom: 10px;
+    }
+
+    /* Table Responsiveness: Force horizontal scrolling if needed */
+    .history-column, .markdown-body, #options-portfolio-card {
+        overflow-x: auto; /* Allow horizontal scrolling for table containers */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Wrap the actual table in a div if using HTML structure, or apply styles directly to prevent overflow */
+    .history-column table, 
+    .markdown-body table, 
+    #options-portfolio-card table {
+        display: block; /* Required to apply width/min-width to table tag */
+        min-width: 450px; /* Minimum width to prevent column squishing and trigger scroll */
+    }
+
+    /* FIX: Ensure THEAD and TBODY match the table's forced width */
+    .history-column table thead,
+    .history-column table tbody,
+    .markdown-body table thead,
+    .markdown-body table tbody,
+    #options-portfolio-card table thead,
+    #options-portfolio-card table tbody {
+        min-width: 450px; 
+        width: 100%;
+        display: table-row-group; /* Ensures they behave correctly inside the block-level table */
+    }
+
+
+}
+
+    
+/* --- Scenario Summary Grid Styling --- */
+
+/* ⭐️ Default (Above 1000px): Vertically Stacked (Block behavior) */
+.scenario-summary-grid {
+    display: flex; /* Use flex to allow simple vertical stacking with gap */
+    flex-direction: column;
+    gap: 10px; /* Spacing between the key-value pairs */
+}
+
+/* Ensure the default kv styles are clean */
+.scenario-summary-grid .kv {
+    display: block; /* Ensure each KV takes up its own line */
+    padding: 0;
+    border: none;
+}
+
+/* ---------------------------------------------------- */
+/* 💻 MEDIUM SCREEN (1000px to 601px): 4-Column Grid */
+/* ---------------------------------------------------- */
+@media (max-width: 1000px) {
+    .scenario-summary-grid {
+        display: grid;
+        /* Four equal columns (side-by-side) */
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 20px; 
+        align-items: start;
+    }
+    
+    .scenario-summary-grid .kv {
+        /* Revert to flex-column for better alignment inside grid cells */
+        display: flex;
+        flex-direction: column;
+    }
+    html, body {
+  overflow-x: hidden;
+}
+}
+
+
+/* ---------------------------------------------------- */
+/* 📱 SMALL SCREEN (Below 600px): 2x2 Grid */
+/* ---------------------------------------------------- */
+@media (max-width: 600px) {
+    .scenario-summary-grid {
+        /* Mobile: Switch to two columns, forcing the 2x2 layout */
+        grid-template-columns: 1fr 1fr; 
+        gap: 15px; 
+    }
+
+    /* Redefine mobile styling for the individual kv cards */
+    .scenario-summary-grid .kv {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+    }
+    
+    .scenario-summary-grid .kv .k {
+        color: var(--color-text-secondary);
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+    
+    .scenario-summary-grid .kv .v {
+        font-size: 1rem;
+        font-weight: bold;
+    }
 }
