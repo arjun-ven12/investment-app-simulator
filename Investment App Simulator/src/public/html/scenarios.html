@@ -11,37 +11,50 @@
 </head>
 
 <body>
+  <!-- 🌐 View Scenarios Button -->
+<button id="openScenariosBtn" class="view-scenarios-btn">
+  View All Scenarios
+</button>
+
   <!-- ✨ Ambient Background -->
   <div id="starfield"></div>
   <div id="navbar-container"></div>
-<!-- <header id="region-header" class="region-header">
-  <h2 id="region-name">Region</h2>
-  <p id="region-meta">0 Scenarios</p>
-</header> -->
+<!-- 🌍 Floating Globe Scenarios -->
+<div id="floatingScenariosOverlay">
+  <h2 class="floating-scenarios-title">Available Scenarios</h2>
+  <div id="floating-scenario-list"></div>
+  <button id="closeFloatingScenarios" class="floating-close">×</button>
+</div>
+
   <!-- 🌍 GLOBE SCENE -->
   <section id="globe-layer" class="view-layer active">
     <div id="globe-ui">
-      <button id="viewAllBtn" class="glass-btn">View All Scenarios</button>
     </div>
   </section>
-<section id="region-timeline" class="timeline-overlay">
-  <div class="timeline-inner">
-    <!-- Navigation Arrows -->
-    <button class="nav-arrow left" id="timeline-prev">‹</button>
 
-    <!-- Main Line -->
-    <div class="timeline-line">
-      <div id="timeline-nodes"></div>
+  <section id="region-timeline" class="timeline-overlay">
+    <div class="timeline-inner">
+      <!-- Navigation Arrows -->
+      <button class="nav-arrow left" id="timeline-prev">‹</button>
+
+      <!-- Main Line -->
+      <div class="timeline-line">
+        <div id="timeline-nodes"></div>
+      </div>
+
+      <button class="nav-arrow right" id="timeline-next">›</button>
     </div>
 
-    <button class="nav-arrow right" id="timeline-next">›</button>
-  </div>
+    <!-- Timeline Detail Panel -->
+    <div id="timeline-detail" class="timeline-detail">
+      <!-- dynamically filled by globe.js -->
+    </div>
+  </section>
+  <div id="mobile-all-scenarios">
+  <h2 class="mobile-section-title">All Scenarios</h2>
+  <div id="mobile-scenario-list"></div>
+</div>
 
-  <!-- Timeline Detail Panel -->
-  <div id="timeline-detail" class="timeline-detail">
-    <!-- dynamically filled by globe.js -->
-  </div>
-</section>
   <!-- 🧭 DASHBOARD -->
   <section id="dashboard-layer" class="view-layer active">
     <div class="dashboard">
@@ -54,45 +67,70 @@
           <button class="tab-button" data-tab="completed">Completed</button>
         </div>
 
-        <div id="not-started" class="tab-content active"><ul id="my-not-started"></ul></div>
-        <div id="in-progress" class="tab-content"><ul id="my-in-progress"></ul></div>
-        <div id="completed" class="tab-content"><ul id="my-completed"></ul></div>
+        <div id="not-started" class="tab-content active">
+          <ul id="my-not-started"></ul>
+        </div>
+        <div id="in-progress" class="tab-content">
+          <ul id="my-in-progress"></ul>
+        </div>
+        <div id="completed" class="tab-content">
+          <ul id="my-completed"></ul>
+        </div>
       </div>
     </div>
   </section>
+  <!-- ============================================================
+     AI Insights Popup — BlackSealed Glass Modal
+============================================================ -->
+<div id="aiInsightsPopup">
+  <div id="aiInsightsContent">
+    <span id="aiInsightsClose" onclick="closeInsightsPopup()">×</span>
+    <div id="aiInsightsBody" class="markdown-text">Loading...</div>
+  </div>
+</div>
+<div id="scenarioOverlay" class="bs-overlay">
+  <div class="bs-card">
 
-  <!-- ⭐ UI + Background JS -->
-  <script>
-    document.getElementById("viewAllBtn").addEventListener("click", () => {
-      document.getElementById("dashboard-layer").classList.toggle("active");
-    });
+    <button id="scenarioOverlayClose" class="bs-close">×</button>
 
-    // Starfield generator
-    const starfield = document.getElementById("starfield");
-    for (let i = 0; i < 200; i++) {
-      const star = document.createElement("div");
-      star.className = "star";
-      star.style.top = Math.random() * 100 + "%";
-      star.style.left = Math.random() * 100 + "%";
-      star.style.animationDelay = Math.random() * 5 + "s";
-      star.style.width = star.style.height = Math.random() * 2 + "px";
-      starfield.appendChild(star);
-    }
-  </script>
+    <div class="bs-tags">
+      <span id="scenarioRegionTag" class="bs-tag"></span>
+      <span id="scenarioVolTag" class="bs-tag"></span>
+    </div>
+
+    <h2 id="scenarioTitle" class="bs-title"></h2>
+    <p id="scenarioDesc" class="bs-desc"></p>
+
+    <div class="bs-info">
+      <div><strong>Start:</strong> <span id="scenarioStart"></span></div>
+      <div><strong>End:</strong> <span id="scenarioEnd"></span></div>
+      <div><strong>Starting Balance:</strong> <span id="scenarioBalance"></span></div>
+    </div>
+
+    <div class="bs-buttons">
+      <button id="scenarioJoinBtn" class="bs-btn-primary">Join Mission</button>
+      <button id="scenarioCancelBtn" class="bs-btn-secondary">Cancel</button>
+    </div>
+
+  </div>
+</div>
+
+
 
   <!-- 🧠 Internal UI Scripts -->
   <script src="../js/chatbot.js" defer></script>
   <script src="../js/navbar.js" defer></script>
   <script src="../js/allScenarios.js" defer></script>
 
-<!-- 🌐 Single Three + Globe.gl context (daytime mode) -->
-<script type="module">
-  import * as THREE from "https://esm.sh/three@0.180.0";
-  import createGlobe from "https://esm.sh/globe.gl@2.36.0?deps=three@0.180.0";
-  window.THREE = THREE;
-  window.Globe = createGlobe;
-  import "../js/globe.js";
-</script>
+  <!-- 🌐 Single Three + Globe.gl context (daytime mode) -->
+  <script type="module">
+    import * as THREE from "https://esm.sh/three@0.180.0";
+    import createGlobe from "https://esm.sh/globe.gl@2.36.0?deps=three@0.180.0";
+    window.THREE = THREE;
+    window.Globe = createGlobe;
+    import "../js/globe.js";
+  </script>
 
 </body>
+
 </html>

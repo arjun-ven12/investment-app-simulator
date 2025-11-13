@@ -67,7 +67,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     .pointAltitude(0)
     .pointRadius(0)
     .pointColor(() => "transparent");
+  const globeLayer = document.getElementById("globe-layer"); // <== add this here
+  const dimEl = document.getElementById("globe-dim");
 
+  if (globeLayer && dimEl && !globeLayer.contains(dimEl)) {
+    globeLayer.appendChild(dimEl); // ensures dim sits above canvas
+    dimEl.style.zIndex = "9"; // keep it on top
+  }
   const scene = globe.scene();
   const controls = globe.controls();
   controls.autoRotate = true;
@@ -380,6 +386,28 @@ window.addEventListener("DOMContentLoaded", async () => {
     const lastSpace = trimmed.lastIndexOf(" ");
     return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "...";
   }
+  // ============================================================
+  // MOBILE MODE — Disable all Globe Interaction
+  // ============================================================
+  if (window.innerWidth < 768) {
+    try {
+      console.log("📱 Mobile mode: disabling globe interaction");
+
+      controls.enabled = false;
+      controls.autoRotate = false;
+
+      globe.enablePointerInteraction(false);
+      globe.pointOfView({ lat: 20, lng: 0, altitude: 2 }, 0); // static camera
+
+      const canvas = globeEl.querySelector("canvas");
+      if (canvas) {
+        canvas.style.pointerEvents = "none";
+        canvas.style.touchAction = "none";
+      }
+    } catch (err) {
+      console.warn("⚠️ Failed to disable globe:", err);
+    }
+  }
 
   // ============================================================
   // 🧭 Hover Tooltip
@@ -473,7 +501,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (hitBeacon.length) {
       let obj = hitBeacon[0].object;
       while (obj && !obj.userData?.data) obj = obj.parent;
-      if (obj?.userData?.data) return showScenarioPopup(obj.userData.data);
+      if (obj?.userData?.data)return openScenarioPopup(obj.userData.data);
     }
 
     // 2️⃣ Continent click
@@ -532,63 +560,82 @@ window.addEventListener("DOMContentLoaded", async () => {
       requestAnimationFrame(animate);
     })();
   }
+function showScenarioPopup(data) {
+  let modal = document.getElementById("scenarioPopup");
 
-  // ============================================================
-  // 🧩 Mission Popup
-  // ============================================================
-  function showScenarioPopup(data) {
-    let modal = document.getElementById("scenarioPopup");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "scenarioPopup";
-      modal.innerHTML = `
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "scenarioPopup";
+
+    modal.innerHTML = `
       <div class="briefing-container">
         <div class="briefing-card">
           <div class="briefing-glow"></div>
+
           <div class="briefing-header">
-           <span class="region-tag white">${data.region || "Global"}</span>
+            <span class="region-tag white">${data.region || "Global"}</span>
             <span class="volatility-tag ${data.volatility?.toLowerCase() || "neutral"}">
               ${(data.volatility || "N/A").toUpperCase()}
             </span>
           </div>
+
           <h2>${data.title}</h2>
           <p class="briefing-desc">${data.description || "Explore this market mission."}</p>
+
           <div class="briefing-meta">
             <div><strong>Start:</strong> ${new Date(data.startDate).toLocaleDateString()}</div>
             <div><strong>End:</strong> ${new Date(data.endDate).toLocaleDateString()}</div>
             <div><strong>Starting Balance:</strong> $${Math.round(data.startingBalance).toLocaleString()}</div>
           </div>
+
           <div class="briefing-actions">
-            <button id="joinBtn">Join Mission</button>
-            <button id="cancelBtn">Cancel</button>
+            <button class="briefing-join-btn">Join Mission</button>
+            <button class="briefing-cancel-btn">Cancel</button>
           </div>
+
         </div>
       </div>
     `;
-      document.body.appendChild(modal);
+    document.body.appendChild(modal);
+  }
+
+  modal.style.display = "flex";
+
+  // Get the buttons (correct selectors!)
+  const joinBtn = modal.querySelector(".briefing-join-btn");
+  const cancelBtn = modal.querySelector(".briefing-cancel-btn");
+
+  // Join
+  joinBtn.onclick = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Please log in first.");
+
+    try {
+      const res = await fetch(`/scenarios/${data.id}/join`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        window.open(
+          `scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`,
+          "_blank"
+        );
+      } else {
+        alert(result.message || "Failed to join scenario.");
+      }
+    } catch (err) {
+      console.error("❌ Error joining scenario:", err);
     }
 
-    modal.style.display = "flex";
+    modal.remove();
+  };
 
-    modal.querySelector("#joinBtn").onclick = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return alert("Please log in first.");
-      try {
-        const res = await fetch(`/scenarios/${data.id}/join`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await res.json();
-        if (result.success) {
-          window.open(`scenario-console.html?scenarioId=${data.id}&token=${encodeURIComponent(token)}`, "_blank");
-        } else alert(result.message || "Failed to join scenario.");
-      } catch (err) {
-        console.error("❌ Error joining scenario:", err);
-      }
-      modal.remove();
-    };
-    modal.querySelector("#cancelBtn").onclick = () => modal.remove();
-  }
+  // Cancel
+  cancelBtn.onclick = () => modal.remove();
+}
+
 
 
   // ============================================================
@@ -724,6 +771,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   function openTimelineAnimation(region) {
     const globeLayer = document.getElementById("globe-layer");
     const timeline = document.getElementById("region-timeline");
+
     controls.enabled = false; // disable orbit controls
     globe.onPolygonHover(null); // disable hover reactions
     // shrink and float up the globe
@@ -752,48 +800,48 @@ window.addEventListener("DOMContentLoaded", async () => {
     activeRegion = null;
   }
 
- async function selectTimelineNode(scenario, index) {
-  const nodes = document.querySelectorAll(".timeline-node");
-  const detail = document.getElementById("timeline-detail");
+  async function selectTimelineNode(scenario, index) {
+    const nodes = document.querySelectorAll(".timeline-node");
+    const detail = document.getElementById("timeline-detail");
 
-  nodes.forEach((n, i) => n.classList.toggle("active", i === index));
+    nodes.forEach((n, i) => n.classList.toggle("active", i === index));
 
-  // === Region label ===
-  const regionTimeline = document.getElementById("region-timeline");
-  if (regionTimeline) {
-    let label = document.getElementById("timeline-region-label");
-    if (!label) {
-      label = document.createElement("div");
-      label.id = "timeline-region-label";
-      regionTimeline.appendChild(label);
-    }
-    const regionNameRaw = activeRegion || scenario.region || "Unknown";
-    const regionName = regionNameRaw.replace(/([a-z])([A-Z])/g, '$1 $2');
-    label.innerHTML = `${regionName} • ${index + 1}/${currentRegionEvents.length}`;
-    label.classList.add("show");
-  }
-
-  // === Card fade animation ===
-  detail.classList.remove("show");
-  setTimeout(async () => {
-    const token = localStorage.getItem("token");
-    let joined = false;
-
-    if (token) {
-      try {
-        const res = await fetch("/scenarios/joined", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        const joinedIds = data.scenarios?.map((s) => s.id) || [];
-        joined = joinedIds.includes(scenario.id);
-      } catch (err) {
-        console.warn("⚠️ Could not check joined status:", err);
+    // === Region label ===
+    const regionTimeline = document.getElementById("region-timeline");
+    if (regionTimeline) {
+      let label = document.getElementById("timeline-region-label");
+      if (!label) {
+        label = document.createElement("div");
+        label.id = "timeline-region-label";
+        regionTimeline.appendChild(label);
       }
+      const regionNameRaw = activeRegion || scenario.region || "Unknown";
+      const regionName = regionNameRaw.replace(/([a-z])([A-Z])/g, '$1 $2');
+      label.innerHTML = `${regionName} • ${index + 1}/${currentRegionEvents.length}`;
+      label.classList.add("show");
     }
 
-    // === Mission Card Content ===
-    detail.innerHTML = `
+    // === Card fade animation ===
+    detail.classList.remove("show");
+    setTimeout(async () => {
+      const token = localStorage.getItem("token");
+      let joined = false;
+
+      if (token) {
+        try {
+          const res = await fetch("/scenarios/joined", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          const joinedIds = data.scenarios?.map((s) => s.id) || [];
+          joined = joinedIds.includes(scenario.id);
+        } catch (err) {
+          console.warn("⚠️ Could not check joined status:", err);
+        }
+      }
+
+      // === Mission Card Content ===
+      detail.innerHTML = `
       <div class="detail-header">
         <h3>${String(index + 1).padStart(2, "0")} — ${scenario.title}</h3>
       </div>
@@ -816,45 +864,52 @@ window.addEventListener("DOMContentLoaded", async () => {
       </div>
     `;
 
-    // === Button handler ===
-    const joinBtn = document.getElementById("joinMissionBtn");
-    if (!joined) {
-      joinBtn.onclick = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return alert("Please log in first.");
-        joinBtn.disabled = true;
-        joinBtn.textContent = "Joining...";
-        try {
-          const res = await fetch(`/scenarios/${scenario.id}/join`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const result = await res.json();
-          if (result.success) {
-            joinBtn.textContent = "Joined";
-            joinBtn.classList.add("joined");
-          } else {
+      // === Button handler ===
+      const joinBtn = document.getElementById("joinMissionBtn");
+      if (!joined) {
+        joinBtn.onclick = async () => {
+          const token = localStorage.getItem("token");
+          if (!token) return alert("Please log in first.");
+          joinBtn.disabled = true;
+          joinBtn.textContent = "Joining...";
+          try {
+            const res = await fetch(`/scenarios/${scenario.id}/join`, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const result = await res.json();
+            if (result.success) {
+              joinBtn.textContent = "Joined";
+              joinBtn.classList.add("joined");
+
+              // 🔥 instantly update My Scenarios + Overlays
+              if (window.forceScenarioRefresh) window.forceScenarioRefresh();
+            } else {
+              joinBtn.disabled = false;
+              joinBtn.textContent = "Join Mission";
+              alert(result.message || "Failed to join scenario.");
+            }
+          } catch (err) {
+            console.error("❌ Join mission failed:", err);
             joinBtn.disabled = false;
             joinBtn.textContent = "Join Mission";
-            alert(result.message || "Failed to join scenario.");
           }
-        } catch (err) {
-          console.error("❌ Join mission failed:", err);
-          joinBtn.disabled = false;
-          joinBtn.textContent = "Join Mission";
-        }
-      };
-    } else {
-      joinBtn.disabled = true;
+        };
+      } else {
+        joinBtn.disabled = true;
+      }
+
+      detail.classList.add("show");
+    }, 150);
+  }
+
+
+
+  window.refreshTimelineState = () => {
+    if (activeRegion && currentRegionEvents.length) {
+      selectTimelineNode(currentRegionEvents[currentNodeIndex], currentNodeIndex);
     }
-
-    detail.classList.add("show");
-  }, 150);
-}
-
-
-
-
+  };
 
   window.openScenario = (id) => {
     window.open(`scenario-console.html?scenarioId=${id}`, "_blank");
@@ -864,4 +919,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   window.openTimelineAnimation = openTimelineAnimation;
 
 
+  if (globeLayer && dimEl && !globeLayer.contains(dimEl)) {
+    globeLayer.appendChild(dimEl);
+    dimEl.style.zIndex = "9";
+  }
 });
