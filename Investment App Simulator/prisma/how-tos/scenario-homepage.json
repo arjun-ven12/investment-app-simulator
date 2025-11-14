@@ -1,0 +1,152 @@
+{
+  "title": "How-To Guide: Using the Scenarios Homepage",
+  "content": [
+    {
+      "heading": "What Are Scenarios?",
+      "content": [
+        {
+          "type": "text",
+          "text": "Scenarios allow you to relive real historical market events and practice trading in a safe, risk-free environment. Each scenario recreates a specific period in market history using actual price data from that time."
+        },
+        {
+          "type": "list",
+          "title": "Why Scenarios Matter",
+          "items": [
+            "You learn how markets reacted during real events such as political shocks, supply-chain disruptions, or financial crises.",
+            "You can practice trading without risking real money.",
+            "You can retry the same scenario multiple times to refine your skills and strategies.",
+            "You build confidence by making decisions based on real market behaviour."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "How Real Data Enhances Learning",
+      "content": [
+        {
+          "type": "text",
+          "text": "Every scenario uses authentic historical stock price movements. This means the ups, downs, volatility, and trends you see are exactly what happened in real life."
+        },
+        {
+          "type": "list",
+          "title": "Benefits of Real Historical Data",
+          "items": [
+            "Improves your understanding of how markets respond to global events.",
+            "Helps you practice reading true price reactions, not artificially generated data.",
+            "Gives you a realistic environment to test your decision-making.",
+            "Allows you to study cause-and-effect: what happened, why it happened, and how the market responded."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Scenarios also run at accelerated speed—price updates can occur every 2 seconds—allowing you to experience an entire month of market activity in minutes."
+        }
+      ]
+    },
+
+    {
+      "heading": "Three Ways to Explore Scenarios",
+      "content": [
+        {
+          "type": "subheading",
+          "text": "1. Globe Beacons"
+        },
+        {
+          "type": "list",
+          "items": [
+            "When the globe appears, you will see glowing circles placed across different regions. These represent scenarios.",
+            "Hover over a beacon to view its name and short description.",
+            "Click the beacon to open a preview card.",
+            "Use the button within the preview to join the scenario."
+          ]
+        },
+
+        {
+          "type": "subheading",
+          "text": "2. Clicking a Country or Continent"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Click on any country or region on the Earth.",
+            "A timeline will appear, showing all scenarios related to that area.",
+            "Each scenario appears as a node within the timeline.",
+            "Select a node to view scenario information and join it."
+          ]
+        },
+
+        {
+          "type": "subheading",
+          "text": "3. View All Scenarios"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Click the 'View All Scenarios' button.",
+            "You will see a complete list of every scenario in the system.",
+            "Scenarios are grouped into categories such as Joinable or Already Joined.",
+            "You can scroll, browse, and choose any scenario you want to begin."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Managing Your Scenarios",
+      "content": [
+        {
+          "type": "text",
+          "text": "The My Scenarios panel allows you to keep track of every scenario you have joined."
+        },
+        {
+          "type": "list",
+          "title": "Tab Categories",
+          "items": [
+            "Not Started — Scenarios you joined but have not yet begun.",
+            "In Progress — Scenarios you are currently working through.",
+            "Completed — Scenarios you have finished; you may retry them anytime."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Viewing AI Insights",
+      "content": [
+        {
+          "type": "text",
+          "text": "Every scenario attempt generates AI-powered insights that analyse your trading performance."
+        },
+        {
+          "type": "list",
+          "title": "Types of Insights",
+          "items": [
+            "Detailed Insights — Includes charts, P/L analysis, scenario-specific patterns, and improvement suggestions.",
+            "Compact Insights — A simplified text-only version for quick review."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "You can access your most recent insights anytime through the 'Show Last Attempt Insights' link on the scenario card."
+        }
+      ]
+    },
+
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Scenarios let you practice trading during real historical events.",
+            "You interact with scenarios through globe beacons, region timelines, or the full scenarios list.",
+            "The system uses actual historical data for a realistic learning experience.",
+            "My Scenarios helps you manage your progress easily.",
+            "AI insights help you understand your strengths and improve your trading skills."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "title": "How-To Guide: Using the Scenario Console",
+  "content": [
+    {
+      "heading": "Overview",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Scenario Console is where you experience a historical market replay using real past price data. Here, you can view charts, place trades, track your portfolio, and control the simulation speed. All progress is automatically saved so you can continue your attempt anytime."
+        }
+      ]
+    },
+
+    {
+      "heading": "Scenario Details Panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "The left panel displays important information about the scenario you are currently running. This helps you understand the background and context of the event being simulated."
+        },
+        {
+          "type": "list",
+          "title": "Details Shown:",
+          "items": [
+            "Scenario title and short description",
+            "Start and end dates of the historical period",
+            "Total duration of the scenario",
+            "Your starting balance for this attempt"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Scenario Chart",
+      "content": [
+        {
+          "type": "text",
+          "text": "The scenario chart visualizes real historical price movements from the time period being replayed. As the simulation progresses, new data points appear automatically in real time."
+        },
+        {
+          "type": "list",
+          "title": "How to Use the Chart:",
+          "items": [
+            "Enter a stock symbol (e.g., AAPL).",
+            "Click 'Generate Chart' to load historical pricing data.",
+            "Watch the chart update as the scenario plays forward.",
+            "Use 'Reset Zoom' to return the chart to its original view."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Trading Panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "The trading panel on the right allows you to place simulated buy or sell orders using the historical prices being replayed."
+        },
+        {
+          "type": "list",
+          "title": "Steps to Place a Trade:",
+          "items": [
+            "Select a stock from the dropdown list.",
+            "Choose whether you want to Buy or Sell.",
+            "Select the order type (Market or Limit).",
+            "Enter the price if the order type requires it.",
+            "Enter the quantity you want to trade.",
+            "Review the calculated total amount.",
+            "Submit your order."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Scenario Timing & Speed Controls",
+      "content": [
+        {
+          "type": "text",
+          "text": "The simulation runs on accelerated time, allowing you to learn faster without waiting for real market speeds. You can adjust how quickly new data points appear."
+        },
+        {
+          "type": "list",
+          "title": "How Scenario Speed Works:",
+          "items": [
+            "1× speed: New data every ~20 seconds.",
+            "2× speed: New data every ~10 seconds.",
+            "5× speed: New data every ~4 seconds.",
+            "10× speed: New data every ~2 seconds."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Speeds above 1× help you complete long scenarios faster, while still maintaining accurate historical price movement."
+        }
+      ]
+    },
+
+    {
+      "heading": "Playback Controls",
+      "content": [
+        {
+          "type": "list",
+          "title": "Available Controls:",
+          "items": [
+            "Play — Starts or resumes the simulation.",
+            "Pause — Temporarily stops the simulation so you can analyze the chart.",
+            "Save & Exit — Saves your exact scenario state and allows you to return later.",
+            "Finish — Ends your attempt immediately and generates AI insights."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Save & Exit is especially helpful for longer scenarios, letting you pause and return without losing any progress."
+        }
+      ]
+    },
+
+    {
+      "heading": "Save & Exit and Scenario Resuming",
+      "content": [
+        {
+          "type": "text",
+          "text": "If you choose Save & Exit, your entire progress and scenario state are stored. When you come back, the simulation will continue exactly where you left off."
+        },
+        {
+          "type": "list",
+          "title": "What Gets Saved:",
+          "items": [
+            "Your current position in the scenario timeline",
+            "The chart data and candles up to that point",
+            "All past trades and open orders",
+            "Your wallet balance",
+            "Your portfolio holdings"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "When you resume, the chart and interface will look the same as when you exited—allowing you to continue seamlessly."
+        }
+      ]
+    },
+
+    {
+      "heading": "Trade History",
+      "content": [
+        {
+          "type": "text",
+          "text": "Your trade history lists all market orders you executed in the scenario."
+        },
+        {
+          "type": "list",
+          "title": "Information Included:",
+          "items": [
+            "Date and time of the trade",
+            "Stock symbol",
+            "Trade type (Buy/Sell)",
+            "Quantity traded",
+            "Executed price",
+            "Total amount"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "You can export your trade history for analysis or recordkeeping."
+        }
+      ]
+    },
+
+    {
+      "heading": "Limit Order History",
+      "content": [
+        {
+          "type": "text",
+          "text": "This section shows all limit orders you placed during the scenario."
+        },
+        {
+          "type": "list",
+          "title": "What You Can See:",
+          "items": [
+            "Order date",
+            "Stock symbol",
+            "Order type (Limit)",
+            "Quantity",
+            "Limit or trigger price",
+            "Total amount",
+            "Order status (Pending or Executed)"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "You can export your limit order history for further review."
+        }
+      ]
+    },
+
+    {
+      "heading": "My Portfolio",
+      "content": [
+        {
+          "type": "text",
+          "text": "Your portfolio shows the performance of all stocks you currently hold in the scenario."
+        },
+        {
+          "type": "list",
+          "title": "Portfolio Details:",
+          "items": [
+            "Stocks you own",
+            "Quantity held",
+            "Average buy price",
+            "Current price based on scenario replay",
+            "Total invested",
+            "Current value",
+            "Realized profit/loss",
+            "Unrealized profit/loss",
+            "Total portfolio value"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "This portfolio is separate from your real-time BlackSealed portfolio—each scenario has its own trading environment."
+        }
+      ]
+    },
+
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "The Scenario Console uses real historical market data to simulate how prices moved during that time.",
+            "You can accelerate the market replay up to 10× for faster learning.",
+            "Save & Exit lets you pause long attempts and return later without losing any progress.",
+            "Your trades, orders, and portfolio all update based on the scenario timeline.",
+            "This console helps you learn how your decisions would have performed in real market conditions."
+          ]
+        }
+      ]
+    }
+  ]
+}

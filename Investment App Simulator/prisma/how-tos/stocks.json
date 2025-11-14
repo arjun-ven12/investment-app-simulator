@@ -1,0 +1,292 @@
+{
+  "title": "How-To Guide: Using the Stock Dashboard",
+  "content": [
+    {
+      "heading": "Overview",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Stock Dashboard allows you to analyze stocks, generate charts, view recommendations, and place simulated trades in real time. This dashboard helps you practice trading and understand how stock price movements work in a professional, data-driven environment—without any financial risk."
+        }
+      ]
+    },
+
+    {
+      "heading": "Watchlist & Search Panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "The left panel functions as your personal watchlist. You can search for stocks, add them to your favorites, and quickly access symbols you want to monitor closely."
+        },
+        {
+          "type": "list",
+          "title": "How to Use the Watchlist:",
+          "items": [
+            "Use the search bar to find a stock by name or ticker symbol.",
+            "Click 'Search' to load the result.",
+            "Select a stock from the list to load it into the dashboard.",
+            "Add or remove stocks from your favorites using the 'Favorite' or 'Unfavorite' button."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Generating a Stock Chart",
+      "content": [
+        {
+          "type": "text",
+          "text": "Once you select a stock, you can customize the chart using time ranges and chart types. After adjusting any setting, you must click 'Generate Chart' to refresh the graph."
+        },
+        {
+          "type": "list",
+          "title": "Time Range Options:",
+          "items": [
+            "1 Day",
+            "1 Week",
+            "1 Month",
+            "6 Months",
+            "1 Year"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Longer ranges (6 Months and 1 Year) may take slightly longer to load because more historical data needs to be processed."
+        },
+        {
+          "type": "list",
+          "title": "Chart Types:",
+          "items": [
+            "Line Chart (Close Price)",
+            "Candlestick Chart"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Candlestick charts show open, high, low, and close prices, giving a more detailed view of price movements."
+        },
+        {
+          "type": "text",
+          "text": "Note: All market data includes a realistic 15-minute delay, similar to standard paper trading platforms."
+        }
+      ]
+    },
+
+    {
+      "heading": "Investment Recommendations",
+      "content": [
+        {
+          "type": "text",
+          "text": "The dashboard displays historical analyst recommendations for the selected stock. These insights help you understand how professional sentiment has changed over time."
+        },
+        {
+          "type": "list",
+          "title": "Recommendation Types:",
+          "items": [
+            "Strong Buy",
+            "Buy",
+            "Hold",
+            "Sell",
+            "Strong Sell"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Company Information Card",
+      "content": [
+        {
+          "type": "text",
+          "text": "The company information card gives you an overview of the business behind the stock. This helps you understand context and fundamentals."
+        },
+        {
+          "type": "list",
+          "title": "Details Included:",
+          "items": [
+            "Company name and ticker",
+            "Country and exchange",
+            "Industry category",
+            "Founded year",
+            "Market capitalization",
+            "Shares outstanding",
+            "Official company website"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Trading Panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "The trading panel allows you to place simulated buy and sell orders using real (delayed) market data. All trades affect your paper trading portfolio instantly."
+        },
+        {
+          "type": "list",
+          "title": "Steps to Place a Trade:",
+          "items": [
+            "Choose Buy or Sell.",
+            "Select the order type (Market, Limit, Stop-Market, Stop-Limit).",
+            "Enter the price if required (Limit and Stop orders).",
+            "Enter the quantity you wish to trade.",
+            "Review the calculated total.",
+            "Submit your order."
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Trade History",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Trade History section lists all executed trades. This helps you track your past decisions and evaluate performance over time."
+        },
+        {
+          "type": "list",
+          "title": "Information Shown:",
+          "items": [
+            "Date and time of trade",
+            "Stock symbol",
+            "Trade type (Buy/Sell)",
+            "Quantity executed",
+            "Executed price",
+            "Total amount"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "You can export your trade history for analysis or recordkeeping."
+        }
+      ]
+    },
+
+    {
+      "heading": "Limit, Stop-Market, and Stop-Limit Orders",
+      "content": [
+        {
+          "type": "text",
+          "text": "This section shows all your advanced order types. These tools help you practice more strategic and conditional trading."
+        },
+        {
+          "type": "list",
+          "title": "Order Types Shown:",
+          "items": [
+            "Limit Orders",
+            "Stop-Market Orders",
+            "Stop-Limit Orders"
+          ]
+        },
+        {
+          "type": "list",
+          "title": "Details Included:",
+          "items": [
+            "Order date",
+            "Stock symbol",
+            "Order type",
+            "Quantity",
+            "Trigger or limit price",
+            "Total amount",
+            "Order status (Pending, Executed, Cancelled)",
+            "Available actions (e.g., cancel)"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Open Positions",
+      "content": [
+        {
+          "type": "text",
+          "text": "Open positions show the stocks you currently hold in your paper trading portfolio."
+        },
+        {
+          "type": "list",
+          "title": "Details Shown:",
+          "items": [
+            "Stock symbol and name",
+            "Quantity held",
+            "Average buy price",
+            "Current price",
+            "Total invested",
+            "Current value",
+            "Unrealized profit or loss",
+            "Percentage gain/loss"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "Closed Positions",
+      "content": [
+        {
+          "type": "text",
+          "text": "Closed positions show your full trading results for stocks you have completely exited. This is where you can see exactly how much you earned or lost after completing all buy and sell transactions."
+        },
+        {
+          "type": "list",
+          "title": "Details Shown:",
+          "items": [
+            "Total Bought Quantity — The total number of shares you purchased.",
+            "Total Bought Value — The total cost of acquiring all shares.",
+            "Total Sold Value — The total amount received after selling all shares.",
+            "Realized P/L — The profit or loss after completing the full buy-and-sell cycle."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Realized P/L reflects your actual results from completed positions. This helps you understand how your decisions performed from start to finish."
+        }
+      ]
+    },
+
+    {
+      "heading": "How This Dashboard Helps You Learn",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Stock Dashboard is built for learning. You can explore how real stocks behave, test strategies, and understand key trading concepts—all without real financial risk."
+        },
+        {
+          "type": "list",
+          "title": "Key Learning Benefits:",
+          "items": [
+            "Practice trading using real stock data with a realistic 15-minute delay.",
+            "Understand short-term vs long-term behavior using multiple time ranges.",
+            "Compare line and candlestick charts to learn different analysis methods.",
+            "Experience how market, limit, stop-market, and stop-limit orders work.",
+            "Observe analyst recommendation trends and how they influence sentiment.",
+            "Review company fundamentals to understand what affects stock performance.",
+            "Track both open and closed positions to learn about risk and returns.",
+            "Use your trade history to analyze past decisions and improve over time."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "With real data, detailed insights, and simulated execution, the Stock Dashboard gives you a safe, realistic environment to build your trading confidence and skills."
+        }
+      ]
+    },
+
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Use the watchlist to quickly access your saved stocks.",
+            "Always click 'Generate Chart' after changing chart settings.",
+            "Longer time ranges may take longer to load due to more data.",
+            "All market data is delayed by 15 minutes.",
+            "Use your portfolio and history to evaluate your performance and improve."
+          ]
+        }
+      ]
+    }
+  ]
+}

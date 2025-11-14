@@ -244,11 +244,17 @@ async function main() {
   }
 
   // Seed persons
-  const insertedPersons = [];
-  for (const person of persons) {
-    const inserted = await prisma.person.create({ data: person });
-    insertedPersons.push(inserted);
-  }
+// Seed persons (duplicate-safe)
+const insertedPersons = [];
+for (const person of persons) {
+  const inserted = await prisma.person.upsert({
+    where: { email: person.email },
+    update: {},           // Don't update anything
+    create: person        // Create only if not found
+  });
+  insertedPersons.push(inserted);
+}
+
 
   // Seed tasks
   const insertedTasks = [];
