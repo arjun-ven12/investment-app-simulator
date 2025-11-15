@@ -11,17 +11,49 @@ async function fetchAllGuides() {
   if (!token) {
     console.warn("⚠️ No token found — using demo guides.");
     return [
-      { id: 1, title: "Understanding Stocks & Market Basics", description: "An introduction to equity markets.", watermark: "Stocks" },
-      { id: 2, title: "Exploring Bonds & Fixed Income", description: "The foundation of stable investing.", watermark: "Bonds" },
-      { id: 3, title: "ETF Strategies & Diversification", description: "How ETFs improve portfolio balance.", watermark: "ETFs" },
-      { id: 4, title: "Advanced Derivatives & Risk", description: "Options, futures, and institutional hedging.", watermark: "Options" },
-      { id: 5, title: "Behavioral Finance & Decision Bias", description: "Understand investor psychology.", watermark: "Behavior" },
-      { id: 6, title: "Portfolio Management", description: "Construct and rebalance like a pro.", watermark: "Portfolio" },
+      {
+        id: 1,
+        title: "Understanding Stocks & Market Basics",
+        description: "An introduction to equity markets.",
+        watermark: "Stocks",
+      },
+      {
+        id: 2,
+        title: "Exploring Bonds & Fixed Income",
+        description: "The foundation of stable investing.",
+        watermark: "Bonds",
+      },
+      {
+        id: 3,
+        title: "ETF Strategies & Diversification",
+        description: "How ETFs improve portfolio balance.",
+        watermark: "ETFs",
+      },
+      {
+        id: 4,
+        title: "Advanced Derivatives & Risk",
+        description: "Options, futures, and institutional hedging.",
+        watermark: "Options",
+      },
+      {
+        id: 5,
+        title: "Behavioral Finance & Decision Bias",
+        description: "Understand investor psychology.",
+        watermark: "Behavior",
+      },
+      {
+        id: 6,
+        title: "Portfolio Management",
+        description: "Construct and rebalance like a pro.",
+        watermark: "Portfolio",
+      },
     ];
   }
 
   try {
-    const res = await fetch("/guides", { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch("/guides", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = await res.json();
     return data.success ? data.guides : [];
   } catch (err) {
@@ -69,7 +101,9 @@ function setActiveGuide(i) {
   updateProgress(i);
 
   const g = guidesData[i];
-  const summary = (g.description || "Explore this guide to learn more.").substring(0, 200);
+  const summary = (
+    g.description || "Explore this guide to learn more."
+  ).substring(0, 200);
 
   const darkImages = [
     "https://images.unsplash.com/photo-1493673272479-a20888bcee10?auto=format&fit=crop&w=1200&q=80",
@@ -78,18 +112,20 @@ function setActiveGuide(i) {
     "https://images.unsplash.com/photo-1568096349182-081e3ae1c235?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1620722413524-01b4b25e8c2a?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1694724892682-cd4c1f429e0f?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1574768101480-6ef23a7bbda1?auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1574768101480-6ef23a7bbda1?auto=format&fit=crop&w=1200&q=80",
   ];
   const bg = darkImages[i % darkImages.length];
 
   detail.classList.remove("show");
   setTimeout(() => {
     detail.innerHTML = `
-      <div class="detail-card" style="--bg:url('${bg}')">
-        <h3>${String(i + 1).padStart(2, "0")} ${g.title}</h3>
-        <p>${summary}...</p>
-        <a href="guide.html?id=${g.id}" class="detail-link">Continue Reading</a>
-      </div>`;
+  <a href="guide.html?id=${g.id}" class="detail-card-link">
+    <div class="detail-card" style="--bg:url('${bg}')">
+      <h3>${String(i + 1).padStart(2, "0")} ${g.title}</h3>
+      <p>${summary}...</p>
+      <span class="detail-link">Continue Reading</span>
+    </div>
+  </a>`;
     detail.classList.add("show");
   }, 200);
 
@@ -116,13 +152,15 @@ function shiftRoadmap(index) {
 
   const nodesWrapper = document.getElementById("timeline-nodes");
   const line = document.querySelector(".timeline-line");
-  [nodesWrapper, line].forEach(el => {
+  [nodesWrapper, line].forEach((el) => {
     el.style.transform = `translateY(-50%) translateX(${offset}px)`;
   });
 
   const bgGlow = document.querySelector(".center-glow");
   if (bgGlow)
-    bgGlow.style.transform = `translate(-50%, -50%) scale(1.05) translateX(${offset * 0.02}px)`;
+    bgGlow.style.transform = `translate(-50%, -50%) scale(1.05) translateX(${
+      offset * 0.02
+    }px)`;
 }
 
 function updateProgress(index) {
@@ -134,8 +172,13 @@ function updateProgress(index) {
   const lastNode = nodes[nodes.length - 1].getBoundingClientRect();
   const currentNode = nodes[index].getBoundingClientRect();
 
-  const progress = ((currentNode.left - firstNode.left) / (lastNode.left - firstNode.left)) * 100;
-  line.style.setProperty("--progress", `${Math.min(100, Math.max(0, progress))}%`);
+  const progress =
+    ((currentNode.left - firstNode.left) / (lastNode.left - firstNode.left)) *
+    100;
+  line.style.setProperty(
+    "--progress",
+    `${Math.min(100, Math.max(0, progress))}%`
+  );
 }
 
 // -------------------- Grid Rendering --------------------
@@ -150,7 +193,7 @@ function renderGridView() {
     "https://images.unsplash.com/photo-1568096349182-081e3ae1c235?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1620722413524-01b4b25e8c2a?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1694724892682-cd4c1f429e0f?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1574768101480-6ef23a7bbda1?auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1574768101480-6ef23a7bbda1?auto=format&fit=crop&w=1200&q=80",
   ];
 
   grid.innerHTML = guidesData
@@ -163,14 +206,16 @@ function renderGridView() {
       const img = darkImages[i % darkImages.length];
 
       return `
-        <div class="guide-card" style="--bg-img: url('${img}')">
-          <div class="guide-content">
-            <h3>${title}</h3>
-            <p>${desc.substring(0, 140)}...</p>
-            <a href="guide.html?id=${g.id}" class="detail-link">READ MORE</a>
-          </div>
-        </div>
-      `;
+  <a href="guide.html?id=${g.id}" class="guide-card-link">
+    <div class="guide-card" style="--bg-img: url('${img}')">
+      <div class="guide-content">
+        <h3>${title}</h3>
+        <p>${desc.substring(0, 140)}...</p>
+        <span class="detail-link">READ MORE</span>
+      </div>
+    </div>
+  </a>
+`;
     })
     .join("");
 }

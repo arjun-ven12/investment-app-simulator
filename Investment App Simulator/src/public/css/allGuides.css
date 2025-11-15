@@ -769,3 +769,21 @@ text-decoration: underline;
   50%  { transform: translate(60px, -50px) scale(1.1); opacity: 0.75; }
   100% { transform: translate(-50px, 60px) scale(1.05); opacity: 0.6; }
 }
+.detail-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.detail-card-link:hover .detail-card {
+  transform: translateY(-6px) scale(1.02);
+}
+
+.guide-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.guide-card-link:hover .guide-card {
+  transform: translateY(-8px) scale(1.03);
+}
