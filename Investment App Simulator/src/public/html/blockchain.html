@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blockchain Explorer | Sealed</title>
 
   <!-- Fonts & Tailwind -->
@@ -75,8 +76,7 @@
     </div>
 <div class="analytics-section">
 
-  <div class="grid grid-cols-2 gap-6 items-stretch">
-    <!-- Left: 2x2 Summary Cards -->
+<div class="responsive-layout">
     <div class="grid grid-cols-2 gap-4 h-full all-summary">
       <div class="summary-card flex flex-col justify-center">
         <p>Total Trades</p>
@@ -96,17 +96,16 @@
       </div>
     </div>
 
-    <!-- Right: Chart -->
-     <div class="chart-wrap">
+    <div class="chart-wrap">
         <div class="chart-outline">
-    <div class="chart-container h-full">
-        <h3>Gas Used</h3>
-        <br>
-      <canvas id="gasChart"></canvas>
+            <div class="chart-container h-full">
+                <h3>Gas Used</h3>
+                <br>
+                <canvas id="gasChart"></canvas>
+            </div>
+        </div>
     </div>
-    </div>
-    </div>
-  </div>
+</div>
   </div>
 </div>
 
@@ -132,3 +131,5 @@
   </script>
 </body>
 </html>
+
+

@@ -1,3 +1,4 @@
+
 /* ============================================================
    PART 1 — GLOBAL, LAYOUT & TYPOGRAPHY
 ============================================================ */
@@ -1476,7 +1477,7 @@ a, img, svg, input, button, textarea {
 /* --- Responsive --- */
 @media (max-width: 900px) {
   .how-works-flow,
-  .why-grid { flex-direction: column; gap: 36px; }
+  .why-grid { flex-direction: column; gap: 36px; display: flex; justify-content: center;}
   .how-card::after { display: none; }
 }
 
@@ -2415,3 +2416,21 @@ body {
 .info-tabs.fade-smooth {
   transition: height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
+
+
+
+
+@media (max-width: 1000px) {
+      html, body {
+  overflow-x: hidden !important;
+
+}
+
+.how-card {
+  min-height: 100px;
+  width: 100%
+}
+}
+
+
+

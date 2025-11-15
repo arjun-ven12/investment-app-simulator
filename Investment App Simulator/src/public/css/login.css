@@ -1,3 +1,4 @@
+
 /* Global Reset */
 * {
   box-sizing: border-box;
@@ -16,53 +17,30 @@ body {
 /* Container Split */
 .container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-/* Left Panel */
-.left-panel {
-  flex: 1;
-  background: url('https://cdn.wallpapersafari.com/37/23/p5Bt5t.jpg') center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+.left-panel .overlay {
+    padding: 60px;
+    text-align: left;
+    max-width: 700px; 
+    color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 12px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
-
-/* .left-panel .overlay {
-  background: rgba(0,0,0,0.7);
-  padding: 60px;
-  text-align: center;
-} */
-
-.left-panel h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.left-panel p {
-  font-size: 1.2rem;
-  color: #bbb;
-}
-
 /* Right Panel */
 .right-panel {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #000000;
+    background-color: whitesmoke;
+padding: 30px 0px;
 }
 
-/* Form Card */
-.form-card {
-  width: 600px;
-  padding: 30px;
-  border-radius: 12px;
-  background-color: #000000;
-  text-align: center;
-}
+
 
 .login-link {
   margin-bottom: 10px;
@@ -368,30 +346,11 @@ body {
   }
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .container {
-    flex-direction: column;
-  }
 
-  .left-panel,
-  .right-panel {
-    height: 50vh;
-    flex: unset;
-  }
-
-  .form-card {
-    width: 90%;
-    padding: 30px;
-  }
-}
 
 /* Form card entrance */
-.form-card {
-  transform: translateX(50px);
-  opacity: 0;
-  animation: slideIn 0.8s forwards;
-}
+
+
 
 @keyframes slideIn {
   to {
@@ -423,17 +382,7 @@ body {
   }
 }
 
-/* Left panel background movement */
-.left-panel::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-size: 20px 20px;
-  animation: moveBackground 20s linear infinite;
-}
+
 
 @keyframes moveBackground {
   0% {
@@ -690,24 +639,6 @@ body {
   margin-bottom: 0;
 }
 
-.pulse .countdown {
-  animation: pulse 1.8s ease-in-out infinite alternate;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-
-  100% {
-    opacity: 0.7;
-    transform: scale(1.04);
-  }
-}
 
 #loginForm.locked {
   opacity: 0.6;
@@ -722,11 +653,6 @@ body {
 }
 
 
-.cf-challenge {
-  margin-top: 10px;
-  display: none;
-  /* hide it completely */
-}
 
 .password-row {
   position: relative;
@@ -855,205 +781,7 @@ body {
 
 
 
-.lava {
-  filter: url("#goo");
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-}
 
-.blob {
-  border-radius: 50%;
-  background-image: linear-gradient(-206deg, #ff9298 0%, #ff008d 100%);
-  /* background-image: linear-gradient(-206deg, #ff9298 0%, #e4008e 100%); */
-  position: absolute;
-}
-
-.blob.top {
-  border-radius: 50%;
-  width: 100%;
-  height: 4%;
-  top: -3%;
-  left: 0;
-}
-
-.blob.bottom {
-  border-radius: 50%;
-  width: 100%;
-  height: 4.5%;
-  bottom: -3%;
-  left: 0;
-}
-
-.blob:nth-child(1) {
-  width: 200px;
-  height: 200px;
-  left: 35%;
-  bottom: -15%;
-
-  animation: wobble 4s ease-in-out alternate infinite,
-    blob-one ease-in-out 18s infinite;
-}
-
-.blob:nth-child(2) {
-  width: 330px;
-  height: 330px;
-  right: 24%;
-  bottom: -65%;
-
-  animation: wobble 5s ease-in-out alternate infinite,
-    blob-two ease-in-out 22s infinite;
-}
-
-.blob:nth-child(3) {
-  width: 150px;
-  height: 150px;
-  bottom: -15%;
-  left: 34%;
-
-  animation: wobble 6s ease-in-out alternate infinite,
-    blob-three ease-in-out 16s infinite;
-}
-
-.blob:nth-child(4) {
-  width: 235px;
-  height: 235px;
-  bottom: -19%;
-  left: 30%;
-
-  animation: wobble 8s ease-in-out alternate infinite,
-    blob-four ease-in-out 16s infinite;
-}
-
-.blob:nth-child(5) {
-  width: 55px;
-  height: 55px;
-  bottom: -25%;
-  left: 34%;
-
-  animation: wobble 9s ease-in-out alternate infinite,
-    blob-five ease-in-out 32s infinite;
-}
-
-.blob:nth-child(6) {
-  width: 35px;
-  height: 35px;
-  bottom: -25%;
-  right: 34%;
-
-  animation: wobble 10s ease-in-out alternate infinite,
-    blob-six ease-in-out 12s infinite;
-}
-
-.blob:nth-child(7) {
-  width: 435px;
-  height: 435px;
-  bottom: -85%;
-  right: 40%;
-
-  animation: wobble 11s ease-in-out alternate infinite,
-    blob-seven ease-in-out 32s infinite;
-}
-
-@keyframes blob-one {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-600%);
-  }
-}
-
-@keyframes blob-two {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-420%);
-  }
-}
-
-@keyframes blob-three {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-305%);
-  }
-}
-
-@keyframes blob-four {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-465%);
-  }
-}
-
-@keyframes blob-five {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-700%);
-  }
-}
-
-@keyframes blob-six {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-700%);
-  }
-}
-
-@keyframes blob-seven {
-
-  0%,
-  100% {
-    transform: translatey(0);
-  }
-
-  50% {
-    transform: translatey(-300%);
-  }
-}
-
-@keyframes wobble {
-  50% {
-    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
-  }
-
-  100% {
-    border-radius: 38% 52% 75% 36% / 50% 40% 50% 60%;
-  }
-}
-
-.right-panel {
-  background-color: white;
-}
 
 body {
   overflow: hidden\W;
@@ -1061,244 +789,33 @@ body {
 
 
 
-.lava {
-  position: absolute;
-  height: 120%;
-  width: 120%;
-  top: -10%;
-  left: -10%;
-  filter: url("#goo");
-  overflow: hidden;
-  /* ✅ prevents any inner overspill */
-}
 
-.lamp::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
-  z-index: 5;
-  pointer-events: none;
-}
 
-.right-panel {
-  background: transparent;
-}
 
-.lamp {
-  position: fixed;
-  /* ✅ always fills screen, never pushes content */
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  z-index: -1;
-  /* ✅ sits behind everything else */
-  background: radial-gradient(circle at 50% 50%, #050505 0%, #000 100%);
-}
 
-.lava {
-  position: absolute;
-  inset: 0;
-  filter: url("#goo");
-  overflow: hidden;
+.left-panel .tagline {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #bbb;
+    margin-bottom: 20px;
 }
 
 
-.right-panel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-}
+
+
 
 .form-card {
   position: relative;
-  z-index: 1;
-}
-
-.right-panel {
-  position: relative;
-  overflow: hidden;
-}
-
-/* ensure form sits above it */
-.form-card {
-  position: relative;
-  z-index: 1;
-}
-
-
-
-
-/* ===========================
-   RIGHT PANEL LAVA BLOB
-=========================== */
-.mini-lava {
-  position: absolute;
-  inset: 0;
-  filter: url("#goo");
-  overflow: hidden;
-  z-index: 0;
-}
-
-/* organic animated blob */
-#rightBlob {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 380px;
-  height: 380px;
-  border-radius: 60% 40% 55% 45% / 55% 45% 45% 55%;
-  background: radial-gradient(circle at 35% 35%, #ff008d 0%, #ff0077 60%, transparent 100%);
-  mix-blend-mode: screen;
-  opacity: 0.55;
-  filter: blur(22px);
-  animation:
-    blobDrift 24s ease-in-out infinite,
-    morphShape 8s ease-in-out infinite;
-  transform: translate(-50%, -50%);
-  will-change: transform, border-radius;
-}
-
-/* drifting in 2D space */
-@keyframes blobDrift {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  25% {
-    transform: translate(-30%, -55%) scale(1.15) rotate(15deg);
-  }
-
-  50% {
-    transform: translate(-60%, -45%) scale(1.1) rotate(-10deg);
-  }
-
-  75% {
-    transform: translate(-40%, -60%) scale(1.2) rotate(20deg);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-/* shape morphing for life */
-@keyframes morphShape {
-
-  0%,
-  100% {
-    border-radius: 60% 40% 50% 50% / 55% 45% 45% 55%;
-  }
-
-  50% {
-    border-radius: 35% 65% 55% 45% / 45% 55% 55% 45%;
-  }
-}
-
-.blob:nth-child(odd) {
-  background: radial-gradient(circle at 35% 35%, #00b7ff 0%, #0040ff 60%, transparent 100%);
-}
-
-.blob:nth-child(even) {
-  background: radial-gradient(circle at 35% 35%, #ff008d 0%, #ff0077 60%, transparent 100%);
-}
-
-/* blur glass card above blob */
-.form-card {
-  position: relative;
-  z-index: 2;
-  /* background: rgba(12,12,12,0.55);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%); */
-  transition: background 0.3s ease;
-  background: transparent;
-}
-
-#rightBlob {
-  background: radial-gradient(circle at 35% 35%, #007cff 0%, #00f0ff 60%, transparent 100%);
-}
-
-.blob:nth-child(odd) {
-  animation-duration: 20s;
-}
-
-.blob:nth-child(even) {
-  animation-duration: 28s;
-}
-
-#rightBlob {
-  animation-duration: 32s;
-}
-
-.left-lava {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 120%;
-  height: 120%;
-  filter: url("#goo");
-  z-index: 0;
-  overflow: hidden;
-}
-
-.left-blob {
-  position: absolute;
-  border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
-  mix-blend-mode: screen;
-  filter: blur(25px);
-  opacity: 0.45;
-  animation: floatLeft 40s ease-in-out infinite alternate,
-    morphLeft 10s ease-in-out infinite;
-}
-
-/* blue-pink fusion for depth */
-.left-blob:nth-child(1) {
-  width: 500px;
-  height: 500px;
-  top: 40%;
-  left: -10%;
-  background: radial-gradient(circle at 40% 40%, #ff0099 0%, #4000ff 60%, transparent 100%);
-  animation-delay: -10s;
-}
-
-.left-blob:nth-child(2) {
-  width: 350px;
-  height: 350px;
-  top: 10%;
-  left: 5%;
-  background: radial-gradient(circle at 35% 35%, #007cff 0%, #00f0ff 60%, transparent 100%);
-  opacity: 0.35;
-  animation-delay: -4s;
-}
-
-@keyframes floatLeft {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-
-  50% {
-    transform: translateY(-8%) translateX(4%) scale(1.05);
-  }
-
-  100% {
-    transform: translateY(4%) translateX(-2%) scale(1);
-  }
-}
-
-@keyframes morphLeft {
-
-  0%,
-  100% {
-    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
-  }
-
-  50% {
-    border-radius: 35% 65% 55% 45% / 55% 45% 55% 45%;
-  }
+  transform: translateX(50px);
+  opacity: 0;
+  animation: slideIn 0.8s forwards;
+overflow: visible;
+  width: 600px;
+  padding: 30px 30px;
+  border-radius: 12px;
+  background-color: whitesmoke;
+  text-align: center;
+height:auto;
 }
 
 body {
@@ -1319,25 +836,14 @@ body {
     url("https://images.unsplash.com/photo-1754738381794-ee91d186a478?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1664&auto=format&fit=crop&q=80&w=881&auto=format&fit=crop&q=80&w=736&auto=format&fit=crop&q=80&w=687&auto=format&fit=crop&w=2000&q=80") center/cover no-repeat;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
+  padding-left: 50px;
 
 }
 
-/* Glassy text overlay
-.left-panel .overlay {
-  background: rgba(10, 10, 10, 0.45);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border-radius: 18px;
-  padding: 80px 60px;
-  text-align: center;
-  color: #fff;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  animation: fadeUp 1.2s ease forwards;
-} */
 
 .left-panel h1 {
-  font-size: 3rem;
+  font-size: 5rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   margin-bottom: 20px;
@@ -1368,22 +874,13 @@ body {
   background: linear-gradient(160deg, #020202 0%, #06080d 100%);
 }
 
-.left-panel h1 {
-  margin-left: -280px;
-  font-size: 90px;
-}
 
-.desc {
- margin-left: -280px;
-}
 
-.tagline {
-  margin-left: -280px;
-}
 
-.right-panel {
-  background-color: whitesmoke;
-}
+
+
+
+
 
 .form-card input {
   width: 100%;
@@ -1415,37 +912,13 @@ body {
   color: #aaa;
 }
 
-.right-panel::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: 100%;
-  background: linear-gradient(to right,
-      rgba(17, 0, 255, 0.25) 0%,
-      rgba(1, 10, 138, 0.15) 40%,
-      transparent 100%);
-  filter: blur(240px);
-  pointer-events: none;
-  z-index: 0;
-}
-
 .form-card input:focus {
   border-color: transparent;
   box-shadow: 0 0 8px rgba(138, 43, 226, 0.25), 0 0 12px rgba(0, 212, 255, 0.2);
   background: #fff;
 }
 
-.form-card::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 1px;
-}
+
 
 .form-card h1 {
   font-weight: 500;
@@ -1458,7 +931,7 @@ body {
 .subtitle {
   font-size: 0.90rem;
   margin-top: -6px;
-  margin-bottom: 100px;
+  margin-bottom: 40px;
   font-weight: 500;
   letter-spacing: 0.3px;
   color: rgba(71, 71, 71, 0.6);
@@ -1497,7 +970,6 @@ body {
   position: absolute;
   inset: 0;
   background: linear-gradient(120deg, #000000, #000000);
-  transform: translateX(-100%);
   transition: transform 0.6s ease;
   z-index: -1;
 }
@@ -1537,6 +1009,7 @@ body {
   overflow: hidden;
   z-index: 1;
   transition: color 0.6s ease, transform 0.4s ease;
+  margin-top: 10px;
 }
 
 /* moving white→black overlay */
@@ -1707,9 +1180,7 @@ body {
 }
 
 
-.right-panel {
-  background-color: white;
-}
+
 
 /* ===========================
    Transparent Password Field
@@ -1848,10 +1319,6 @@ body {
   transition: all 0.3s ease;
 }
 
-.form-card{
-  margin-bottom: 30px;
-}
-
 
 
 
@@ -1894,3 +1361,197 @@ body {
 #microsoftSignInBtn {
   transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+.left-panel .desc {
+  font-size: 16px;
+}
+
+
+
+
+/* -------------------------------------------
+/* Small Mobile (up to 480px) */
+@media (max-width: 1000px) {
+
+
+  .form-card input {
+    font-size: 0.85rem;
+  }
+
+  .main-wrapper {
+    width: 100%;
+  }
+  .desc {
+    margin-left: 0px;
+  }
+
+    .left-panel {
+        padding: 60px 0;
+                height: auto;
+
+    }
+.form-card form button[type="submit"] {
+  margin-top: 15px;
+  font-size: 14px;
+}
+    #googleSignInBtn, #microsoftSignInBtn {
+      font-size: 14px !important;
+    }
+    .left-panel .overlay {
+        padding: 10px 20px;
+        width: 100%;
+    }
+    .left-panel::before {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .left-panel h1 {
+        font-size: 2rem !important;
+                margin-left: 0px !important;
+    }
+    .left-panel .tagline {
+        font-size: 0.8rem;
+                margin-left: 0px;
+
+    }
+
+
+
+
+        
+    .left-panel .desc {
+        font-size: 0.8rem;
+                margin-left: 0px;
+
+    }
+    
+    .right-panel {
+        padding: 30px 10px;
+    }
+    
+
+    .form-card h1 {
+        font-size: 1.5rem;
+    }
+    
+    #googleSignInBtn, #microsoftSignInBtn {
+        font-size: 0.9rem;
+        padding: 10px 10px;
+        height: 50px !important;
+    }
+    
+    .oauth-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+
+
+
+
+
+    .right-panel {
+        height: auto;
+        padding: 40px 0px;
+        overflow: visible !important;
+        background-color: whitesmoke;
+    }
+
+
+    .form-card {
+        width: 100%;
+        max-width: 500px; 
+        padding: 0px !important;
+        position: relative;
+        height: 100%;
+        margin-bottom: 0px;
+    }
+    
+    /* Stack form rows vertically (for username/email) */
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-row input {
+        margin-bottom: 18px; 
+    }
+
+    /* Stack password rows vertically */
+    .password-row {
+        flex-direction: column; 
+    }
+    
+    /* Fix the password toggle positioning for stacked inputs */
+    .password-row > input {
+        width: 100%;
+        margin-bottom: 15px; /* Re-establish spacing */
+    }
+
+    /* Target the password toggle for the first password input (inside the first password-row) */
+    #togglePassword {
+        /* Position relative to the parent form-card/right-panel */
+        position: absolute;
+        top: 15px; /* Aligns with the first password input */
+        right: 36px; 
+        transform: translateY(0);
+    }
+    
+    /* Target the password toggle for the second password input (inside the second password-row) */
+    #toggleConfirmPassword {
+        /* Position relative to the parent form-card/right-panel */
+        position: absolute;
+        top: 15px; /* Aligns with the confirm password input */
+        right: 36px;
+        transform: translateY(0);
+    }
+
+    .form-card h1 {
+      text-align: left;
+      padding-top: 5px;
+    }
+    
+    .form-card .subtitle {
+      display: none;
+    }
+
+    .container {
+      display: flex;
+              flex-direction: column;
+
+    }
+}
+
+@media (max-width: 1300px) {
+  .left-panel {
+  padding-left: 0;
+
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

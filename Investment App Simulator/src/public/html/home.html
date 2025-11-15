@@ -48,13 +48,13 @@
         </nav>
   </div>
 
-
-  <div class="main-content">
     <div class="top">
       <h1 class="page-h1">Welcome, <span id="username" class="page-h1">User</span></h1>
       <p class="page-label">Dashboard</p>
       <p class="page-para">Get personalised AI advice, track your trades, and see where you stand on the leaderboard.</p>
     </div>
+  <div class="main-content">
+
 
     <!-- Wallet Section -->
 
@@ -82,45 +82,55 @@
 
     <!-- Portfolio Section -->
     <div class="sections" id="portfolio-section">
-      <div class="portfolio-section chart-container">
-        <h1>Your Portfolio</h1>
-        <!-- Tabs -->
-        <div class="tab-container">
-          <button id="tab-stocks" class="tab-button active">Stocks</button>
-          <button id="tab-options" class="tab-button">Options</button>
-        </div>
-        <br>
-        <!-- Portfolio Content -->
-        <div id="portfolio-stocks" class="tab-content active">
-          <div class="trading-card2"><!-- Stocks will render here --></div>
-        </div>
-        <div id="portfolio-options" class="tab-content">
-          <div id="options-portfolio-card" ><!-- Options will render here --></div>
+      <div class="trading-card">
+        <div class="portfolio-section chart-container">
+          <h1>Your Portfolio</h1>
+          <!-- Tabs -->
+          <div class="tab-container">
+            <button id="tab-stocks" class="tab-button active">Stocks</button>
+            <button id="tab-options" class="tab-button">Options</button>
+          </div>
+          <br>
+          <!-- Portfolio Content -->
+          <div id="portfolio-stocks" class="tab-content active">
+            <div class="trading-card2"><!-- Stocks will render here --></div>
+          </div>
+          <div id="portfolio-options" class="tab-content">
+            <div id="options-portfolio-card" ><!-- Options will render here --></div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Goals Section -->
-          <div class="sections" id="leaderboard-section">
-            <div>
-                  <div class="history-column">
-            <h2>Leaderboard</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th >Rank</th>
-                  <th>Username</th>
-                  <th>Profit/Loss %</th>
-                  <th>Last Trade</th>
-                </tr>
-              </thead>
-              <tbody id="leaderboard-body">
-                <!-- Dynamically injected -->
-              </tbody>
-            </table>
-                  </div>
-                </div>
-          </div>
+<div class="sections" id="leaderboard-section">
+  <div>
+    <div class="history-column">
+      <h2>Leaderboard</h2>
+
+      <!-- Podium for top 3 -->
+      <div id="leaderboard-podium"></div>
+
+      <div class="">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Username</th>
+              <th>Profit/Loss %</th>
+              <th>Last Trade</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Dynamically injected -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+
 <!-- <div class="portfolio-section content chart-container">
   <h1>My Scenarios</h1>
   <div id="homepage-scenarios">

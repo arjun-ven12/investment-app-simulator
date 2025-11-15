@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginForm");
   const warningCard = document.getElementById("warningCard");
@@ -8,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
   if (storedLockUntil && new Date(storedLockUntil) > new Date()) {
     startLockoutTimer(new Date(storedLockUntil));
   }
+
+
 
   loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -80,7 +83,10 @@ document.addEventListener("DOMContentLoaded", function () {
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("username", data.user.username);
-
+    // Initialize Web3Auth in background
+    import("./web3auth.js").then(async ({ initWeb3Auth }) => {
+      await initWeb3Auth();
+    });
       window.location.href = "/html/home.html";
     } catch (err) {
       showWarning(err.message || "Unexpected error occurred.");
@@ -284,4 +290,15 @@ document.addEventListener("mousemove", (e) => {
   const y = (e.clientY / window.innerHeight - 0.5) * 30;
   blob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1.1)`;
 });
+
+
+
+
+
+
+
+
+
+
+
 

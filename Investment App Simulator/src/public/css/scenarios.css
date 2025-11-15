@@ -1,3 +1,4 @@
+
 /* ============================================================
    BLACKSEALED — Scenario Dashboard (Glass Cards · Transparent Layout)
    Transparent right panel · Frosted glass cards · Premium minimal
@@ -434,27 +435,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
 #globe-layer canvas {
   pointer-events: auto;
 }/* ---------- DASHBOARD PANEL RIGHT ALIGN ---------- */
-#dashboard-layer {
-  position: fixed;
-  top: 0;
-  right: 0;                     /* ✅ anchors to right edge */
-  width: 34vw;                  /* adjust width to taste (30–38vw looks good) */
-  height: 100vh;
-  padding: 42px 50px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-end;        /* ✅ aligns contents to the right side */
-  color: #e7ecf3;
-  background: transparent;
-  border-left: none;
-  box-shadow: none;
-  z-index: 5;
-  overflow-y: auto;
-  transform: translateX(100%);
-  opacity: 0;
-  transition: all 0.7s cubic-bezier(.4, 0, .2, 1);
-}
+
 
 #dashboard-layer.active {
   transform: translateX(0);
@@ -484,13 +465,23 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
   z-index: 60;
   display: none;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   color: #f5f8ff;
   font-family: 'Outfit', sans-serif;
-  margin-left: -840px;
   padding-top: 10px;
 }
+
+.grid-left {
+      display: flex;
+    width: 70vw;
+
+}
+
+.insideleft {
+  justify-content: left;
+}
+
 
 .timeline-overlay.active {
   display: flex;
@@ -559,21 +550,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
   white-space: nowrap;
 }
 
-/* --- Detail Card --- */
-.timeline-detail {
-  margin-top: 25px;            /* reduced spacing */
-  background: rgba(20,22,28,0.7);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 12px;
-  padding: 18px 26px;          /* smaller padding */
-  text-align: center;
-  max-width: 480px;            /* narrower card */
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.4s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 25px rgba(0,0,0,0.4);
-}
+
 
 .timeline-detail.show {
   opacity: 1;
@@ -731,16 +708,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
   border-color: rgba(255,255,255,0.25);
   color: #fff;
 }
-.timeline-detail {
-  position: relative;
-  margin-top: -15px;
-  background: rgba(12, 14, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 22px 36px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-  margin-left: -400px;
-}
+
 .timeline-detail::before {
   content: "";
   position: absolute;
@@ -1106,23 +1074,26 @@ h2 {
    (Stops layout jumping when no cards)
 ============================================================ */
 
+    html, body {
+  overflow-x: hidden;
+  width: 100vw;
+}
+
 #dashboard-layer {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-    width: 40vw !important;         /* ✅ increased from 34vw or 620px */
-  max-width: 880px !important;    /* ✅ prevents it from being too wide on ultra-wide screens */
-  height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
+    position: fixed;
+    right: 0;
+    width: 30vw; /* INCREASED WIDTH: from 200px to 250px */
+    /* top and height will be set by JS for accurate alignment */
+    background-color: #00000000;
+    box-shadow: 4px 0 12px rgba(0,0,0,0.7); /* Increased shadow for bigger look */
+    display: flex;
+    flex-direction: column;
    padding: 60px 60px !important;  /* ✅ gives more breathing room */
-  box-sizing: border-box !important;
-  background: transparent !important;
-  backdrop-filter: blur(10px) !important;
-  overflow: hidden !important;
-  background-color: transparent;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #E0EBFF #111; /* thumb + track */
 }
 
 /* --- Console stays full height always --- */
@@ -1194,7 +1165,6 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   padding: 22px 18px;
   margin: 10px 0 14px 0;         /* tighter top/bottom */
   margin-left: -40px !important;     /* << force left edge */
-  margin-right: 30px !important; /* spacing from scrollbar */
   transition: border 0.2s ease, background 0.2s ease;
 }
 
@@ -1368,7 +1338,7 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   justify-content: center;
   padding-left: 6vw;
   gap: 22px;
-  z-index: 12; /* stays behind the button */
+  z-index: 70; /* stays behind the button */
   pointer-events: none; /* makes background & overlay not block clicks */
   margin-left: 100px;
 }
@@ -1376,6 +1346,12 @@ html, body, button, p, h1, h2, h3, h4, span, div {
 #floatingScenariosOverlay.show {
   display: flex;
   animation: fadeIn 0.4s ease forwards;
+  background-color: #000000d4;
+    overflow: scroll;
+    height: fit-content;
+    padding-top: 100px;
+    z-index: 70; /* stays behind the button */
+
 }
 
 /* --- Title --- */
@@ -1461,7 +1437,7 @@ html, body, button, p, h1, h2, h3, h4, span, div {
 /* --- View/Close Button --- */
 .view-scenarios-btn {
 
-  z-index: 50; /* above the overlay */
+  z-index: 80; /* above the overlay */
 
 
 }
@@ -1475,7 +1451,7 @@ html, body, button, p, h1, h2, h3, h4, span, div {
 @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
 #region-timeline{
-margin-left: -300px;
+margin-left: -250px;
 }
 
 #globe-layer {
@@ -2006,11 +1982,8 @@ backdrop-filter: blur(14px) saturate(130%);
 .close-btn:hover {
   background: rgba(255,255,255,0.15);
 }
-#timeline-detail{
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-}#scenarioOverlay {
+
+#scenarioOverlay {
   z-index: 999999 !important;
   position: fixed !important;
   pointer-events: auto !important;
@@ -2475,3 +2448,144 @@ backdrop-filter: blur(14px) saturate(130%);
 .bs-btn-secondary:hover {
   background: rgba(255,255,255,0.18);
 }
+
+
+
+.fullbox {
+  width: 100vw;
+}
+
+.scene-container {
+  width: 70%;
+  height: auto;
+}
+
+
+@media (max-width: 1250px) {
+
+      #region-timeline{
+      margin-left: -170px;
+      padding: 20px;
+    }
+
+    .timeline-detail {
+      width:auto
+    }
+
+    .timeline-close{
+      right: 25px;
+    }
+}
+
+
+
+@media (max-width: 1000px) {
+
+
+  #globe-layer {
+    width:100vw !important;
+    left: 0 !important;
+  }
+
+  .fullbox {
+        display: flex;
+        flex-direction: column; 
+        
+        /* 1. Remove any default body padding/margin that might cause overflow */
+        margin: 0; 
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden; /* Prevents the body itself from showing the scrollbar */
+    }
+
+      #dashboard-layer {
+        width: 100vw; 
+        margin-bottom: 20px; 
+        padding:0px 0px !important;
+        height: auto !important;
+        position: relative;
+        box-shadow: none;
+        top: 100px;
+    margin-bottom: 80px;
+        margin-top: -90px;
+        border: none;
+    }
+
+    .grid-left {
+      width: 100vw;
+    }
+
+    
+#floatingScenariosOverlay {
+  margin-left: 0px;
+  padding-top: 70px;
+  width: 100%;
+  }
+
+  #floatingScenariosOverlay.show {
+
+  overflow-x: hidden;
+  }
+
+  .floating-scenarios-title {
+    padding-top: 35px
+}
+
+.dashboard {
+  padding: 20px
+}
+
+.scenario-card {
+  margin-right: 0px !important
+}
+.right-panel {
+  padding: 0px;
+}
+
+.right-panel h3 {
+  margin-top: 0px !important
+}
+
+#dashboard-layer.active {
+      width: 100vw;
+}
+
+#globe-layer canvas {
+width: 100% !important;
+height: 100% !important;
+}
+#region-timeline {
+    margin-left: 0px;
+    width: 90%
+}
+
+.timeline-detail {
+  margin-top: 40px;
+  background: rgba(12, 14, 20, 0.889);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 24px 40px;
+  text-align: left;
+  max-width: 600px;
+  width: auto;
+  z-index: 200;
+  backdrop-filter: blur(30px);
+  color: #e4e8f0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+

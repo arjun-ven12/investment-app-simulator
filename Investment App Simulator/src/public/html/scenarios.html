@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,58 +28,59 @@
 </div>
 
   <!-- 🌍 GLOBE SCENE -->
-  <section id="globe-layer" class="view-layer active">
-    <div id="globe-ui">
-    </div>
-  </section>
-
-  <section id="region-timeline" class="timeline-overlay">
-    <div class="timeline-inner">
-      <!-- Navigation Arrows -->
-      <button class="nav-arrow left" id="timeline-prev">‹</button>
-
-      <!-- Main Line -->
-      <div class="timeline-line">
-        <div id="timeline-nodes"></div>
-      </div>
-
-      <button class="nav-arrow right" id="timeline-next">›</button>
-    </div>
-
-    <!-- Timeline Detail Panel -->
-    <div id="timeline-detail" class="timeline-detail">
-      <!-- dynamically filled by globe.js -->
-    </div>
-  </section>
-  <div id="mobile-all-scenarios">
-  <h2 class="mobile-section-title">All Scenarios</h2>
-  <div id="mobile-scenario-list"></div>
-</div>
-
-  <!-- 🧭 DASHBOARD -->
-  <section id="dashboard-layer" class="view-layer active">
-    <div class="dashboard">
-      <div class="right-panel">
-        <h3>My Scenarios</h3>
-
-        <div class="tabs">
-          <button class="tab-button active" data-tab="not_started">Not Started</button>
-          <button class="tab-button" data-tab="in_progress">In Progress</button>
-          <button class="tab-button" data-tab="completed">Completed</button>
-        </div>
-
-        <div id="not-started" class="tab-content active">
-          <ul id="my-not-started"></ul>
-        </div>
-        <div id="in-progress" class="tab-content">
-          <ul id="my-in-progress"></ul>
-        </div>
-        <div id="completed" class="tab-content">
-          <ul id="my-completed"></ul>
+  <div class="fullbox">
+    <div class="grid-left">
+      <div class="insideleft">
+        <section id="globe-layer" class="view-layer active">
+          <div id="globe-ui">
+          </div>
+        </section>
+        <div class="timelineleft">
+          <section id="region-timeline" class="timeline-overlay">
+            <div class="timeline-inner">
+              <!-- Navigation Arrows -->
+              <button class="nav-arrow left" id="timeline-prev">‹</button>
+              <!-- Main Line -->
+              <div class="timeline-line">
+                <div id="timeline-nodes"></div>
+              </div>
+              <button class="nav-arrow right" id="timeline-next">›</button>
+            </div>
+            <!-- Timeline Detail Panel -->
+            <div id="timeline-detail" class="timeline-detail">
+              <!-- dynamically filled by globe.js -->
+            </div>
+          </section>
         </div>
       </div>
     </div>
-  </section>
+    <!-- <div id="mobile-all-scenarios">
+    <h2 class="mobile-section-title">All Scenarios</h2>
+    <div id="mobile-scenario-list"></div>
+    </div> -->
+    <!-- 🧭 DASHBOARD -->
+    <section id="dashboard-layer" class="view-layer active">
+      <div class="dashboard">
+        <div class="right-panel">
+          <h3>My Scenarios</h3>
+          <div class="tabs">
+            <button class="tab-button active" data-tab="not_started">Not Started</button>
+            <button class="tab-button" data-tab="in_progress">In Progress</button>
+            <button class="tab-button" data-tab="completed">Completed</button>
+          </div>
+          <div id="not-started" class="tab-content active">
+            <ul id="my-not-started"></ul>
+          </div>
+          <div id="in-progress" class="tab-content">
+            <ul id="my-in-progress"></ul>
+          </div>
+          <div id="completed" class="tab-content">
+            <ul id="my-completed"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
   <!-- ============================================================
      AI Insights Popup — BlackSealed Glass Modal
 ============================================================ -->
@@ -134,3 +136,5 @@
 </body>
 
 </html>
+
+

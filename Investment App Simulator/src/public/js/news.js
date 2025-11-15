@@ -1,3 +1,4 @@
+
 // ============================================================
 // news.js — BlackSealed Market Feed (Final Production)
 // Cinematic Grid · Smart Rotation · Socket.IO Live Views
@@ -272,31 +273,114 @@ function bookmarkIdFromDrawer(apiId) {
   // Use dataset if you store actual bookmarkId
   return card.dataset.bookmarkDbId || apiId;
 }
+// ==========================================================
+// 1. GLOBAL STATE & DOM REFERENCES
+// ==========================================================
+const paginationContainer = document.getElementById('pagination-controls'); // Fetches <div id="pagination-controls">
 
-async function displayNews(newsList = []) {
+let currentNewsList = [];
+let currentPage = 1;
+const itemsPerPage = 12; 
+
+
+// ==========================================================
+// 2. PAGINATION FUNCTIONS
+// ==========================================================
+
+/**
+ * Creates and updates the pagination buttons.
+ * @param {number} totalItems - The total number of news items.
+ */
+function createPaginationControls(totalItems) {
+    if (!paginationContainer) return;
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    paginationContainer.innerHTML = '';
+    
+    if (totalPages <= 1) return; 
+
+    // --- Previous Button ---
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = 'Previous';
+    prevBtn.className = 'pagebutton'; // Using your existing class
+    prevBtn.disabled = (currentPage === 1); 
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayNews(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+    
+    if (currentPage > 1) {
+        paginationContainer.appendChild(prevBtn);
+    }
+    
+    // --- Page Number/Status ---
+    const pageStatus = document.createElement('span');
+    pageStatus.className = 'page-status';
+    pageStatus.textContent = `Page ${currentPage} of ${totalPages}`;
+    paginationContainer.appendChild(pageStatus);
+
+
+    // --- Next Button ---
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next';
+    nextBtn.className = 'pagebutton'; // Using your existing class
+    nextBtn.disabled = (currentPage >= totalPages);
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayNews(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+    paginationContainer.appendChild(nextBtn);
+}
+
+
+// ==========================================================
+// 3. REVISED DISPLAY FUNCTION
+// ==========================================================
+
+async function displayNews(newsList = currentNewsList) {
     if (!newsContainer) return;
+    
+    // Update global list and reset page if a new list is provided (e.g., from search)
+    if (newsList !== currentNewsList) {
+        currentNewsList = newsList;
+        currentPage = 1; 
+    }
+
     newsContainer.innerHTML = "";
-
     userBookmarks = await fetchUserBookmarksIds();
-    if (!Array.isArray(newsList)) newsList = [];
+    
+    if (!Array.isArray(currentNewsList)) currentNewsList = [];
+    
+    // ⭐️ PAGINATION LOGIC: Slice the array
+    const totalItems = currentNewsList.length;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const newsForPage = currentNewsList.slice(startIndex, endIndex);
 
-    newsList.forEach((news, i) => {
+    // ⭐️ RENDER CARDS FOR THE CURRENT PAGE ONLY
+    newsForPage.forEach((news) => {
         const card = document.createElement("article");
         card.className = "news-card";
-
-        // if (i % 8 === 0) card.classList.add("highlighted");
 
         const key = String(news.apiId || news.id);
         card.dataset.newsKey = key;
 
-        // Thumbnail
+        // ... [Thumbnail, Text, Summary, Meta, Buttons creation logic remains here] ...
+        
+        // --- Thumbnail ---
         const thumbWrapper = document.createElement("div");
         thumbWrapper.className = "thumb-wrapper";
         const img = createSmartImage(news.image, news.headline, news.category);
         thumbWrapper.appendChild(img);
         card.appendChild(thumbWrapper);
 
-        // Text
+        // --- Text ---
         const source = document.createElement("div");
         source.className = "source";
         source.textContent = news.source || "Unknown";
@@ -309,7 +393,7 @@ async function displayNews(newsList = []) {
         summary.className = "summary";
         summary.textContent = news.summary || "";
 
-        // Meta
+        // --- Meta (Views/Likes) ---
         const viewsDiv = document.createElement("div");
         viewsDiv.className = "views";
         viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(0)} • ${formatLikes(news.totalLikes || 0)}`;
@@ -319,7 +403,7 @@ async function displayNews(newsList = []) {
             viewsDiv.innerHTML = `${createEyeSVG(16)} ${formatViews(views)} • ${formatLikes(news.totalLikes || 0)}`;
         });
 
-        // Buttons
+        // --- Actions (Read More, Bookmark, Like) ---
         const readMore = document.createElement("a");
         readMore.href = news.url || "#";
         readMore.target = "_blank";
@@ -331,35 +415,27 @@ async function displayNews(newsList = []) {
         updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(key));
 
         bookmarkBtn.onclick = async () => {
-            const isBookmarked = userBookmarks.includes(key);
+             const isBookmarked = userBookmarks.includes(key);
 
             if (isBookmarked) {
-                // 🧠 Unbookmark immediately
                 updateBookmarkButtonUI(bookmarkBtn, false);
                 userBookmarks = userBookmarks.filter((id) => id !== key);
-
-                // remove from server + drawer
-                await removeBookmark(bookmarkIdFromDrawer(key)); // 🧩 use existing backend delete route
+                await removeBookmark(bookmarkIdFromDrawer(key));
                 const existing = bookmarkContainer.querySelector(`[data-bookmark-id="${key}"]`);
                 if (existing) existing.remove();
 
-                // show empty state if none left
                 if (!bookmarkContainer.querySelector(".news-card")) {
                     const emptyMsg = document.createElement("div");
                     emptyMsg.className = "empty-state";
                     emptyMsg.textContent = "No saved news yet.";
                     bookmarkContainer.appendChild(emptyMsg);
                 }
-
             } else {
-                // 🧠 Bookmark instantly
                 updateBookmarkButtonUI(bookmarkBtn, true);
                 const result = await bookmarkNews(news);
                 if (result?.success) userBookmarks.push(key);
             }
         };
-
-
 
         const likeBtn = document.createElement("button");
         likeBtn.className = "like-btn";
@@ -392,23 +468,30 @@ async function displayNews(newsList = []) {
         card.append(source, headline, summary, actions, viewsDiv);
         newsContainer.appendChild(card);
     });
+    
+    // ⭐️ Render Pagination Controls after rendering news
+    createPaginationControls(totalItems);
+
     // --- Scroll Reveal Observer ---
-const observer = new IntersectionObserver(
-  entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target); // reveal once per card
-      }
-    });
-  },
-  { threshold: 0.2 } // trigger when 20% visible
-);
+    const observer = new IntersectionObserver(
+        entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        },
+        { threshold: 0.2 } 
+    );
 
-// Observe all newly loaded cards
-document.querySelectorAll('.news-card').forEach(card => observer.observe(card));
-
+    document.querySelectorAll('.news-card').forEach(card => observer.observe(card));
 }
+
+
+
+
+
 function applyScrollReveal() {
   const cards = document.querySelectorAll('.news-card');
 
@@ -707,4 +790,9 @@ window.addEventListener('scroll', () => {
   if (window.scrollY > 20) nav.classList.add('scrolled');
   else nav.classList.remove('scrolled');
 });
+
+
+
+
+
 
