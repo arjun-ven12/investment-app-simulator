@@ -620,7 +620,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
   position: absolute;
   top: -50px;
   right: 0;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0);
   border: 1px solid rgba(255,255,255,0.15);
   color: #fff;
   font-size: 20px;
@@ -642,7 +642,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
    =============================== */
 .timeline-detail {
   margin-top: 40px;
-  background: rgba(12, 14, 20, 0.65);
+  background: rgba(12, 14, 20, 0);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   padding: 24px 40px;
@@ -1089,7 +1089,7 @@ h2 {
     display: flex;
     flex-direction: column;
    padding: 60px 60px !important;  /* ✅ gives more breathing room */
-
+  z-index: 70;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin; /* Firefox */
@@ -1335,20 +1335,20 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   display: none;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  padding-left: 6vw;
+  justify-content: top;
+  padding-left: 10vw;
   gap: 22px;
   z-index: 70; /* stays behind the button */
   pointer-events: none; /* makes background & overlay not block clicks */
-  margin-left: 100px;
+  height: 100%;
 }
 
 #floatingScenariosOverlay.show {
   display: flex;
   animation: fadeIn 0.4s ease forwards;
   background-color: #000000d4;
-    overflow: scroll;
-    height: fit-content;
+    overflow-y: scroll;
+    height: 100%;
     padding-top: 100px;
     z-index: 70; /* stays behind the button */
 
@@ -1375,7 +1375,6 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   width: 70vw;
   max-width: 1050px;
   justify-content: start;
-  padding-right: 50px;
   animation: slideUp 0.6s ease forwards;
   pointer-events: auto;
 }
@@ -1496,18 +1495,13 @@ margin-left: -250px;
   margin-left: -100px;
 }
 
-.scenario-card.mini {
-  transform: scale(0.88);
-}
-.scenario-card.mini {
-  transform: scale(0.88) translateX(20px);
-}
+
 .right-panel {
   transition: transform 0.6s cubic-bezier(.4,0,.2,1), opacity 0.4s ease;
 }
 
 .right-panel.shift-right {
-  transform: translateX(120px);
+  transform: translateX(20px);
   opacity: 0.9;
 }
 
@@ -1516,11 +1510,7 @@ margin-left: -250px;
   transform-origin: center;
 }
 
-.scenario-card.mini {
-  transform: scale(0.88);
-  opacity: 0.75;
-  filter: blur(0.5px) brightness(0.9);
-}
+
 .floating-card .btn {
   background: linear-gradient(135deg, #4fa8ff, #58b9ff);
   border: none;
