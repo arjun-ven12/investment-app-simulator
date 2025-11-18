@@ -36,6 +36,7 @@
         "@nomicfoundation/hardhat-toolbox": "^3.0.0",
         "@playwright/test": "^1.47.2",
         "@types/node": "^22.7.2",
+        "concurrently": "^9.2.1",
         "eslint": "^9.11.1",
         "globals": "^15.9.0",
         "hardhat": "^2.27.0",
@@ -49,11 +50,17 @@
         "postinstall": "npx prisma generate",
         "migration:dev": "dotenv -e .env.development -- npx prisma migrate dev",
         "migration:reset": "dotenv -e .env.development -- npx prisma migrate reset",
-        "start": "dotenv -e .env.development -- node ./src/server.js",
+    
+        "start": "concurrently \"npx hardhat node\" \"dotenv -e .env.development -- node ./src/server.js\"",
+    
         "chatbot": "node ./src/public/js/chatbot.js",
         "test": "playwright test --config=configs/playwright.config.js",
         "lint": "eslint -c configs/eslint.config.mjs ./src/*",
         "test-trace": "npm test -- --reporter=html --trace on",
-        "dev": "nodemon index.js"
+    
+        "dev": "nodemon index.js",
+        "chain": "npx hardhat node",
+        "dev:all": "concurrently \"npm run chain\" \"npm run dev\""
     }
+    
 }

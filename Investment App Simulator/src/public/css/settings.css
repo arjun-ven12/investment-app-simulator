@@ -1,2213 +1,2767 @@
 
+
 .markdown-body {
-background-color: #0a0a0f00!important;
-}
-
-.tab-content.active {
-    background-color: #00000000;
-    margin-top: 20px;
-}
-
-.sections {
-    padding-top: 100px;
-}
-/* Container for the navigation buttons */
-.in-page-nav {
-    display: flex;
-    flex-direction: column; 
-    gap: 10px; /* Space between buttons */
-}
-
-/* =================== NAVIGATION LINK BUTTON STYLING =================== */
-
-.sidebar-link {
-    /* Display: flex, Full Width, and Alignment for a clean button look */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center text/icons horizontally */
-    width: 100%; /* Take up the full width of the parent container */
-    
-    /* Button Aesthetics */
-    text-decoration: none;
-    padding: 15px 10px; /* Generous vertical padding for a button feel */
-    font-weight: 100; /* Bolder text */
-    font-size: 1.05rem;
-    border-radius: 6px; /* Rounded corners for a modern button */
-    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-    text-align: center;
-
-
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    /* Add transition for smooth hover effects */
-}
-/* Hover and Focus effect */
-.sidebar-link:hover,
-.sidebar-link:focus {
-    background-color: #282a2f; /* Highlight color on hover */
-    color: #ffffff; 
-    text-decoration: none;
-    transform: translateY(-2px); /* Slight lift effect */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* Active State (if you implement active tracking with JS) */
-.sidebar-link.active {
-    background-color: #007bff; /* Primary action blue */
-    color: #ffffff;
-    border-color: #0056b3;
-    box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
-    transform: none; /* No lift when active */
-}
-
-/* Icon Styling (Assuming you add icons later) */
-.sidebar-link i {
-    margin-right: 8px; /* Space between icon and text */
-    font-size: 1.2em;
-}
-
-
-
-.page-label {
-    
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12.8px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(210, 220, 240, 0.6);
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-
-.page-para {
-font-size: 16px;
-    color: rgba(210, 220, 235, 0.65);
-    max-width: 700px;
-    margin: 0 auto -90px;
-    line-height: 1.6;
-text-align: center;
-}
-
-.sidebar {
-    height: 100%;
-}
-.top {
-    align-items: center;
-    margin-bottom: 50px;
-    margin-top: 50px;
-}
-.page-h1 {
-        font-size: 3.2rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 15px;
-    text-align: center;
-
-}
-
-.markdown-body h3 {
-    font-size: 18px;
-    padding-bottom: 12px;
-}
-
-.markdown-body hr {
-    margin-bottom: 20px;
-}
-
-
-.markdown-body h4 {
-    font-size: 16px;
-    padding-bottom: 12px;
-    font-weight: 100;
-}
-
-
-.markdown-body li, .markdown-body strong {
-    font-size: 14px;
-    padding-bottom: 12px;
-}
-
-
-.markdown-body p {
-    font-size: 14px;
-    padding-bottom: 12px;
-}
-
-
-/* Import Outfit font */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
-
-/* General Reset & Fonts */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Outfit', sans-serif;
-    font-size: 13px; /* Increased base font from 10px to 13px */
-}
-
-body {
-    background-color: #0a0a0f; /* deeper black */
-    color: #ffffff;
-    line-height: 1.6; /* Increased line height from 1.4 to 1.6 */
-}
-
-h1 {
-    font-size: 2.2rem; /* Increased from 1.5rem to 2.2rem */
-    font-weight: 700;
-    margin-bottom: 10px; /* Increased margin from 5px to 10px */
-    color: #ffffff;
-}
-
-h2 {
-    font-size: 1.2rem;
-    margin-top: 12px;
-    margin-bottom: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
-    text-transform: uppercase; /* Make text uppercase */
-    letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
-}
-
-h4 {
-    font-size: 1.2rem; /* Increased from 0.9rem to 1.2rem */
-    font-weight: 700;
-    margin-bottom: 6px; /* Increased margin from 4px to 6px */
-    color: #ffffff;
-}
-
-/* Container & Layout */
-.content {
-    width: 100%;
-    margin: 15px auto; /* Increased margin from 8px to 15px */
-    padding: 15px; /* Increased padding from 10px to 15px */
-    background-color: #00000080; /* ultra-dark card background */
-    border-radius: 12px; /* Increased border radius from 8px to 12px */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.7); /* Adjusted shadow for bigger look */
-}
-
-.container {
-    display: grid;
-    grid-template-columns: 75% 25%;
-    gap: 12px; /* Increased gap from 6px to 12px */
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.container2 {
-    display: grid;
-    grid-template-columns: 75% 25%;
-    gap: 12px; /* Increased gap from 6px to 12px */
-    box-sizing: border-box;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.trading-card {
-    padding: 10px 15px; 
-    border-radius: 12px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    margin: 10px 0px;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-.trading-card select {
-        padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: #12121ABF;
-    color: #fff;
-    width: auto;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-/* --- CHART WRAPPER: Used to create the strong external aura glow --- */
-.chart-wrapper {
-    position: relative;
-    z-index: 1; /* Establishes a stacking context */
-    margin: 10px 0; /* Controls the spacing outside the whole component */
-    padding: 1px; /* Small padding to ensure the blur isn't clipped */
-    border-radius: 12px;
-    overflow: visible; /* Allows the glow to extend past the wrapper bounds */
-    height: 100%;
-}
-
-/* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
-.chart-wrapper::before {
-    content: '';
-    position: absolute;
-    /* Position slightly outside the bounds of the wrapper */
-    top: -5%;
-    left: -5%;
-    width: 120%;
-    height: 120%;
-    border-radius: 12px;
-    z-index: 0; /* Pushed behind the chart container (z-index 10) */
-    pointer-events: none;
-    
-    /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
-    background: 
-        radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
-        radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);
-    
-    filter: blur(80px); /* Heavy blur for soft, radiating effect */
-    mix-blend-mode: screen; 
-    opacity: 0.8;
-}
-
-/* --- CHART CONTAINER: Combines Frosted Glass, Noise Overlay, and Internal Glow --- */
-.chart-container {
-    /* 1. LAYOUT & STACKING */
-    position: relative; 
-    overflow: hidden; 
-    z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
-    width: 100%;
-    /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
-    border-radius: 12px;
-    /* height: 100%;
-    margin-bottom: 10px; */
-
-    /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
-    /* The external aura is now handled by .chart-wrapper::before */
-    
-    /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
-    background: 
-        /* Layer 1: Inner Dark Fill (Solid color) */
-        #0a0b1f, 
-        /* Layer 2: Frosted Background (Light translucent layer) */
-        linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
-        /* Layer 3: Border Gradient (The thin, fading white border line) */
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.4) 0%,   
-            rgba(255, 255, 255, 0.8) 25%,  
-            rgba(255, 255, 255, 0.8) 75%,  
-            rgba(255, 255, 255, 0.4) 100% 
-        );
-
-    background-clip: content-box, content-box, border-box;
-    background-origin: border-box;
-    padding: 21px; 
-
-    /* Apply the visual frosted effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-/* --- Digital Noise Texture (::before on .chart-container) --- */
-/* Creates the fine, static noise texture over the chart area */
-.chart-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* SVG data URL for the noise pattern */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
-    
-    opacity: 0.3;
-    z-index: 2; 
-    pointer-events: none;
-    border-radius: 12px;
-    -webkit-mask: linear-gradient(#fff, #fff);
-    mask: linear-gradient(#fff, #fff);
-}
-
-/* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
-/* Creates the soft, internal colored glow blobs behind the content */
-.chart-container::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    width: 150%; 
-    height: 150%;
-    border-radius: 50%; 
-    
-    /* Two radial gradients for the dual-color effect */
-    background: 
-        /* Blue Blob: Top-Left Corner */
-        radial-gradient(circle at 20% 20%, 
-            rgba(0, 200, 255, 0.25) 0%, 
-            transparent 35% 
-        ),
-        /* Purple Blob: Bottom-Right Corner */
-        radial-gradient(circle at 80% 80%, 
-            rgba(255, 0, 251, 0.25) 0%, 
-            transparent 35% 
-        );
-    
-    z-index: -1; 
-    pointer-events: none;
-    mix-blend-mode: screen; 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Side-by-side container */
-.history-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 equal columns */
-    gap: 12px; /* Increased gap from 6px to 12px */
-    width: 100%;
-    margin: 10px 0; /* Increased margin from 6px to 10px */
-}
-
-/* Column styling */
-.history-column {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: auto;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-/* Table styling */
-
-
-
-
-
-
-/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
-.history-column table {
-    width: 100%;
-    /* Use separate to enable border-radius and external border */
-    border-collapse: separate; 
-    border-spacing: 0;
-    margin-top: 10px;
-    
-    /* FROSTED GLASS CONTAINER STYLES */
-    border-radius: 10px;
-    overflow: hidden; 
-    position: relative;
-    font-weight: 300; 
-    color: #fff;
-    font-size: 1rem;
-    
-    /* Subtle Border and Translucent Dark Background (Matching select input) */
-    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
-    background-color: rgba(18, 18, 26, 0.75); 
-    
-    /* Apply glass effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
-}
-
-/* Base cell styling */
-.history-column th, .history-column td {
-    padding: 10px; 
-    text-align: left; /* Better for data */
-    color: #fff;
-    font-weight: 300;
-}
-
-/* Header styling */
-.history-column th {
-    /* Slightly darker and defined header background */
-    background-color: rgba(0, 0, 0, 0); 
-    /* Subtle internal border for header separation */
-    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
-    text-transform: uppercase;
-    font-weight: 400; 
-    color: whitesmoke;
-}
-
-/* Row hover styling */
-.history-column tr:hover {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0.25); 
-}
-/* Row hover styling */
-.history-column tr {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0); 
-    border-bottom:none ;
-}
-
-/* Internal Row Separator */
-.history-column tr:not(:last-child) td {
-    /* Thin internal separator */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-}
-
-
-
-
-.markdown-body table {
-    width: 100%;
-    /* Use separate to enable border-radius and external border */
-    border-collapse: separate; 
-    border-spacing: 0;
-    margin-top: 10px;
-    
-    /* FROSTED GLASS CONTAINER STYLES */
-    border-radius: 8px;
-    overflow: hidden; 
-    position: relative;
-    font-weight: 300; 
-    color: #fff;
-    font-size: 1rem;
-    
-    /* Subtle Border and Translucent Dark Background (Matching select input) */
-    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
-    background-color: rgba(18, 18, 26, 0.75); 
-    
-    /* Apply glass effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
-}
-
-/* Base cell styling */
-.markdown-body th, .markdown-body td {
-    padding: 10px; 
-    text-align: left; /* Better for data */
-    color: #fff;
-    font-weight: 300;
-}
-
-/* Header styling */
-.markdown-body th {
-    /* Slightly darker and defined header background */
-    background-color: rgba(0, 0, 0, 0); 
-    /* Subtle internal border for header separation */
-    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
-    text-transform: uppercase;
-    font-weight: 400; 
-    color: whitesmoke;
-}
-
-.markdown-body tr:hover {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0.25); 
-}
-/* Row hover styling */
-.markdown-body tr {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0); 
-    border-bottom:none ;
-}
-
-/* Internal Row Separator */
-.markdown-body tr:not(:last-child) td {
-    /* Thin internal separator */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
-.options-table {
-    width: 100%;
-    /* Use separate to enable border-radius and external border */
-    border-collapse: separate; 
-    border-spacing: 0;
-    margin-top: 10px;
-    
-    /* FROSTED GLASS CONTAINER STYLES */
-    border-radius: 10px;
-    overflow: hidden; 
-    position: relative;
-    font-weight: 300; 
-    color: #fff;
-    font-size: 1rem;
-    
-    /* Subtle Border and Translucent Dark Background (Matching select input) */
-    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
-    background-color: rgba(18, 18, 26, 0.75); 
-    
-    /* Apply glass effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
-}
-
-/* Base cell styling */
-.options-table th, .options-table td {
-    padding: 10px; 
-    text-align: left; /* Better for data */
-    color: #fff;
-    font-weight: 300;
-}
-
-/* Header styling */
-.options-table th {
-    /* Slightly darker and defined header background */
-    background-color: rgba(0, 0, 0, 0); 
-    /* Subtle internal border for header separation */
-    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
-    text-transform: uppercase;
-    font-weight: 400; 
-    color: whitesmoke;
-}
-
-/* Row hover styling */
-.options-table tr:hover {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0.103); 
-}
-/* Row hover styling */
-.options-table tr {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0); 
-    border-bottom:none ;
-}
-
-/* Internal Row Separator */
-.options-table tr:not(:last-child) td {
-    /* Thin internal separator */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-}
-
-
-
-
-
-
-
-
-/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
-#options-portfolio-card table {
-    width: 100%;
-    /* Use separate to enable border-radius and external border */
-    border-collapse: separate; 
-    border-spacing: 0;
-    margin-top: 10px;
-    
-    /* FROSTED GLASS CONTAINER STYLES */
-    border-radius: 10px;
-    overflow: hidden; 
-    position: relative;
-    font-weight: 300; 
-    color: #fff;
-    font-size: 1rem;
-    
-    /* Subtle Border and Translucent Dark Background (Matching select input) */
-    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
-    background-color: rgba(18, 18, 26, 0.75); 
-    
-    /* Apply glass effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
-}
-
-/* Base cell styling */
-#options-portfolio-card th, #options-portfolio-card td {
-    padding: 10px; 
-    text-align: left; /* Better for data */
-    color: #fff;
-    font-weight: 300;
-}
-
-/* Header styling */
-#options-portfolio-card th {
-    /* Slightly darker and defined header background */
-    background-color: rgba(0, 0, 0, 0); 
-    /* Subtle internal border for header separation */
-    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
-    text-transform: uppercase;
-    font-weight: 400; 
-    color: whitesmoke;
-}
-
-/* Row hover styling */
-#options-portfolio-card tr:hover {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0.103); 
-}
-/* Row hover styling */
-#options-portfolio-card tr {
-    /* Subtle translucent hover effect (lighter than the base) */
-    background-color: rgba(72, 72, 72, 0); 
-    border-bottom:none ;
-}
-
-/* Internal Row Separator */
-#options-portfolio-card tr:not(:last-child) td {
-    /* Thin internal separator */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-}
-
-
-
-
-
-
-
-
-/* Responsive: stack on smaller screens */
-@media (max-width: 1200px) { /* Increased breakpoint from 1000px to 1200px */
-    .history-container {
-        grid-template-columns: 1fr;
+    background-color: #0a0a0f00!important;
     }
-}
-
-/* Forms */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Increased gap from 6px to 10px */
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-textarea, button {
-    padding: 12px 12px; /* Increased padding from 8px 8px */
-    border-radius: 6px; /* Increased border radius from 4px to 6px */
-    border: none;
-    font-size: 1rem; /* Increased input text size from 0.75rem */
-    background-color: #1c1c28;
-    color: #fff;
-    width: auto
-}
-
-/* --- SELECT INPUT STYLING (Translucent with Subtle Border) --- */
-select {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: auto;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-select:hover {
-    background-color: rgba(18, 18, 26, 0.9);
-    border-color: rgba(83, 89, 107, 0.8);
-}
-
-
-input {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border: 2px solid #4a90e2; /* Increased border thickness */
-}
-
-input::placeholder,
-textarea::placeholder,
-select::placeholder {
-    font-size: 0.85rem; /* Increased placeholder font from 0.8rem */
-    color: #aaa; 
-    font-weight: 300;
-}
-
-
-/* Buttons */
-button {
-    background-color: #E0EBFF;
-    color: #000000;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem; /* Increased font size from 0.8rem */
-    transition: background 0.3s, transform 0.2s;
-    border-radius: 6px; /* Increased border radius from 4px to 6px */
-    border: none;
-    margin: 2px; /* Increased margin from 1px to 2px */
-}
-
-#submit-comment-button2 {
-    background-color: #E0EBFF;
-    color: #000000;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: background 0.3s, transform 0.2s;
-    border-radius: 6px;
-    border: none;
-    margin: 2px;
-    width: 100%;
-}
-
-
-.submit-button {
-    background-color: #E0EBFF;
-    color: #000000;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: background 0.3s, transform 0.2s;
-    border-radius: 6px;
-    border: none;
-    margin: 2px;
-    width: 100%;
-}
-
-button:hover, .submit-button:hover {
-    background-color: #94cdff;
-    transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
-}
-
-button:active, .submit-button:active {
-    transform: translateY(0);
-}
-
-/* Tables */
-table {
-    border-collapse: collapse;
-    width: 100%;
-    background-color: #1c1c28;
-    border-radius: 6px; /* Increased border radius from 4px to 6px */
-    overflow: hidden;
-    font-size: 1rem; /* Increased table text size from 0.75rem */
-}
-
- thead {
-    /* Base background color, very subtle */
-    background-color: rgba(37, 37, 37, 0.238); 
-    /* Removed box-shadow */
-    position: relative; /* CRITICAL: Needed for the pseudo-element positioning */
-    z-index: 1; /* Ensure header is above table body */
-    overflow: hidden; /* Ensures the blurred aura doesn't escape the header bounds */
-}
-
-/* Pseudo-element to create the background aura glow */
- thead::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1; /* Pushes the glow behind the <th> content */
-    pointer-events: none;
     
-    /* Dual-Color Background: Cyan and Magenta spots */
-    background: 
-        radial-gradient(circle at 10% 80%, rgba(0, 200, 255, 0.15) 0%, transparent 40%), /* Cyan spot */
-        radial-gradient(circle at 90% 20%, rgba(255, 0, 251, 0.15) 0%, transparent 40%); /* Magenta spot */
+    /* --- LEADERBOARD PODIUM STYLING --- */
     
-    filter: blur(25px); /* Heavy blur for soft, radiating effect */
-    opacity: 0.8;
-}
-
-
-th, td {
-    padding: 8px; /* Increased padding from 5px to 8px */
-    text-align: center;
-    border-bottom: 1px solid #444;
-}
-
-tr:hover {
-    background-color: #2e2e40;
-}
-
-
-
-/* Search */
-
-
-#stock-search {
-    flex: 1;
-    font-size: 1rem; /* Increased font size from 0.75rem */
-    width: 100% !important;
-}
-
-/* Stock/Favorites List */
-#stock-list, #favorite-stocks, #comments-list {
-    list-style: none;
-    margin-top: 8px; /* Increased margin from 5px to 8px */
-    padding-left: 0;
-}
-
-
-/* Charts */
-canvas {
-    background-color: #00000000;
-    border-radius: 12px; /* Increased border radius from 8px to 12px */
-    padding: 8px; /* Increased padding from 4px to 8px */
-    height: 400px;
-}
-
-/* Comments Section */
-.stock-symbol-search {
-    display: flex;
-    gap: 8px; /* Increased gap from 4px to 8px */
-    margin-bottom: 8px; /* Increased margin from 5px to 8px */
-}
-
-.new-comment textarea {
-    width: 100%;
-    resize: none;
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-
-
-/* Stock List Styling */
-#stock-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 10px; /* Increased margin from 6px to 10px */
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Increased gap from 6px to 10px */
-}
-
-#stock-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: auto;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-#stock-list li:hover {
-    background-color: #2a2a38;
-    transform: translateY(-2px); /* Increased hover lift */
-}
-
-#stock-list li span {
-    font-size: 1rem; /* Increased text size from 0.8rem */
-    color: #ffffff;
-    font-weight: 500;
-}
-
-#stock-list li button {
-    padding: 8px 10px; /* Increased padding from 4px 8px */
-    border-radius: 6px;
-    border: none;
-    background-color: #E0EBFF;
-    color: black;
-    font-size: 0.85rem !important; /* Increased font size from 0.75rem */
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-}
-
-#stock-list li button:hover {
-    background-color: #181c1f;
-    transform: translateY(-2px);
-}
-
-#stock-list li button:active {
-    transform: translateY(0);
-}
-
-
-/* Responsive */
-@media (max-width: 1100px) { /* Increased breakpoint from 900px to 1100px */
-    .container {
-        grid-template-columns: 1fr; /* stacked on smaller screens */
-        padding: 0 15px; /* Increased padding from 10px to 15px */
-    }
-    canvas {
-        width: 100% !important;
-        height: auto !important;
-    }
-    .main-content {
-        margin-left: 0; /* Remove margin when stacked */
-    }
-    .sidebar {
-        position: static;
+    /* The main container for the top 3 spots */
+    #leaderboard-podium {
+        display: flex;
+        justify-content: center; /* Center the podium structure */
+        align-items: flex-end; /* Align spots to the bottom line (crucial for podium effect) */
         width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #53596B;
+        margin: 40px 0;
+        min-height: 250px; /* Ensure space for the tallest spot */
     }
-}
-
-
-
-
-#market-status-banner {
-    position: fixed; 
-    top: 70px; /* Increased position from 50px to 60px */
-    left: 0; 
-    width: 100%;
-    background-color: #000000c0;
-    color: rgb(255, 255, 255);
-    overflow: hidden; 
-    white-space: nowrap; 
-    font-weight: light;
-    font-size: 1.2rem; /* Increased font size from 1rem to 1.2rem */
-    z-index: 1000;
-    padding: 8px 0; /* Increased padding from 6px to 8px */
-    border-bottom: 1px solid rgba(83, 89, 107, 0.5); /* Increased border thickness */
-    margin-bottom: 20px;
     
-    /* ADDED: Background Blur for frosted effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-#market-status {
-    display: inline-block;
-    padding-left: 100%; 
-    animation: scroll-text 20s linear infinite; /* Increased scroll time from 15s to 20s */
-    font-size: 1.2rem;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
-    text-transform: uppercase; /* Make text uppercase */
-    letter-spacing: 0.05em;
-}
-
-@keyframes scroll-text {
-    0%  { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-
-
-
-
-.favorite-stocks-grid li button{
-    padding: 8px 8px; /* Increased padding from 2px 5px */
-    border-radius: 6px;
-    border: none;
-    background-color: #E0EBFF;
-    color: #000;
-    font-size: 0.85rem; /* Increased font size from 0.7rem */
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-
-.favorite-stocks-grid {
-    display: flex;
-    flex-direction: column; /* stack items vertically */
-    gap: 12px; /* Increased gap from 6px to 10px */
-    margin-top: 10px; /* Increased margin from 6px to 10px */
-    width: 100%; /* take full width of sidebar */
-}
-
-
-.favorite-stock-item button {
-    background: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 4px; /* Increased border radius */
-    padding: 3px 8px; /* Increased padding */
-    cursor: pointer;
-    font-size: 0.75rem; /* Increased font size from 0.75rem */
+    .podium {
+        display: flex;
+        align-items: flex-end;
+        gap: 15px; /* Space between the three spots */
+        max-width: 700px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: center;
+        /* Order of appearance: 2nd, 1st, 3rd */
+    }
     
-}
-
-
-
-.favorite-stocks-grid li button:hover {
-    background-color: #201e34 !important;
-    transform: translateY(-2px) !important; /* Increased hover lift */
-}
-
-/* --- MODIFIED FAVORITE STOCK ITEM STYLE --- */
-.favorite-stocks-grid li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 8px; 
+    /* Base style for all podium spots */
+    .podium-spot1,
+    .podium-spot2,
+    .podium-spot3 {
+      transition: all 0.7s ease;
+      cursor: pointer;
+    }
     
-    /* Translucent dark background for theme consistency */
-    background-color: rgba(18, 18, 26, 0); 
-    color: #fff;
-    width: auto;
-    transition: all 0.2s ease-in-out; 
+    /* Shared hover animation */
+    .podium-spot2:hover,
+    .podium-spot3:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 200, 255, 0.4);
+       border: 1px solid rgba(83, 89, 107, 0.5); 
     
-    /* Setup for gradient border and glow */
-    position: relative;
-    overflow: hidden; /* Hides internal overflow but allows shadow/border to be managed */
-    z-index: 1; /* Establishes stacking context */
-
-    /* ADDED: Aura glow radiating from the gradient bar (Left side only) */
-
-}
-
-/* Pseudo-element to create the gradient left border bar */
-.favorite-stocks-grid li::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 2px; /* Desired border thickness */
-    height: 100%;
-    /* Gradient from top (cyan) to bottom (magenta) */
-    background: linear-gradient(to bottom, rgba(0, 200, 255, 0.585), rgba(255, 0, 251, 0.487));
-    z-index: 2; /* Ensures it sits on top of the list item background */
-}
-
-/* --- END MODIFICATION --- */
-
-
-/* sidebar base (no fixed top) */
-.sidebar {
-    position: fixed;
-    left: 0;
-    width: 250px; /* INCREASED WIDTH: from 200px to 250px */
-    /* top and height will be set by JS for accurate alignment */
-    background-color: #00000000;
-    padding: 15px; /* Increased padding from 12px 10px */
-    box-shadow: 4px 0 12px rgba(0,0,0,0.7); /* Increased shadow for bigger look */
-    display: flex;
-    flex-direction: column;
-    z-index: 500; 
-    border-right: 2px solid rgba(83, 89, 107, 0.5); /* Increased border thickness */
-
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #E0EBFF #111; /* thumb + track */
-}
-
-
-
-
-/* Sidebar search */
-.sidebar .search-container {
-    margin-bottom: 15px; /* Increased margin from 10px to 15px */
-}
-
-.search-container {
-    align-items: center;
-}
-.sidebar #stock-search {
-    width: 100%;
-}
-.stock-search input{
-    font-size: 0.75rem; /* Increased input text size from 0.75rem */
-    height: 35px; /* Increased height from 28px to 35px */
-}
-
-#search-button {
-    margin-top: 5px !important;
-    height: 40px !important ;
-    width: 100% !important;
-    margin-bottom: -20px !important;
+      background: linear-gradient(
+        to bottom,
+        rgba(25, 25, 35, 0.9),
+        rgba(10, 10, 15, 0.75)
+      );
+    }
     
-}
-/* Watchlist items */
-#watchlist {
-    flex: 1;
-    overflow-y: auto;
-    list-style: none;
-    margin-top: 10px; /* Increased margin from 6px to 10px */
-    padding: 0;
-}
-
-#watchlist li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px; /* Increased padding from 6px 8px */
-    margin-bottom: 6px; /* Increased margin from 4px to 6px */
-    background-color: #171720ad;
-    border-radius: 8px; /* Increased border radius from 5px to 8px */
-    transition: background 0.3s, transform 0.2s;
-    cursor: pointer;
-}
-
-#watchlist li:hover {
-    background-color: #2a2a38;
-    transform: translateY(-2px);
-}
-
-#watchlist li span {
-    font-size: 1rem; /* Increased font size from 0.8rem */
-    color: #fff;
-    font-weight: 500;
-}
-
-#watchlist li button {
-    padding: 4px 8px; /* Increased padding from 2px 5px */
-    border-radius: 6px;
-    border: none;
-    background-color: #E0EBFF;
-    color: #000;
-    font-size: 0.85rem; /* Increased font size from 0.7rem */
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-#search-button {
-    padding: 4px 8px; /* Increased padding from 2px 5px */
-    border-radius: 6px;
-    border: none;
-    background-color: #E0EBFF;
-    color: #000;
-    font-size: 0.85rem; /* Increased font size from 0.7rem */
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-#watchlist li button:hover {
-    background-color: #357ab8;
-}
-
-
-/*
- * Styles for the options-wrap container using Flexbox
- * to place the select elements side-by-side.
- */
-.options-wrap {
-    display: flex; /* Enables flex container */
-    gap: 0.755rem; /* Increased space between the two select groups from 1rem to 1.5rem */
-    align-items: center; /* Vertically centers the items if they have different heights */
-}
-
-
-/* Optional: Focus state styling */
-select:focus {
-    border-color: #3b82f6; /* Blue border on focus */
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); /* Increased box shadow */
-}
-
-
-/* Push main content right */
-.main-content {
-    margin-left: 250px; /* UPDATED: to match new sidebar width (250px) */
-    padding: 15px; /* Increased padding from 12px to 15px */
-}
-
-/* Container to position the arrow */
-.select-wrapper {
-    position: relative;
-    width: 100%; 
-    display: inline-block;
-}
-
-/* Dropdown styling */
-#range {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-/* Hover & focus states */
-#range:hover, #range:focus {
-    border-color: #0ff; 
-    outline: none;
-}
-
-/* Add custom arrow using pseudo-element */
-
-
-/* Option styling */
-#range option {
-    background-color: #1c1c28;
-    color: #fff;
-}
-
-/* Label styling */
-label[for="range"] {
-    display: block;
-    margin-bottom: 6px; /* Increased margin from 4px to 6px */
-    font-weight: 500;
-    color: #fff;
-    font-size: 0.85rem; /* Increased font size from 0.8rem */
-    margin-bottom: 4px; /* Increased margin from 2px to 4px */
-}
-
-
-/* Dropdown styling */
-#chartType {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-#chartType option {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-#order-type {
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
-/* Hover & focus states */
-#chartType:hover,
-#chartType:focus {
-    border-color: #0ff; 
-    outline: none;
-}
-
-/* Option styling */
-#chartType option {
-    background-color: #1c1c28;
-    color: #fff;
-}
-
-/* Optional label styling */
-label[for="chartType"] {
-    display: block;
-    margin-bottom: 4px; /* Increased margin from 2px to 4px */
-    font-weight: 500;
-    color: #fff;
-    font-size: 0.85rem; /* Increased font size from 0.8rem */
-}
-
-
-
-
-/* ==================== Global Fade-in ==================== */
-body {
-    animation: fadeInBody 0.8s ease forwards;
-}
-
-@keyframes fadeInBody {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Only animate new elements that you add dynamically */
-.animate-slideup {
-    opacity: 0;
-    transform: translateY(20px); /* Increased translateY from 10px to 20px */
-    animation: slideUp 0.6s forwards;
-}
-
-@keyframes slideUp {
-    to {
+    
+    .podium-spot1:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 200, 255, 0.4);
+    
+      /* background: linear-gradient(
+        to bottom,
+        rgba(25, 25, 35, 0.9),
+        rgba(10, 10, 15, 0.75)
+      ); */
+    }
+    
+    /* Trophy styling */
+    .trophy {
+      font-size: 28px;
+      color: gold;
+      text-shadow: 0 0 10px rgba(255, 217, 0, 0.289), 0 0 20px rgba(255, 215, 0, 0.3);
+      animation: trophy-glow 2s infinite ease-in-out alternate;
+      margin-bottom: 8px;
+      transform: translateY(-10px);
+    
+    }
+    
+    
+    /* Base style for all podium spots */
+    .podium-spot2 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Push content to the bottom of the column */
+        flex: 1;
+        min-width: 200px;
+        padding: 15px 10px 10px;
+        border-radius: 8px 8px 0 0; /* Rounded top corners */
+     border: 1px solid rgba(83, 89, 107, 0.5); 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        margin-bottom: 10px;
+            height: 160px;
+        border-top: 5px solid rgb(0, 162, 255); /* Bronze */
+    
+    
+    }
+    
+    .podium-spot1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Push content to the bottom of the column */
+        flex: 1;
+        min-width: 400px;
+        min-height: 200px;
+     
+    }
+    .podium-spot3 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Push content to the bottom of the column */
+        flex: 1;
+        min-width: 150px;
+        padding: 15px 10px 10px;
+        border-radius: 8px 8px 0 0; /* Rounded top corners */
+     border: 1px solid rgba(83, 89, 107, 0.5); 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        margin-bottom: 10px;
+            height: 120px;
+        border-top: 5px solid rgb(238, 0, 255); /* Bronze */
+    
+    
+    }
+    /* Spot Heights: The key to the podium structure */
+    .podium-spot1.first {
+        height: 200px;
+        /* Primary Accent Color for 1st place */
+       
+    }
+    
+    
+    
+    
+    
+    
+    /* --- Content Styling --- */
+    
+    /* Style for the Rank Number */
+    .podium-rank {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+        line-height: 1;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+    }
+    
+    /* Color specific ranks */
+    /* .podium-spot.first .podium-rank {
+        color: #FFD700; 
+    } */
+    .podium-spot.second .podium-rank {
+        color: #C0C0C0; /* Silver */
+    }
+    .podium-spot.third .podium-rank {
+        color: #CD7F32; /* Bronze */
+    }
+    
+    /* Style for the Username */
+    .podium-username {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #E0EBFF;
+        text-align: center;
+        margin-bottom: 5px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+                text-align: center;
+    
+    }
+    .secondspot {
+        margin: auto;
+        align-items: center;
+    }
+    /* Style for the Score (Profit/Loss %) */
+    .podium-score {
+        font-size: 1.25rem;
+        font-weight: 700;
+        /* Use a default neutral color, ideally this would be colored green/red by JS */
+        color: #ffffff; 
+        margin-top: 5px;
+                text-align: center;
+    
+    }
+    
+    
+    
+    
+    
+    .tab-content.active {
+        background-color: #00000000;
+        margin-top: 20px;
+    }
+    
+    .sections {
+        padding-top: 100px;
+    }
+    /* Container for the navigation buttons */
+    .in-page-nav {
+        display: flex;
+        flex-direction: column; 
+        gap: 10px; /* Space between buttons */
+    }
+    
+    /* =================== NAVIGATION LINK BUTTON STYLING =================== */
+    
+    .sidebar-link {
+        /* Display: flex, Full Width, and Alignment for a clean button look */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center text/icons horizontally */
+        width: 100%; /* Take up the full width of the parent container */
+        
+        /* Button Aesthetics */
+        text-decoration: none;
+        padding: 15px 10px; /* Generous vertical padding for a button feel */
+        font-weight: 100; /* Bolder text */
+        font-size: 1.05rem;
+        border-radius: 6px; /* Rounded corners for a modern button */
+        transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        text-align: center;
+    
+    
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0);
+        color: #fff;
+        /* Add transition for smooth hover effects */
+    }
+    /* Hover and Focus effect */
+    .sidebar-link:hover,
+    .sidebar-link:focus {
+        background-color: #282a2f; /* Highlight color on hover */
+        color: #ffffff; 
+        text-decoration: none;
+        transform: translateY(-2px); /* Slight lift effect */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Active State (if you implement active tracking with JS) */
+    .sidebar-link.active {
+        background-color: #007bff; /* Primary action blue */
+        color: #ffffff;
+        border-color: #0056b3;
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+        transform: none; /* No lift when active */
+    }
+    
+    /* Icon Styling (Assuming you add icons later) */
+    .sidebar-link i {
+        margin-right: 8px; /* Space between icon and text */
+        font-size: 1.2em;
+    }
+    
+    
+    
+    .page-label {
+        
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12.8px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(210, 220, 240, 0.6);
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    
+    .page-para {
+    font-size: 16px;
+        color: rgba(210, 220, 235, 0.65);
+        max-width: 700px;
+        margin: 0 auto -90px;
+        line-height: 1.6;
+    text-align: center;
+    }
+    
+    .sidebar {
+        height: 100%;
+    }
+    .top {
+        align-items: center;
+        margin-bottom: 50px;
+        margin-top: 50px;
+        padding-left: 250px;
+    }
+    .page-h1 {
+            font-size: 3.2rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 15px;
+        text-align: center;
+    
+    }
+    
+    .markdown-body h3 {
+        font-size: 18px;
+        padding-bottom: 12px;
+    }
+    
+    .markdown-body hr {
+        margin-bottom: 20px;
+    }
+    
+    
+    .markdown-body h4 {
+        font-size: 16px;
+        padding-bottom: 12px;
+        font-weight: 100;
+    }
+    
+    
+    .markdown-body li, .markdown-body strong {
+        font-size: 14px;
+        padding-bottom: 12px;
+    }
+    
+    
+    .markdown-body p {
+        font-size: 14px;
+        padding-bottom: 12px;
+    }
+    
+    
+    /* Import Outfit font */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
+    
+    /* General Reset & Fonts */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px; /* Increased base font from 10px to 13px */
+    }
+    
+    body {
+        background-color: #0a0a0f; /* deeper black */
+        color: #ffffff;
+        line-height: 1.6; /* Increased line height from 1.4 to 1.6 */
+    }
+    
+    h1 {
+        font-size: 2.2rem; /* Increased from 1.5rem to 2.2rem */
+        font-weight: 700;
+        margin-bottom: 10px; /* Increased margin from 5px to 10px */
+        color: #ffffff;
+    }
+    
+    h2 {
+        font-size: 1.2rem;
+        margin-top: 12px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
+        text-transform: uppercase; /* Make text uppercase */
+        letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
+    }
+    
+    h4 {
+        font-size: 1.2rem; /* Increased from 0.9rem to 1.2rem */
+        font-weight: 700;
+        margin-bottom: 6px; /* Increased margin from 4px to 6px */
+        color: #ffffff;
+    }
+    
+    /* Container & Layout */
+    .content {
+        width: 100%;
+        margin: 15px auto; /* Increased margin from 8px to 15px */
+        padding: 15px; /* Increased padding from 10px to 15px */
+        background-color: #00000080; /* ultra-dark card background */
+        border-radius: 12px; /* Increased border radius from 8px to 12px */
+        box-shadow: 0 5px 20px rgba(0,0,0,0.7); /* Adjusted shadow for bigger look */
+    }
+    
+    .container {
+        display: grid;
+        grid-template-columns: 75% 25%;
+        gap: 12px; /* Increased gap from 6px to 12px */
+        box-sizing: border-box;
+        width: 100%;
+    }
+    
+    .container2 {
+        display: grid;
+        grid-template-columns: 75% 25%;
+        gap: 12px; /* Increased gap from 6px to 12px */
+        box-sizing: border-box;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .trading-card {
+        border-radius: 12px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        margin: 10px 0px;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    .trading-card select {
+            padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: #12121ABF;
+        color: #fff;
+        width: auto;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* --- CHART WRAPPER: Used to create the strong external aura glow --- */
+    .chart-wrapper {
+        position: relative;
+        z-index: 1; /* Establishes a stacking context */
+        margin: 10px 0; /* Controls the spacing outside the whole component */
+        padding: 1px; /* Small padding to ensure the blur isn't clipped */
+        border-radius: 12px;
+        overflow: visible; /* Allows the glow to extend past the wrapper bounds */
+        height: 100%;
+    }
+    
+    /* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
+    .chart-wrapper::before {
+        content: '';
+        position: absolute;
+        /* Position slightly outside the bounds of the wrapper */
+        top: -5%;
+        left: -5%;
+        width: 120%;
+        height: 120%;
+        border-radius: 12px;
+        z-index: 0; /* Pushed behind the chart container (z-index 10) */
+        pointer-events: none;
+        
+        /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
+        background: 
+            radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
+            radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);
+        
+        filter: blur(80px); /* Heavy blur for soft, radiating effect */
+        mix-blend-mode: screen; 
+        opacity: 0.8;
+    }
+    
+    /* --- CHART CONTAINER: Combines Frosted Glass, Noise Overlay, and Internal Glow --- */
+    .chart-container {
+        /* 1. LAYOUT & STACKING */
+        position: relative; 
+        overflow: hidden; 
+        z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
+        width: 100%;
+        /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
+        border-radius: 12px;
+        /* height: 100%;
+        margin-bottom: 10px; */
+    
+        /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
+        /* The external aura is now handled by .chart-wrapper::before */
+        
+        /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
+        background: 
+            /* Layer 1: Inner Dark Fill (Solid color) */
+            #0a0b1f, 
+            /* Layer 2: Frosted Background (Light translucent layer) */
+            linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
+            /* Layer 3: Border Gradient (The thin, fading white border line) */
+            linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%,   
+                rgba(255, 255, 255, 0.8) 25%,  
+                rgba(255, 255, 255, 0.8) 75%,  
+                rgba(255, 255, 255, 0.4) 100% 
+            );
+    
+        background-clip: content-box, content-box, border-box;
+        background-origin: border-box;
+        padding: 21px; 
+    
+        /* Apply the visual frosted effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    /* --- Digital Noise Texture (::before on .chart-container) --- */
+    /* Creates the fine, static noise texture over the chart area */
+    .chart-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        
+        /* SVG data URL for the noise pattern */
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+        
+        opacity: 0.3;
+        z-index: 2; 
+        pointer-events: none;
+        border-radius: 12px;
+        -webkit-mask: linear-gradient(#fff, #fff);
+        mask: linear-gradient(#fff, #fff);
+    }
+    
+    /* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
+    /* Creates the soft, internal colored glow blobs behind the content */
+    .chart-container::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); 
+        width: 150%; 
+        height: 150%;
+        border-radius: 50%; 
+        
+        /* Two radial gradients for the dual-color effect */
+        background: 
+            /* Blue Blob: Top-Left Corner */
+            radial-gradient(circle at 20% 20%, 
+                rgba(0, 200, 255, 0) 0%, 
+                transparent 35% 
+            ),
+            /* Purple Blob: Bottom-Right Corner */
+            radial-gradient(circle at 80% 80%, 
+                rgba(255, 0, 251, 0.25) 0%, 
+                transparent 35% 
+            );
+        
+        z-index: -1; 
+        pointer-events: none;
+        mix-blend-mode: screen; 
+    }
+    
+    
+    
+    
+    
+    .podium-wrapper {
+        position: relative;
+        z-index: 1; /* Establishes a stacking context */
+        margin: 10px 0; /* Controls the spacing outside the whole component */
+        padding: 1px; /* Small padding to ensure the blur isn't clipped */
+        border-radius: 12px;
+        overflow: visible; /* Allows the glow to extend past the wrapper bounds */
+        height: 100%;
+    }
+    
+    /* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
+    .podium-wrapper::before {
+        content: '';
+        position: absolute;
+        /* Position slightly outside the bounds of the wrapper */
+        top: -5%;
+        left: -5%;
+        width: 120%;
+        height: 120%;
+        border-radius: 12px;
+        z-index: 0; /* Pushed behind the chart container (z-index 10) */
+        pointer-events: none;
+        
+        /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
+        background: 
+            radial-gradient(circle at 10% 10%, rgb(0, 162, 255) 0%, transparent 40%), 
+            radial-gradient(circle at 90% 90%, rgb(238, 0, 255) 0%, transparent 40%);
+        
+        filter: blur(80px); /* Heavy blur for soft, radiating effect */
+        mix-blend-mode: screen; 
+        opacity: 0.8;
+    }
+    
+    
+    .podium-container {
+        /* 1. LAYOUT & STACKING */
+        position: relative; 
+        overflow: hidden; 
+        z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
+        width: 100%;
+        /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
+        border-radius: 12px;
+        /* height: 100%;
+        margin-bottom: 10px; */
+    
+        /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
+        /* The external aura is now handled by .chart-wrapper::before */
+        
+        /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
+        background: 
+            /* Layer 1: Inner Dark Fill (Solid color) */
+            #0a0b1f, 
+            /* Layer 2: Frosted Background (Light translucent layer) */
+            linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
+            /* Layer 3: Border Gradient (The thin, fading white border line) */
+            linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%,   
+                rgba(255, 255, 255, 0.8) 25%,  
+                rgba(255, 255, 255, 0.8) 75%,  
+                rgba(255, 255, 255, 0.4) 100% 
+            );
+    
+        background-clip: content-box, content-box, border-box;
+        background-origin: border-box;
+        padding: 21px; 
+    
+        /* Apply the visual frosted effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    /* --- Digital Noise Texture (::before on .chart-container) --- */
+    /* Creates the fine, static noise texture over the chart area */
+    .podium-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        
+        /* SVG data URL for the noise pattern */
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
+        
+        opacity: 0.3;
+        z-index: 2; 
+        pointer-events: none;
+        border-radius: 12px;
+        -webkit-mask: linear-gradient(#fff, #fff);
+        mask: linear-gradient(#fff, #fff);
+    }
+    
+    /* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
+    /* Creates the soft, internal colored glow blobs behind the content */
+    .podium-container::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); 
+        width: 150%; 
+        height: 150%;
+        border-radius: 50%; 
+        
+        /* Two radial gradients for the dual-color effect */
+        background: 
+            /* Blue Blob: Top-Left Corner */
+            radial-gradient(circle at 20% 20%, 
+                rgb(0, 200, 255) 0%, 
+                transparent 35% 
+            ),
+            /* Purple Blob: Bottom-Right Corner */
+            radial-gradient(circle at 80% 80%, 
+                rgb(255, 0, 251) 0%, 
+                transparent 35% 
+            );
+        
+        z-index: -1; 
+        pointer-events: none;
+        mix-blend-mode: screen; 
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* Side-by-side container */
+    .history-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 equal columns */
+        gap: 12px; /* Increased gap from 6px to 12px */
+        width: 100%;
+        margin: 10px 0; /* Increased margin from 6px to 10px */
+    }
+    
+    /* Column styling */
+    .history-column {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: auto;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    /* Table styling */
+    
+    
+    
+    
+    
+    
+    /* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+    .history-column table {
+        width: 100%;
+        /* Use separate to enable border-radius and external border */
+        border-collapse: separate; 
+        border-spacing: 0;
+        margin-top: 10px;
+        
+        /* FROSTED GLASS CONTAINER STYLES */
+        border-radius: 10px;
+        overflow: hidden; 
+        position: relative;
+        font-weight: 300; 
+        color: #fff;
+        font-size: 1rem;
+        
+        /* Subtle Border and Translucent Dark Background (Matching select input) */
+        /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background: 
+            radial-gradient(circle at 10% 10%, rgb(0, 0, 0) 0%, transparent 40%), 
+            radial-gradient(circle at 95% 95%, rgb(0, 0, 0) 0%, transparent 40%);        
+        /* Apply glass effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+    }
+    
+    
+    /* Base cell styling */
+    .history-column th, .history-column td {
+        padding: 15px 10px; 
+        text-align: left; /* Better for data */
+        color: #fff;
+        font-weight: 300;
+    }
+    
+    /* Header styling */
+    .history-column th {
+        /* Slightly darker and defined header background */
+        background-color: rgba(0, 0, 0, 0); 
+        /* Subtle internal border for header separation */
+        text-transform: uppercase;
+        font-weight: 400; 
+        color: whitesmoke;
+    }
+    
+    /* Row hover styling */
+    .history-column tr:hover {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0.25); 
+    }
+    /* Row hover styling */
+    .history-column tr {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0); 
+        border-bottom:none ;
+    }
+    
+    .history-column thead tr {
+        background: 
+            radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
+            radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);  border-bottom: none;
+            border-bottom: none;
+    }
+    
+    /* Internal Row Separator */
+    /* .history-column tr:not(:last-child) td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    } */
+    
+    
+    
+    
+    .markdown-body table {
+        width: 100%;
+        /* Use separate to enable border-radius and external border */
+        border-collapse: separate; 
+        border-spacing: 0;
+        margin-top: 10px;
+        
+        /* FROSTED GLASS CONTAINER STYLES */
+        border-radius: 8px;
+        overflow: hidden; 
+        position: relative;
+        font-weight: 300; 
+        color: #fff;
+        font-size: 1rem;
+        
+        /* Subtle Border and Translucent Dark Background (Matching select input) */
+        /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+        background-color: rgba(18, 18, 26, 0.75); 
+        
+        /* Apply glass effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+        margin-bottom: 10px;
+    }
+    
+    /* Base cell styling */
+    .markdown-body th, .markdown-body td {
+        padding: 10px; 
+        text-align: left; /* Better for data */
+        color: #fff;
+        font-weight: 300;
+    }
+    
+    /* Header styling */
+    .markdown-body th {
+        /* Slightly darker and defined header background */
+        background-color: rgba(0, 0, 0, 0); 
+        /* Subtle internal border for header separation */
+        border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+        text-transform: uppercase;
+        font-weight: 400; 
+        color: whitesmoke;
+    }
+    
+    .markdown-body tr:hover {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0.25); 
+    }
+    /* Row hover styling */
+    .markdown-body tr {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0); 
+        border-bottom:none ;
+    }
+    
+    /* Internal Row Separator */
+    .markdown-body tr:not(:last-child) td {
+        /* Thin internal separator */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+    .options-table {
+        width: 100%;
+        /* Use separate to enable border-radius and external border */
+        border-collapse: separate; 
+        border-spacing: 0;
+        margin-top: 10px;
+        
+        /* FROSTED GLASS CONTAINER STYLES */
+        border-radius: 10px;
+        overflow: hidden; 
+        position: relative;
+        font-weight: 300; 
+        color: #fff;
+        font-size: 1rem;
+        
+        /* Subtle Border and Translucent Dark Background (Matching select input) */
+        /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+        background-color: rgba(18, 18, 26, 0.75); 
+        
+        /* Apply glass effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+    }
+    
+    /* Base cell styling */
+    .options-table th, .options-table td {
+        padding: 10px; 
+        text-align: left; /* Better for data */
+        color: #fff;
+        font-weight: 300;
+    }
+    
+    /* Header styling */
+    .options-table th {
+        /* Slightly darker and defined header background */
+        background-color: rgba(0, 0, 0, 0); 
+        /* Subtle internal border for header separation */
+        border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+        text-transform: uppercase;
+        font-weight: 400; 
+        color: whitesmoke;
+    }
+    
+    /* Row hover styling */
+    .options-table tr:hover {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0.103); 
+    }
+    /* Row hover styling */
+    .options-table tr {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0); 
+        border-bottom:none ;
+    }
+    
+    /* Internal Row Separator */
+    .options-table tr:not(:last-child) td {
+        /* Thin internal separator */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    /* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+    #options-portfolio-card table {
+        width: 100%;
+        /* Use separate to enable border-radius and external border */
+        border-collapse: separate; 
+        border-spacing: 0;
+        margin-top: 10px;
+        
+        /* FROSTED GLASS CONTAINER STYLES */
+        border-radius: 10px;
+        overflow: hidden; 
+        position: relative;
+        font-weight: 300; 
+        color: #fff;
+        font-size: 1rem;
+        
+        /* Subtle Border and Translucent Dark Background (Matching select input) */
+        /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+        background-color: rgba(18, 18, 26, 0.75); 
+        
+        /* Apply glass effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+    }
+    
+    /* Base cell styling */
+    #options-portfolio-card th, #options-portfolio-card td {
+        padding: 10px; 
+        text-align: left; /* Better for data */
+        color: #fff;
+        font-weight: 300;
+    }
+    
+    /* Header styling */
+    #options-portfolio-card th {
+        /* Slightly darker and defined header background */
+        background-color: rgba(0, 0, 0, 0); 
+        /* Subtle internal border for header separation */
+        border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+        text-transform: uppercase;
+        font-weight: 400; 
+        color: whitesmoke;
+    }
+    
+    /* Row hover styling */
+    #options-portfolio-card tr:hover {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0.103); 
+    }
+    /* Row hover styling */
+    #options-portfolio-card tr {
+        /* Subtle translucent hover effect (lighter than the base) */
+        background-color: rgba(72, 72, 72, 0); 
+        border-bottom:none ;
+    }
+    
+    /* Internal Row Separator */
+    #options-portfolio-card tr:not(:last-child) td {
+        /* Thin internal separator */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* Forms */
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Increased gap from 6px to 10px */
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    textarea, button {
+        padding: 12px 12px; /* Increased padding from 8px 8px */
+        border-radius: 6px; /* Increased border radius from 4px to 6px */
+        border: none;
+        font-size: 1rem; /* Increased input text size from 0.75rem */
+        background-color: #1c1c28;
+        color: #fff;
+        width: auto
+    }
+    
+    /* --- SELECT INPUT STYLING (Translucent with Subtle Border) --- */
+    select {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: auto;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    select:hover {
+        background-color: rgba(18, 18, 26, 0.9);
+        border-color: rgba(83, 89, 107, 0.8);
+    }
+    
+    
+    input {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border: 2px solid #4a90e2; /* Increased border thickness */
+    }
+    
+    input::placeholder,
+    textarea::placeholder,
+    select::placeholder {
+        font-size: 0.85rem; /* Increased placeholder font from 0.8rem */
+        color: #aaa; 
+        font-weight: 300;
+    }
+    
+    
+    /* Buttons */
+    button {
+        background-color: #E0EBFF;
+        color: #000000;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem; /* Increased font size from 0.8rem */
+        transition: background 0.3s, transform 0.2s;
+        border-radius: 6px; /* Increased border radius from 4px to 6px */
+        border: none;
+        margin: 2px; /* Increased margin from 1px to 2px */
+    }
+    
+    #submit-comment-button2 {
+        background-color: #E0EBFF;
+        color: #000000;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: background 0.3s, transform 0.2s;
+        border-radius: 6px;
+        border: none;
+        margin: 2px;
+        width: 100%;
+    }
+    
+    
+    .submit-button {
+        background-color: #E0EBFF;
+        color: #000000;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: background 0.3s, transform 0.2s;
+        border-radius: 6px;
+        border: none;
+        margin: 2px;
+        width: 100%;
+        margin-bottom: 10px
+    }
+    
+    button:hover, .submit-button:hover {
+        background-color: #94cdff;
+        transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
+    }
+    
+    button:active, .submit-button:active {
+        transform: translateY(0);
+    }
+    
+    /* Tables */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: #1c1c28;
+        border-radius: 6px; /* Increased border radius from 4px to 6px */
+        overflow: hidden;
+        font-size: 1rem; /* Increased table text size from 0.75rem */
+    }
+    
+     thead {
+        /* Base background color, very subtle */
+        background-color: rgba(37, 37, 37, 0.238); 
+        /* Removed box-shadow */
+        position: relative; /* CRITICAL: Needed for the pseudo-element positioning */
+        z-index: 1; /* Ensure header is above table body */
+        overflow: hidden; /* Ensures the blurred aura doesn't escape the header bounds */
+    }
+    
+    /* Pseudo-element to create the background aura glow */
+     thead::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Pushes the glow behind the <th> content */
+        pointer-events: none;
+        
+        /* Dual-Color Background: Cyan and Magenta spots */
+        background: 
+            radial-gradient(circle at 10% 80%, rgba(0, 200, 255, 0.15) 0%, transparent 40%), /* Cyan spot */
+            radial-gradient(circle at 90% 20%, rgba(255, 0, 251, 0.15) 0%, transparent 40%); /* Magenta spot */
+        
+        filter: blur(25px); /* Heavy blur for soft, radiating effect */
+        opacity: 0.8;
+    }
+    
+    
+    th, td {
+        padding: 8px; /* Increased padding from 5px to 8px */
+        text-align: center;
+    }
+    
+    tr:hover {
+        background-color: #2e2e40;
+    }
+    
+    
+    
+    /* Search */
+    
+    
+    #stock-search {
+        flex: 1;
+        font-size: 1rem; /* Increased font size from 0.75rem */
+        width: 100% !important;
+    }
+    
+    /* Stock/Favorites List */
+    #stock-list, #favorite-stocks, #comments-list {
+        list-style: none;
+        margin-top: 8px; /* Increased margin from 5px to 8px */
+        padding-left: 0;
+    }
+    
+    
+    /* Charts */
+    canvas {
+        background-color: #00000000;
+        border-radius: 12px; /* Increased border radius from 8px to 12px */
+        padding: 8px; /* Increased padding from 4px to 8px */
+        height: 400px;
+    }
+    
+    /* Comments Section */
+    .stock-symbol-search {
+        display: flex;
+        gap: 8px; /* Increased gap from 4px to 8px */
+        margin-bottom: 8px; /* Increased margin from 5px to 8px */
+    }
+    
+    .new-comment textarea {
+        width: 100%;
+        resize: none;
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    
+    
+    /* Stock List Styling */
+    #stock-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 10px; /* Increased margin from 6px to 10px */
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Increased gap from 6px to 10px */
+    }
+    
+    #stock-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: auto;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    #stock-list li:hover {
+        background-color: #2a2a38;
+        transform: translateY(-2px); /* Increased hover lift */
+    }
+    
+    #stock-list li span {
+        font-size: 1rem; /* Increased text size from 0.8rem */
+        color: #ffffff;
+        font-weight: 500;
+    }
+    
+    #stock-list li button {
+        padding: 8px 10px; /* Increased padding from 4px 8px */
+        border-radius: 6px;
+        border: none;
+        background-color: #E0EBFF;
+        color: black;
+        font-size: 0.85rem !important; /* Increased font size from 0.75rem */
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+    }
+    
+    #stock-list li button:hover {
+        background-color: #181c1f;
+        transform: translateY(-2px);
+    }
+    
+    #stock-list li button:active {
+        transform: translateY(0);
+    }
+    
+    
+    
+    
+    
+    
+    #market-status-banner {
+        position: fixed; 
+        top: 70px; /* Increased position from 50px to 60px */
+        left: 0; 
+        width: 100%;
+        background-color: #000000c0;
+        color: rgb(255, 255, 255);
+        overflow: hidden; 
+        white-space: nowrap; 
+        font-weight: light;
+        font-size: 1.2rem; /* Increased font size from 1rem to 1.2rem */
+        z-index: 1000;
+        padding: 8px 0; /* Increased padding from 6px to 8px */
+        border-bottom: 1px solid rgba(83, 89, 107, 0.5); /* Increased border thickness */
+        margin-bottom: 20px;
+        
+        /* ADDED: Background Blur for frosted effect */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    #market-status {
+        display: inline-block;
+        padding-left: 100%; 
+        animation: scroll-text 20s linear infinite; /* Increased scroll time from 15s to 20s */
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
+        text-transform: uppercase; /* Make text uppercase */
+        letter-spacing: 0.05em;
+    }
+    
+    @keyframes scroll-text {
+        0%  { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+    
+    
+    
+    
+    
+    .favorite-stocks-grid li button{
+        padding: 8px 8px; /* Increased padding from 2px 5px */
+        border-radius: 6px;
+        border: none;
+        background-color: #E0EBFF;
+        color: #000;
+        font-size: 0.85rem; /* Increased font size from 0.7rem */
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    
+    .favorite-stocks-grid {
+        display: flex;
+        flex-direction: column; /* stack items vertically */
+        gap: 12px; /* Increased gap from 6px to 10px */
+        margin-top: 10px; /* Increased margin from 6px to 10px */
+        width: 100%; /* take full width of sidebar */
+    }
+    
+    
+    .favorite-stock-item button {
+        background: #ff4d4f;
+        color: white;
+        border: none;
+        border-radius: 4px; /* Increased border radius */
+        padding: 3px 8px; /* Increased padding */
+        cursor: pointer;
+        font-size: 0.75rem; /* Increased font size from 0.75rem */
+        
+    }
+    
+    
+    
+    .favorite-stocks-grid li button:hover {
+        background-color: #201e34 !important;
+        transform: translateY(-2px) !important; /* Increased hover lift */
+    }
+    
+    /* --- MODIFIED FAVORITE STOCK ITEM STYLE --- */
+    .favorite-stocks-grid li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 8px; 
+        
+        /* Translucent dark background for theme consistency */
+        background-color: rgba(18, 18, 26, 0); 
+        color: #fff;
+        width: auto;
+        transition: all 0.2s ease-in-out; 
+        
+        /* Setup for gradient border and glow */
+        position: relative;
+        overflow: hidden; /* Hides internal overflow but allows shadow/border to be managed */
+        z-index: 1; /* Establishes stacking context */
+    
+        /* ADDED: Aura glow radiating from the gradient bar (Left side only) */
+    
+    }
+    
+    /* Pseudo-element to create the gradient left border bar */
+    .favorite-stocks-grid li::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2px; /* Desired border thickness */
+        height: 100%;
+        /* Gradient from top (cyan) to bottom (magenta) */
+        background: linear-gradient(to bottom, rgba(0, 200, 255, 0.585), rgba(255, 0, 251, 0.487));
+        z-index: 2; /* Ensures it sits on top of the list item background */
+    }
+    
+    /* --- END MODIFICATION --- */
+    
+    
+    /* sidebar base (no fixed top) */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        width: 250px; /* INCREASED WIDTH: from 200px to 250px */
+        /* top and height will be set by JS for accurate alignment */
+        background-color: #00000000;
+        padding: 15px; /* Increased padding from 12px 10px */
+        box-shadow: 4px 0 12px rgba(0,0,0,0.7); /* Increased shadow for bigger look */
+        display: flex;
+        flex-direction: column;
+        z-index: 500; 
+        border-right: 2px solid rgba(83, 89, 107, 0.5); /* Increased border thickness */
+    
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: #E0EBFF #111; /* thumb + track */
+    }
+    
+    
+    
+    
+    /* Sidebar search */
+    .sidebar .search-container {
+        margin-bottom: 15px; /* Increased margin from 10px to 15px */
+    }
+    
+    .search-container {
+        align-items: center;
+    }
+    .sidebar #stock-search {
+        width: 100%;
+    }
+    .stock-search input{
+        font-size: 0.75rem; /* Increased input text size from 0.75rem */
+        height: 35px; /* Increased height from 28px to 35px */
+    }
+    
+    #search-button {
+        margin-top: 5px !important;
+        height: 40px !important ;
+        width: 100% !important;
+        margin-bottom: -20px !important;
+        
+    }
+    /* Watchlist items */
+    #watchlist {
+        flex: 1;
+        overflow-y: auto;
+        list-style: none;
+        margin-top: 10px; /* Increased margin from 6px to 10px */
+        padding: 0;
+    }
+    
+    #watchlist li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px; /* Increased padding from 6px 8px */
+        margin-bottom: 6px; /* Increased margin from 4px to 6px */
+        background-color: #171720ad;
+        border-radius: 8px; /* Increased border radius from 5px to 8px */
+        transition: background 0.3s, transform 0.2s;
+        cursor: pointer;
+    }
+    
+    #watchlist li:hover {
+        background-color: #2a2a38;
+        transform: translateY(-2px);
+    }
+    
+    #watchlist li span {
+        font-size: 1rem; /* Increased font size from 0.8rem */
+        color: #fff;
+        font-weight: 500;
+    }
+    
+    #watchlist li button {
+        padding: 4px 8px; /* Increased padding from 2px 5px */
+        border-radius: 6px;
+        border: none;
+        background-color: #E0EBFF;
+        color: #000;
+        font-size: 0.85rem; /* Increased font size from 0.7rem */
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    #search-button {
+        padding: 4px 8px; /* Increased padding from 2px 5px */
+        border-radius: 6px;
+        border: none;
+        background-color: #E0EBFF;
+        color: #000;
+        font-size: 0.85rem; /* Increased font size from 0.7rem */
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    #watchlist li button:hover {
+        background-color: #357ab8;
+    }
+    
+    
+    /*
+     * Styles for the options-wrap container using Flexbox
+     * to place the select elements side-by-side.
+     */
+    .options-wrap {
+        display: flex; /* Enables flex container */
+        gap: 0.755rem; /* Increased space between the two select groups from 1rem to 1.5rem */
+        align-items: center; /* Vertically centers the items if they have different heights */
+    }
+    
+    
+    /* Optional: Focus state styling */
+    select:focus {
+        border-color: #3b82f6; /* Blue border on focus */
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); /* Increased box shadow */
+    }
+    
+    
+    /* Push main content right */
+    .main-content {
+        margin-left: 250px; /* UPDATED: to match new sidebar width (250px) */
+        padding: 15px; /* Increased padding from 12px to 15px */
+    }
+    
+    /* Container to position the arrow */
+    .select-wrapper {
+        position: relative;
+        width: 100%; 
+        display: inline-block;
+    }
+    
+    /* Dropdown styling */
+    #range {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    /* Hover & focus states */
+    #range:hover, #range:focus {
+        border-color: #0ff; 
+        outline: none;
+    }
+    
+    /* Add custom arrow using pseudo-element */
+    
+    
+    /* Option styling */
+    #range option {
+        background-color: #1c1c28;
+        color: #fff;
+    }
+    
+    /* Label styling */
+    label[for="range"] {
+        display: block;
+        margin-bottom: 6px; /* Increased margin from 4px to 6px */
+        font-weight: 500;
+        color: #fff;
+        font-size: 0.85rem; /* Increased font size from 0.8rem */
+        margin-bottom: 4px; /* Increased margin from 2px to 4px */
+    }
+    
+    
+    /* Dropdown styling */
+    #chartType {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    #chartType option {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    #order-type {
+        padding: 12px 12px; 
+        border-radius: 6px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+    /* Hover & focus states */
+    #chartType:hover,
+    #chartType:focus {
+        border-color: #0ff; 
+        outline: none;
+    }
+    
+    /* Option styling */
+    #chartType option {
+        background-color: #1c1c28;
+        color: #fff;
+    }
+    
+    /* Optional label styling */
+    label[for="chartType"] {
+        display: block;
+        margin-bottom: 4px; /* Increased margin from 2px to 4px */
+        font-weight: 500;
+        color: #fff;
+        font-size: 0.85rem; /* Increased font size from 0.8rem */
+    }
+    
+    
+    
+    
+    /* ==================== Global Fade-in ==================== */
+    body {
+        animation: fadeInBody 0.8s ease forwards;
+    }
+    
+    @keyframes fadeInBody {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Only animate new elements that you add dynamically */
+    .animate-slideup {
+        opacity: 0;
+        transform: translateY(20px); /* Increased translateY from 10px to 20px */
+        animation: slideUp 0.6s forwards;
+    }
+    
+    @keyframes slideUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Sidebar slide-in (only once) */
+    .sidebar {
+        transform: translateX(-100%);
+        animation: slideInLeft 0.8s forwards;
+        padding: 30px 10px;
+    }
+    
+    @keyframes slideInLeft {
+        to { transform: translateX(0); }
+    }
+    
+    
+    /* Portfolio container */
+    #portfolioContainer {
+        margin: 20px auto; /* Increased margin from 12px to 20px */
+        width: 100%; 
+        max-width: 1200px; /* Increased max width from 1000px to 1200px */
+        color: #ffffff;
+    }
+    
+    /* Portfolio title */
+    #portfolioContainer h2 {
+        font-size: 1.8rem; /* Increased font size from 1.2rem to 1.8rem */
+        font-weight: 700;
+        margin-bottom: 20px; /* Increased margin from 12px to 20px */
+        color: #E0EBFF;
+        text-align: left;
+    }
+    
+    /* Grid for stocks */
+    .stock-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Adjusted minmax for larger cards from 180px */
+        gap: 12px; /* Increased gap from 8px to 12px */
+        margin-bottom: 20px; /* Increased margin from 15px to 20px */
+    }
+    
+    /* Individual stock card */
+    .stock-column {
+        padding: 12px 12px; 
+        border-radius: 8px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.35);
+        color: #fff;
+        width: auto;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    }
+    
+     h3 {
+        font-size: 1.2rem; /* Increased font size from 0.95rem to 1.2rem */
+        font-weight: 700;
+        margin-bottom: 8px; /* Increased margin from 6px to 8px */
+        color: #ffffff;
+    }
+    
+    .stock-column p {
+        font-size: 1rem; /* Increased font size from 0.8rem to 1rem */
+        margin-bottom: 4px; /* Increased margin from 3px to 4px */
+        color: #ffffff;
+    }
+    
+    .stock-column strong {
+        color: #E0EBFF;
+    }
+    
+    /* Hover effect */
+    .stock-column:hover {
+        background-color: #12121a;
+        transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
+    }
+    
+    
+    
+    
+    .portfolio-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* left chart bigger than portfolio */
+        gap: 20px; /* Increased gap from 12px to 20px */
+        margin-top: 20px; /* Increased margin from 12px to 20px */
+    }
+    
+    .chart-container {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .fullscreen-chart {
+        height: 100%;
+        background-color: #00000000;
+        box-shadow: none;
+        padding: 10px;
+        margin:0px
+    }
+    
+    .trading-card2 {
+        height: 100%;
+        overflow-y: auto;
+        background-color: #00000000;
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    
+    
+    
+    /* Ensure chart container has a fixed height */
+    #myChart2, #recommendationChart, .fullscreen-chart canvas {
+        width: 100% !important;
+        height: 400px !important; /* Setting a fixed height for a bigger chart appearance, or a percentage if the parent is fixed */
+    }
+    
+    
+    
+    
+    
+    .company-card-content h2 {
+        margin-top: 8px; /* Increased margin from 6px to 8px */
+        font-size: 1.6rem; /* Increased font size from 1.3rem to 1.6rem */
+        font-weight: 400;
+    }
+    
+    .company-logo img {
+        border-radius: 8px; /* Increased border radius from 5px to 8px */
+    }
+    
+    .company-card-content p {
+        margin: 6px 0; /* Increased margin from 4px 0 */
+        font-size: 1.1rem; /* Increased font size from 0.9rem to 1.1rem */
+        padding-bottom: 4px; /* Increased padding from 2px to 4px */
+    }
+    
+    .company-card-content a {
+        color: #0ff; 
+        text-decoration: none;
+    }
+    
+    .company-card-content a:hover {
+        text-decoration: underline;
+    }
+    
+    
+    .form-group {
+        display: flex;
+        gap: 12px; /* Increased gap from 8px to 12px */
+        align-items: center;
+    }
+    
+    .form-group select {
+        background: #00000000;
+        color: white;
+        padding: 12px 12px /* Increased padding */
+    }
+    
+    
+    
+    
+    /* --- PRETTY RADIO BUTTON STYLING (Themed) --- */
+    
+    /* Wrapper for the entire radio element and label text */
+    .pretty-radio {
+        position: relative;
+        padding-left: 25px; 
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 13px; 
+        color: #f0f0f0; /* Ensure text is visible */
+        transition: color 0.2s;
+    }
+    
+    .pretty-radio:hover {
+        color: rgb(255, 255, 255); /* Subtle hover effect on text matching the highlight color */
+    }
+    
+    /* Hidden native input */
+    .pretty-radio input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    /* Outer ring (Unchecked State - matches the subtle border style) */
+    .radio-label::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px; /* Slightly increased size for visibility */
+        height: 16px; 
+        /* Subtle theme border (matches <select> border color) */
+        border: 2px solid rgba(83, 89, 107, 0.7); 
+        border-radius: 50%;
+        /* Dark, slightly translucent background */
+        background: rgba(18, 18, 26, 0.9); 
+        box-sizing: border-box;
+        transition: all 0.2s;
+    }
+    
+    /* Inner dot (Checked State) */
+    .radio-label::after {
+        content: "";
+        position: absolute;
+        left: 4px; /* Adjusted position for the 2px border on ::before */
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px; 
+        height: 8px; 
+        /* Primary highlight color (Bright Cyan) */
+        background: rgb(255, 255, 255); 
+        border-radius: 100%;
+        opacity: 0;
+        transition: opacity 0.2s, background 0.2s;
+    }
+    
+    /* State when checked: Activate border glow and inner dot */
+    .pretty-radio input:checked + .radio-label::before {
+        border-color: rgb(255, 255, 255); /* Outer ring switches to highlight color */
+        box-shadow: 0 0 5px rgba(0, 213, 255, 0.5); /* Subtle glow effect */
+    }
+    
+    .pretty-radio input:checked + .radio-label::after {
+        opacity: 1; /* Show the inner dot */
+    }
+    
+    /* State when focused (Accessibility & Enhanced Interaction) */
+    .pretty-radio input:focus + .radio-label::before {
+        box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.5); /* Focus ring */
+    }
+    
+    
+    .pretty-radio input:checked + .radio-label::after {
+        opacity: 1;
+    }
+    .hidden {
+        display: none;
+    }
+    
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px; /* Increased gap from 3px to 5px */
+        align-items: flex-start;
+    }
+    
+    .form-group.radio-group {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px; /* Increased gap from 8px to 12px */
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    
+    .visible {
+        opacity: 1;
+        height: auto;
+    }
+    
+    
+    .form-group-radio {
+        display: flex;
+        gap: 30px; /* Increased gap from 20px to 30px */
+        align-items: center; 
+        padding: 10px 0; /* Increased padding from 6px 0 */
+    }
+    
+    .pretty-radio input {
+        vertical-align: middle; 
+    }
+    
+    .pretty-radio .radio-label {
+        vertical-align: middle;
+        display: inline-block; 
+        font-size: 13px; /* Increased font size from 10px to 13px */
+    }
+    
+    
+    .portfolio-layout {
+        display: flex;
+        gap: 20px; /* Increased gap from 12px to 20px */
+        align-items: flex-start;
+    }
+    
+    .positions-section {
+        flex: 2;
+    }
+    
+    .portfolio-chart-container {
+        flex: 1;
+    }
+    
+    /* --- TAB CONTAINER (Revised) --- */
+    .tab-container {
+        display: flex;
+        justify-content: flex-start;
+        gap: 4px; /* Increased gap for visual separation */
+        margin-top: 15px; /* Reduced top margin from previous 45px, adjust as needed */
+        margin-bottom: 00; /* Ensure no margin below the tabs to connect them to content */
+    }
+    
+    /* --- TAB BUTTONS (Enhanced) --- */
+    .tab-button {
+        background-color: #12121a00; /* Darker, more distinct background */
+        border: none; /* Remove default border, we'll use a specific bottom border */
+        color: #bdbdbd; /* Lighter color for inactive text */
+        padding: 10px 18px; /* Increased padding for larger, easier-to-click targets */
+        border-radius: 8px 8px 0 0; /* Rounded top corners for a "lifted" effect */
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-bottom 0.2s; /* Smooth transitions */
+        font-size: 1.2rem; /* Clearer font size */
+        font-weight: 500;
+        position: relative; /* Needed for the active bar effect */
+        top: 2px; /* Pull button up slightly to align with the border-bottom */
+    }
+    
+    /* Hover State */
+    .tab-button:hover:not(.active) {
+        background-color: #1c1c2800; /* Slightly lift background on hover */
+        color: #ffffff; /* Make text white on hover */
+    }
+    
+    /* Active State */
+    .tab-button.active {
+        background-color: #2a2a3d00; /* Distinct active background */
+        color: rgb(255, 255, 255); /* **Bright cyan/aqua** highlight color */
+        font-weight: 300;
+        top: 0; /* Pull the active button flush */
+        
+        /* Active State Bar (the key visual feature) */
+    }
+    
+    /* 🪩 hover line animation */
+    .tab-button::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: var(--hover-color);
+      transition: width 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    
+    .tab-button:hover::after,
+    .tab-button.active::after {
+      width: 100%;
+    }
+    
+    .tab-button:hover {
+      color: var(--hover-color);
+      text-shadow: 0 0 8px rgba(255,255,255,0.2); /* faint glow */
+    }
+    
+    /* Ensure tab content starts directly below the anchor line */
+    .tab-content {
+        /* You would place your tab content styling here */
+        /* border: 1px solid #2a2a3d; */
+        background-color: #000000;
+        border-top: none; /* No top border, connects visually to the tabs */
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        
+    }
+    
+    .cancel-limit-btn {
+        width: 100%;
+    }
+    
+    .cancel-btn {
+        width: 100%;
+    }
+    
+    .actioncolumn {
+        text-align: center !important;
+    }
+    
+    .options-card {
+        padding: 15px 15px; 
+        border-radius: 12px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.75);
+        color: #fff;
+        width: 100%;
+        margin: 20px 0px;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    
+    }
+    
+    .options-container {
+        padding: 10px 0px; 
+        border-radius: 12px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0); 
+        font-size: 1rem; 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0);
+        color: #fff;
+        width: 100%;
+        margin: 10px 0px;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+    
+    }
+    
+    
+    .ohlc-body {
+        padding: 15px /* Increased padding from 12px */
+    }
+    
+    
+    /* Error message styling */
+    #error-message,
+    #buy-error {
+        color: #ff4d4f; 
+        font-weight: 500;
+        margin-top: 5px; /* Increased margin from 3px to 5px */
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    /* Success message styling */
+    #success-message,
+    #create-success {
+        color: #52c41a; 
+        font-weight: 500;
+        margin-top: 5px; /* Increased margin from 3px to 5px */
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7); /* Darker background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    
+    .popup-content {
+        background: #000000;
+        padding: 20px; /* Increased padding from 12px 16px */
+        border-radius: 8px; /* Increased border radius from 5px to 8px */
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Adjusted shadow */
+        outline: #323232 2px solid; /* Increased outline thickness */
+        font-size: 1.1rem; /* Increased general popup font size */
+    }
+    
+    .popup-content button {
+        margin: 0 10px; /* Increased margin from 0 6px */
+        padding: 8px 15px; /* Increased padding from 5px 10px */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    #confirm-yes {
+        padding-top: 8px; /* Increased padding from 6px */
+        background-color: #53c41ac8; 
+        color: white;
+    }
+    
+    #confirm-no {
+        padding-top: 8px; /* Increased padding from 6px */
+        background-color: #f94a4dca; 
+        color: white;
+    }
+    
+    /* ===== Toast Styles ===== */
+    .toast {
+        position: fixed;
+        bottom: 25px; /* Increased position from 15px to 25px */
+        right: 25px; /* Increased position from 15px to 25px */
+        background: #333;
+        color: #fff;
+        padding: 12px 18px; /* Increased padding from 8px 12px */
+        border-radius: 8px; /* Increased border radius from 5px to 8px */
+        font-size: 14px; /* Increased font size from 12px to 14px */
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+        z-index: 1000;
+    }
+    
+    .toast.show {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/* Sidebar slide-in (only once) */
-.sidebar {
-    transform: translateX(-100%);
-    animation: slideInLeft 0.8s forwards;
-    padding: 30px 10px;
-}
-
-@keyframes slideInLeft {
-    to { transform: translateX(0); }
-}
-
-
-/* Portfolio container */
-#portfolioContainer {
-    margin: 20px auto; /* Increased margin from 12px to 20px */
-    width: 100%; 
-    max-width: 1200px; /* Increased max width from 1000px to 1200px */
-    color: #ffffff;
-}
-
-/* Portfolio title */
-#portfolioContainer h2 {
-    font-size: 1.8rem; /* Increased font size from 1.2rem to 1.8rem */
-    font-weight: 700;
-    margin-bottom: 20px; /* Increased margin from 12px to 20px */
-    color: #E0EBFF;
-    text-align: left;
-}
-
-/* Grid for stocks */
-.stock-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Adjusted minmax for larger cards from 180px */
-    gap: 12px; /* Increased gap from 8px to 12px */
-    margin-bottom: 20px; /* Increased margin from 15px to 20px */
-}
-
-/* Individual stock card */
-.stock-column {
-    padding: 12px 12px; 
-    border-radius: 8px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.35);
-    color: #fff;
-    width: auto;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-}
-
- h3 {
-    font-size: 1.2rem; /* Increased font size from 0.95rem to 1.2rem */
-    font-weight: 700;
-    margin-bottom: 8px; /* Increased margin from 6px to 8px */
-    color: #ffffff;
-}
-
-.stock-column p {
-    font-size: 1rem; /* Increased font size from 0.8rem to 1rem */
-    margin-bottom: 4px; /* Increased margin from 3px to 4px */
-    color: #ffffff;
-}
-
-.stock-column strong {
-    color: #E0EBFF;
-}
-
-/* Hover effect */
-.stock-column:hover {
-    background-color: #12121a;
-    transform: translateY(-2px); /* Increased hover lift from -1px to -2px */
-}
-
-/* Responsive adjustments */
-@media (max-width: 800px) { /* Increased breakpoint from 600px to 800px */
-    .stock-grid {
-        grid-template-columns: 1fr; /* stack cards on small screens */
+    
+     .toast.success {
+        background: linear-gradient(90deg, #00c851 0%, #000000 60%, #000000 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        letter-spacing: 0.4px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        font-weight: 300;
+    } 
+    
+    .toast.error {
+        background-color: #dc3545; 
     }
-}
-
-
-
-.portfolio-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* left chart bigger than portfolio */
-    gap: 20px; /* Increased gap from 12px to 20px */
-    margin-top: 20px; /* Increased margin from 12px to 20px */
-}
-
-.chart-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.fullscreen-chart {
-    height: 100%;
-    background-color: #00000000;
-    box-shadow: none;
-    padding: 10px;
-    margin:0px
-}
-
-.trading-card2 {
-    height: 100%;
-    overflow-y: auto;
-    background-color: #00000000;
-    box-shadow: none;
-    padding: 0;
-}
-
-/* Responsive: stack on smaller screens */
-@media (max-width: 1100px) { /* Increased breakpoint from 900px to 1100px */
-    .portfolio-container {
-        grid-template-columns: 1fr;
-        gap: 12px; /* Increased gap from 8px to 12px */
+    
+    
+    
+    
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        
+        /* --- Add the blur here --- */
+        backdrop-filter: blur(7px); /* Adjust the '5px' to control the blur intensity */
+        /* Add vendor prefixes for wider compatibility */
+        -webkit-backdrop-filter: blur(7px); 
     }
-}
-
-
-
-/* Ensure chart container has a fixed height */
-#myChart2, #recommendationChart, .fullscreen-chart canvas {
-    width: 100% !important;
-    height: 400px !important; /* Setting a fixed height for a bigger chart appearance, or a percentage if the parent is fixed */
-}
-
-
-
-
-
-.company-card-content h2 {
-    margin-top: 8px; /* Increased margin from 6px to 8px */
-    font-size: 1.6rem; /* Increased font size from 1.3rem to 1.6rem */
-    font-weight: 400;
-}
-
-.company-logo img {
-    border-radius: 8px; /* Increased border radius from 5px to 8px */
-}
-
-.company-card-content p {
-    margin: 6px 0; /* Increased margin from 4px 0 */
-    font-size: 1.1rem; /* Increased font size from 0.9rem to 1.1rem */
-    padding-bottom: 4px; /* Increased padding from 2px to 4px */
-}
-
-.company-card-content a {
-    color: #0ff; 
-    text-decoration: none;
-}
-
-.company-card-content a:hover {
-    text-decoration: underline;
-}
-
-
-.form-group {
-    display: flex;
-    gap: 12px; /* Increased gap from 8px to 12px */
-    align-items: center;
-}
-
-.form-group select {
-    background: #00000000;
-    color: white;
-    padding: 12px 12px /* Increased padding */
-}
-
-
-
-
-/* --- PRETTY RADIO BUTTON STYLING (Themed) --- */
-
-/* Wrapper for the entire radio element and label text */
-.pretty-radio {
-    position: relative;
-    padding-left: 25px; 
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 13px; 
-    color: #f0f0f0; /* Ensure text is visible */
-    transition: color 0.2s;
-}
-
-.pretty-radio:hover {
-    color: rgb(255, 255, 255); /* Subtle hover effect on text matching the highlight color */
-}
-
-/* Hidden native input */
-.pretty-radio input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-/* Outer ring (Unchecked State - matches the subtle border style) */
-.radio-label::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px; /* Slightly increased size for visibility */
-    height: 16px; 
-    /* Subtle theme border (matches <select> border color) */
-    border: 2px solid rgba(83, 89, 107, 0.7); 
-    border-radius: 50%;
-    /* Dark, slightly translucent background */
-    background: rgba(18, 18, 26, 0.9); 
-    box-sizing: border-box;
-    transition: all 0.2s;
-}
-
-/* Inner dot (Checked State) */
-.radio-label::after {
-    content: "";
-    position: absolute;
-    left: 4px; /* Adjusted position for the 2px border on ::before */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px; 
-    height: 8px; 
-    /* Primary highlight color (Bright Cyan) */
-    background: rgb(255, 255, 255); 
-    border-radius: 100%;
-    opacity: 0;
-    transition: opacity 0.2s, background 0.2s;
-}
-
-/* State when checked: Activate border glow and inner dot */
-.pretty-radio input:checked + .radio-label::before {
-    border-color: rgb(255, 255, 255); /* Outer ring switches to highlight color */
-    box-shadow: 0 0 5px rgba(0, 213, 255, 0.5); /* Subtle glow effect */
-}
-
-.pretty-radio input:checked + .radio-label::after {
-    opacity: 1; /* Show the inner dot */
-}
-
-/* State when focused (Accessibility & Enhanced Interaction) */
-.pretty-radio input:focus + .radio-label::before {
-    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.5); /* Focus ring */
-}
-
-
-.pretty-radio input:checked + .radio-label::after {
-    opacity: 1;
-}
-.hidden {
-    display: none;
-}
-
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px; /* Increased gap from 3px to 5px */
-    align-items: flex-start;
-}
-
-.form-group.radio-group {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px; /* Increased gap from 8px to 12px */
-}
-
-.hidden {
-    display: none !important;
-}
-
-.visible {
-    opacity: 1;
-    height: auto;
-}
-
-
-.form-group-radio {
-    display: flex;
-    gap: 30px; /* Increased gap from 20px to 30px */
-    align-items: center; 
-    padding: 10px 0; /* Increased padding from 6px 0 */
-}
-
-.pretty-radio input {
-    vertical-align: middle; 
-}
-
-.pretty-radio .radio-label {
-    vertical-align: middle;
-    display: inline-block; 
-    font-size: 13px; /* Increased font size from 10px to 13px */
-}
-
-
-.portfolio-layout {
-    display: flex;
-    gap: 20px; /* Increased gap from 12px to 20px */
-    align-items: flex-start;
-}
-
-.positions-section {
-    flex: 2;
-}
-
-.portfolio-chart-container {
-    flex: 1;
-}
-
-/* --- TAB CONTAINER (Revised) --- */
-.tab-container {
-    display: flex;
-    justify-content: flex-start;
-    gap: 4px; /* Increased gap for visual separation */
-    margin-top: 15px; /* Reduced top margin from previous 45px, adjust as needed */
-    margin-bottom: 00; /* Ensure no margin below the tabs to connect them to content */
-}
-
-/* --- TAB BUTTONS (Enhanced) --- */
-.tab-button {
-    background-color: #12121a00; /* Darker, more distinct background */
-    border: none; /* Remove default border, we'll use a specific bottom border */
-    color: #bdbdbd; /* Lighter color for inactive text */
-    padding: 10px 18px; /* Increased padding for larger, easier-to-click targets */
-    border-radius: 8px 8px 0 0; /* Rounded top corners for a "lifted" effect */
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, border-bottom 0.2s; /* Smooth transitions */
-    font-size: 1.2rem; /* Clearer font size */
-    font-weight: 500;
-    position: relative; /* Needed for the active bar effect */
-    top: 2px; /* Pull button up slightly to align with the border-bottom */
-}
-
-/* Hover State */
-.tab-button:hover:not(.active) {
-    background-color: #1c1c28; /* Slightly lift background on hover */
-    color: #ffffff; /* Make text white on hover */
-}
-
-/* Active State */
-.tab-button.active {
-    background-color: #2a2a3d00; /* Distinct active background */
-    color: rgb(255, 255, 255); /* **Bright cyan/aqua** highlight color */
-    font-weight: 300;
-    top: 0; /* Pull the active button flush */
     
-    /* Active State Bar (the key visual feature) */
-}
-
-/* 🪩 hover line animation */
-.tab-button::after {
-  content: "";
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  width: 0%;
-  height: 2px;
-  background-color: var(--hover-color);
-  transition: width 0.35s cubic-bezier(.4,0,.2,1);
-}
-
-.tab-button:hover::after,
-.tab-button.active::after {
-  width: 100%;
-}
-
-.tab-button:hover {
-  color: var(--hover-color);
-  text-shadow: 0 0 8px rgba(255,255,255,0.2); /* faint glow */
-}
-
-/* Ensure tab content starts directly below the anchor line */
-.tab-content {
-    /* You would place your tab content styling here */
-    /* border: 1px solid #2a2a3d; */
-    background-color: #000000;
-    border-top: none; /* No top border, connects visually to the tabs */
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    
-}
-
-.cancel-limit-btn {
-    width: 100%;
-}
-
-.cancel-btn {
-    width: 100%;
-}
-
-.actioncolumn {
-    text-align: center !important;
-}
-
-.options-card {
-    padding: 15px 15px; 
-    border-radius: 12px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.75);
-    color: #fff;
-    width: 100%;
-    margin: 20px 0px;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-
-}
-
-.options-container {
-    padding: 10px 0px; 
-    border-radius: 12px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0); 
-    font-size: 1rem; 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0);
-    color: #fff;
-    width: 100%;
-    margin: 10px 0px;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-
-}
-
-
-.ohlc-body {
-    padding: 15px /* Increased padding from 12px */
-}
-
-
-/* Error message styling */
-#error-message,
-#buy-error {
-    color: #ff4d4f; 
-    font-weight: 500;
-    margin-top: 5px; /* Increased margin from 3px to 5px */
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-/* Success message styling */
-#success-message,
-#create-success {
-    color: #52c41a; 
-    font-weight: 500;
-    margin-top: 5px; /* Increased margin from 3px to 5px */
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-.popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7); /* Darker background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.popup-content {
-    background: #000000;
-    padding: 20px; /* Increased padding from 12px 16px */
-    border-radius: 8px; /* Increased border radius from 5px to 8px */
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Adjusted shadow */
-    outline: #323232 2px solid; /* Increased outline thickness */
-    font-size: 1.1rem; /* Increased general popup font size */
-}
-
-.popup-content button {
-    margin: 0 10px; /* Increased margin from 0 6px */
-    padding: 8px 15px; /* Increased padding from 5px 10px */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-#confirm-yes {
-    padding-top: 8px; /* Increased padding from 6px */
-    background-color: #53c41ac8; 
-    color: white;
-}
-
-#confirm-no {
-    padding-top: 8px; /* Increased padding from 6px */
-    background-color: #f94a4dca; 
-    color: white;
-}
-
-/* ===== Toast Styles ===== */
-.toast {
-    position: fixed;
-    bottom: 25px; /* Increased position from 15px to 25px */
-    right: 25px; /* Increased position from 15px to 25px */
-    background: #333;
-    color: #fff;
-    padding: 12px 18px; /* Increased padding from 8px 12px */
-    border-radius: 8px; /* Increased border radius from 5px to 8px */
-    font-size: 14px; /* Increased font size from 12px to 14px */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-    z-index: 1000;
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
- .toast.success {
-    background: linear-gradient(90deg, #00c851 0%, #000000 60%, #000000 100%);
-    color: #fff;
-    border: none;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
-    letter-spacing: 0.4px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    font-weight: 300;
-} 
-
-.toast.error {
-    background-color: #dc3545; 
-}
-
-
-
-
-.popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    
-    /* --- Add the blur here --- */
-    backdrop-filter: blur(7px); /* Adjust the '5px' to control the blur intensity */
-    /* Add vendor prefixes for wider compatibility */
-    -webkit-backdrop-filter: blur(7px); 
-}
-
-.popup-content {
-     padding: 50px 30px; 
-    border-radius: 12px; 
-    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
-    border: 1px solid rgba(83, 89, 107, 0.5); 
-    /* Translucent dark background */
-    background-color: rgba(18, 18, 26, 0.85);
-    color: #fff;
-    width: auto;
-    margin: 10px 0px;
-    /* Add transition for smooth hover effects */
-    transition: all 0.2s ease-in-out; 
-    text-align: center;
-}
-
-.popup-content p {
-    font-size: 1.1rem; 
-}
-
-.popup-content button {
-    margin: 0 10px; /* Increased margin from 0 6px */
-    padding: 8px 15px; /* Increased padding from 5px 10px */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem; /* Increased font size from 0.8rem */
-}
-
-#confirm-yes {
-    padding-top: 8px; 
-    color: white;
-    
-    /* Subtle Translucent Green Gradient */
-    background: linear-gradient(135deg, 
-        rgba(83, 196, 26, 0.85),  /* Start: Slightly lighter, 85% opacity */
-        rgba(40, 150, 10, 0.577)   /* End: Slightly darker, 85% opacity */
-    );
-    /* Remove the old background-color: #53c41ac8; */
-}
-
-#confirm-no {
-    padding-top: 8px; 
-    color: white;
-    
-    /* Subtle Translucent Red Gradient */
-    background: linear-gradient(135deg, 
-        rgba(249, 74, 77, 0.85),  /* Start: Slightly lighter, 85% opacity */
-        rgba(210, 30, 36, 0.527)   /* End: Slightly darker, 85% opacity */
-    );
-    /* Remove the old background-color: #f94a4dca; */
-}
-
-
-
-
-
-.settings-container {
-    max-width: 700px;
-    margin: 50px auto;
-    padding: 0 20px;
-}
-
-.settings-container h1 {
-    text-align: center;
-    margin-bottom: 40px;
-    color: #ffffff;
-}
-
-.settings-section {
-    background-color: #000000;
-    padding: 25px 20px;
-    margin-bottom: 30px;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-}
-
-.settings-section h2 {
-    margin-bottom: 15px;
-    color: #ffffff;
-}
-
-.settings-section label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-.settings-section input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.settings-section button {
-    padding: 12px 25px;
-    background-color: #2d89ff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.settings-section button:hover {
-    background-color: #1366d6;
-}
-
-.settings-section .danger-button {
-    background-color: #ff4d4f;
-}
-
-.settings-section .danger-button:hover {
-    background-color: #d9363e;
-}
-
-.settings-section p {
-    margin-bottom: 10px;
-    color: #b00;
-    font-weight: 500;
-}
-
-
-
-    .profit {
-      color: green;
-      font-weight: bold;
+    .popup-content {
+         padding: 50px 30px; 
+        border-radius: 12px; 
+        /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+        border: 1px solid rgba(83, 89, 107, 0.5); 
+        /* Translucent dark background */
+        background-color: rgba(18, 18, 26, 0.85);
+        color: #fff;
+        width: auto;
+        margin: 10px 0px;
+        /* Add transition for smooth hover effects */
+        transition: all 0.2s ease-in-out; 
+        text-align: center;
     }
-    .loss {
-      color: red;
-      font-weight: bold;
-    }
-
-
     
-   /* Import Outfit font */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
-
-/* General Reset & Fonts */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px; /* base font smaller */
-}
-
-body {
-    background-color: #0a0a0f; /* deeper black */
-    color: #ffffff;
-    line-height: 1.4; /* slightly tighter for smaller font */
-}
-
-h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #ffffff;
-}
-
-
-
-h4 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #ffffff;
-}
-
-/* Container & Layout */
-.content {
-    width: 100%;
-    margin: 15px auto;
-    padding: 15px;
-    background-color: #00000080; /* ultra-dark card background */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-}
-
-.container {
-    display: grid;
-    grid-template-columns: 75% 25%;
-    gap: 10px;          
-    box-sizing: border-box;
-    width: 100%;
-    /* max-height: 600px; */
-}
-
-
-
-/* .trading-card{
-  max-width: 300px;
-} */
-
-/* Side-by-side container */
-.history-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 equal columns */
-    gap: 10px;
-    width: 100%;
-    margin: 10px 0;
-    /* padding-left: 40px;
-        padding-right: 40px; */
-      /* max-width: 1500px; */
-
-}
-
-
-
-/* Responsive: stack on smaller screens */
-@media (max-width: 1000px) {
+    .popup-content p {
+        font-size: 1.1rem; 
+    }
+    
+    .popup-content button {
+        margin: 0 10px; /* Increased margin from 0 6px */
+        padding: 8px 15px; /* Increased padding from 5px 10px */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem; /* Increased font size from 0.8rem */
+    }
+    
+    #confirm-yes {
+        padding-top: 8px; 
+        color: white;
+        
+        /* Subtle Translucent Green Gradient */
+        background: linear-gradient(135deg, 
+            rgba(83, 196, 26, 0.85),  /* Start: Slightly lighter, 85% opacity */
+            rgba(40, 150, 10, 0.577)   /* End: Slightly darker, 85% opacity */
+        );
+        /* Remove the old background-color: #53c41ac8; */
+    }
+    
+    #confirm-no {
+        padding-top: 8px; 
+        color: white;
+        
+        /* Subtle Translucent Red Gradient */
+        background: linear-gradient(135deg, 
+            rgba(249, 74, 77, 0.85),  /* Start: Slightly lighter, 85% opacity */
+            rgba(210, 30, 36, 0.527)   /* End: Slightly darker, 85% opacity */
+        );
+        /* Remove the old background-color: #f94a4dca; */
+    }
+    
+    
+    
+    
+    
+    .settings-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+    
+    .settings-container h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #ffffff;
+    }
+    
+    .settings-section {
+        background-color: #000000;
+        padding: 25px 20px;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    .settings-section h2 {
+        margin-bottom: 15px;
+        color: #ffffff;
+    }
+    
+    .settings-section label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .settings-section input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    .settings-section button {
+        padding: 12px 25px;
+        background-color: #2d89ff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+    
+    .settings-section button:hover {
+        background-color: #1366d6;
+    }
+    
+    .settings-section .danger-button {
+        background-color: #ff4d4f;
+    }
+    
+    .settings-section .danger-button:hover {
+        background-color: #d9363e;
+    }
+    
+    .settings-section p {
+        margin-bottom: 10px;
+        color: #b00;
+        font-weight: 500;
+    }
+    
+    
+    
+        .profit {
+          color: green;
+          font-weight: bold;
+        }
+        .loss {
+          color: red;
+          font-weight: bold;
+        }
+    
+    
+        
+       /* Import Outfit font */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
+    
+    /* General Reset & Fonts */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px; /* base font smaller */
+    }
+    
+    body {
+        background-color: #0a0a0f; /* deeper black */
+        color: #ffffff;
+        line-height: 1.4; /* slightly tighter for smaller font */
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #ffffff;
+    }
+    
+    
+    
+    h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #ffffff;
+    }
+    
+    /* Container & Layout */
+    .content {
+        width: 100%;
+        margin: 15px auto;
+        padding: 15px;
+        background-color: #00000080; /* ultra-dark card background */
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    
+    .container {
+        display: grid;
+        grid-template-columns: 75% 25%;
+        gap: 10px;          
+        box-sizing: border-box;
+        width: 100%;
+        /* max-height: 600px; */
+    }
+    
+    
+    
+    /* .trading-card{
+      max-width: 300px;
+    } */
+    
+    /* Side-by-side container */
     .history-container {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 equal columns */
+        gap: 10px;
+        width: 100%;
+        margin: 10px 0;
+        /* padding-left: 40px;
+            padding-right: 40px; */
+          /* max-width: 1500px; */
+    
     }
-}
-
-
-/* .portfolio-section {
-    margin-top: 20px;
-    background: #000000;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    padding: 16px;
-  } */
-  
-  .tab-buttons {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  
-  .tab-btn {
-    flex: 1;
-    padding: 10px;
-    background: #f0f0f0;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
-  
-  /* .tab-btn.active {
-    background: #007bff;
-    color: white;
-  } */
-  
-  .portfolio-tab {
-    display: none;
-  }
-  
-  .portfolio-tab.active {
-    display: block;
-  }
-  
-  .portfolio-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .portfolio-table th, .portfolio-table td {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-  }
-  
+    
+    
+    
+    
+    
+    /* .portfolio-section {
+        margin-top: 20px;
+        background: #000000;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 16px;
+      } */
+      
+      .tab-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+      }
+      
+      /* .tab-btn.active {
+        background: #007bff;
+        color: white;
+      } */
+      
+      .portfolio-tab {
+        display: none;
+      }
+      
+      .portfolio-tab.active {
+        display: block;
+      }
+      
+      .portfolio-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .portfolio-table th, .portfolio-table td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+      
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* --- Existing 600px Media Query (Modified for better podium and table handling) --- */
+    @media (max-width: 600px) {
+        /* Global Font Adjustment */
+    .markdown-body li {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+    
+            .markdown-body p {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+    
+                .markdown-body strong {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+        .page-para {
+            font-size: 13px;
+        }
+    
+        /* Main Heading & Paragraph */
+        .page-h1 {
+            font-size: 2rem;
+        }
+    
+    
+        /* Leaderboard Podium */
+        #leaderboard-podium {
+            margin: 20px 0;
+            min-height: 160px; /* Reduced min-height for small screens */
+        }
+        .podium {
+            gap: 0px; /* Further reduce space between spots */
+        }
+        .podium-spot1, .podium-spot2, .podium-spot3 {
+            min-width: unset; /* Allow spots to shrink more naturally */
+            padding: 10px 5px; /* Reduce padding */
+            margin-bottom: 5px; /* Reduce margin */
+        }
+        /* Set explicit small heights for the podium structure */
+        .podium-spot1.first {
+            height: 140px;
+        }
+        .podium-spot2 {
+            height: 110px;
+        }
+        .podium-spot3 {
+            height: 80px;
+        }
+        
+        /* Podium Content */
+        .podium-rank {
+            font-size: 1.8rem;
+        }
+        .podium-username {
+            font-size: 1.2rem;
+        }
+        .podium-score {
+            font-size: 1rem;
+        }
+        
+        /* Table Responsiveness: Force horizontal scrolling if needed */
+        .history-column, .markdown-body, #options-portfolio-card {
+            overflow-x: auto; /* Allow horizontal scrolling for table containers */
+            -webkit-overflow-scrolling: touch;
+        }
+    
+        /* Wrap the actual table in a div if using HTML structure, or apply styles directly to prevent overflow */
+        .history-column table, 
+        .markdown-body table, 
+        #options-portfolio-card table {
+            display: block; /* Allows container to overflow */
+            max-width: 450px; /* Minimum width to prevent column squishing, adjust as needed */
+                    overflow-x: auto; /* Allow horizontal scrolling for table containers */
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Form Elements */
+        input, select, textarea, button, .sidebar-link {
+            padding: 10px; /* Slightly reduce padding on inputs/buttons */
+            font-size: 0.95rem;
+        }
+    
+        .thead {
+            width: 100%;
+        }
+    }
+    
+    
+    @media (max-width: 1000px) {
+    
+            .page-para {
+            font-size: 13px;
+        }
+    
+    
+        .submit-button {
+        background-color: #E0EBFF;
+        color: #000000;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: background 0.3s, transform 0.2s;
+        border-radius: 6px;
+        border: none;
+        margin: 2px;
+        width: 100%;
+        margin-bottom: 10px
+    }
+        /* CRITICAL: Turn the BODY into the main flex container */
+    .markdown-body li {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+        .markdown-body p {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+                   .markdown-body strong {
+            font-size: 12px ; /* Slight reduction for global base font */
+        }
+            html, body {
+      overflow-x: hidden;
+    }
+        body {
+            display: flex;
+            flex-direction: column; 
+            
+            /* 1. Remove any default body padding/margin that might cause overflow */
+            margin: 0; 
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden; /* Prevents the body itself from showing the scrollbar */
+        }
+    
+            .podium-username {
+            font-size: 1.2rem;
+            padding: 5px 0px;
+        }
+    
+        .portfolio-layout {
+            flex-direction: column;
+        }
+        .canvas {
+            width: 300px !important;
+            height: auto !important;
+        }
+    
+        .stock-column {
+            width: 300px;
+        }
+        /* 2. .top (Must be a DIRECT CHILD of body) */
+        .top {
+            order: -2; /* This is the new lowest order, placing it FIRST */
+            width: 100%;
+            padding: 0 15px;
+            margin-top: 20px;
+            margin-bottom: 30px; /* Reduced vertical space for mobile density */
+        }
+        .podium {
+                    display: flex;
+            flex-direction: column; 
+            
+        }
+    
+        .podium-spot1, .podium-spot2, .podium-spot3 {
+            width: 100%; /* Make them full width to stack */
+            margin: 10px 0; 
+            justify-content: center;
+            min-width: unset; 
+            padding: 15px 5px; 
+            margin-bottom: 5px; 
+            
+            /* Ensure the staggered heights are removed for the stacked view */
+            height: auto !important;
+            
+            /* Force the 1, 2, 3 sequence */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .podium-spot1 {
+            order: 1; /* First spot in the stack */
+        }
+        .podium-spot2 {
+            order: 2; /* Second spot in the stack */
+        }
+        .podium-spot3 {
+            order: 3; /* Third spot in the stack */
+        }
+    
+        .podium-container{
+            width: 100%;
+        }
+    
+        .podium-wrapper{
+            width:100%
+        }
+    
+        /* 3. Sidebar (Now second element) */
+        .sidebar {
+            order: -1; /* This is now the second element */
+            width: 100%; 
+            padding: 0 15px; /* Add horizontal padding *inside* the sidebar content */
+            margin-bottom: 20px; 
+            height: auto;
+            position: relative;
+            box-shadow: none;
+            top: 100px;
+                    border: none;
+    
+        }
+    
+        /* 4. Main Content (Now third element) */
+        .main-content {
+            order: 0; 
+            width: 100%;
+            padding: 0 15px; /* Add horizontal padding to the main content */
+            margin: auto;
+        }
+    
+        /* 5. Adjust the link container for scrolling (Unchanged) */
+        .in-page-nav {
+            display: flex;
+            flex-direction: row; 
+            gap: 10px; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            width: 100%; 
+            padding-bottom: 5px; 
+        }
+    
+        .sidebar-link {
+            flex-shrink: 0; 
+            width: 160px; 
+            margin-bottom: 10px;
+        }
+    
+        /* Table Responsiveness: Force horizontal scrolling if needed */
+        .history-column, .markdown-body, #options-portfolio-card {
+            overflow-x: auto; /* Allow horizontal scrolling for table containers */
+            -webkit-overflow-scrolling: touch;
+        }
+    
+        /* Wrap the actual table in a div if using HTML structure, or apply styles directly to prevent overflow */
+        .history-column table, 
+        .markdown-body table, 
+        #options-portfolio-card table {
+            display: block; /* Required to apply width/min-width to table tag */
+            min-width: 450px; /* Minimum width to prevent column squishing and trigger scroll */
+        }
+    
+        /* FIX: Ensure THEAD and TBODY match the table's forced width */
+        .history-column table thead,
+        .history-column table tbody,
+        .markdown-body table thead,
+        .markdown-body table tbody,
+        #options-portfolio-card table thead,
+        #options-portfolio-card table tbody {
+            min-width: 450px; 
+            width: 100%;
+            display: table-row-group; /* Ensures they behave correctly inside the block-level table */
+        }
+    }
+    

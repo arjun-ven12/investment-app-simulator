@@ -29,6 +29,7 @@
     <script src="../js/stopMarketOrder.js" defer></script>
     <script src="../js/home.js" defer></script>
     <script src="../js/navbar.js" defer></script>
+    <script src="../js/web3auth.js" defer></script>
   </head>
 
   <body>
@@ -36,6 +37,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- <h3>WatchList</h3> -->
+                                <h2>Watchlist</h2>
+
       <div class="search-container">
         <input
           type="text"
@@ -243,6 +246,8 @@
         <div class="chart-wrapper">
           <div class="chart-container">
             <!-- <div class="content trading-card2"></div> -->
+                         <h2>Company Details</h2>
+
             <div class="company-card"></div>
           </div>
         </div>
@@ -604,9 +609,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // For SPA route changes you might also call it after rendering new header.
 })();
 
+import { getProvider } from "./web3auth.js";
+import { ethers } from "ethers";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const provider = getProvider(); // use shared provider
+    const signer = provider.getSigner();
+
+    // Example: fetch user wallet balance
+    const balance = await signer.getBalance();
+    console.log("Wallet balance:", ethers.formatEther(balance));
+
+    // Now you can use signer in your trade functions
+    // e.g., call your smart contract methods
+    // await optionLedger.recordOptionTrade(...);
+  } catch (err) {
+    console.error("Blockchain access failed:", err);
+  }
+});
+
+
     </script>
   </body>
 </html>
+
 
 
 

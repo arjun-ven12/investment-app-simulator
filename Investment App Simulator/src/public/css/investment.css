@@ -938,6 +938,7 @@ background: white;
     overflow-x: hidden;
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #E0EBFF #111; /* thumb + track */
+    height: 100%;
 }
 
 /* --- SCROLLBAR STYLING (For WebKit/Blink Browsers like Chrome, Edge, Safari) --- */
@@ -1571,7 +1572,7 @@ body {
 
 /* Hover State */
 .tab-button:hover:not(.active) {
-    background-color: #1c1c28; /* Slightly lift background on hover */
+    background-color: #1c1c2800; /* Slightly lift background on hover */
     color: #ffffff; /* Make text white on hover */
 }
 
@@ -1604,7 +1605,7 @@ body {
 
 .tab-button:hover {
   color: var(--hover-color);
-  text-shadow: 0 0 8px rgba(255,255,255,0.2); /* faint glow */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0); /* faint glow */
 }
 
 /* Ensure tab content starts directly below the anchor line */
@@ -2170,4 +2171,9 @@ h1 {
         font-size: 1rem;
         font-weight: bold;
     }
+}
+
+
+.main-content {
+    overflow-x: hidden;
 }

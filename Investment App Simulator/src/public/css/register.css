@@ -1,3 +1,4 @@
+
 /* Global Reset */
 * {
   box-sizing: border-box;
@@ -7,211 +8,64 @@
 }
 
 html, body {
-  height: 100%;
-  background-color: #000;
+  background-color: #ffffff;
   color: #fff;
 }
 
-/* Container Split */
+/* -------------------------------------------
+ CONTAINER SPLIT (Desktop Default)
+ ------------------------------------------- */
 .container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-/* Left Panel */
+/* -------------------------------------------
+ LEFT PANEL (Branding/Visual)
+ ------------------------------------------- */
 .left-panel {
   flex: 2;
-  background: url('https://cdn.wallpapersafari.com/37/23/p5Bt5t.jpg') center/cover no-repeat;
+  background: url('[https://cdn.wallpapersafari.com/37/23/p5Bt5t.jpg](https://cdn.wallpapersafari.com/37/23/p5Bt5t.jpg)') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background-attachment: fixed; 
+}
+
+#referralCode {
+margin-bottom: 0px !important;
 }
 
 .left-panel .overlay {
   padding: 60px;
-  text-align: center;
+  text-align: left;
+  max-width: 100%; 
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 .left-panel h1 {
   font-size: 3rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 5px; 
 }
 
-.left-panel p {
-  font-size: 1.2rem;
+.left-panel .tagline {
+  font-size: 1.4rem;
+  font-weight: 500;
   color: #bbb;
-}
-
-/* Right Panel */
-.right-panel {
-  flex: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #000000;
-}
-
-/* Form Card */
-.form-card {
-  width: 600px;
-  padding: 30px;
-  border-radius: 12px;
-  background-color: #000000;
-  text-align: center;
-}
-
-.login-link {
   margin-bottom: 20px;
-  color: #aaa;
-  font-size: 0.9rem;
-  text-align: left;
 }
 
-.login-link a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
+#referralCode {
+margin-bottom: 20px !important;
 }
 
 
-
-
-.form-card h1 {
-  /* margin-bottom: 10px; */
-  font-weight: 900;
-  text-align: left;
-
-}
-/* Inputs */
-.form-card input {
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 18px;
-  border-radius: 8px;
-  border: 1px solid #555;
-  background: transparent;
-  color: #fff;
-  font-size: 1rem;
-  transition: 0.2s;
-}
-
-.form-card input::placeholder {
-  color: #777;
-}
-
-.form-card input:focus {
-  outline: none;
-  border-color: #fff;
-}
-
-/* Button */
-.form-card button {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid #fff;
-  background: transparent;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-
-
-/* Login Link */
-.login-link {
-  margin-top: 20px;
-  color: #aaa;
-  font-size: 0.9rem;
-}
-
-.login-link a {
-  color: #fff;
-  text-decoration: none;
-}
-
-
-/* Responsive */
-@media (max-width: 900px) {
-  .container {
-    flex-direction: column;
-  }
-  .left-panel, .right-panel {
-    height: 50vh;
-    flex: unset;
-  }
-  .form-card {
-    width: 90%;
-    padding: 30px;
-  }
-}
-
-
-/* Form Rows: group inputs in one line */
-.form-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-/* Make inputs wider inside rows */
-.form-row input {
-  flex: 1 1 100%;  /* stretch inputs to full available width */
-  min-width: 0;    /* ensures proper shrinking in flex layout */
-}
-
-/* Referral code stays full width */
-.form-row:last-child input {
-  flex: 1 1 100%;
-}
-
-
-
-/* Input focus glow */
-.form-card input:focus {
-  outline: none;
-  border-color: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
-}
-
-/* Floating label effect */
-.form-row input::placeholder {
-  color: #777;
-  transition: all 0.3s ease;
-}
-.form-row input:focus::placeholder,
-.form-row input:not(:placeholder-shown)::placeholder {
-  transform: translateY(-40px);
-  font-size: 0.8rem;
-  color: #aaa;
-}
-
-/* Button hover animation */
-.form-card button {
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-
-
-
-
-/* Form card entrance */
-.form-card {
-  transform: translateX(50px);
-  opacity: 0;
-  animation: slideIn 0.8s forwards;
-}
-@keyframes slideIn {
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
 
 /* Left panel text animation */
 .left-panel .overlay h1,
@@ -228,145 +82,148 @@ html, body {
 }
 @keyframes fadeUp {
   to {
-    opacity: 1;
-    transform: translateY(20);
+      opacity: 1;
+      transform: translateY(0);
   }
 }
 
-/* Warning card shake */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  50% { transform: translateX(6px); }
-  75% { transform: translateX(-6px); }
-}
-.warning-card.show {
-  animation: shake 0.4s;
-}
-
-
-
-
-.left-panel h1 {
-  animation: slideUp 1s ease forwards;
+/* -------------------------------------------
+ RIGHT PANEL (Form Container)
+ ------------------------------------------- */
+.right-panel {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  padding: 20px; 
 }
 
-.left-panel p {
-  animation: slideUp 1.2s ease forwards;
+/* Form Card */
+.form-card {
+  width: 600px;
+  max-width: 100%; 
+  padding: 40px; 
+  border-radius: 12px;
+  background-color: #000000;
+  text-align: center;
+  /* Entrance Animation */
+  transform: translateX(50px);
+  opacity: 0;
+  animation: slideIn 0.8s forwards;
+}
+
+@keyframes slideIn {
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+.form-card h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  text-align: left;
+  margin-bottom: 10px;
 }
 
 
 
-@keyframes moveBackground {
-  0% { transform: translate(0,0); }
-  100% { transform: translate(50px, 50px); }
+/* Login Link */
+.login-link {
+  margin-bottom: 20px;
+  color: #aaa;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
-
-.input-container {
-  position: relative;
-  width: 100%;
+.login-link a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
 }
 
-.input-container input {
+/* -------------------------------------------
+ INPUTS AND FORM LAYOUT
+ ------------------------------------------- */
+.form-card input {
   width: 100%;
   padding: 14px 16px;
+  margin-bottom: 18px;
   border-radius: 8px;
   border: 1px solid #555;
   background: transparent;
   color: #fff;
   font-size: 1rem;
+  transition: 0.2s;
 }
 
-.input-container label {
-  position: absolute;
-  top: 40%;
-  left: 16px;
-  transform: translateY(-50%);
+.form-card input::placeholder {
   color: #777;
-  pointer-events: none;
-  font-size: 1rem;
-  z-index: 10;
-
+  transition: all 0.3s ease;
 }
 
-
-
-
-
-/* Button Base */
-.form-card button {
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid #fff;
-  background: transparent;
-  color: #fff; /* default text color */
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.6s ease;
+.form-card input:focus {
+  outline: none;
+  border-color: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
 }
 
-/* Gradient Layer Behind Text */
-.form-card button::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%; /* start off-screen */
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg, #c8f5d7, #30b157, #2ee709);
-  transition: left 0.8s ease;
-  z-index: -1; /* behind text */
+.form-card input:focus::placeholder,
+.form-card input:not(:placeholder-shown)::placeholder {
+  transform: translateY(-40px);
+  font-size: 0.8rem;
+  color: #aaa;
 }
 
-/* Hover: slide gradient in */
-.form-card button:hover::before {
-  left: 0;
+/* Form Rows (for username/email) */
+.form-row {
+  display: flex;
+  gap: 16px;
 }
 
-/* Hover: ensure text is visible on gradient */
-.form-card button:hover {
-  color: #000000; /* contrast text on gradient */
-  z-index: 1; /* text stays above gradient */
+.form-row input {
+  flex: 1 1 0%; 
+  margin-bottom: 0;
 }
 
-
-
+/* Password Toggle Container (Must be relative parent of toggle) */
 .password-row {
   position: relative;
   display: flex;
   align-items: center;
-}
-
-.password-row input {
   width: 100%;
-  padding-right: 44px; /* make room for the icon */
-  box-sizing: border-box;
+  /* Override margin-bottom to ensure it's controlled by the input fields */
+  margin-bottom: 0; 
 }
 
-.password-toggle svg {
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
+.password-row > input {
+  /* Ensures password input takes full width of the row */
+  flex-grow: 1;
+  margin-bottom: 18px; 
 }
+
 .password-toggle {
   position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-87%);
+  top: calc(50% - 9px); /* Center relative to the input box itself (14px/2 + 18px bottom margin / 2) */
+  right: 36px; /* Adjusted from 16px to align when not in a row */
+  transform: translateY(-50%);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  transition: color 0.2s ease, transform 0.15s ease, opacity 0.25s ease;
+  transition: all 0.2s;
   line-height: 0;
-  opacity: 0; /* hidden by default */
-  pointer-events: none; /* not clickable until shown */
+  opacity: 0; 
+  pointer-events: none; 
+}
+/* Re-target to align the toggle with the input's height */
+.password-row > .password-toggle {
+  right: 30px;
+  top: 15px; /* Adjusting the top position for better alignment with the input field */
+  transform: translateY(0);
 }
 
 .password-toggle.visible {
@@ -374,13 +231,10 @@ html, body {
   pointer-events: auto;
 }
 
-/* Smooth transition for password input and icon */
-input[type="password"],
-input[type="text"] {
-  transition: opacity 0.25s ease-in-out;
-}
-
 .password-toggle svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -389,20 +243,79 @@ input[type="text"] {
   opacity: 0.8;
 }
 
-
-
-.left-panel .desc{
-  text-align: left;
-}
-
-.left-panel .tagline{
-  text-align: left;
-}
-
-.overlay h1 {
-  text-align: left;
+/* -------------------------------------------
+ BUTTONS (Primary)
+ ------------------------------------------- */
+.form-card button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
   width: 100%;
-  margin-left: 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff; 
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.6s ease;
 }
+
+.form-card button[type="submit"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; 
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, #c8f5d7, #30b157, #2ee709);
+  transition: left 0.8s ease;
+  z-index: -1; 
+}
+
+.form-card button[type="submit"]:hover::before {
+  left: 0;
+}
+
+.form-card button[type="submit"]:hover {
+  color: #000000; 
+  z-index: 1; 
+}
+
+/* -------------------------------------------
+ DIVIDER & OAUTH BUTTONS
+ ------------------------------------------- */
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 30px 0 20px 0;
+}
+
+.divider hr {
+  flex-grow: 1;
+  border: none;
+  border-top: 1px solid #333;
+}
+
+.divider span {
+  padding: 0 15px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+
+/* -------------------------------------------
+/* Small Mobile (up to 480px) */
+
+
+
+
+
+
+
+
 
 
