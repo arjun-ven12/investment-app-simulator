@@ -5,26 +5,55 @@ const prisma = require("../../prisma/prismaClient");
 const optionsModel = require('../models/options');
 const optionsController = require('../controllers/optionsController');
 const { broadcastChatbotMessage } = require("../socketBroadcast");
+function getToneProfile(tone) {
+  switch (tone) {
+    case "friendly":
+      return "Warm, friendly, supportive, encouraging.";
+    case "strict":
+      return "Firm, disciplined, direct, focused on rules.";
+    case "professional":
+      return "Formal, objective, concise, structured.";
+    case "educational":
+      return "Clear, step-by-step, teaching-oriented with explanations.";
+    default:
+      return "Neutral, balanced, helpful.";
+  }
+}
+
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
+async function loadUserAISettings(userId) {
+  const settings = await prisma.aISetting.findUnique({
+    where: { userId: Number(userId) },
+  });
+
+  return settings || {
+    riskTolerance: "moderate",
+    aiTone: "professional",
+  };
+}
+
 
 module.exports.generateResponse = async (req, res) => {
   const { prompt, model = "gpt-3.5", max_tokens = 4000, userId } = req.body;
 
   if (!prompt) return res.status(400).json({ error: "Prompt is required." });
-
+  let fullPrompt = prompt;
   try {
-    let fullPrompt = prompt;
-
     if (userId) {
+      const settings = await loadUserAISettings(userId);
+
+      fullPrompt =
+        `User AI Settings:\n` +
+        `- Risk Tolerance: ${settings.riskTolerance}\n` +
+        `- Tone: ${settings.aiTone}\n\n` +
+        fullPrompt;
+
       const portfolio = await chatbotModel.getUserPortfolio(Number(userId));
       const summary = chatbotModel.buildPortfolioSummary(portfolio);
-      fullPrompt += `\n\nUser portfolio summary (auto-generated):\n${JSON.stringify(
-        summary,
-        null,
-        2
-      )}\n\nUse this information to adapt your answer if relevant.`;
+
+      fullPrompt += `\n\nUser portfolio summary:\n${JSON.stringify(summary, null, 2)}`;
     }
 
     const aiText = await chatbotModel.generateResponse(
@@ -94,8 +123,14 @@ module.exports.getPortfolioAdvice = async (req, res) => {
   if (!Number.isInteger(userId))
     return res.status(400).json({ error: "Invalid user ID." });
 
-  // Accept user preferences (riskProfile: 'conservative'|'moderate'|'aggressive')
-  const { riskProfile } = req.query;
+  const settings = await loadUserAISettings(userId);
+
+  const aiPrefBlock = `
+USER PREFERENCES:
+- Risk Tolerance: ${settings.riskTolerance}
+- Tone: ${settings.aiTone}
+`;
+
 
   try {
     // 1️⃣ Fetch portfolio & summary
@@ -161,12 +196,16 @@ module.exports.getPortfolioAdvice = async (req, res) => {
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
     console.log(wallet);
-
+    const settings = await loadUserAISettings(userId);
+    const riskProfile = settings.riskTolerance;
     // 4️⃣ Construct LLM prompt
     const prompt = `
+    ${aiPrefBlock}
 SYSTEM:
-You are a friendly, mentor-style financial coach for paper traders. 
-Tone: constructive, encouraging, mentor-like. Avoid alarmist words. Warn about risks but highlight positives and opportunities. 
+SYSTEM:
+You are a financial coach for paper traders.
+Tone Style: ${getToneProfile(settings.aiTone)}
+Risk Style: ${settings.riskTolerance}
 Do NOT give legal or tax advice. Always include: "This advice is for educational purposes only and is not financial advice."
 RULE: Recommend only individual stocks that exist in the portfolio or are commonly traded US stocks (no ETFs, crypto, or bonds).
 
@@ -282,8 +321,12 @@ module.exports.getScenarioAnalysis = async (req, res) => {
       }),
     };
     const summaryData = await scenarioController.getScenarioEndingSummary(req, null, true);
-
-
+    const aiSettings = await loadUserAISettings(userId);
+    const prefBlock = `
+USER PREFERENCES:
+- Risk Tolerance: ${aiSettings.riskTolerance}
+- Tone: ${aiSettings.aiTone}
+`;
     // Then extract intraday separately
     const intradayData = summaryData.intraday;
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
@@ -293,11 +336,14 @@ module.exports.getScenarioAnalysis = async (req, res) => {
       mockReq,
       mockRes
     );
-    const wallet = await scenarioModel.getParticipantWallet;
+   const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
     // 🧠 Prepare prompt for AI
     const prompt = `
+    ${prefBlock}
 SYSTEM:
-You are a friendly, mentor-style **financial coach** for paper traders participating in high-volatility scenario simulations.  
+You are a financial strategy assistant for fast-paced scenario simulations.
+Tone: ${getToneProfile(aiSettings.aiTone)}
+Risk Style: ${aiSettings.riskTolerance} 
 You analyze their portfolio performance, trading behavior, and risk exposure, providing **constructive, data-driven insights** to help them improve their strategy.  
 
 ### 🎯 TONE & STYLE
@@ -418,7 +464,7 @@ ${JSON.stringify(intradayData, null, 2)}
       1500
     );
 
-    return res.status(200).json({ aiAdvice});
+    return res.status(200).json({ aiAdvice });
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
     return res.status(500).json({ error: err.message });
@@ -433,7 +479,8 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
 
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
-
+    // ⭐ FIX — load settings
+    const aiSettings = await loadUserAISettings(userId);
     // 🔹 Get scenario summary data from your existing logic
     const mockReq = { params: { scenarioId }, user: { id: userId } };
     const mockRes = {
@@ -456,8 +503,9 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
 
     const prompt = `
 SYSTEM:
-You are a friendly, mentor-style **financial coach** for paper traders in simulations.  
-
+You are a **financial coach** for paper traders in simulations. 
+Tone: ${getToneProfile(aiSettings.aiTone)}
+Risk Style: ${aiSettings.riskTolerance}
 The scenario has ended. Generate a **short, clear, and actionable popup summary**. Focus on:  
 1️⃣ What happened in the market.  
 2️⃣ How the user's portfolio performed.  
@@ -524,7 +572,7 @@ ${JSON.stringify(portfolio, null, 2)}
       "gpt-4o-mini",
       1500
     );
- await upsertAIAdvice(userId, scenarioId, aiAdvice);
+    await upsertAIAdvice(userId, scenarioId, aiAdvice);
     return res.status(200).json({ aiAdvice, portfolio });
   } catch (err) {
     console.error("Chatbot Analysis Error:", err);
@@ -546,6 +594,7 @@ module.exports.getUserOptionAdvice = async (req, res) => {
     if (!trades || trades.length === 0) {
       return res.status(404).json({ message: "No option trades found for this user." });
     }
+const aiSettings = await loadUserAISettings(userId);
 
     const portfolioRes = await optionsModel.getUserOptionPortfolio(parseInt(userId, 10));
     const portfolio = Array.isArray(portfolioRes?.portfolio) ? portfolioRes.portfolio : [];
@@ -660,6 +709,8 @@ module.exports.getUserOptionAdvice = async (req, res) => {
     const prompt = `
 SYSTEM:
 You are a quantitative options analyst.
+Tone: ${getToneProfile(aiSettings.aiTone)}
+Risk Profile: ${aiSettings.riskTolerance}
 Write a concise, professional, and actionable assessment for an options trader.
 Assume only CALL/PUT instruments and MARKET/LIMIT order types are supported.
 Do not discuss changing expirations (user trades 0–7 days). Do not introduce strike-range "quality" commentary beyond the rules below.
@@ -727,8 +778,8 @@ End with:
       "gpt-4o-mini",
       1500
     );
- // 🔹 Save AI insights into DB
-   
+    // 🔹 Save AI insights into DB
+
     return res.status(200).json({ summary, aiAdvice });
   } catch (error) {
     console.error("Error generating option advice:", error);
@@ -807,7 +858,7 @@ module.exports.startChatSession = async (req, res) => {
   try {
     const userId = parseInt(req.user?.id);
     if (!userId) return res.status(400).json({ error: "Missing userId" });
-const session = await startChatSession(userId); // ✅ capture it
+    const session = await startChatSession(userId); // ✅ capture it
     res.status(200).json(session);
   } catch (err) {
     console.error("startChatSession error:", err);
@@ -841,19 +892,19 @@ module.exports.sendChatMessage = async (req, res) => {
 
     // 2️⃣ Generate AI reply
     const aiResponse = await chatbotModel.generateResponseForNyra(
-  prompt,       // ✅ first
-  userId,       // ✅ second
-  sessionId,    // ✅ third
-  "gpt-4o-mini",
-  400
-);
+      prompt,       // ✅ first
+      userId,       // ✅ second
+      sessionId,    // ✅ third
+      "gpt-4o-mini",
+      400
+    );
 
     // 3️⃣ Save AI message
     await saveMessage(parseInt(userId), sessionId, "assistant", aiResponse);
-broadcastChatbotMessage(userId, sessionId, {
-  role: "assistant",
-  content: aiResponse,
-});
+    broadcastChatbotMessage(userId, sessionId, {
+      role: "assistant",
+      content: aiResponse,
+    });
 
     res.status(200).json({ response: aiResponse });
   } catch (err) {

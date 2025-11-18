@@ -2,7 +2,16 @@ import prisma from "../../prisma/prismaClient.js";
 import OpenAI from "openai";
 import scenarioModel from "../models/scenario.js";
 const openai = new OpenAI({});
+async function loadUserAISettings(userId) {
+  const settings = await prisma.aISetting.findUnique({
+    where: { userId: Number(userId) },
+  });
 
+  return settings || {
+    riskTolerance: "moderate",
+    aiTone: "professional",
+  };
+}
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
 //////////////////////////////////////////////////////
@@ -13,11 +22,24 @@ const generateResponseForChatbot = async (
   max_tokens = 150
 ) => {
   try {
+    const settings = await loadUserAISettings(req.body.userId);
+
+    const systemPrompt = `
+You are Nyra, the AI assistant.
+
+Tone: ${settings.aiTone}
+Risk Tolerance: ${settings.riskTolerance}
+`;
+
     const completion = await openai.chat.completions.create({
       model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt }
+      ],
       max_tokens,
     });
+
     return completion.choices[0].message.content;
   } catch (error) {
     throw new Error("Error generating AI response: " + error.message);
@@ -724,19 +746,26 @@ async function generateResponseForNyra(prompt, userId, sessionId, model = "gpt-4
       select: { role: true, content: true },
     });
 
-    // 🧩 2. Build conversation array for OpenAI
+    const settings = await loadUserAISettings(userId);
+
+    const systemPrompt = `
+You are Nyra, an adaptive Fintech AI assistant.
+
+TONE: ${settings.aiTone}
+RISK TOLERANCE: ${settings.riskTolerance}
+
+Rules:
+- Match tone exactly.
+- Adapt investment comments to user riskTolerance.
+- Keep replies short, clear, friendly.
+`;
+
     const conversation = [
-      {
-        role: "system",
-        content:
-          "You are Nyra, a helpful and intelligent Fintech AI assistant for Sealed (Paper Trading Simulator with blockchain). Speak professionally but friendly. Keep answers concise and insightful.",
-      },
-      ...pastMessages.map((msg) => ({
-        role: msg.role === "assistant" ? "assistant" : "user",
-        content: msg.content,
-      })),
+      { role: "system", content: systemPrompt },
+      ...pastMessages.map(m => ({ role: m.role, content: m.content })),
       { role: "user", content: prompt },
     ];
+
 
     // 🚀 3. Call OpenAI API
     const completion = await openai.chat.completions.create({

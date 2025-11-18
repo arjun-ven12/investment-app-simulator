@@ -212,6 +212,7 @@ model User {
   OptionBlockchainTransaction OptionBlockchainTransaction[]
   ChatSession                 ChatSession[]
   ChatMessage                 ChatMessage[]
+  aisetting                   AISetting?
 }
 
 model Referral {
@@ -512,17 +513,17 @@ model OptionHistPrice {
 }
 
 model Scenario {
-  id              Int      @id @default(autoincrement())
+  id              Int                   @id @default(autoincrement())
   title           String
   description     String?
   startDate       DateTime
   endDate         DateTime
-  startingBalance Decimal  @db.Decimal(10, 2) // <-- two decimal places
-  region          String?  // e.g., "Asia", "Europe", "US"
+  startingBalance Decimal               @db.Decimal(10, 2) // <-- two decimal places
+  region          String? // e.g., "Asia", "Europe", "US"
   lat             Float?
   lng             Float?
-  volatility      String?  // "low" | "medium" | "high"
-  participants ScenarioParticipant[]
+  volatility      String? // "low" | "medium" | "high"
+  participants    ScenarioParticipant[]
 
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @default(now()) @updatedAt
@@ -778,4 +779,14 @@ model FallbackImage {
   createdAt       DateTime @default(now())
 
   @@index([category])
+}
+
+model AISetting {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  riskTolerance String   @default("moderate") // conservative | moderate | aggressive
+  aiTone        String   @default("professional")
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

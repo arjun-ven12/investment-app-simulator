@@ -40,6 +40,7 @@ const scenarioRouter = require("./routers/scenario")
 const stopLimitRouter = require("./routers/stopLimit");
 const aiAdviceRoutes = require("./routers/aiAdvice");
 const authRoutes = require("./routers/auth");
+const aiSettingsRouter = require('./routers/aiSettings');
 const app = express();
 
 // Middleware for parsing JSON requests
@@ -86,7 +87,7 @@ app.use('/leaderboard', leaderboardRouter)
 app.use('/options', optionsRouter)
 app.use('/blockchain', blockchainRouter)
 app.use("/api/fallback-image", fallbackImageRouter);
-
+app.use("/ai-settings", aiSettingsRouter);
 app.use('/referral', referralRouter);
 app.use('/dashboard', dashboardRouter);
 
