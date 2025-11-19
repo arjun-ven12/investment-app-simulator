@@ -1,4 +1,3 @@
-
 const { parse } = require('path');
 const prisma = require('../../prisma/prismaClient');
 
@@ -1324,11 +1323,6 @@ exports.favoriteStock = function favoriteStock(userId, symbol) {
 
 //     return executedOrders;
 // };
-
-
-
-
-
 //////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
@@ -1954,7 +1948,11 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
   
       const user = await tx.user.findUnique({ where: { id: userId } });
       if (!user) throw new Error("User not found!");
-  
+          if (tradeType === "BUY" && user.wallet < totalAmount ) {
+              
+            throw new Error("Insufficient funds to place this buy stop-market order");
+        
+      }
       let updatedWallet = user.wallet;
       if (tradeType === "BUY") {
         updatedWallet -= totalAmount;
@@ -2442,13 +2440,21 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
     if (!latestPriceRecord) {
       throw new Error("Could not fetch latest market price for the stock.");
     }
-  
+          const user = await prisma.user.findUnique({ where: { id: userId } });
+          const totalCost = quantity * parseFloat(limitPrice);
+
     const latestPrice = Number(latestPriceRecord.closePrice);
   
     // 2️⃣ Validate limit price against market price
     if (orderType.toUpperCase() === "BUY" && limitPrice >= latestPrice) {
       throw new Error(`Buy limit price (${limitPrice}) must be below current market price (${latestPrice}).`);
     }
+
+          if (orderType.toUpperCase() === "BUY" && user.wallet < totalCost ) {
+              
+            throw new Error("Insufficient funds to place this buy stop-market order");
+        
+      }
   
     if (orderType.toUpperCase() === "SELL" && limitPrice <= latestPrice) {
       throw new Error(`Sell limit price (${limitPrice}) must be above current market price (${latestPrice}).`);
@@ -2590,5 +2596,4 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
       data: { status: 'CANCELLED' },
     });
   };
-  
   
