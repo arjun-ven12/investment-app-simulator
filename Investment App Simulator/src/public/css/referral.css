@@ -392,82 +392,7 @@ a, img, svg, input, button, textarea {
    RESPONSIVE ADJUSTMENTS
 ---------------------------- */
 
-/* --- Medium Screens --- */
-@media (max-width: 1024px) {
-  .container {
-    padding: 18px;
-    max-width: 1000px;
-  }
-  .card.referral-full {
-    padding: 20px;
-    gap: 16px;
-  }
-  .friend-referral-section {
-    flex-basis: 170px;
-  }
-}
 
-/* --- Tablets & Mobile --- */
-@media (max-width: 768px) {
-  .container {
-    padding: 14px;
-  }
-
-  .card.referral-full {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .referral-code-section {
-    flex: 1 1 100%;
-  }
-
-  .friend-referral-section {
-    flex: 1 1 100%;
-    order: 2;
-    display: flex;
-    justify-content: center;
-  }
-
-  .steps-container-card {
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-  }
-
-  .step-line {
-    display: none;
-  }
-
-  .qr-placeholder {
-    width: 80px;
-    height: 80px;
-  }
-
-  #referralTable {
-    min-width: 520px;
-  }
-
-  h1 {
-    font-size: 1.4rem;
-    text-align: center;
-  }
-}
-
-/* --- Extra Small Phones --- */
-@media (max-width: 420px) {
-  .progress-bar {
-    height: 16px;
-  }
-  .referral-row input {
-    font-size: 0.82rem;
-    padding: 8px 36px 8px 10px;
-  }
-  .qr-placeholder {
-    width: 68px;
-    height: 68px;
-  }
-}
 
 /* ============================================================
    END OF PART 2
@@ -817,29 +742,6 @@ a, img, svg, input, button, textarea {
 /* ============================================================
    RESPONSIVE (All Planet Versions)
 ============================================================ */
-@media (max-width: 1024px) {
-  .planet-left,
-  .planet-right {
-    width: 200px;
-    height: 200px;
-    opacity: 0.45;
-  }
-  .sealed-line {
-    width: 75vw;
-  }
-}
-
-@media (max-width: 768px) {
-  .planet-left,
-  .planet-right {
-    width: 150px;
-    height: 150px;
-    opacity: 0.35;
-  }
-  .sealed-line {
-    width: 85vw;
-  }
-}
 
 /* ============================================================
    END OF PART 3 — COMPLETE FILE
@@ -1049,17 +951,7 @@ a, img, svg, input, button, textarea {
   line-height: 1.5;
 }
 
-/* Responsive fix */
-@media (max-width: 900px) {
-  .why-grid {
-    flex-direction: column;
-    align-items: center;
-  }
-  .why-card {
-    width: 90%;
-    max-width: 400px;
-  }
-}
+
 
 /* Hide/show tab content cleanly */
 .tab-content {
@@ -1234,12 +1126,7 @@ a, img, svg, input, button, textarea {
 }
 
 /* ensure clickability */
-#starCanvas,
-.space-bg,
-.aura,
-.sealed-path {
-  pointer-events: none;
-}
+
 /* ==========================================
    BLACKSEALED — Cinematic Flow Alignment
 ========================================== */
@@ -1321,21 +1208,7 @@ a, img, svg, input, button, textarea {
   }
 }
 
-/* --- make it responsive --- */
-@media (max-width: 900px) {
-  .how-works-flow {
-    flex-direction: column;
-    gap: 40px;
-  }
 
-  .how-card {
-    max-width: 360px;
-  }
-
-  .how-card::after {
-    display: none;
-  }
-}
 /* =============================================
    BlackSealed — Executive Refinement Upgrade
 ============================================= */
@@ -1474,12 +1347,7 @@ a, img, svg, input, button, textarea {
   padding-top: 10px;
 }
 
-/* --- Responsive --- */
-@media (max-width: 900px) {
-  .how-works-flow,
-  .why-grid { flex-direction: column; gap: 36px; display: flex; justify-content: center;}
-  .how-card::after { display: none; }
-}
+
 
 
 /* ================================
@@ -1622,14 +1490,7 @@ a, img, svg, input, button, textarea {
   color: rgba(255,255,255,0.65);
 }
 
-/* --- Responsiveness --- */
-@media (max-width: 900px) {
-  .referral-full {
-    padding: 40px 28px;
-    margin: 100px auto 80px;
-  }
-  #referralCode { font-size: 15px; }
-}
+
 .referral-full::after {
   content: "";
   position: absolute;
@@ -1864,22 +1725,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .referral-table.sleek th,
-  .referral-table.sleek td {
-    padding: 12px 14px;
-    font-size: 0.85rem;
-  }
 
-  .username {
-    font-size: 0.9rem;
-  }
-
-  .action-sub {
-    font-size: 0.75rem;
-  }
-}
 
 
 
@@ -1959,15 +1805,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .referral-key.sleek {
-    padding: 28px 18px;
-  }
-  .referral-bar input {
-    font-size: 0.9rem;
-  }
-}
+
 /* ============================================================
    BRIDGING ELEMENTS — Flow & Continuity
 ============================================================ */
@@ -2420,17 +2258,257 @@ body {
 
 
 
-@media (max-width: 1000px) {
-      html, body {
-  overflow-x: hidden !important;
-
-}
 
 .how-card {
   min-height: 100px;
   width: 100%
 }
+
+    .history-section {
+      margin-bottom: 100px;
+    }
+
+
+
+
+
+
+
+
+
+
+
+/* ------------------------------------------- */
+/* --- 1024px (General Tablet/Small Desktop) --- */
+/* ------------------------------------------- */
+@media (max-width: 1024px) {
+    /* HTML/Body fix from 1000px rule */
+    html, body {
+        overflow-x: hidden !important;
+    }
+
+    .container {
+        padding: 18px;
+        max-width: 1000px;
+    }
+
+    .card.referral-full {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .friend-referral-section {
+        flex-basis: 170px;
+    }
+
+    /* Planet background scaling */
+    .planet-left,
+    .planet-right {
+        width: 200px;
+        height: 200px;
+        opacity: 0.45;
+    }
+
+    .sealed-line {
+        width: 75vw;
+    }
 }
 
 
+/* ------------------------------------ */
+/* --- 900px (Mid-Range Tablet/Flow) --- */
+/* ------------------------------------ */
+@media (max-width: 900px) {
+    /* Unified flow and grid conversion to column layout */
+    .how-works-flow,
+    .why-grid {
+        flex-direction: column;
+        gap: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Ensures content is centered vertically */
+    }
 
+    .how-card::after {
+        display: none; /* Remove separator line between cards */
+    }
+
+    .why-card {
+        width: 90%;
+        max-width: 600px;
+        align-content: center;
+          }
+
+    .how-card {
+        max-width: 600px;
+                align-content: center;
+    }
+
+    /* Referral full card styling */
+    .referral-full {
+        padding: 40px 28px;
+        margin: 100px auto 80px;
+    }
+
+    #referralCode {
+        font-size: 15px;
+    }
+
+    html, body {
+        overflow-x: hidden !important;
+    }
+}
+
+
+/* -------------------------------- */
+/* --- 768px (Mobile & Tablet) --- */
+/* -------------------------------- */
+@media (max-width: 768px) {
+
+  .sealed-console {
+    overflow-y: scroll;
+  }
+  #starCanvas {
+    width: 100vw;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+    .container {
+        padding: 14px;
+    }
+
+    .card.referral-full {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    /* Referral sections switch to full width and reorder */
+    .referral-code-section {
+        flex: 1 1 100%;
+    }
+
+    .friend-referral-section {
+        flex: 1 1 100%;
+        order: 2;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Steps and progress layout */
+    .steps-container-card {
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+
+    .sealed-caption {
+      transform: translateX(0px) !important;
+    }
+
+
+
+    .info-tabs.linked{
+      height: fit-content !important;
+    }
+    .step-line {
+        display: none; /* Hide desktop separator */
+    }
+
+    .qr-placeholder {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Ensure referral table is wide enough to prevent content squash */
+    #referralTable {
+        min-width: 520px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+        text-align: center;
+    }
+
+    /* Planet background scaling */
+    .planet-left,
+    .planet-right {
+        width: 150px;
+        height: 150px;
+        opacity: 0.35;
+    }
+
+    .sealed-line {
+        width: 85vw;
+    }
+
+    /* Referral table styling adjustments */
+    .referral-table.sleek th,
+    .referral-table.sleek td {
+        padding: 12px 14px;
+        font-size: 0.85rem;
+    }
+
+    .username {
+        font-size: 0.9rem;
+    }
+
+    .action-sub {
+        font-size: 0.75rem;
+    }
+
+    .referral-key.sleek {
+        padding: 28px 18px;
+    }
+
+    .referral-bar input {
+        font-size: 0.9rem;
+    }
+
+        html, body {
+        overflow-x: hidden !important;
+    }
+
+
+    .sealed-bg {
+      margin-right: -100px;
+    }
+
+    .desc {
+      font-size: 14px;
+    }
+
+    .hero-section::before {
+    content: "";
+    position: absolute;
+    width: 100vw;
+    height: 300px;
+    left: 50%;
+    top: 360px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+
+.hero-section::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 450px;
+    background: radial-gradient(circle, rgba(124, 170, 255, 0.05), transparent 70%);
+    filter: blur(80px);
+    z-index: -1;
+}
+
+.mini-referral {
+  right: 10px;
+}
+}
