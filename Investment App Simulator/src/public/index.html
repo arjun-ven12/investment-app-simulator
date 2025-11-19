@@ -1,449 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sealed — AI Paper Trading • Blockchain • Copilot</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackSealed — Next-Gen Paper Trading Platform</title>
 
-<style>
-/* ===============================
-   SEALEd — LUXURY LANDING SYSTEM
-   =============================== */
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-:root{
-  --bg:#07090D;
-  --ink:#F5F7FA;
-  --muted:rgba(240,248,255,.65);
-  --accent:#00E0FF;
-  --accent-2:#9A4DFF;
-  --glass:rgba(15,16,24,.35);
-  --glass-strong:rgba(15,16,24,.70);
-  --ring: conic-gradient(from 180deg at 50% 50%, #00E0FF, #9A4DFF 40%, #00E0FF 80%);
-  --nav-h: 78px;
-  --radius: 18px;
-  --shadow: 0 10px 40px rgba(0,0,0,.45);
-  --ease: cubic-bezier(.4,0,.2,1);
-}
-
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  background:radial-gradient(60% 100% at 80% 0%, rgba(0,224,255,.10) 0%, transparent 60%) ,
-             radial-gradient(50% 60% at -10% 20%, rgba(154,77,255,.10) 0%, transparent 70%) ,
-             var(--bg);
-  color:var(--ink);
-  font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  letter-spacing:.1px;
-  overflow-x:hidden;
-  padding-top:var(--nav-h);
-}
-
-/* NAVBAR */
-.nav{
-  position:fixed; top:0; left:0; right:0; height:var(--nav-h);
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 clamp(20px,6vw,88px);
-  z-index:999;
-  background:transparent;
-  transition:background .6s var(--ease), backdrop-filter .6s var(--ease);
-}
-.nav.scrolled{
-  background:var(--glass-strong);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.brand{
-  display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:.6px;
-  text-decoration:none; color:var(--ink);
-}
-.brand-badge{
-  width:26px; height:26px; border-radius:50%;
-  background:var(--ring); filter:blur(.2px); position:relative;
-}
-.brand-badge:after{
-  content:""; position:absolute; inset:3px; border-radius:50%; background:#0d1117;
-}
-.nav ul{list-style:none; display:flex; gap:34px; margin:0; padding:0; align-items:center}
-.nav a{color:var(--muted); text-decoration:none; font-weight:500; font-size:15px; position:relative; transition:color .3s var(--ease)}
-.nav a:hover{color:#fff}
-.nav a.active{color:#fff}
-.nav a.active:after, .nav a:hover:after{
-  content:""; position:absolute; left:0; right:0; bottom:-10px; height:1px; background:#fff; transform-origin:center; animation:underline .35s var(--ease) forwards;
-}
-@keyframes underline{from{transform:scaleX(0)} to{transform:scaleX(1)}}
-
-.nav .cta{
-  padding:10px 14px; border-radius:12px; background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  color:#0b0d12; font-weight:800; letter-spacing:.3px; box-shadow:0 8px 20px rgba(0,224,255,.25);
-}
-
-/* HERO */
-.hero{
-  min-height:calc(100dvh - var(--nav-h));
-  display:grid; grid-template-columns:1.1fr .9fr; align-items:center;
-  padding: clamp(24px,6vw,88px);
-  gap: clamp(20px,3vw,48px);
-}
-h1{
-  font-size: clamp(34px,5.2vw,74px);
-  line-height: .98;
-  margin:0 0 12px;
-  letter-spacing:.4px;
-}
-.hero p{color:var(--muted); font-size: clamp(16px,1.2vw,18px); margin: 12px 0 28px}
-.hero .buttons{display:flex; gap:14px; flex-wrap:wrap}
-.btn{
-  padding:14px 18px; border-radius:14px; border:1px solid rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:700; letter-spacing:.2px;
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  backdrop-filter: blur(8px);
-  transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
-}
-.btn:hover{ transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.35); border-color:rgba(255,255,255,.25)}
-.btn.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#0b0d12; box-shadow:0 12px 28px rgba(0,224,255,.25)}
-.hero-sub{
-  display:flex; gap:18px; align-items:center; color:var(--muted); font-size:14px; margin-top:10px
-}
-.hero-sub i{color:var(--accent)}
-
-/* ORB (NYRA) */
-.orb-wrap{ position:relative; height:min(60vh,540px); display:grid; place-items:center}
-.orb{
-  width:min(58vh,520px); height:min(58vh,520px); border-radius:50%;
-  background: radial-gradient(40% 40% at 50% 50%, rgba(0,224,255,.35), rgba(154,77,255,.15) 60%, transparent 70%),
-              radial-gradient(60% 60% at 50% 60%, rgba(255,255,255,.08), transparent 70%), #0b0d12;
-  box-shadow:
-    0 0 120px rgba(0,224,255,.25),
-    inset 0 0 60px rgba(0,224,255,.15);
-  position:relative;
-  transform:translateZ(0);
-  animation: float 6s ease-in-out infinite;
-}
-@keyframes float{ 0%,100%{ transform: translateY(-6px)} 50%{ transform: translateY(6px)}}
-.orb::before{
-  content:""; position:absolute; inset:-3px; border-radius:50%;
-  background: var(--ring); filter: blur(10px); opacity:.55; mask: linear-gradient(#000 60%, transparent 100%);
-}
-.glow-dot{
-  position:absolute; width:22px; height:22px; border-radius:50%;
-  background:#fff; box-shadow:0 0 30px 12px rgba(255,255,255,.35), 0 0 120px 40px rgba(0,224,255,.12);
-  animation: orbit 8.5s linear infinite;
-}
-@keyframes orbit{
-  from{ transform: rotate(0deg) translateX(calc(50% - 10px)) rotate(0deg) }
-  to{ transform: rotate(360deg) translateX(calc(50% - 10px)) rotate(-360deg) }
-}
-.play{
-  position:absolute; width:86px; height:86px; border-radius:50%;
-  background:rgba(255,255,255,.08);
-  display:grid; place-items:center; border:1px solid rgba(255,255,255,.15);
-  backdrop-filter: blur(6px);
-  cursor:pointer; transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease);
-}
-.play:hover{ transform:scale(1.04); box-shadow:0 10px 30px rgba(0,0,0,.4); background:rgba(255,255,255,.12)}
-.play i{ font-size:26px; color:#fff; transform:translateX(1px)}
-
-/* TRUST BAR */
-.trust{
-  padding: 16px clamp(20px,6vw,88px) 0;
-  opacity:.85
-}
-.trust .rail{
-  display:flex; gap:42px; overflow:auto; scrollbar-width:none; -ms-overflow-style:none
-}
-.trust .rail::-webkit-scrollbar{display:none}
-.pill{
-  border:1px solid rgba(255,255,255,.08); padding:8px 12px; border-radius:999px; color:var(--muted); white-space:nowrap; background:rgba(255,255,255,.02)
-}
-
-/* FEATURE GRID */
-.section{ padding: clamp(36px,8vw,96px) clamp(20px,6vw,88px)}
-.section h2{ font-size: clamp(26px,3.6vw,42px); margin:0 0 18px}
-.kicker{ color:var(--muted); margin-bottom:28px}
-.grid{
-  display:grid; grid-template-columns: repeat(3, 1fr); gap:22px;
-}
-.card{
-  position:relative; border-radius:var(--radius); overflow:hidden; padding:22px; min-height:180px;
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.08); box-shadow: var(--shadow);
-  transition: transform .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease)
-}
-.card:hover{ transform: translateY(-6px); border-color:rgba(255,255,255,.18); background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03))}
-.card h3{ margin:6px 0 8px; font-size:18px}
-.card p{ color:var(--muted); margin:0}
-.card i{ color:var(--accent); font-size:18px}
-.card .cta-mini{ margin-top:14px; display:inline-flex; align-items:center; gap:8px; color:#fff; text-decoration:none; font-weight:700}
-.card .cta-mini i{font-size:12px}
-
-/* SHOWCASE STRIP */
-.showcase{ display:grid; grid-template-columns: 1.2fr .8fr; gap:22px }
-.panel{
-  border-radius:var(--radius);
-  background:var(--glass); border:1px solid rgba(255,255,255,.08); min-height:260px;
-  padding:22px; position:relative; overflow:hidden; box-shadow: var(--shadow);
-}
-.panel .texture{
-  position:absolute; inset:-20%; background: radial-gradient(40% 40% at 70% 30%, rgba(0,224,255,.20), transparent 60%),
-                               radial-gradient(40% 40% at 30% 70%, rgba(154,77,255,.18), transparent 60%);
-  filter: blur(40px); opacity:.85; pointer-events:none;
-}
-.panel h3{ margin:6px 0 8px }
-.list{ margin:10px 0 0; padding:0; list-style:none; color:var(--muted)}
-.list li{ display:flex; gap:10px; align-items:baseline; margin:8px 0}
-.list li i{ color:var(--accent)}
-
-/* STATS STRIP */
-.stats{ display:flex; gap:18px; flex-wrap:wrap; margin-top:8px}
-.stat{
-  flex:1 1 200px; border-radius:16px; padding:18px 20px; border:1px solid rgba(255,255,255,.08);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); text-align:center
-}
-.stat strong{ font-size:28px}
-.stat span{ display:block; color:var(--muted); margin-top:2px}
-
-/* CTA FOOTER */
-.cta-foot{
-  text-align:center; padding: clamp(48px,10vw,120px) clamp(20px,6vw,88px);
-}
-.cta-foot .box{
-  display:inline-flex; flex-direction:column; gap:16px; align-items:center; justify-content:center; text-align:center;
-  padding: 34px clamp(18px,5vw,48px);
-  border-radius: 24px; border:1px solid rgba(255,255,255,.1);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  box-shadow: var(--shadow);
-}
-footer{color:var(--muted); text-align:center; padding:40px 20px}
-
-/* REVEAL on scroll */
-.reveal{ opacity:0; transform: translateY(16px); transition: all .7s var(--ease)}
-.reveal.on{ opacity:1; transform:none}
-
-/* RESPONSIVE */
-@media (max-width: 1020px){
-  .hero{ grid-template-columns:1fr; padding-top:clamp(18px,4vw,36px)}
-  .orb-wrap{ order:-1; height:52vh}
-  .grid{ grid-template-columns:1fr 1fr}
-  .showcase{ grid-template-columns:1fr}
-}
-@media (max-width: 640px){
-  .grid{ grid-template-columns:1fr}
-  .nav ul{ display:none}
-  .nav .menu{display:block}
-}
-
-/* MOBILE MENU (simple) */
-.menu{display:none; font-size:22px; cursor:pointer}
-.drawer{
-  position:fixed; top:var(--nav-h); right:16px; left:16px; border-radius:16px; padding:14px;
-  background:var(--glass-strong); border:1px solid rgba(255,255,255,.08); display:none; z-index:998
-}
-.drawer a{ display:block; padding:12px 8px; color:#fff; text-decoration:none; border-radius:10px}
-.drawer a + a{ margin-top:6px}
-.drawer.show{ display:block}
-</style>
+  <!-- Styles -->
+  <link rel="stylesheet" href="blacksealed-landing.css" />
 </head>
+
 <body>
+  <!-- Ambient Background -->
+  <div id="starfield"></div>
+  <div class="background-glow glow-top-left"></div>
+  <div class="background-glow glow-bottom-right"></div>
 
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <a class="brand" href="home.html">
-    <span class="brand-badge"></span> Sealed
-  </a>
-  <ul>
-    <li><a href="/html/investment.html">Invest</a></li>
-    <li><a href="/html/scenarios.html">Scenarios</a></li>
-    <li><a href="/html/referral.html">Referral</a></li>
-    <li><a href="/html/allGuides.html">Guides</a></li>
-    <li><a href="/html/news.html">News</a></li>
-    <li><a class="cta" href="/html/login.html">Launch App</a></li>
-  </ul>
-  <i class="fa-solid fa-bars menu" id="menuBtn"></i>
-</nav>
-<div class="drawer" id="drawer">
-  <a href="/html/investment.html">Invest</a>
-  <a href="/html/scenarios.html">Scenarios</a>
-  <a href="/html/referral.html">Referral</a>
-  <a href="/html/allGuides.html">Guides</a>
-  <a href="/html/news.html">News</a>
-  <a class="btn primary" href="/html/login.html" style="display:block;text-align:center;margin-top:8px;">Launch App</a>
-</div>
-
-<!-- HERO -->
-<header class="hero">
-  <div class="reveal on">
-    <h1>Data-Driven Paper Trading.<br/>Blockchain-verified Results.<br/>Nyra at your side.</h1>
-    <p>
-      Sealed is a premium environment to learn, simulate, and refine strategies.
-      Trade with AI insights, prove performance on-chain, and level up with cinematic scenarios.
-    </p>
-    <div class="buttons">
-      <a class="btn primary" href="/html/login.html"><i class="fa-solid fa-rocket"></i>&nbsp; Launch App</a>
-      <a class="btn" href="/html/scenarios.html"><i class="fa-regular fa-circle-play"></i>&nbsp; Try a Scenario</a>
-      <a class="btn" href="/html/referral.html"><i class="fa-solid fa-gift"></i>&nbsp; Earn by Referral</a>
+  <!-- NAVBAR -->
+  <header class="bs-nav">
+    <div class="bs-nav-left">
+      <div class="logo-orb"></div>
+      <span class="logo-text">BlackSealed</span>
     </div>
-    <div class="hero-sub"><i class="fa-solid fa-shield"></i> Transparent. On-chain verified. Free to start.</div>
-  </div>
-
-  <div class="orb-wrap reveal">
-    <div class="orb" id="orb">
-      <span class="glow-dot" style="top:8%; left:50%"></span>
-      <button class="play" style="top:50%; left:50%; transform:translate(-50%,-50%)">
-        <i class="fa-solid fa-play"></i>
-      </button>
+    <nav class="bs-nav-links">
+      <a href="#platform">Platform</a>
+      <a href="#ai">Nyra AI</a>
+      <a href="#markets">Markets</a>
+      <a href="#scenarios">Scenarios</a>
+      <a href="#ledger">Ledger</a>
+      <a href="#gamification">Gamification</a>
+    </nav>
+    <div class="bs-nav-actions">
+      <button class="btn ghost-btn">Log in</button>
+      <button class="btn primary-btn">Launch Simulator</button>
     </div>
-  </div>
-</header>
+  </header>
 
-<!-- TRUST -->
-<section class="trust reveal">
-  <div class="rail">
-    <div class="pill">AI Copilot: Nyra</div>
-    <div class="pill">On-chain Performance Ledger</div>
-    <div class="pill">Scenario Engine</div>
-    <div class="pill">Paper Options & Equities</div>
-    <div class="pill">Referrals up to $5,000</div>
-    <div class="pill">Guides • News • Console</div>
-  </div>
-</section>
+  <!-- MAIN -->
+  <main>
 
-<!-- FEATURES -->
-<section class="section">
-  <h2 class="reveal">Everything you need to train like a pro.</h2>
-  <p class="kicker reveal">Sealed blends institutional-grade simulation with delightful product polish.</p>
+    <!-- HERO SECTION -->
+    <section class="hero" id="top">
+      <div class="hero-content">
+        <p class="section-tag">NEXT-GEN PAPER TRADING</p>
+        <h1>
+          Master the markets<br />
+          with <span class="accent">simulation-grade precision.</span>
+        </h1>
+        <p class="hero-subtitle">
+          BlackSealed is a cinematic, AI-powered paper trading platform for stocks & options — combining
+          real-time simulations, institutional-grade analytics, and blockchain-verified trade history.
+        </p>
+        <div class="hero-actions">
+          <button class="btn primary-btn">Start Trading</button>
+          <button class="btn ghost-btn">View Platform Demo</button>
+        </div>
 
-  <div class="grid">
-    <article class="card reveal">
-      <i class="fa-solid fa-brain"></i>
-      <h3>Nyra — AI Copilot</h3>
-      <p>Contextual advice, trade rationales, and post-mortems tuned for your scenario. Not just chat — a coach.</p>
-      <a class="cta-mini" href="/html/chatbot.html">Talk to Nyra <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-
-    <article class="card reveal">
-      <i class="fa-solid fa-cubes"></i>
-      <h3>On-chain Proof</h3>
-      <p>Every attempt sealed on a tamper-proof ledger. Share performance with recruiters or teammates.</p>
-      <a class="cta-mini" href="/html/investment.html">View Ledger <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-
-    <article class="card reveal">
-      <i class="fa-solid fa-chart-line"></i>
-      <h3>Paper Trading</h3>
-      <p>Trade equities & options with live-like feeds, limit/market orders, and P&L tracking.</p>
-      <a class="cta-mini" href="/html/investment.html">Open Terminal <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-
-    <article class="card reveal">
-      <i class="fa-solid fa-clapperboard"></i>
-      <h3>Scenario Engine</h3>
-      <p>Time-boxed challenges, curated volatility, and scoring. Replay, learn, and iterate.</p>
-      <a class="cta-mini" href="/html/scenarios.html">Start Challenge <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-
-    <article class="card reveal">
-      <i class="fa-solid fa-graduation-cap"></i>
-      <h3>Guides & Playbooks</h3>
-      <p>Bite-size lessons on options, risk, and strategy. Designed to be read between trades.</p>
-      <a class="cta-mini" href="/html/allGuides.html">Browse Guides <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-
-    <article class="card reveal">
-      <i class="fa-solid fa-gift"></i>
-      <h3>Referral Rewards</h3>
-      <p>Invite your circle and unlock tiered rewards up to <strong>$5,000</strong>. Everyone levels up.</p>
-      <a class="cta-mini" href="/html/referral.html">Get My Link <i class="fa-solid fa-arrow-right"></i></a>
-    </article>
-  </div>
-</section>
-
-<!-- SHOWCASE -->
-<section class="section">
-  <div class="showcase">
-    <div class="panel reveal">
-      <div class="texture"></div>
-      <h3>Why Sealed?</h3>
-      <ul class="list">
-        <li><i class="fa-solid fa-check"></i> Train with **realistic constraints** and scoring.</li>
-        <li><i class="fa-solid fa-check"></i> Keep an **immutable record** of attempt history.</li>
-        <li><i class="fa-solid fa-check"></i> Use **Nyra** to detect blind spots & craft better setups.</li>
-        <li><i class="fa-solid fa-check"></i> Share **verifiable results** — not screenshots.</li>
-      </ul>
-      <div class="stats">
-        <div class="stat"><strong id="s1">0</strong><span>Scenarios Completed</span></div>
-        <div class="stat"><strong id="s2">0</strong><span>On-chain Seals</span></div>
-        <div class="stat"><strong id="s3">0</strong><span>Guides Read</span></div>
+        <div class="hero-metrics">
+          <div class="metric-card">
+            <span class="metric-label">Simulated Volume</span>
+            <span class="metric-value">$12.7M+</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Trades Executed</span>
+            <span class="metric-value">51,284</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Scenario Attempts</span>
+            <span class="metric-value">236</span>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="panel reveal">
-      <div class="texture"></div>
-      <h3>Next up</h3>
-      <ul class="list">
-        <li><i class="fa-regular fa-bell"></i> Real-time alerts & risk nudges.</li>
-        <li><i class="fa-regular fa-compass"></i> Strategy templates & backtests.</li>
-        <li><i class="fa-regular fa-star"></i> Public profiles with sealed records.</li>
-      </ul>
-      <div style="margin-top:18px">
-        <a class="btn primary" href="/html/login.html">Reserve Handle</a>
+      <!-- Hero Visual Cluster -->
+      <div class="hero-visual">
+        <!-- Main Chart Card -->
+        <div class="hero-card chart-card tilt-on-hover">
+          <div class="card-header">
+            <span class="card-title">AAPL / NASDAQ</span>
+            <span class="card-pill">Paper • Live Feed</span>
+          </div>
+          <div class="hero-chart-placeholder">
+            <div class="chart-line"></div>
+            <div class="chart-glow"></div>
+            <div class="chart-marker marker-1"></div>
+            <div class="chart-marker marker-2"></div>
+            <div class="chart-marker marker-3"></div>
+          </div>
+          <div class="chart-footer">
+            <span>1D</span>
+            <span>5D</span>
+            <span class="active">1M</span>
+            <span>6M</span>
+            <span>1Y</span>
+          </div>
+        </div>
+
+        <!-- Order Card -->
+        <div class="hero-card order-card tilt-on-hover">
+          <div class="card-header">
+            <span class="card-title">New Order</span>
+            <span class="card-pill green">Simulated</span>
+          </div>
+          <div class="order-body">
+            <div class="order-row">
+              <span>Order Type</span>
+              <span class="pill">Limit</span>
+            </div>
+            <div class="order-row">
+              <span>Side</span>
+              <span class="pill green">Buy</span>
+            </div>
+            <div class="order-row">
+              <span>Quantity</span>
+              <span>24</span>
+            </div>
+            <div class="order-row">
+              <span>Limit Price</span>
+              <span>$272.40</span>
+            </div>
+            <button class="btn primary-btn full-btn">Place Paper Trade</button>
+          </div>
+        </div>
+
+        <!-- Portfolio + AI card -->
+        <div class="hero-card portfolio-card tilt-on-hover">
+          <div class="card-header">
+            <span class="card-title">Portfolio Snapshot</span>
+            <span class="card-pill">Nyra AI</span>
+          </div>
+          <div class="portfolio-body">
+            <div class="portfolio-row">
+              <span>Total Value</span>
+              <span>$117,501.28</span>
+            </div>
+            <div class="portfolio-row">
+              <span>Unrealized P/L</span>
+              <span class="green">+ $1,023.44</span>
+            </div>
+            <div class="portfolio-row">
+              <span>Realized P/L</span>
+              <span class="green">+ $312.09</span>
+            </div>
+            <div class="ai-pill">
+              <div class="ai-orb"></div>
+              <span>“Portfolio is tech-heavy. Consider diversifying into defensives.”</span>
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- PLATFORM SECTION -->
+    <section class="section" id="platform">
+      <div class="section-header animate-on-scroll">
+        <p class="section-tag">THE PLATFORM</p>
+        <h2>More than paper trading. A full market lab.</h2>
+        <p class="section-subtitle">
+          Execute complex orders, explore options, and stress-test your strategy — all in a safe,
+          simulated environment that feels like a real trading terminal.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card animate-on-scroll tilt-on-hover">
+          <h3>Real-Time Paper Trading</h3>
+          <p>
+            Market, limit, stop-limit & stop-market orders with simulated execution logic,
+            live pricing feeds, order history, and cancellable open orders.
+          </p>
+          <ul>
+            <li>Live bid/ask simulation</li>
+            <li>Portfolio P/L tracking</li>
+            <li>Watchlists & stock search</li>
+          </ul>
+        </article>
+
+        <article class="feature-card animate-on-scroll tilt-on-hover">
+          <h3>Options Included</h3>
+          <p>
+            Trade calls and puts in a controlled environment with full visibility over contracts,
+            expiries, open interest, and realized vs unrealized options P/L.
+          </p>
+          <ul>
+            <li>Buy/Sell Calls & Puts</li>
+            <li>Options portfolio view</li>
+            <li>Open, closed & expired states</li>
+          </ul>
+        </article>
+
+        <article class="feature-card animate-on-scroll tilt-on-hover">
+          <h3>Portfolio Analytics</h3>
+          <p>
+            Visualize sector exposure, historical equity curves, and trade-level performance with
+            allocation breakdowns and realized/unrealized performance.
+          </p>
+          <ul>
+            <li>Sector & industry breakdowns</li>
+            <li>Equity curve & drawdown</li>
+            <li>Recent trades & activity feed</li>
+          </ul>
+        </article>
+
+        <article class="feature-card animate-on-scroll tilt-on-hover">
+          <h3>News & Market Data</h3>
+          <p>
+            Surface the stories that matter to your portfolio with integrated news, bookmarks, likes,
+            and context-aware sentiment.
+          </p>
+          <ul>
+            <li>Real-time headlines</li>
+            <li>Bookmark & react</li>
+            <li>Company fundamentals</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- NYRA AI SECTION -->
+    <section class="section section-split" id="ai">
+      <div class="split-text animate-on-scroll">
+        <p class="section-tag">NYRA AI</p>
+        <h2>Your AI portfolio strategist.</h2>
+        <p class="section-subtitle">
+          Nyra reads your portfolio like a seasoned risk manager — highlighting strengths,
+          exposing concentration risk, and suggesting practical diversification moves.
+        </p>
+        <div class="pill-list">
+          <span class="pill">Portfolio critique</span>
+          <span class="pill">Scenario analysis</span>
+          <span class="pill">Diversification ideas</span>
+          <span class="pill">Behavioral feedback</span>
+        </div>
+      </div>
+
+      <div class="split-visual animate-on-scroll">
+        <div class="ai-orb-large">
+          <div class="ai-orb-ring ring-1"></div>
+          <div class="ai-orb-ring ring-2"></div>
+          <div class="ai-orb-core"></div>
+        </div>
+        <div class="ai-tooltip">
+          “If AAPL drops 10%, your portfolio drawdown is -6.2%. Consider hedging with less-correlated sectors.”
+        </div>
+      </div>
+    </section>
+
+    <!-- MARKET COMMAND CENTER -->
+    <section class="section" id="markets">
+      <div class="section-header animate-on-scroll">
+        <p class="section-tag">MARKET COMMAND CENTER</p>
+        <h2>Everything a serious trader expects — minus the real risk.</h2>
+      </div>
+
+      <div class="command-grid">
+        <div class="command-card animate-on-scroll tilt-on-hover">
+          <h3>Dynamic Charts</h3>
+          <p>Candlestick, intraday, and zoomable historical views for every symbol you simulate.</p>
+          <div class="mini-chart">
+            <div class="mini-line"></div>
+          </div>
+        </div>
+        <div class="command-card animate-on-scroll tilt-on-hover">
+          <h3>Live Sentiment</h3>
+          <p>Track how news and sentiment could impact your positions before you click buy.</p>
+          <div class="mini-tags">
+            <span class="pill green">Bullish</span>
+            <span class="pill red">Event Risk</span>
+          </div>
+        </div>
+        <div class="command-card animate-on-scroll tilt-on-hover">
+          <h3>Comments & Watchlists</h3>
+          <p>Organize your ideas and notes per ticker with comments, watchlists, and tags.</p>
+          <div class="mini-comment">
+            “Watching NVDA into earnings — high IV, consider spreads instead of naked calls.”
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENARIOS -->
+    <section class="section" id="scenarios">
+      <div class="section-header animate-on-scroll">
+        <p class="section-tag">SCENARIO TRAINING</p>
+        <h2>Replay the markets like a mission — without making it the whole platform.</h2>
+        <p class="section-subtitle">
+          Scenarios are self-contained training environments powered by real historical data.
+          Each mission gets its own portfolio, attempts, and Nyra post-game insights.
+        </p>
+      </div>
+
+      <div class="scenario-timeline animate-on-scroll">
+        <div class="scenario-node">
+          <div class="node-dot"></div>
+          <div class="node-label">
+            <h4>2020 · Pandemic Crash</h4>
+            <p>Navigate historic drawdowns and violent reversals.</p>
+          </div>
+        </div>
+        <div class="scenario-node">
+          <div class="node-dot"></div>
+          <div class="node-label">
+            <h4>2022 · Inflation Reversal</h4>
+            <p>Rotate through sectors as policy and inflation collide.</p>
+          </div>
+        </div>
+        <div class="scenario-node">
+          <div class="node-dot"></div>
+          <div class="node-label">
+            <h4>2024 · Oil Supply Crunch</h4>
+            <p>Trade energy, transport, and volatility in a supply shock.</p>
+          </div>
+        </div>
+        <div class="scenario-node">
+          <div class="node-dot node-pulse"></div>
+          <div class="node-label">
+            <h4>Next · Your Custom Scenario</h4>
+            <p>Design and test your own stress tests.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOCKCHAIN LEDGER -->
+    <section class="section section-split" id="ledger">
+      <div class="split-text animate-on-scroll">
+        <p class="section-tag">BLOCKCHAIN-VERIFIED</p>
+        <h2>Every trade leaves a trail.</h2>
+        <p class="section-subtitle">
+          A private blockchain ledger records each simulated execution — creating a tamper-evident
+          history of your decisions for audits, competitions, and learning.
+        </p>
+        <ul class="bullet-list">
+          <li>SHA-256 hashed trade blocks</li>
+          <li>Genesis block on initialization</li>
+          <li>Automatic chain validation</li>
+          <li>Optional on-chain anchoring</li>
+        </ul>
+      </div>
+      <div class="split-visual animate-on-scroll">
+        <div class="ledger-stack">
+          <div class="ledger-block">
+            <span>Block #128</span>
+            <span>AAPL • Buy 24 @ 272.40</span>
+          </div>
+          <div class="ledger-connector"></div>
+          <div class="ledger-block">
+            <span>Block #129</span>
+            <span>TSLA • Sell 5 @ 214.10</span>
+          </div>
+          <div class="ledger-connector"></div>
+          <div class="ledger-block">
+            <span>Block #130</span>
+            <span>Portfolio Hash: 9f3a…e72</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMIFICATION -->
+    <section class="section" id="gamification">
+      <div class="section-header animate-on-scroll">
+        <p class="section-tag">GAMIFICATION</p>
+        <h2>Serious tools, playful progression.</h2>
+      </div>
+      <div class="gamification-grid">
+        <div class="gam-card animate-on-scroll tilt-on-hover">
+          <h3>Leaderboards</h3>
+          <p>Compete on risk-adjusted returns, not just raw P/L.</p>
+          <div class="mini-leaderboard">
+            <div><span>#1</span> <span>NyraLabs</span> <span class="green">+18.3%</span></div>
+            <div><span>#2</span> <span>GammaGirl</span> <span class="green">+15.1%</span></div>
+            <div><span>#3</span> <span>PaperBull</span> <span class="green">+12.7%</span></div>
+          </div>
+        </div>
+        <div class="gam-card animate-on-scroll tilt-on-hover">
+          <h3>Referral Progress</h3>
+          <p>Invite friends, unlock scenarios and analytics boosts.</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 62%;"></div>
+          </div>
+          <span class="progress-label">62% to “Market Architect” badge</span>
+        </div>
+        <div class="gam-card animate-on-scroll tilt-on-hover">
+          <h3>Achievements</h3>
+          <p>Collect badges for disciplined, consistent decisions.</p>
+          <div class="badge-row">
+            <span class="badge-pill">First 10 Trades</span>
+            <span class="badge-pill">No-FOMO Week</span>
+            <span class="badge-pill">Diversified Portfolio</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section CTA-section">
+      <div class="cta-card animate-on-scroll">
+        <p class="section-tag">READY TO START?</p>
+        <h2>Turn the markets into your training ground.</h2>
+        <p class="section-subtitle">
+          Launch the BlackSealed simulator, explore real-time paper trading, and let Nyra guide your next decisions — before real capital is at stake.
+        </p>
+        <div class="hero-actions">
+          <button class="btn primary-btn">Launch Simulator</button>
+          <button class="btn ghost-btn">View Docs & Guides</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bs-footer">
+    <div>© <span id="year"></span> BlackSealed. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="#">Docs</a>
+      <a href="#">Security</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
     </div>
-  </div>
-</section>
+  </footer>
 
-<!-- CTA FOOTER -->
-<section class="cta-foot">
-  <div class="box reveal">
-    <h2 style="margin:0">Ready to get sealed?</h2>
-    <p class="kicker">Launch the console, run a scenario, and mint your first on-chain attempt.</p>
-    <div class="buttons">
-      <a class="btn primary" href="/html/login.html">Launch App</a>
-      <a class="btn" href="/html/scenarios.html">Try a Challenge</a>
-    </div>
-  </div>
-</section>
-
-<footer>© 2025 Sealed — AI • Ledger • Paper Trading</footer>
-
-<script>
-/* Scroll effects */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll',()=>{ if (scrollY>40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled'); });
-
-/* Mobile drawer */
-const drawer = document.getElementById('drawer');
-document.getElementById('menuBtn')?.addEventListener('click', ()=> drawer.classList.toggle('show'));
-
-/* Parallax-ish orb follow */
-const orb = document.getElementById('orb');
-if (orb){
-  window.addEventListener('mousemove', (e)=>{
-    const rect = orb.getBoundingClientRect();
-    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
-    const dx = (e.clientX - cx)/rect.width, dy = (e.clientY - cy)/rect.height;
-    orb.style.transform = `translateY(${Math.sin(Date.now()/1400)*6}px) rotateX(${dy*6}deg) rotateY(${dx*-6}deg)`;
-  });
-}
-
-/* Reveal on scroll */
-const reveals = [...document.querySelectorAll('.reveal')];
-const io = new IntersectionObserver((entries)=>{
-  entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('on'); io.unobserve(en.target);} });
-},{threshold:.12});
-reveals.forEach(el=>io.observe(el));
-
-/* Cute stat counter */
-function count(el, to, dur=1200){
-  const start = performance.now(); const from = 0;
-  function tick(t){ const p = Math.min(1,(t-start)/dur); el.textContent = Math.floor(from+(to-from)*p).toLocaleString(); if(p<1) requestAnimationFrame(tick); }
-  requestAnimationFrame(tick);
-}
-count(document.getElementById('s1'), 128);
-count(document.getElementById('s2'), 342);
-count(document.getElementById('s3'), 76);
-</script>
+  <!-- Scripts -->
+  <script src="index.js"></script>
 </body>
+
 </html>
