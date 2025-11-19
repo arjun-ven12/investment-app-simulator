@@ -2764,4 +2764,6 @@
             display: table-row-group; /* Ensures they behave correctly inside the block-level table */
         }
     }
-    
+    text {
+        font-size: 44px;
+    }
