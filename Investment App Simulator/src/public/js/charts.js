@@ -1,8 +1,4 @@
 
-
-
-
-
 window.currentStockId = null;
 
 ////////////////////////////////////////////////////
@@ -675,8 +671,6 @@ function renderChart(data) {
 });
 
 
-
-
 //////////////////////////////////////////////////
 /////////// Export Trades
 //////////////////////////////////////////////////
@@ -727,13 +721,13 @@ window.addEventListener('DOMContentLoaded', function () {
 
 // JSwindow.addEventListener('DOMContentLoaded', function () {
   const intradayForm = document.getElementById('chart-form-intraday');
-  const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
-  const rangeSelect = intradayForm.querySelector("select[name='range']");
-  const chartTypeSelect = intradayForm.querySelector("select[name='chartType']");
-  const chartCanvas = document.getElementById('myChart2');
-  let intradayChart = null;
+const chartSymbolInput = intradayForm.querySelector("input[name='chartSymbol']");
+const rangeSelect = intradayForm.querySelector("select[name='range']");
+const chartTypeSelect = intradayForm.querySelector("select[name='chartType']");
+const chartCanvas = document.getElementById('myChart2');
+let intradayChart = null;
 
-  function getTimeUnit(data) {
+function getTimeUnit(data) {
     if (!data || data.length === 0) return 'day';
     const diffMs = data[data.length - 1].x - data[0].x;
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
@@ -741,152 +735,128 @@ window.addEventListener('DOMContentLoaded', function () {
     if (diffDays <= 7) return 'day';
     if (diffDays <= 60) return 'week';
     return 'month';
-  }
+}
 
-  intradayForm.addEventListener('submit', async function (e) {
+intradayForm.addEventListener('submit', async function (e) {
     e.preventDefault();
+        const loadingDiv = document.getElementById("loading");
+    loadingDiv.innerText = "Loading chart...";
+    loadingDiv.style.color = "#ffffffff";
+    loadingDiv.style.padding = "10px 0";
     const symbolValue = chartSymbolInput.value.trim();
     const rangeValue = rangeSelect.value;
     const chartType = chartTypeSelect.value;
 
-    if (!symbolValue) { alert('Enter a symbol'); return; }
-
     const now = new Date();
     let dateFrom = new Date();
-    switch(rangeValue) {
-      case '1d': dateFrom.setDate(now.getDate() - 1); break;
-      case '1w': dateFrom.setDate(now.getDate() - 7); break;
-      case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
-      case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
-      case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
-      case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
-      default: dateFrom.setDate(now.getDate() - 7);
+    switch (rangeValue) {
+        case '1d': dateFrom.setDate(now.getDate() - 1); break;
+        case '1w': dateFrom.setDate(now.getDate() - 7); break;
+        case '1m': dateFrom.setMonth(now.getMonth() - 1); break;
+        case '6m': dateFrom.setMonth(now.getMonth() - 6); break;
+        case '1y': dateFrom.setFullYear(now.getFullYear() - 1); break;
+        case '5y': dateFrom.setFullYear(now.getFullYear() - 5); break;
+        default: dateFrom.setDate(now.getDate() - 7);
     }
 
     const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFrom.toISOString().split('T')[0]}&date_to=${now.toISOString().split('T')[0]}`;
 
     try {
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error('Failed to fetch OHLC data');
-      const ohlcData = await response.json();
-      if (!Array.isArray(ohlcData) || ohlcData.length === 0) throw new Error('No OHLC data');
-      // Wait 2 seconds before fetching stock ID to allow DB upsert
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        const result = await fetch(apiUrl).then(res => res.json());
+
+        const ohlcData = result.ohlc;
+        const startPrice = result.startPrice;
+        const endPrice = result.endPrice;
+        const difference = result.difference;
+        const percentageChange = result.percentageChange;
+
+        if (!Array.isArray(ohlcData) || ohlcData.length === 0) {
+            throw new Error('No OHLC data');
+        }
+
+        // DISPLAY PRICE % & DIFFERENCE
+        const percentageDiv = document.getElementById("percentage2");
+        const sign = difference >= 0 ? "+" : "";
+        const color = difference >= 0 ? "#65ea69ff" : "#ec4e4eff";
+
+percentageDiv.innerHTML = `
+    <span style="color:${color}; font-size:20px; font-weight:600; display:flex;justify-content:right;padding-top:10px;padding-right:3px;">
+        ${sign}${difference.toFixed(2)} (${sign}${percentageChange.toFixed(2)}%)
+    </span>
+`;
 
 
-      const formattedData = ohlcData.map(item => ({
-        x: new Date(item.date).getTime(),
-        o: item.openPrice,
-        h: item.highPrice,
-        l: item.lowPrice,
-        c: item.closePrice
-      })).sort((a, b) => a.x - b.x);
+        // Format for the chart
+        const formattedData = ohlcData.map(item => ({
+            x: new Date(item.date).getTime(),
+            o: item.openPrice,
+            h: item.highPrice,
+            l: item.lowPrice,
+            c: item.closePrice
+        })).sort((a, b) => a.x - b.x);
 
-      const timeUnit = getTimeUnit(formattedData);
+        const timeUnit = getTimeUnit(formattedData);
 
-      // Destroy old chart if exists
-      if (intradayChart) {
-        intradayChart.destroy();
-        intradayChart = null;
-      }
+        // Destroy old chart
+        if (intradayChart) {
+            intradayChart.destroy();
+            intradayChart = null;
+        }
 
-      // Clear canvas and fix height
-      const ctx = chartCanvas.getContext('2d');
-      ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-      //chartCanvas.height = 00;
+        // Clear canvas
+        const ctx = chartCanvas.getContext('2d');
+        ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
 
-      // Chart configuration
-      let config;
-if (chartType === 'line') {
-  config = {
-    type: 'line',
-    data: {
-      labels: formattedData.map(d => new Date(d.x)),
-      datasets: [{
-        label: `${symbolValue} Close Price`,
-        data: formattedData.map(d => d.c),
-        borderColor: '#E0EBFF', // line color
-        fill: true,
-        tension: 0.1,
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
+        // BUILD THE CHART
+        let config;
+        if (chartType === 'line') {
+            config = {
+                type: 'line',
+                data: {
+                    labels: formattedData.map(d => new Date(d.x)),
+                    datasets: [{
+                        label: `${symbolValue} Close Price`,
+                        data: formattedData.map(d => d.c),
+                        borderColor: '#E0EBFF',
+                        fill: true,
+                        tension: 0.1,
+                        backgroundColor: function (context) {
+                            const chart = context.chart;
+                            const { ctx, chartArea } = chart;
 
-          if (!chartArea) {
-            return null; // Chart not fully initialized yet
+                            if (!chartArea) return null;
+
+                            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                            gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
+                            gradient.addColorStop(1, 'rgba(143,173,253,0)');
+                            return gradient;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+                            ticks: { color: 'white' },
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } },
+                        zoom: {
+                            pan: { enabled: true, mode: 'xy', modifierKey: 'ctrl' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
+                        }
+                    }
+                }
+            };
           }
-
-          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
-          gradient.addColorStop(1, 'rgba(143,173,253,0)');
-          return gradient;
-        }
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'time',
-          time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-          ticks: { color: 'white' },
-          grid: {
-            drawOnChartArea: true,
-            color: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) return 'rgba(255,255,255,0.1)';
-              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
-              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
-              return gradient;
-            }
-          },
-          title: { display: true, text: 'Date', color: 'white' }
-        },
-        y: {
-          ticks: { color: 'white' },
-          grid: {
-            drawOnChartArea: true,
-            color: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) return 'rgba(255,255,255,0.1)';
-              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-              gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
-              gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-              gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
-              return gradient;
-            }
-          },
-          title: { display: true, text: 'Price', color: 'white' }
-        }
-      },
-      plugins: {
-        legend: { labels: { color: 'white' } },
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: 'xy',
-            modifierKey: 'ctrl'
-          },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            mode: 'xy'
-          }
-        }
-      }
-    }
-  };
-}
-
-
-      
-      
-      
+            
 
       else { // candlestick
         config = {
@@ -940,6 +910,7 @@ if (chartType === 'line') {
       }
 
       intradayChart = new Chart(ctx, config);
+        loadingDiv.innerText = "";
 
     } catch (err) {
       console.error(err);
@@ -951,7 +922,12 @@ if (chartType === 'line') {
 //});
 
 
+document.getElementById("reset-zoom").addEventListener("click", () => {
+    if (intradayChart) {
+        intradayChart.resetZoom(); // works with chartjs-plugin-zoom
+    }
 
+  });
 
 
 
