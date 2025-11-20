@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,6 +16,7 @@
     />
     <!-- Main CSS -->
     <link rel="stylesheet" href="../css/investment.css" />
+
     <!-- Socket.IO + Chart libraries -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -116,9 +115,15 @@
               </div>
               </div>
               <button type="submit">Generate Chart</button>
+
             </form>
+            <div id="loading"></div>
+            <div id="percentage2"></div>
             <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
-          </div>
+                                  <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
+              Reset Zoom
+            </span>
+            </div>
         </div>
         <div class="trading-card">
           <form id="trading-form">
@@ -635,12 +640,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     <script src="../js/chatbot.js" defer></script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
