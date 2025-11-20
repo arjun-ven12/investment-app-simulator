@@ -1309,3 +1309,7 @@ html, body {
 }
 
 
+.main2{
+  padding: 15px !important;
+  overflow:hidden
+}

@@ -186,52 +186,6 @@ body {
   overflow: hidden;
 }
 
-/* ✦ Edges shimmer with cyan-pink gradient */
-.scenario-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(130deg,
-    rgba(77,223,181,0.4),
-    rgba(58,123,224,0.3),
-    rgba(255,102,196,0.25));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.55;
-  transition: opacity 0.3s ease;
-}
-.scenario-card:hover::before { opacity: 0.9; }
-
-/* ✦ Light sweep highlight */
-.scenario-card::after {
-  content: "";
-  position: absolute;
-  top: -100%;
-  left: -100%;
-  width: 250%;
-  height: 250%;
-  background: linear-gradient(
-    125deg,
-    rgba(255,255,255,0) 45%,
-    rgba(255,255,255,0.10) 50%,
-    rgba(255,255,255,0) 55%
-  );
-  opacity: 0;
-  transform: rotate(12deg);
-  transition: opacity 0.4s ease;
-}
-.scenario-card:hover::after {
-  opacity: 1;
-  animation: glass-shine 2.2s linear forwards;
-}
-@keyframes glass-shine {
-  0% { transform: translateX(-120%) rotate(12deg); }
-  100% { transform: translateX(120%) rotate(12deg); }
-}
 
 /* ✦ Hover lift */
 .scenario-card:hover {
@@ -412,7 +366,7 @@ body {
 }
 
 /* ensure globe isn’t blocked */
-#dashboard-layer, #navbar-container {
+ #navbar-container {
   pointer-events: none;
 }
 canvas { pointer-events: auto; position: relative; z-index: 0; }
@@ -445,9 +399,7 @@ canvas { pointer-events: auto; position: relative; z-index: 0; }
 
 
 
-#navbar-container{
-  z-index: 50;
-}
+
 
 
 
@@ -1091,6 +1043,7 @@ h2 {
     flex-direction: column;
    padding: 60px 60px !important;  /* ✅ gives more breathing room */
   z-index: 70;
+  height:90vh;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin; /* Firefox */
@@ -1354,6 +1307,7 @@ html, body, button, p, h1, h2, h3, h4, span, div {
     z-index: 70; /* stays behind the button */
 
 }
+
 /* --- Title --- */
 .floating-scenarios-title {
   font-family: 'Outfit', sans-serif;
@@ -1363,7 +1317,8 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   letter-spacing: 0.4px;
   text-shadow: 0 0 16px rgba(0,0,0,0.5);
   margin-bottom: 2px;
-  margin-left: 4px;
+  margin-left: 8px;
+  margin-top: 60px;
   pointer-events: auto;
 
 }
@@ -1372,7 +1327,7 @@ html, body, button, p, h1, h2, h3, h4, span, div {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 28px;
-  width: 70vw;
+  width: 50vw;
   max-width: 1050px;
   justify-content: start;
   animation: slideUp 0.6s ease forwards;
@@ -2400,10 +2355,11 @@ backdrop-filter: blur(14px) saturate(130%);
 
 /* Buttons */
 .bs-buttons {
-  display: flex;
-  gap: 16px;
+    position: relative;
+    display: flex;
+    gap: 16px;
+    z-index: 20;
 }
-
 .bs-btn-primary {
   background: linear-gradient(135deg, #4da8ff, #91d2ff);
   padding: 12px 32px;
