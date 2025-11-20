@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,294 +51,269 @@
   <!-- Main Content -->
   <div class="main-content">
     <!-- Navbar -->
-    <div id="navbar-container"></div>
-    <!-- Dashboard Header -->
-      <br />
-      <h1 class="sandboxh1">Sandbox Stock Dashboard</h1>
-
-
-
-
-    <div class="wallet-balance">
-      <h3>Wallet Balance: $<span id="wallet-balance">0.00</span></h3>
-      <div id="current-update-time">Current update: --</div>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 6px; margin: 5px 0;">
-      <!-- Percentage text -->
-      <div id="replay-progress-text" style="font-size: 0.75rem; color: #fff; min-width: 30px; text-align: rleft;">0%
+    <div class="main2">
+      <div id="navbar-container"></div>
+      <!-- Dashboard Header -->
+        <br />
+        <h1 class="sandboxh1">Sandbox Stock Dashboard</h1>
+      <div class="wallet-balance">
+        <h3>Wallet Balance: $<span id="wallet-balance">0.00</span></h3>
+        <div id="current-update-time">Current update: --</div>
       </div>
-
-      <!-- Progress bar container -->
-      <div
-        style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;" class="progressbar">
-        <div id="replay-progress"
-          style="height: 100%; width: 0%; background: #fff; border-radius: 4px; transition: width 0.2s;"></div>
+      <div style="display: flex; align-items: center; gap: 6px; margin: 5px 0;">
+        <!-- Percentage text -->
+        <div id="replay-progress-text" style="font-size: 0.75rem; color: #fff; min-width: 30px; text-align: rleft;">0%
+        </div>
+        <!-- Progress bar container -->
+        <div
+          style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;" class="progressbar">
+          <div id="replay-progress"
+            style="height: 100%; width: 0%; background: #fff; border-radius: 4px; transition: width 0.2s;"></div>
+        </div>
       </div>
+      <!-- Chart + Trading Form -->
+      <div class="container">
+        <div class="chart-wrapper">
+          <div class="chart-container">
+            <form id="chart-form-intraday" class="chart-form">
+              <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required />
+              <!-- <label for="range">Select Range:</label>
+                <select name="range" id="range">
+                  <option value="1d">Last 1 Day</option>
+                  <option value="1w" selected>Last 1 Week</option>
+                  <option value="1m">Last 1 Month</option>
+                  <option value="6m">Last 6 Months</option>
+                  <option value="1y">Last 1 Year</option>
+                </select> -->
+              <!-- <div class="select-wrapper">
+                <select name="chartType" id="chartType">
+                  <option value="line">Line (Close Price)</option>
+                </select>
+              </div> -->
+              <button type="submit">Generate Chart</button>
+            </form>
+            <br>
+                        <div id="loading"></div>
 
-    </div>
-
-    <!-- Chart + Trading Form -->
-    <div class="container">
+            <div ><canvas id="myChart3" class="canvas3"></canvas></div>
+            <div id="next-update-timer" style="color: #fff; margin-top: 10px;">Next update in: --s</div>
+            <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
+              Reset Zoom
+            </span>
+          </div>
+        </div>
+        <div class="trading-card">
+          <form id="trading-form">
+            <h2>Trade Stock</h2>
+            <div class="form-group">
+              <label for="trade-symbol">Select Stock</label>
+              <select id="trade-symbol" name="trade-symbol">
+                <option value="" disabled selected>Select stock</option>
+              </select>
+            </div>
+            <div class="form-group-radio">
+              <label class="pretty-radio">
+                <input type="radio" name="side" value="BUY" checked />
+                <span class="radio-label">Buy</span>
+              </label>
+              <label class="pretty-radio">
+                <input type="radio" name="side" value="SELL" />
+                <span class="radio-label">Sell</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="order-type">Order Type</label>
+              <select id="order-type" name="order-type">
+                <option value="" disabled selected>Please select</option>
+                <option value="market">Market Order</option>
+                <option value="limit">Limit Order</option>
+              </select>
+            </div>
+            <div class="form-group hidden" id="timeframe-container">
+              <label for="timeframe">Time Frame</label>
+              <select id="timeframe" name="timeframe">
+                <option value="gtc">Good Till Cancelled (GTC)</option>
+                <option value="day">Day Order</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="price">Stock Price</label>
+              <input type="number" id="price" name="price" placeholder="Enter price" step="0.01" />
+            </div>
+            <div id="limitPriceContainer" style="display:none; margin-top:10px;">
+              <label for="limitPrice">Limit Price</label>
+              <input type="number" id="limitPrice" step="0.01" placeholder="Enter limit price">
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input type="number" id="quantity" name="quantity" placeholder="Enter quantity" />
+            </div>
+            <div class="form-group">
+              <label for="amount">Amount</label>
+              <input type="text" id="amount" name="amount" placeholder="--" readonly />
+            </div>
+            <div id="buy-error" class="error-message"></div>
+            <button type="submit" class="submit-button" id="submit-order">
+              Submit Order
+            </button>
+                        <div id="buy-error" class="error-message"></div>
+              <div id="create-success" class="success-message"></div>
+          </form>
+          <div class="replay-controls">
+            <button type="button" id="btn-play">Play</button>
+            <button type="button" id="btn-pause">Pause</button>
+            <button type="button" id="btn-save">Save & Exit</button>
+            <button id="btn-finish" class="control-btn">Finish</button>
+            <label for="speed-select" style="color:#fff; margin-left:10px;">
+              Speed:
+              <div class="speed-bar-wrapper">
+                <select id="speed-select">
+                  <option value="1" selected>1x</option>
+                  <option value="2">2x</option>
+                  <option value="4">4x</option>
+                  <option value="5">5x</option>
+                  <option value="10">10x</option>
+                </select>
+                <div class="speed-buttons">
+                  <button data-value="1">1x</button>
+                  <button data-value="2">2x</button>
+                  <button data-value="4">4x</button>
+                  <button data-value="5">5x</button>
+                  <button data-value="10">10x</button>
+                </div>
+              </div>
+            </label>
+          </div>
+          <div class="replay-controls">
+          </div>
+        </div>
+        <!-- <div class="company-card"></div> -->
+      </div>
+      <!-- Market Status Banner
+        <div id="market-status-banner">
+          <span id="market-status">Loading market status...</span>
+        </div> -->
+      <!-- Trade History + Limit Orders -->
+      <div class="history-container">
+        <div class="history-column">
+          <h2>Your Trade History</h2>
+          <div id="trades-error" class="error-message"></div>
+          <button id="export-trades" class="submit-button">
+            Export Trade History
+          </button>
+          <table id="trades-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Stock Symbol</th>
+                <th>Trade Type</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total Amount</th>
+              </tr>
+            </thead>
+            <tbody id="trades-table-body"></tbody>
+          </table>
+          <br>
+      <div id="trades-pagination"></div>
+        </div>
+        <div class="history-column">
+          <h2>Your Limit Order History</h2>
+          <div id="limit-orders-error" class="error-message"></div>
+          <button id="export-limit-orders" class="submit-button">
+            Export Limit Order History
+          </button>
+          <table id="limit-orders-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Stock Symbol</th>
+                <th>Order Type</th>
+                <th>Quantity</th>
+                <th>Limit Price</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="limit-orders-table-body"></tbody>
+          </table>
+          <br>
+      <div id="limit-orders-pagination"></div>
+        </div>
+      </div>
+      <!-- <div class="chart-container">
+        <div class="content trading-card2"></div>
+      </div> -->
+      <br>
       <div class="chart-wrapper">
         <div class="chart-container">
-          <form id="chart-form-intraday" class="chart-form">
-            <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required />
-            <!-- <label for="range">Select Range:</label>
-              <select name="range" id="range">
-                <option value="1d">Last 1 Day</option>
-                <option value="1w" selected>Last 1 Week</option>
-                <option value="1m">Last 1 Month</option>
-                <option value="6m">Last 6 Months</option>
-                <option value="1y">Last 1 Year</option>
-              </select> -->
-            <!-- <div class="select-wrapper">
-              <select name="chartType" id="chartType">
-                <option value="line">Line (Close Price)</option>
-              </select>
-            </div> -->
-            <button type="submit">Generate Chart</button>
-          </form>
-          <br>
-          <div ><canvas id="myChart3" class="canvas3"></canvas></div>
-          <div id="next-update-timer" style="color: #fff; margin-top: 10px;">Next update in: --s</div>
-          <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
-            Reset Zoom
-          </span>
-        </div>
-      </div>
-
-      <div class="trading-card">
-        <form id="trading-form">
-          <h2>Trade Stock</h2>
-          <div class="form-group">
-            <label for="trade-symbol">Select Stock</label>
-            <select id="trade-symbol" name="trade-symbol">
-              <option value="" disabled selected>Select stock</option>
-            </select>
-          </div>
-          <div class="form-group-radio">
-            <label class="pretty-radio">
-              <input type="radio" name="side" value="BUY" checked />
-              <span class="radio-label">Buy</span>
-            </label>
-            <label class="pretty-radio">
-              <input type="radio" name="side" value="SELL" />
-              <span class="radio-label">Sell</span>
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label for="order-type">Order Type</label>
-            <select id="order-type" name="order-type">
-              <option value="" disabled selected>Please select</option>
-              <option value="market">Market Order</option>
-              <option value="limit">Limit Order</option>
-            </select>
-          </div>
-          <div class="form-group hidden" id="timeframe-container">
-            <label for="timeframe">Time Frame</label>
-            <select id="timeframe" name="timeframe">
-              <option value="gtc">Good Till Cancelled (GTC)</option>
-              <option value="day">Day Order</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="price">Stock Price</label>
-            <input type="number" id="price" name="price" placeholder="Enter price" step="0.01" />
-          </div>
-
-          <div id="limitPriceContainer" style="display:none; margin-top:10px;">
-            <label for="limitPrice">Limit Price</label>
-            <input type="number" id="limitPrice" step="0.01" placeholder="Enter limit price">
-          </div>
-
-          <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" id="quantity" name="quantity" placeholder="Enter quantity" />
-          </div>
-
-
-
-
-          <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="text" id="amount" name="amount" placeholder="--" readonly />
-          </div>
-          <div id="buy-error" class="error-message"></div>
-          <button type="submit" class="submit-button" id="submit-order">
-            Submit Order
-          </button>
-                      <div id="buy-error" class="error-message"></div>
-
-
-            <div id="create-success" class="success-message"></div>
-        </form>
-        <div class="replay-controls">
-          <button type="button" id="btn-play">Play</button>
-          <button type="button" id="btn-pause">Pause</button>
-          <button type="button" id="btn-save">Save & Exit</button>
-          <button id="btn-finish" class="control-btn">Finish</button>
-          <label for="speed-select" style="color:#fff; margin-left:10px;">
-            Speed:
-            <div class="speed-bar-wrapper">
-              <select id="speed-select">
-                <option value="1" selected>1x</option>
-                <option value="2">2x</option>
-                <option value="4">4x</option>
-                <option value="5">5x</option>
-                <option value="10">10x</option>
-              </select>
-              <div class="speed-buttons">
-                <button data-value="1">1x</button>
-                <button data-value="2">2x</button>
-                <button data-value="4">4x</button>
-                <button data-value="5">5x</button>
-                <button data-value="10">10x</button>
+          <div id="portfolioContainer">
+            <h1>My Portfolio</h1>
+            <div class="portfolio-layout">
+              <!-- Left: Stock Analytics -->
+              <div class="positions-section" id="stockCardsContainer"></div>
+              <!-- Right: Pie Chart -->
+              <div class="portfolio-chart-container">
+                <canvas id="portfolioChart" class="fullscreen-chart"></canvas>
               </div>
             </div>
-          </label>
-        </div>
-        <div class="replay-controls">
-
-        </div>
-      </div>
-
-      <!-- <div class="company-card"></div> -->
-    </div>
-    <!-- Market Status Banner
-      <div id="market-status-banner">
-        <span id="market-status">Loading market status...</span>
-      </div> -->
-
-
-    <!-- Trade History + Limit Orders -->
-    <div class="history-container">
-      <div class="history-column">
-        <h2>Your Trade History</h2>
-        <div id="trades-error" class="error-message"></div>
-        <button id="export-trades" class="submit-button">
-          Export Trade History
-        </button>
-        <table id="trades-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Stock Symbol</th>
-              <th>Trade Type</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Total Amount</th>
-            </tr>
-          </thead>
-          <tbody id="trades-table-body"></tbody>
-        </table>
-        <br>
-<div id="trades-pagination"></div>
-      </div>
-      <div class="history-column">
-        <h2>Your Limit Order History</h2>
-        <div id="limit-orders-error" class="error-message"></div>
-        <button id="export-limit-orders" class="submit-button">
-          Export Limit Order History
-        </button>
-        <table id="limit-orders-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Stock Symbol</th>
-              <th>Order Type</th>
-              <th>Quantity</th>
-              <th>Limit Price</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="limit-orders-table-body"></tbody>
-        </table>
-        <br>
-<div id="limit-orders-pagination"></div>
-      </div>
-    </div>
-
-    <!-- <div class="chart-container">
-      <div class="content trading-card2"></div>
-    </div> -->
-    <br>
-    <div class="chart-wrapper">
-      <div class="chart-container">
-        <div id="portfolioContainer">
-          <h1>My Portfolio</h1>
-          <div class="portfolio-layout">
-            <!-- Left: Stock Analytics -->
-            <div class="positions-section" id="stockCardsContainer"></div>
-            <!-- Right: Pie Chart -->
-            <div class="portfolio-chart-container">
-              <canvas id="portfolioChart" class="fullscreen-chart"></canvas>
-            </div>
           </div>
         </div>
       </div>
-    </div>
-
-      <!-- Cancel confirmation popup -->
-<div id="cancel-popup" class="popup hidden">
-  <div class="popup-content">
-    <p>Are you sure you want to cancel?</p>
-    <br>
-    <button id="confirm-yes">Yes</button>
-    <button id="confirm-no">No</button>
-  </div>
-</div>
-
-   <div id="endScreenModal" class="modal">
-  <div class="modal-content endgame">
-    <header class="end-header">
-      <h1>Scenario Complete</h1>
-      <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
-      <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready. 
-        <em>Each new run resets your balance and positions so you can try different strategies.</em>
-      </p>
-    </header>
-
-    <!-- Quick summary row -->
-    <div class="end-summary">
-      <div class="card kpi">
-        <div class="kpi-label">Final Portfolio Value</div>
-        <div id="kpi-total" class="kpi-value">—</div>
+        <!-- Cancel confirmation popup -->
+      <div id="cancel-popup" class="popup hidden">
+        <div class="popup-content">
+      <p>Are you sure you want to cancel?</p>
+      <br>
+      <button id="confirm-yes">Yes</button>
+      <button id="confirm-no">No</button>
+        </div>
       </div>
-      <div class="card kpi">
-        <div class="kpi-label">Cash Remaining</div>
-        <div id="kpi-cash" class="kpi-value">—</div>
+      
+         <div id="endScreenModal" class="modal">
+        <div class="modal-content endgame">
+      <header class="end-header">
+        <h1>Scenario Complete</h1>
+        <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
+        <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready.
+          <em>Each new run resets your balance and positions so you can try different strategies.</em>
+        </p>
+      </header>
+      <!-- Quick summary row -->
+      <div class="end-summary">
+        <div class="card kpi">
+          <div class="kpi-label">Final Portfolio Value</div>
+          <div id="kpi-total" class="kpi-value">—</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Cash Remaining</div>
+          <div id="kpi-cash" class="kpi-value">—</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Return</div>
+          <div id="kpi-return" class="kpi-value">—</div>
+        </div>
+        <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
       </div>
-      <div class="card kpi">
-        <div class="kpi-label">Return</div>
-        <div id="kpi-return" class="kpi-value">—</div>
+      <!-- Portfolio recap -->
+      <div class="portfolio-layout">
+        <div class="portfolio-chart-container">
+          <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
+        </div>
+        <div id="endStockCards" class="positions-section"></div>
       </div>
-      <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
-    </div>
-
-    <!-- Portfolio recap -->
-    <div class="portfolio-layout">
-      <div class="portfolio-chart-container">
-        <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
+      <!-- AI insights -->
+      <div id="aiAdviceContainer" class="ai-block">
+        <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
       </div>
-      <div id="endStockCards" class="positions-section"></div>
+      <!-- Actions -->
+      <div class="buttons end-actions">
+        <button id="closeEndScreen" class="btn ghost">Close</button>
+        <button id="generateMoreInsights" class="btn secondary">Generate More Insights</button>
+      </div>
+        </div>
+      </div>
     </div>
-
-    <!-- AI insights -->
-    <div id="aiAdviceContainer" class="ai-block">
-      <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
-    </div>
-
-    <!-- Actions -->
-    <div class="buttons end-actions">
-      <button id="closeEndScreen" class="btn ghost">Close</button>
-      <button id="generateMoreInsights" class="btn secondary">Generate More Insights</button>
-    </div>
-  </div>
-</div>
 <!-- </div> -->
 
 </body>
