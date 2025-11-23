@@ -51,7 +51,7 @@
         "migration:dev": "dotenv -e .env.development -- npx prisma migrate dev",
         "migration:reset": "dotenv -e .env.development -- npx prisma migrate reset",
     
-        "start": "node ./src/server.js",
+        "start": "concurrently \"npx hardhat node\" \"dotenv -e .env.development -- node ./src/server.js\"",
     
         "chatbot": "node ./src/public/js/chatbot.js",
         "test": "playwright test --config=configs/playwright.config.js",
