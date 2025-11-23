@@ -4,7 +4,7 @@ const socketBroadcast = require('../socketBroadcast');
 const { ethers } = require('ethers');
 require("dotenv").config();
 
-const ledgerAbi = require("../../artifacts/contracts/tradeLedger.sol/TradeLedger.json").abi;
+// const ledgerAbi = require("../../artifacts/contracts/tradeLedger.sol/TradeLedger.json").abi;
 
 // ✅ Hardhat Local Node Provider
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);

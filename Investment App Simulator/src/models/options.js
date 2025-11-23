@@ -11,7 +11,7 @@ const fetch = require('node-fetch');
 
 const hardhat = require("hardhat");
 const { ethers } = require("ethers");
-const ledgerAbi = require("../../artifacts/contracts/optionsLedger.sol/OptionsLedger.json").abi;
+// const ledgerAbi = require("../../artifacts/contracts/optionsLedger.sol/OptionsLedger.json").abi;
 
 // Hardhat Local Node Provider
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
