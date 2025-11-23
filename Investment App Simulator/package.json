@@ -47,7 +47,7 @@
         "seed": "node prisma/seed.js"
     },
     "scripts": {
-        "postinstall": "npx prisma generate",
+        "postinstall": "npx prisma generate && npx hardhat compile",
         "migration:dev": "dotenv -e .env.development -- npx prisma migrate dev",
         "migration:reset": "dotenv -e .env.development -- npx prisma migrate reset",
     

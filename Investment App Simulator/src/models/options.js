@@ -11,7 +11,7 @@ const fetch = require('node-fetch');
 
 const hardhat = require("hardhat");
 const { ethers } = require("ethers");
-// const ledgerAbi = require("../../artifacts/contracts/optionsLedger.sol/OptionsLedger.json").abi;
+const ledgerAbi = require("../../artifacts/contracts/optionsLedger.sol/OptionsLedger.json").abi;
 
 // Hardhat Local Node Provider
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
@@ -20,7 +20,9 @@ const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
 // Smart Contract
-const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS, ledgerAbi, signer);
+const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS, 
+  ledgerAbi, 
+  signer);
 
 //////////////////////////////////////////////////
 /// GET OPTIONS CONTRACTS BY SYMBOL (ex AAPL)
