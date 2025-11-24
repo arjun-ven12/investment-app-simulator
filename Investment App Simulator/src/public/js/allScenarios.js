@@ -235,7 +235,7 @@ async function renderMyScenarios(filter = "all") {
     mainBtn.className = "my-scenario-btn";
     mainBtn.textContent = status === "COMPLETED" ? "Retry" : "Open Console";
     mainBtn.addEventListener("click", () => {
-      window.open(`scenario-console.html?scenarioId=${s.id}`, "_blank");
+      window.open(`/scenario-console?scenarioId=${s.id}`, "_blank");
     });
     btnContainer.appendChild(mainBtn);
 
@@ -831,7 +831,7 @@ async function renderMobileAllScenarios() {
       `;
 
       card.querySelector(".open").addEventListener("click", () => {
-        window.open(`scenario-console.html?scenarioId=${s.id}`, "_blank");
+        window.open(`/scenario-console?scenarioId=${s.id}`, "_blank");
       });
 
       card.querySelector(".remove-btn").addEventListener("click", async () => {
