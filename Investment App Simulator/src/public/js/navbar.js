@@ -1,76 +1,101 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('navbar-container');
-  fetch('../html/navbar.html')
-    .then(response => {
-      if (!response.ok) throw new Error('Navbar HTML not found');
-      return response.text();
-    })
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("navbar-container");
+
+  // Load navbar HTML
+  fetch("/html/navbar.html")
+    .then(res => res.text())
     .then(html => {
       container.innerHTML = html;
-      initNavbar();
+
+      initNavbarToggle();
+      initAuthVisibility();
       highlightActiveLink();
+      initLogout();
     })
-    .catch(err => console.error('Error loading navbar:', err));
+    .catch(err => console.error("Failed to load navbar:", err));
 });
 
-function initNavbar() {
-  const toggle = document.getElementById('navbar-toggle');
-  const links = document.querySelector('.navbar-links');
-  const logoutButton = document.getElementById('logoutButton');
+/* -----------------------------
+   NAVBAR HAMBURGER TOGGLE (Mobile)
+--------------------------------*/
+function initNavbarToggle() {
+  const toggle = document.getElementById("navbar-toggle");
+  const links = document.querySelector(".navbar-links");
 
-  toggle?.addEventListener('click', () => {
-    links.classList.toggle('active');
-  });
-
-  // ✅ Session + Username Check
-  const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = '/login';
-    return;
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000;
-
-    if (Date.now() > exp) {
-      alert('Session expired. Please log in again.');
-      localStorage.clear();
-      window.location.href = '/login';
-    } else {
-      const username = payload.username || localStorage.getItem('username');
-      const navbarUser = document.getElementById('navbar-username');
-      if (navbarUser && username) {
-        navbarUser.textContent = username;
-      }
-    }
-  } catch (err) {
-    console.error('Invalid or malformed token:', err);
-    localStorage.clear();
-    window.location.href = '/login';
-  }
-
-  // ✅ Logout
-  logoutButton.style.display = token ? 'block' : 'none';
-  logoutButton.addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = '/login';
+  toggle?.addEventListener("click", () => {
+    links?.classList.toggle("active");
   });
 }
 
+/* -----------------------------
+   SHOW/HIDE BUTTONS BASED ON LOGIN STATUS
+--------------------------------*/
+function initAuthVisibility() {
+  const token = localStorage.getItem("token");
+
+  const loginBtn = document.getElementById("loginButton");
+  const registerBtn = document.getElementById("registerButton");
+  const logoutBtn = document.getElementById("logoutButton");
+  const profileBtn = document.getElementById("profileButton");
+
+  const buttonsToToggle = [
+    "HomeButton",
+    "ProgressButton",
+    "UserButton",
+    "TaskButton",
+    "MessageButton"
+  ];
+
+  if (token) {
+    // Show user-only buttons
+    profileBtn?.classList.remove("d-none");
+    logoutBtn?.classList.remove("d-none");
+
+    buttonsToToggle.forEach(id =>
+      document.getElementById(id)?.classList.remove("d-none")
+    );
+
+    // Hide login/register
+    loginBtn?.classList.add("d-none");
+    registerBtn?.classList.add("d-none");
+  } else {
+    // Hide logged-in buttons
+    profileBtn?.classList.add("d-none");
+    logoutBtn?.classList.add("d-none");
+
+    buttonsToToggle.forEach(id =>
+      document.getElementById(id)?.classList.add("d-none")
+    );
+
+    // Show login/register
+    loginBtn?.classList.remove("d-none");
+    registerBtn?.classList.remove("d-none");
+  }
+}
+
+/* -----------------------------
+   HIGHLIGHT CURRENT NAVIGATION LINK
+--------------------------------*/
 function highlightActiveLink() {
-  const currentPath = window.location.pathname.split('/').pop();
-  const navLinks = document.querySelectorAll('.navbar-links a');
-  navLinks.forEach(link => {
-    const linkPath = link.getAttribute('href');
-    if (linkPath === currentPath) link.classList.add('active');
-    else link.classList.remove('active');
+  const current = window.location.pathname;
+
+  document.querySelectorAll(".navbar-links a").forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
   });
 }
 
-window.addEventListener("scroll", () => {
-  const navbar = document.querySelector(".navbar");
-  if (!navbar) return;
-  if (window.scrollY > 40) navbar.classList.add("scrolled");
-  else navbar.classList.remove("scrolled");
-});
+/* -----------------------------
+   LOGOUT HANDLER
+--------------------------------*/
+function initLogout() {
+  const logoutBtn = document.getElementById("logoutButton");
+
+  logoutBtn?.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  });
+}
