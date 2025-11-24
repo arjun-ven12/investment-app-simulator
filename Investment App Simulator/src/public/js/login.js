@@ -275,14 +275,13 @@ passwordInput.addEventListener("input", () => {
 
 });
 
-// 🌐 Google Sign-In redirect
 document.getElementById("googleSignInBtn").addEventListener("click", () => {
-  window.location.href = "http://localhost:3000/auth/google";
+  window.location.href = `${window.location.origin}/auth/google`;
 });
 
-// 🪟 Microsoft Sign-In redirect
+
 document.getElementById("microsoftSignInBtn").addEventListener("click", () => {
-  window.location.href = "http://localhost:3000/auth/microsoft";
+  window.location.href = `${window.location.origin}/auth/microsoft`;
 });
 document.addEventListener("mousemove", (e) => {
   const blob = document.querySelector(".blob-focus");

@@ -66,11 +66,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // --- Google Sign-In ---
-  document
-    .getElementById("googleSignInBtn")
-    .addEventListener("click", () => {
-      window.location.href = "http://localhost:3000/auth/google";
-    });
+document.getElementById("googleSignInBtn").addEventListener("click", () => {
+  window.location.href = `${window.location.origin}/auth/google`;
+});
+
 
   // --- Password visibility toggles ---
   const passwordInput = document.getElementById("password");
@@ -152,8 +151,7 @@ function smoothToggle(input, type) {
   });
 });
 // --- Microsoft Sign-In ---
-document
-  .getElementById("microsoftSignInBtn")
-  .addEventListener("click", () => {
-    window.location.href = "http://localhost:3000/auth/microsoft";
-  });
+
+document.getElementById("microsoftSignInBtn").addEventListener("click", () => {
+  window.location.href = `${window.location.origin}/auth/microsoft`;
+});
