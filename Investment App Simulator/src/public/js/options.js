@@ -614,7 +614,7 @@ window.addEventListener('DOMContentLoaded', () => {
         `;
         tr.addEventListener('click', () => {
           const symbol = c.symbol ?? '';
-          if (symbol) window.location.href = `ohlc.html?symbol=${encodeURIComponent(symbol)}`;
+          if (symbol) window.location.href = `/ohlc?symbol=${encodeURIComponent(symbol)}`;;
         });
         tbody.appendChild(tr);
       });

@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
   backButton.addEventListener('click', (e) => {
     e.preventDefault();
     // Redirect to the Investment Dashboard and scroll to the Options tab
-    window.location.href = '/html/investment.html#options-dashboard';
+    window.location.href = '/investment#options-dashboard';
   });
 });
 
