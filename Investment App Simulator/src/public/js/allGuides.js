@@ -118,8 +118,8 @@ function setActiveGuide(i) {
 
   detail.classList.remove("show");
   setTimeout(() => {
-    detail.innerHTML = `
-  <a href="guide.html?id=${g.id}" class="detail-card-link">
+detail.innerHTML = `
+  <a href="/guide?id=${g.id}" class="detail-card-link">
     <div class="detail-card" style="--bg:url('${bg}')">
       <h3>${String(i + 1).padStart(2, "0")} ${g.title}</h3>
       <p>${summary}...</p>
@@ -206,7 +206,7 @@ function renderGridView() {
       const img = darkImages[i % darkImages.length];
 
       return `
-  <a href="guide.html?id=${g.id}" class="guide-card-link">
+  <a href="/guide?id=${g.id}" class="guide-card-link">
     <div class="guide-card" style="--bg-img: url('${img}')">
       <div class="guide-content">
         <h3>${title}</h3>

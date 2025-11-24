@@ -25,7 +25,7 @@ function initNavbar() {
   // ✅ Session + Username Check
   const token = localStorage.getItem('token');
   if (!token) {
-    window.location.href = '/html/login.html';
+    window.location.href = '/login';
     return;
   }
 
@@ -36,7 +36,7 @@ function initNavbar() {
     if (Date.now() > exp) {
       alert('Session expired. Please log in again.');
       localStorage.clear();
-      window.location.href = '/html/login.html';
+      window.location.href = '/login';
     } else {
       const username = payload.username || localStorage.getItem('username');
       const navbarUser = document.getElementById('navbar-username');
@@ -47,14 +47,14 @@ function initNavbar() {
   } catch (err) {
     console.error('Invalid or malformed token:', err);
     localStorage.clear();
-    window.location.href = '/html/login.html';
+    window.location.href = '/login';
   }
 
   // ✅ Logout
   logoutButton.style.display = token ? 'block' : 'none';
   logoutButton.addEventListener('click', () => {
     localStorage.clear();
-    window.location.href = '/html/login.html';
+    window.location.href = '/login';
   });
 }
 

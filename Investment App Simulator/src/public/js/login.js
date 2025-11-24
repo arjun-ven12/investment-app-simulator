@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
     import("./web3auth.js").then(async ({ initWeb3Auth }) => {
       await initWeb3Auth();
     });
-      window.location.href = "/html/home.html";
+      window.location.href = "/home";
     } catch (err) {
       showWarning(err.message || "Unexpected error occurred.");
     }

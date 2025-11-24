@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       setTimeout(() => {
-        window.location.href = "/html/login.html";
+        window.location.href = "/login";
       }, 2500);
     } catch (err) {
       showWarning(err.message || "Unexpected error occurred.");

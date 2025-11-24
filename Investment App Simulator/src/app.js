@@ -65,6 +65,26 @@ app.use('/api', loginRegisterRouter);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+// ⭐ AUTO CLEAN ROUTES FOR ALL /public/html/*.html
+const fs = require("fs");
+
+const htmlDir = path.join(__dirname, "public/html");
+
+fs.readdirSync(htmlDir).forEach(file => {
+  if (file.endsWith(".html")) {
+
+    // Convert "login.html" → "/login"
+    const cleanRoute = "/" + file.replace(".html", "");
+
+    // Full path to file
+    const filePath = path.join(htmlDir, file);
+
+    // Create pretty route
+    app.get(cleanRoute, (req, res) => res.sendFile(filePath));
+
+    console.log("✔ Clean route enabled:", cleanRoute);
+  }
+});
 
 // Additional Routes
 app.use('/tasks', taskRouter);
