@@ -3,11 +3,11 @@ const prisma = require("../../prisma/prismaClient");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const client = new OAuth2Client(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
-);
+const client = new OAuth2Client({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  redirectUri: process.env.GOOGLE_REDIRECT_URI
+});
 
 // ✅ STEP 1: Redirect user to Google
 exports.googleLogin = (req, res) => {
@@ -31,10 +31,9 @@ exports.googleCallback = async (req, res) => {
     // Exchange code for tokens
     const { tokens } = await client.getToken({
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
       redirect_uri: process.env.GOOGLE_REDIRECT_URI,
     });
+
 
     // Verify ID token
     const ticket = await client.verifyIdToken({
