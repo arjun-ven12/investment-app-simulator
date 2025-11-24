@@ -9,5 +9,7 @@ router.put('/change-email', jwtMiddleware.verifyToken, settingsController.change
 router.put('/change-password', jwtMiddleware.verifyToken, settingsController.changePassword);
 router.put('/change-username', jwtMiddleware.verifyToken,settingsController.changeUsername);
 router.delete('/delete-account', jwtMiddleware.verifyToken,settingsController.deleteAccount);
+router.get('/me/auth-type', jwtMiddleware.verifyToken, settingsController.getAuthType);
+
 
 module.exports = router;

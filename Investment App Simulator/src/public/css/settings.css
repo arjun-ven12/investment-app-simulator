@@ -2752,7 +2752,7 @@
         /* FIX: Ensure THEAD and TBODY match the table's forced width */
         .history-column table thead,
         .history-column table tbody,
-        .markdown-body table thead,
+        .markdown-body table thead,zz
         .markdown-body table tbody,
         #options-portfolio-card table thead,
         #options-portfolio-card table tbody {
@@ -2761,3 +2761,118 @@
             display: table-row-group; /* Ensures they behave correctly inside the block-level table */
         }
     }
+/* ============================================
+   PREMIUM BLACKSEALED SETTINGS UI (V2)
+============================================ */
+
+/* Glass Cards */
+.settings-card {
+    background: rgba(20, 20, 35, 0.45);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 34px 30px;
+    border-radius: 14px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.45);
+    transition: 0.25s ease;
+    position: relative;
+}
+
+.settings-card:hover {
+    background: rgba(35, 35, 55, 0.55);
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-3px);
+}
+
+/* Inner glow accents */
+.settings-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 20% 20%, rgba(120,0,255,0.08), transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(0,140,255,0.08), transparent 60%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Section Titles */
+.settings-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.settings-card .sub {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 18px;
+}
+
+/* Inputs */
+.settings-card input,
+.settings-card select {
+    width: 100%;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #fff;
+    margin-bottom: 14px;
+    transition: 0.25s ease;
+}
+
+.settings-card input:focus,
+.settings-card select:focus {
+    border-color: #7bb7ff;
+    background: rgba(0,0,0,0.48);
+    box-shadow: 0 0 12px rgba(80,140,255,0.35);
+}
+
+/* Dropdown fix */
+.settings-card select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+}
+
+/* Primary Gradient Button */
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: linear-gradient(90deg,#2b1b90,#7a3cff,#b34bff);
+    color: white;
+    transition: 0.25s ease;
+}
+
+.primary-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Delete button */
+.danger-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: linear-gradient(90deg,#8b0000,#d20000,#ff4444);
+    color: white;
+}
+
+/* Disabled state styling */
+.disabled-input {
+    opacity: 0.45 !important;
+    background: rgba(40,40,40,0.35) !important;
+    pointer-events: none;
+}
+
+.lock-message {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    opacity: 0.55;
+}

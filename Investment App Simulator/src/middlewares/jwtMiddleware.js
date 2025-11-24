@@ -1,59 +1,77 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const prisma = require("../../prisma/prismaClient");
 
 // Generate JWT token
-module.exports.generateToken = (req, res, next) => {
+module.exports.generateToken = async (req, res, next) => {
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                googleId: true,
+                microsoftId: true
+            }
+        });
+
+        const authProvider = user.googleId
+            ? "google"
+            : user.microsoftId
+            ? "microsoft"
+            : "normal";
+
         const token = jwt.sign(
-            { id: req.user.id, username: req.user.username }, 
-            process.env.JWT_SECRET_KEY, 
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                googleId: user.googleId,
+                microsoftId: user.microsoftId,
+                authProvider
+            },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
         );
 
         res.locals.token = token;
         next();
     } catch (error) {
-        console.error('Error generating token:', error.message);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("Error generating token:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
 // Send token to client
 module.exports.sendToken = (req, res) => {
     res.status(200).json({
-        message: 'Success',
+        message: "Success",
         token: res.locals.token,
-        id: req.user.id,
-        username: req.user.username,
     });
 };
 
 // Verify JWT token
 module.exports.verifyToken = (req, res, next) => {
     try {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+        const token = req.headers["authorization"]?.split(" ")[1];
 
         if (!token) {
-            return res.status(401).json({ message: 'Access token missing' });
+            return res.status(401).json({ message: "Access token missing" });
         }
 
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
             if (err) {
-                return res.status(403).json({ message: 'Invalid or expired token' });
+                return res
+                    .status(403)
+                    .json({ message: "Invalid or expired token" });
             }
 
-            // ✅ Attach decoded user info to req.user
-            req.user = {
-                id: decoded.id,
-                username: decoded.username,
-                tokenTimestamp: decoded.timestamp, // optional
-            };
-
+            req.user = decoded; 
             next();
         });
     } catch (error) {
-        console.error('Token verification error:', error.message);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("Token verification error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

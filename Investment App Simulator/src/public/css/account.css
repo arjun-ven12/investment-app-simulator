@@ -1,363 +1,143 @@
+/* ============================================
+   BLACKSEALED V4 — EXECUTIVE DARK UI
+   ============================================ */
 
-/* ======================================
-   Settings Page Styles
-   ====================================== */
-/* Import Outfit font */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
-
-/* General Reset & Fonts */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* GLOBAL */
+.settings-page {
+    background: #05070d; /* pure deep navy-black */
+    color: #ffffff;
+    min-height: 100vh;
     font-family: 'Outfit', sans-serif;
 }
 
-/* --- Main Container Layout --- */
-.settings-container {
-    max-width: 1000px;
-    width: 95%; 
-    margin: 40px auto; 
-    padding: 40px 20px; 
-    border-radius: 12px; 
-    
-    box-shadow: 0 5px 20px rgba(0,0,0,0.7);
-    
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-.settings-container h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #ffffff;
-    padding-left: 0;
+.settings-hero {
     text-align: center;
-    padding-top: 10px;
+    padding-top: 130px;
+    padding-bottom: 40px;
 }
 
-/* --- Section Styling (Visual Separators) --- */
-.settings-section {
-    padding: 20px 0;
-    border-top: 1px solid rgba(83, 89, 107, 0.2); 
+.settings-hero h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #f5f7fa;
 }
 
-.settings-container section:first-of-type {
-    border-top: none;
-}
-
-.settings-section h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.settings-section p {
-    color: #ff4d4f; /* Danger color for warnings */
+.settings-hero p {
     font-size: 1rem;
-    margin-bottom: 15px;
-    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    margin-top: 8px;
 }
 
-/* --- Form and Label Styling --- */
-.settings-section form {
-    display: flex; /* Ensure form elements stack nicely */
+/* WRAPPER */
+.settings-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 25px;
+    display: flex;
     flex-direction: column;
-    gap: 15px; 
+    gap: 40px;
 }
 
-.settings-section label {
-    font-size: 0.85rem; 
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 300;
-    margin-top: 5px;
+/* ============================================
+   SETTINGS CARD — ULTRA SLEEK DARK PANELS
+   ============================================ */
+.settings-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 30px 28px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s ease;
 }
 
-/* ⭐️ INPUT FIELD STYLING (MATCHING YOUR DESIGN) ⭐️ */
-.settings-section input[type="email"],
-.settings-section input[type="password"],
-.settings-section input[type="text"] {
-    /* Styles copied directly from your generic 'input' rule */
-    padding: 12px 12px; 
-    border-radius: 6px; 
-    border: 1px solid rgba(255, 255, 255, 0.587); /* Subtle border */
-    font-size: 1rem; 
-    background-color: rgba(18, 18, 26, 0); /* Translucent dark background */
-    color: #fff;
+.settings-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.03);
+}
+
+/* TYPOGRAPHY */
+.settings-card h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #f4f7fc;
+}
+
+.settings-card .sub {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 20px;
+}
+
+/* FORM INPUTS */
+.settings-card input,
+.settings-card select {
     width: 100%;
-    transition: all 0.2s ease-in-out; 
-    margin-top: 0; /* Ensures consistent spacing */
-    box-sizing: border-box; /* Crucial for padding/border integrity */
+    background: #0b0e17;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 13px 14px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: 0.25s ease;
 }
 
-.settings-section input:focus {
-    /* Styles copied directly from your generic 'input:focus' rule */
+.settings-card input:focus,
+.settings-card select:focus {
+    border-color: #4d93ff;
+    background: #0f1320;
+    box-shadow: 0 0 8px rgba(90,140,255,0.25);
     outline: none;
-    border: 2px solid #4a90e2; 
-    padding: 11px 11px; /* Compensate for 2px border to maintain size */
 }
 
-/* ⭐️ STANDARD BUTTON STYLING (MATCHING YOUR DESIGN) ⭐️ */
-.settings-section button:not(.danger-button) {
-    /* Styles copied directly from your generic 'button' rule */
-    background-color: #E0EBFF;
-    color: #000000;
+/* BUTTONS */
+.primary-btn {
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: none;
     cursor: pointer;
     font-weight: 500;
-    font-size: 0.85rem; 
-    transition: background 0.3s, transform 0.2s;
-    border-radius: 6px; 
-    border: none;
-    margin: 2px 0; /* Adjusted margin */
-    width: 100%;
-    padding: 12px 12px; /* Ensure padding is consistent */
+
+    background: #111827;
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,0.12);
+
+    transition: 0.3s ease;
 }
 
-.settings-section button:not(.danger-button):hover {
-    background-color: #94cdff;
-    transform: translateY(-2px);
+.primary-btn:hover {
+    background: #1c2333;
+    border-color: rgba(255,255,255,0.18);
 }
 
-.settings-section button:not(.danger-button):active {
-    transform: translateY(0);
-}
-
-/* --- Danger Button Styling (Delete Account) --- */
-.danger-button {
-    /* Base styles from button */
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem; 
-    transition: background 0.3s, transform 0.2s;
-    border-radius: 6px; 
-    border: none;
-    margin: 2px 0;
-    width: 100%;
-    padding: 12px 12px;
-    
-    /* Danger specific colors */
-    background-color: #ff4d4f; 
-    color: #ffffff;
-}
-
-.danger-button:hover {
-    background-color: #e03f41;
-    transform: translateY(-2px);
-}
-
-.danger-button:active {
-    transform: translateY(0);
-}
-
-/* --- Responsive Adjustments --- */
-@media (max-width: 1000px) {
-    .settings-container {
-        width: 100%;
-        margin: 20px auto;
-        padding: 15px;
-        border-radius: 0;
-    }
-
-
-    .settings-container h1 {
-        font-size: 1.8rem;
-    }
-
-    .settings-section {
-        padding: 15px 0;
-    }
-
-    .settings-section label {
-        font-size: 12px;
-    }
-
-        html, body {
-  overflow-x: hidden;
-}
-
-body {
-    padding: 0px 20px;
-}
-
-.settings-section h2 {
-    font-size: 1rem;
-    margin-top: 12px;
-    margin-bottom: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
-    text-transform: uppercase; /* Make text uppercase */
-    letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
-}
-
-.settings-container h1 {
-    font-size: 24px
-}
-}
-
-h2 {
-    font-size: 1.2rem;
-    margin-top: 12px;
-    margin-bottom: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.85); /* Slightly translucent white */
-    text-transform: uppercase; /* Make text uppercase */
-    letter-spacing: 0.05em; /* Add slight spacing for better uppercase readability */
-}
-
-
-
-
-
-
-
-/* --- CHART WRAPPER: Used to create the strong external aura glow --- */
-.chart-wrapper {
-    position: relative;
-    z-index: 1; /* Establishes a stacking context */
-    margin: 10px 0; /* Controls the spacing outside the whole component */
-    padding: 1px; /* Small padding to ensure the blur isn't clipped */
-    border-radius: 12px;
-    overflow: visible; /* Allows the glow to extend past the wrapper bounds */
-    height: 100%;
-}
-
-/* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
-.chart-wrapper::before {
-    content: '';
-    position: absolute;
-    /* Position slightly outside the bounds of the wrapper */
-    top: -5%;
-    left: -5%;
-    width: 120%;
-    height: 120%;
-    border-radius: 12px;
-    z-index: 0; /* Pushed behind the chart container (z-index 10) */
-    pointer-events: none;
-    
-    /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
-    background: 
-        radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.432) 0%, transparent 40%), 
-        radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.4) 0%, transparent 40%);
-    
-    filter: blur(80px); /* Heavy blur for soft, radiating effect */
-    mix-blend-mode: screen; 
-    opacity: 0.8;
-}
-
-/* --- CHART CONTAINER: Combines Frosted Glass, Noise Overlay, and Internal Glow --- */
-.chart-container {
-    /* 1. LAYOUT & STACKING */
-    position: relative; 
-    overflow: hidden; 
-    z-index: 10; /* CRITICAL: Must be higher than the wrapper's glow (z-index 0) */
-    width: 100%;
-    /* margin: 10px 0; -- REMOVED: Now handled by .chart-wrapper */
-    border-radius: 12px;
-    /* height: 100%;
-    margin-bottom: 10px; */
-
-    /* --- EXTERNAL AURA GLOW (box-shadow) REMOVED --- */
-    /* The external aura is now handled by .chart-wrapper::before */
-    
-    /* 2. FROSTED GLASS & GRADIENT BORDER IMPLEMENTATION (Unchanged) */
-    background: 
-        /* Layer 1: Inner Dark Fill (Solid color) */
-        #0a0b1f, 
-        /* Layer 2: Frosted Background (Light translucent layer) */
-        linear-gradient(160deg, rgba(255,255,255,.025), rgba(0, 0, 0, 0.015)),
-        /* Layer 3: Border Gradient (The thin, fading white border line) */
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.4) 0%,   
-            rgba(255, 255, 255, 0.8) 25%,  
-            rgba(255, 255, 255, 0.8) 75%,  
-            rgba(255, 255, 255, 0.4) 100% 
-        );
-
-    background-clip: content-box, content-box, border-box;
-    background-origin: border-box;
-    padding: 21px; 
-
-    /* Apply the visual frosted effect */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-/* --- Digital Noise Texture (::before on .chart-container) --- */
-/* Creates the fine, static noise texture over the chart area */
-.chart-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* SVG data URL for the noise pattern */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)" opacity="0.1"/></svg>');
-    
-    opacity: 0.3;
-    z-index: 2; 
-    pointer-events: none;
-    border-radius: 12px;
-    -webkit-mask: linear-gradient(#fff, #fff);
-    mask: linear-gradient(#fff, #fff);
-}
-
-/* --- VIBRANT BLUE/PURPLE INTERNAL AURA GLOW (::after on .chart-container) --- */
-/* Creates the soft, internal colored glow blobs behind the content */
-.chart-container::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    width: 150%; 
-    height: 150%;
-    border-radius: 50%; 
-    
-    /* Two radial gradients for the dual-color effect */
-    background: 
-        /* Blue Blob: Top-Left Corner */
-        radial-gradient(circle at 20% 20%, 
-            rgba(0, 200, 255, 0.141) 0%, 
-            transparent 35% 
-        ),
-        /* Purple Blob: Bottom-Right Corner */
-        radial-gradient(circle at 80% 80%, 
-            rgba(255, 0, 251, 0) 0%, 
-            transparent 35% 
-        );
-    
-    z-index: -1; 
-    pointer-events: none;
-    mix-blend-mode: screen; 
-}
-/* --- AI Settings Select Styling --- */
-.settings-section select {
-    padding: 12px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.55);
-    background: rgba(18,18,26,0);
-    color: #ffffff;
-    font-size: 1rem;
-    width: 100%;
-    cursor: pointer;
-    transition: border 0.2s ease-in-out;
-}
-
-.settings-section select:focus {
-    border: 2px solid #4a90e2;
-    outline: none;
-}
-.settings-section select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: rgba(18, 18, 26, 0.6);
+.danger-btn {
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: #5a0e0e;
     color: #fff;
+    border: 1px solid rgba(255,0,0,0.25);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s ease;
 }
 
-.settings-section select option {
-    background-color: #11131f;
-    color: #fff;
+.danger-btn:hover {
+    background: #7c0f0f;
+}
+
+/* LOCKED / SSO STATE */
+.disabled-input {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.lock-message {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: rgba(255,150,150,0.45);
+}
+
+/* REMOVE FUGLY PURPLE GLOWS */
+.settings-card::after {
+    display: none !important;
 }
