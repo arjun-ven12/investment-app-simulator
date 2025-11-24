@@ -701,7 +701,7 @@ model AIAdvice {
   advice    String
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BlockchainTransaction {
