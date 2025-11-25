@@ -22,7 +22,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 clamp(16px, 5vw, 80px); /* responsive padding */
-    background: transparent;
+    background: #000000e0;
     color: var(--text-color);
     z-index: 1000;
     box-sizing: border-box;
