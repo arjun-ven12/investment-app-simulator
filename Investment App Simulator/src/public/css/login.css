@@ -1457,13 +1457,9 @@ body {
     }
 
 
-
-
-
-
-    .right-panel {
+.right-panel {
         height: auto;
-        padding: 40px 0px;
+        padding: 40px 15px;
         overflow: visible !important;
         background-color: whitesmoke;
     }

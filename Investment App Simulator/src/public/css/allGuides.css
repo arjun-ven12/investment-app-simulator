@@ -787,3 +787,14 @@ text-decoration: underline;
 .guide-card-link:hover .guide-card {
   transform: translateY(-8px) scale(1.03);
 }
+@media (max-width: 1000px) {
+  #timeline-detail {
+    margin: 0px;
+    width: auto
+  }
+
+  .guides-container {
+    padding: 20px
+  }
+
+}

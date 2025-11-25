@@ -2524,3 +2524,16 @@ height: 100% !important;
 }
 
 }
+
+
+@media (min-width: 2000px) {
+    #region-timeline {
+    margin-left: -300px;
+}
+}
+
+@media (min-width: 3000px) {
+    #region-timeline {
+    margin-left: -450px;
+}
+}

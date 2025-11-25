@@ -732,3 +732,34 @@ margin-top: 20px;
 
 
 
+@media (min-width: 1800px) {
+  body {
+    font-size: 1.2rem; /* Increases all text that scales from body */
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .summary-card p {
+    font-size: 16px;
+  }
+
+  .summary-card h4 {
+    font-size: 3rem;
+  }
+
+  #tradeSearch {
+    font-size: 16px;
+  }
+
+  .trade-table,
+  .trade-table th,
+  .trade-table td {
+    font-size: 14px;
+  }
+}

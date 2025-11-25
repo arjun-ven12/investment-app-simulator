@@ -1783,3 +1783,11 @@ html, body {
     font-size: 0.9rem;
     font-weight: 300;
 }
+
+@media (max-width: 1000px) {
+
+  .hero {
+    padding: 20px
+  }
+
+}

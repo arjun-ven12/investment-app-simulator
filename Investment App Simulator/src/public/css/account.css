@@ -1,143 +1,391 @@
-/* ============================================
-   BLACKSEALED V4 — EXECUTIVE DARK UI
-   ============================================ */
 
-/* GLOBAL */
-.settings-page {
-    background: #05070d; /* pure deep navy-black */
-    color: #ffffff;
-    min-height: 100vh;
+/*
+ * 🌟 Settings Page CSS - Applied Frosted Glass/Neon Dark Theme 🌟
+ * (Based on the provided general theme and color variables)
+ */
+
+/* --- Global Variables (Copied for completeness) --- */
+:root {
+    --color-dark-navy: #040613;
+    --color-card-dark: #12192B;
+    --color-input-dark: #1E2537;
+    --color-accent-blue: #00A3FF;
+    --color-text-light: #E0E0E0;
+    --color-border-subtle: #33405B;
+    --color-text-secondary: #9090A0;
+    --color-danger-red: #ff3860; /* Added for delete button */
+}
+* {
     font-family: 'Outfit', sans-serif;
 }
 
+body {
+    padding-top: 100px
+}
+/* --- Body (Inherits from general theme) --- */
+.settings-page {
+    /* Set the deep dark background */
+    background-color: var(--color-dark-navy);
+    padding: 100px 20px; /* Increased padding for aesthetics */
+}
+
+/* --- Hero Section & Headings --- */
 .settings-hero {
     text-align: center;
-    padding-top: 130px;
-    padding-bottom: 40px;
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+}
+.chart-wrapper {
+    position: relative;
+    z-index: 1; /* Establishes a stacking context */
+    margin: 10px 0; /* Controls the spacing outside the whole component */
+    padding: 1px; /* Small padding to ensure the blur isn't clipped */
+    border-radius: 12px;
+    overflow: visible; /* Allows the glow to extend past the wrapper bounds */
+    height: 100%;
+}
+
+/* --- EXTERNAL AURA GLOW (Pseudo-element on Wrapper) --- */
+.chart-wrapper::before {
+    content: '';
+    position: absolute;
+    /* Position slightly outside the bounds of the wrapper */
+    top: -5%;
+    left: -5%;
+    width: 120%;
+    height: 120%;
+    border-radius: 12px;
+    z-index: 0; /* Pushed behind the chart container (z-index 10) */
+    pointer-events: none;
+    
+    /* Dual-Color Background: Blue/Cyan and Purple/Magenta */
+    background: 
+        radial-gradient(circle at 10% 10%, rgba(0, 162, 255, 0.104) 0%, transparent 40%), 
+        radial-gradient(circle at 90% 90%, rgba(238, 0, 255, 0.104) 0%, transparent 40%);
+    
+    filter: blur(80px); /* Heavy blur for soft, radiating effect */
+    mix-blend-mode: screen; 
+    opacity: 0.8;
 }
 
 .settings-hero h1 {
-    font-size: 2.6rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    color: #f5f7fa;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    /* Neon Text Effect */
+    text-shadow: 0 0 10px rgba(0, 163, 255, 0.4), 0 0 20px rgba(0, 163, 255, 0.1);
 }
 
 .settings-hero p {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.45);
-    margin-top: 8px;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    font-weight: 300;
 }
-
-/* WRAPPER */
+.lock-message {
+    color: #ff6e92;
+    font-size: 14px;
+}
+/* --- Main Wrapper --- */
 .settings-wrapper {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 0 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+    display: grid;
+    gap: 25px;
 }
 
-/* ============================================
-   SETTINGS CARD — ULTRA SLEEK DARK PANELS
-   ============================================ */
+/* --- Settings Card (The Core Frosted Container) --- */
 .settings-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-    padding: 30px 28px;
+    /* Reusing the dark, frosted, glass-like style from .company-card-content */
+    background-color: #11141c51;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     border-radius: 12px;
-    backdrop-filter: blur(10px);
-    transition: 0.3s ease;
+    padding: 25px; /* Increased padding */
+    position: relative;
+    overflow: hidden;
+    /* Stronger, floating shadow */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+    transition: transform 0.2s, box-shadow 0.3s;
+    border: 1px solid rgba(83, 89, 107, 0.5); 
 }
 
 .settings-card:hover {
-    border-color: rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.03);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.9);
 }
 
-/* TYPOGRAPHY */
 .settings-card h2 {
-    font-size: 1.15rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    letter-spacing: 0.3px;
-    color: #f4f7fc;
+    color: var(--color-text-light);
+    margin-top: 0;
+    margin-bottom: 5px;
 }
 
 .settings-card .sub {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.38);
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
     margin-bottom: 20px;
+    font-weight: 300;
 }
 
-/* FORM INPUTS */
-.settings-card input,
+/* --- Input Fields (Frosted/Thin Border) --- */
+.settings-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-card input[type="text"],
+.settings-card input[type="password"],
 .settings-card select {
     width: 100%;
-    background: #0b0e17;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 13px 14px;
+    padding: 12px 15px;
+    box-sizing: border-box;
     border-radius: 8px;
-    color: #fff;
-    font-size: 0.95rem;
-    transition: 0.25s ease;
+    /* Frosted style from #tradeSearch */
+    border: 1.1px solid rgba(255, 255, 255, 0.2); 
+    background: #11141c00; /* Fully transparent background */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--color-text-light);
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+}
+
+.settings-card input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
 }
 
 .settings-card input:focus,
 .settings-card select:focus {
-    border-color: #4d93ff;
-    background: #0f1320;
-    box-shadow: 0 0 8px rgba(90,140,255,0.25);
     outline: none;
+    /* Glow effect on focus */
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2), 0 0 10px rgba(0, 163, 255, 0.2);
 }
 
-/* BUTTONS */
-.primary-btn {
-    padding: 12px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
+/* Special styling for select dropdowns */
+.settings-card select {
+    /* Reset default appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path fill="%23E0E0E0" d="M0 0l5 6 5-6z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 35px; /* Space for arrow */
+}
+
+.settings-card select option {
+    /* Ensure options are readable on the dark theme */
+    background-color: var(--color-card-dark);
+    color: var(--color-text-light);
+}
+
+/* AI Preferences Labels */
+.settings-card label {
+    color: var(--color-text-light);
     font-weight: 500;
+    margin-top: 5px;
+    font-size: 1rem;
+}
 
-    background: #111827;
-    color: #e2e8f0;
-    border: 1px solid rgba(255,255,255,0.12);
 
-    transition: 0.3s ease;
+/* --- Buttons (Primary & Danger) --- */
+
+/* Primary Button (Blue Gradient/Accent) */
+.primary-btn {
+    /* NEW: Linear gradient from Blue (#00A3FF) to Pink (rgb(255, 0, 251)) */
+background-color: #E0EBFF;
+    border: none;
+    color: rgb(0, 0, 0);
+    font-size: 1rem;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    margin-top: 10px;
 }
 
 .primary-btn:hover {
-    background: #1c2333;
-    border-color: rgba(255,255,255,0.18);
+    /* Soft glow on hover */
+    box-shadow: 0 0 15px rgba(0, 163, 255, 0.6), 0 0 20px rgba(255, 0, 251, 0.4);
+    transform: translateY(-2px) scale(1.01);
 }
 
+/* Danger Button (Red/Warning) */
 .danger-btn {
-    padding: 12px 18px;
+    background: linear-gradient(90deg, var(--color-danger-red) 0%, #ff6e92 100%);
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 12px 20px;
     border-radius: 8px;
-    background: #5a0e0e;
-    color: #fff;
-    border: 1px solid rgba(255,0,0,0.25);
-    font-weight: 600;
     cursor: pointer;
-    transition: 0.25s ease;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    margin-top: 10px;
 }
 
 .danger-btn:hover {
-    background: #7c0f0f;
+    box-shadow: 0 0 15px rgba(255, 56, 96, 0.6);
+    transform: translateY(-2px) scale(1.01);
 }
 
-/* LOCKED / SSO STATE */
-.disabled-input {
-    opacity: 0.45;
-    cursor: not-allowed;
+/* --- Delete Account Section Warnings --- */
+.settings-card[data-section="delete"] h2.warning-label {
+    color: var(--color-danger-red);
+    text-shadow: 0 0 5px rgba(255, 56, 96, 0.4);
 }
 
-.lock-message {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    color: rgba(255,150,150,0.45);
+.settings-card[data-section="delete"] p.warning {
+    color: var(--color-danger-red);
+    font-weight: 500;
 }
 
-/* REMOVE FUGLY PURPLE GLOWS */
-.settings-card::after {
+/* --- Status Text --- */
+.status-text {
+    font-size: 0.9rem;
+    color: var(--color-accent-blue); /* Use blue for general status */
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* --- Responsive Adjustments (Based on trade table media query) --- */
+@media (max-width: 600px) {
+    .settings-hero h1 {
+        font-size: 2rem;
+    }
+
+    .settings-card {
+        padding: 20px;
+    }
+
+    .settings-card h2 {
+        font-size: 1.3rem;
+    }
+}
+
+
+
+
+
+
+.toast {
+    position: fixed;
+    bottom: 25px; /* Increased position from 15px to 25px */
+    right: 25px; /* Increased position from 15px to 25px */
+    background: linear-gradient(90deg, #00c851 0%, #000000 60%, #000000 100%);
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);    color: #fff;
+    padding: 12px 18px; /* Increased padding from 8px 12px */
+    border-radius: 8px; /* Increased border radius from 5px to 8px */
+    font-size: 16px; /* Increased font size from 12px to 14px */
+    opacity: 1;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+    margin-bottom: 20px;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+.toast.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+
+.hidden {
     display: none !important;
+}
+
+
+
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+    /* --- Add the blur here --- */
+    backdrop-filter: blur(7px); /* Adjust the '5px' to control the blur intensity */
+    /* Add vendor prefixes for wider compatibility */
+    -webkit-backdrop-filter: blur(7px); 
+}
+
+.popup-content {
+     padding: 50px 30px; 
+    border-radius: 12px; 
+    /* Subtle border: 1px line using a semi-transparent version of a dark gray */
+    border: 1px solid rgba(83, 89, 107, 0.5); 
+    /* Translucent dark background */
+    background-color: rgba(18, 18, 26, 0.85);
+    color: #fff;
+    width: auto;
+    margin: 10px 0px;
+    /* Add transition for smooth hover effects */
+    transition: all 0.2s ease-in-out; 
+    text-align: center;
+}
+
+.popup-content p {
+    font-size: 1.1rem; 
+}
+
+.popup-content button {
+    margin: 0 10px; /* Increased margin from 0 6px */
+    padding: 8px 15px; /* Increased padding from 5px 10px */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+}
+
+#confirm-yes {
+    padding-top: 8px; 
+    color: white;
+    
+    /* Subtle Translucent Green Gradient */
+    background: linear-gradient(135deg, 
+        rgba(83, 196, 26, 0.85),  /* Start: Slightly lighter, 85% opacity */
+        rgba(40, 150, 10, 0.577)   /* End: Slightly darker, 85% opacity */
+    );
+    /* Remove the old background-color: #53c41ac8; */
+}
+
+#confirm-no {
+    padding-top: 8px; 
+    color: white;
+    
+    /* Subtle Translucent Red Gradient */
+    background: linear-gradient(135deg, 
+        rgba(249, 74, 77, 0.85),  /* Start: Slightly lighter, 85% opacity */
+        rgba(210, 30, 36, 0.527)   /* End: Slightly darker, 85% opacity */
+    );
+    /* Remove the old background-color: #f94a4dca; */
 }

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,80 +24,77 @@
         <p>Manage your account, preferences, and security on BlackSealed.</p>
     </section>
 
-    <main class="settings-wrapper">
+    <div class="chart-wrapper">
+        <main class="settings-wrapper">
+            <!-- USERNAME -->
+            <section class="settings-card" data-section="username">
+                <h2>Change Username</h2>
+                <p class="sub">Your username is visible across all BlackSealed features.</p>
+                <form id="change-username-form">
+                    <input type="text" id="newUsername" placeholder="New Username" required>
+                    <!-- Password row for LOCAL ONLY -->
+                    <div id="usernamePwRow">
+                        <input type="password" id="currentPasswordUsername" placeholder="Confirm Password">
+                    </div>
+                    <button type="submit" class="primary-btn">Update Username</button>
+                </form>
+            </section>
+            <!-- PASSWORD (LOCAL ONLY) -->
+            <section class="settings-card" data-section="password">
+                <h2>Change Password</h2>
+                <p class="sub">Choose a strong password to keep your account secure.</p>
+                <form id="change-password-form">
+                    <input type="password" id="oldPassword" placeholder="Old Password" required>
+                    <input type="password" id="newPassword" placeholder="New Password" required>
+                    <button type="submit" class="primary-btn">Update Password</button>
+                </form>
+            </section>
+            <!-- AI PREFS -->
+            <section class="settings-card">
+                <h2>AI Preferences</h2>
+                <p class="sub">Customize how Nyra interacts with you.</p>
+                <form id="ai-settings-form">
+                    <label>Risk Tolerance</label>
+                    <select id="riskTolerance">
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                    <label>AI Tone</label>
+                    <select id="aiTone">
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="strict">Strict</option>
+                        <option value="educational">Educational</option>
+                    </select>
+                    <button type="submit" class="primary-btn">Save Preferences</button>
+                    <p id="aiSaveStatus" class="status-text"></p>
+                </form>
+            </section>
+            <!-- DELETE ACCOUNT -->
+            <section class="settings-card" data-section="delete">
+                <h2 class="warning-label">Delete Account</h2>
+                <p class="sub warning">This action cannot be undone.</p>
+                <form id="delete-account-form">
+                    <!-- Password row for LOCAL ONLY -->
+                    <div id="deletePwRow">
+                        <input type="password" id="deletePassword" placeholder="Confirm Password">
+                    </div>
+                    <button type="submit" class="danger-btn">Delete Account</button>
+                </form>
+            </section>
+        </main>
+    </div>
+<div id="toast" class="toast hidden"></div>
 
-        <!-- USERNAME -->
-        <section class="settings-card" data-section="username">
-            <h2>Change Username</h2>
-            <p class="sub">Your username is visible across all BlackSealed features.</p>
-
-            <form id="change-username-form">
-                <input type="text" id="newUsername" placeholder="New Username" required>
-
-                <!-- Password row for LOCAL ONLY -->
-                <div id="usernamePwRow">
-                    <input type="password" id="currentPasswordUsername" placeholder="Confirm Password">
-                </div>
-
-                <button type="submit" class="primary-btn">Update Username</button>
-            </form>
-        </section>
-
-        <!-- PASSWORD (LOCAL ONLY) -->
-        <section class="settings-card" data-section="password">
-            <h2>Change Password</h2>
-            <p class="sub">Choose a strong password to keep your account secure.</p>
-
-            <form id="change-password-form">
-                <input type="password" id="oldPassword" placeholder="Old Password" required>
-                <input type="password" id="newPassword" placeholder="New Password" required>
-                <button type="submit" class="primary-btn">Update Password</button>
-            </form>
-        </section>
-
-        <!-- AI PREFS -->
-        <section class="settings-card">
-            <h2>AI Preferences</h2>
-            <p class="sub">Customize how Nyra interacts with you.</p>
-
-            <form id="ai-settings-form">
-                <label>Risk Tolerance</label>
-                <select id="riskTolerance">
-                    <option value="low">Low</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="high">High</option>
-                </select>
-
-                <label>AI Tone</label>
-                <select id="aiTone">
-                    <option value="professional">Professional</option>
-                    <option value="friendly">Friendly</option>
-                    <option value="strict">Strict</option>
-                    <option value="educational">Educational</option>
-                </select>
-
-                <button type="submit" class="primary-btn">Save Preferences</button>
-                <p id="aiSaveStatus" class="status-text"></p>
-            </form>
-        </section>
-
-        <!-- DELETE ACCOUNT -->
-        <section class="settings-card" data-section="delete">
-            <h2 class="warning-label">Delete Account</h2>
-            <p class="sub warning">This action cannot be undone.</p>
-
-            <form id="delete-account-form">
-
-                <!-- Password row for LOCAL ONLY -->
-                <div id="deletePwRow">
-                    <input type="password" id="deletePassword" placeholder="Confirm Password">
-                </div>
-
-                <button type="submit" class="danger-btn">Delete Account</button>
-            </form>
-        </section>
-
-    </main>
+    <div id="delete-popup" class="popup hidden">
+  <div class="popup-content">
+    <p>Are you sure you want to delete your account?</p>
+    <br>
+    <button id="confirm-yes">Yes</button>
+    <button id="confirm-no">No</button>
+  </div>
+</div>
 
     <script src="../js/settings.js" defer></script>
     <script src="../js/navbar.js"></script>

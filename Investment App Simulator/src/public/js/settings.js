@@ -1,6 +1,3 @@
-// ======================================
-// SETTINGS PAGE SCRIPT (FINAL CLEAN VERSION)
-// ======================================
 
 window.addEventListener("DOMContentLoaded", async () => {
 
@@ -102,12 +99,26 @@ function initUsernameChange(authType) {
     const form = document.getElementById("change-username-form");
     if (!form) return;
 
+    const toast = document.getElementById("toast");
+
+    const showToast = (message, isError = false) => {
+        toast.textContent = message;
+        toast.classList.remove("hidden");
+        toast.classList.toggle("error", isError);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("error");
+        }, 3000);
+    };
+
     form.addEventListener("submit", async e => {
         e.preventDefault();
 
         const newUsername = document.getElementById("newUsername").value.trim();
 
-        let password = authType === "local"
+        const password = authType === "local"
             ? document.getElementById("currentPasswordUsername").value.trim()
             : null;
 
@@ -121,12 +132,17 @@ function initUsernameChange(authType) {
         });
 
         const data = await res.json();
-        if (data.error) return alert(data.error);
 
-        alert("Username updated successfully!");
+        if (data.error) {
+            showToast(data.error, true);
+            return;
+        }
+
+        showToast("Username updated successfully!");
         form.reset();
     });
 }
+
 
 // --------------------------------------
 // CHANGE PASSWORD (LOCAL ONLY)
@@ -153,12 +169,35 @@ function initPasswordChange(authType) {
         });
 
         const data = await res.json();
-        if (data.error) return alert(data.error);
 
-        alert("Password changed successfully!");
+        // 🔴 Error toast
+        if (data.error) {
+            toast(data.error, "error"); 
+            return;
+        }
+
+        // 🟢 Success toast
+        toast("Password changed successfully!", "success");
         form.reset();
     });
 }
+function toast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add("show");
+    }, 10);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 
 // --------------------------------------
 // DELETE ACCOUNT
@@ -167,19 +206,42 @@ function initDeleteAccount(authType) {
     const form = document.getElementById("delete-account-form");
     if (!form) return;
 
+    const popup = document.getElementById("delete-popup");
+    const yesBtn = document.getElementById("confirm-yes");
+    const noBtn = document.getElementById("confirm-no");
+
+    // Helper functions
+    const showPopup = () => popup.classList.remove("hidden");
+    const hidePopup = () => popup.classList.add("hidden");
+
     form.addEventListener("submit", async e => {
         e.preventDefault();
 
-        let password = authType === "local"
-            ? document.getElementById("deletePassword").value.trim()
-            : null;
+        let password = null;
 
-        if (authType === "local" && !password)
-            return alert("Please enter your password.");
+        if (authType === "local") {
+            password = document.getElementById("deletePassword").value.trim();
 
-        if (!confirm("Are you sure you want to delete your account?"))
-            return;
+            if (!password) {
+                showPopupMessage("Please enter your password.");
+                return;
+            }
+        }
 
+        // Show confirmation popup instead of alert()
+        showPopup();
+
+        // Wait for Yes or No
+        const userChoice = await new Promise(resolve => {
+            yesBtn.onclick = () => resolve(true);
+            noBtn.onclick = () => resolve(false);
+        });
+
+        hidePopup();
+
+        if (!userChoice) return; // User clicked No
+
+        // Proceed with delete request
         const res = await fetch("/settings/delete-account", {
             method: "DELETE",
             headers: {
@@ -190,12 +252,34 @@ function initDeleteAccount(authType) {
         });
 
         const data = await res.json();
-        if (data.error) return alert(data.error);
 
-        alert("Account deleted successfully.");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        if (data.error) {
+            showPopupMessage(data.error);
+            return;
+        }
+
+        // Success
+        showPopupMessage("Your account has been deleted.", () => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        });
     });
+
+    // Message popup utility
+    function showPopupMessage(message, callback) {
+        popup.querySelector(".popup-content").innerHTML = `
+            <p>${message}</p>
+            <br>
+            <button id="close-msg">OK</button>
+        `;
+
+        popup.classList.remove("hidden");
+
+        document.getElementById("close-msg").onclick = () => {
+            popup.classList.add("hidden");
+            if (callback) callback();
+        };
+    }
 }
 
 // --------------------------------------
