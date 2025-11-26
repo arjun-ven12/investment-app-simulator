@@ -1,0 +1,124 @@
+{
+  "title": "How-To Guide: Using Daily AI Advice",
+  "content": [
+    {
+      "heading": "What Is Daily AI Advice?",
+      "content": [
+        {
+          "type": "text",
+          "text": "Daily AI Advice provides personalised insights on your portfolio, trading behaviour, and opportunities for improvement. It refreshes every day at exactly 11:00 AM based on your latest trades, risk settings, and market conditions."
+        },
+        {
+          "type": "list",
+          "title": "What Daily Advice Helps You With",
+          "items": [
+            "Understanding strengths and weaknesses in your portfolio",
+            "Spotting diversification gaps and sector risks",
+            "Improving your entry and exit timing",
+            "Identifying behavioural patterns such as over-concentration or emotional trading",
+            "Receiving stock and option recommendations tailored to your settings"
+          ]
+        }
+      ]
+    },
+
+    {
+      "heading": "How Advice Is Generated",
+      "content": [
+        {
+          "type": "text",
+          "text": "Nyra AI evaluates all your trading activity and portfolio data each morning before generating your 11:00 AM update."
+        },
+        {
+          "type": "list",
+          "title": "What Nyra Analyzes",
+          "items": [
+            "Your current holdings, cash, and sector exposure",
+            "Recent trades and order types (market vs limit)",
+            "Performance metrics such as P/L, timing, and consistency",
+            "Risk exposure, drawdown behaviour, and portfolio concentration",
+            "Your scenario attempts and post-run trading patterns"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "If you make new trades during the day, they will be reflected in the next day's 11:00 AM advice update."
+        }
+      ]
+    },
+
+    {
+      "heading": "Customising Your AI Preferences",
+      "content": [
+        {
+          "type": "text",
+          "text": "You can control the style and strictness of Nyra’s advice using the AI Preferences panel in Settings."
+        },
+        {
+          "type": "list",
+          "title": "Risk Tolerance Options",
+          "items": [
+            "Low — Nyra prioritises capital preservation, safer picks, and conservative strategies.",
+            "Moderate — Balanced suggestions with steady growth and controlled risk.",
+            "High — More aggressive recommendations focused on higher potential returns."
+          ]
+        },
+        {
+          "type": "list",
+          "title": "AI Tone Options",
+          "items": [
+            "Professional — Clear, objective guidance.",
+            "Friendly — Softer tone with encouraging feedback.",
+            "Strict — Direct, performance-driven feedback.",
+            "Educational — Explanations and teaching-style insights."
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Your AI preferences directly influence the wording, strictness, and risk profile of your daily advice."
+        }
+      ]
+    },
+
+    {
+      "heading": "Viewing Your Daily Advice",
+      "content": [
+        {
+          "type": "text",
+          "text": "All advice is available under the AI Advice tab, where you can switch between Stocks and Options insights."
+        },
+        {
+          "type": "list",
+          "title": "What You Will See",
+          "items": [
+            "Portfolio critique (strengths and weaknesses)",
+            "Scenario analysis outcomes",
+            "Stock diversification recommendations",
+            "Option strategy suggestions",
+            "Behavioural notes and improvement areas"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Each card is updated at 11:00 AM daily and displays the exact timestamp of your latest update."
+        }
+      ]
+    },
+
+    {
+      "heading": "Key Takeaways",
+      "content": [
+        {
+          "type": "list",
+          "items": [
+            "Daily AI Advice is refreshed every day at 11:00 AM.",
+            "Nyra’s insights adapt based on your risk tolerance and AI tone settings.",
+            "Advice includes stock, options, behaviour, and scenario-based analysis.",
+            "You can view your updated insights anytime under the AI Advice tab.",
+            "Your AI preferences allow you to personalise how Nyra guides you."
+          ]
+        }
+      ]
+    }
+  ]
+}
