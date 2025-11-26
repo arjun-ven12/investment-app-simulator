@@ -253,4 +253,13 @@ canvas {
   display: block;
   margin: 0 auto;
   box-sizing: border-box;
+}@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
+}
+@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
 }

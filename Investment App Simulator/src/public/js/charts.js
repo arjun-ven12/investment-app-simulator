@@ -490,7 +490,7 @@ window.addEventListener('DOMContentLoaded', function () {
       // { exchange: "SGX", holiday: null, isOpen: false, session: "pre-market", timezone: "...", t: ... }
       const statusText = data.isOpen ? "open" : "closed";
       const sessionText = data.session ? ` (${data.session})` : "";
-      marketStatusEl.textContent = `Market is ${statusText}${sessionText}`;
+      marketStatusEl.textContent = `Market is ${statusText}${sessionText} (USA)`;
     })
     .catch(error => {
       console.error("Error retrieving market status:", error);

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,7 +23,7 @@
   <!-- NAVBAR -->
   <header class="bs-nav">
     <div class="bs-nav-left">
-      <div class="logo-orb"></div>
+      <!-- <div class="logo-orb"></div> -->
       <span class="logo-text">BlackSealed</span>
     </div>
     <nav class="bs-nav-links">
@@ -34,8 +35,7 @@
       <a href="#gamification">Gamification</a>
     </nav>
     <div class="bs-nav-actions">
-      <button class="btn ghost-btn">Log in</button>
-      <button class="btn primary-btn">Launch Simulator</button>
+      <button class="btn primary-btn" onclick="window.location.href='/login'" >Launch Simulator</button>
     </div>
   </header>
 
@@ -51,15 +51,15 @@
           with <span class="accent">simulation-grade precision.</span>
         </h1>
         <p class="hero-subtitle">
-          BlackSealed is a cinematic, AI-powered paper trading platform for stocks & options — combining
+          BlackSealed is an AI-powered paper trading platform for stocks & options — combining
           real-time simulations, institutional-grade analytics, and blockchain-verified trade history.
         </p>
         <div class="hero-actions">
-          <button class="btn primary-btn">Start Trading</button>
-          <button class="btn ghost-btn">View Platform Demo</button>
+          <button class="btn primary-btn" onclick="window.location.href='/login'" >Start Trading</button>
+          <!-- <button class="btn ghost-btn">View Platform Demo</button> -->
         </div>
 
-        <div class="hero-metrics">
+        <!-- <div class="hero-metrics">
           <div class="metric-card">
             <span class="metric-label">Simulated Volume</span>
             <span class="metric-value">$12.7M+</span>
@@ -72,7 +72,7 @@
             <span class="metric-label">Scenario Attempts</span>
             <span class="metric-value">236</span>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Hero Visual Cluster -->
@@ -173,7 +173,6 @@
             live pricing feeds, order history, and cancellable open orders.
           </p>
           <ul>
-            <li>Live bid/ask simulation</li>
             <li>Portfolio P/L tracking</li>
             <li>Watchlists & stock search</li>
           </ul>
@@ -200,7 +199,7 @@
           </p>
           <ul>
             <li>Sector & industry breakdowns</li>
-            <li>Equity curve & drawdown</li>
+            <li>Equity distribution</li>
             <li>Recent trades & activity feed</li>
           </ul>
         </article>
@@ -272,13 +271,13 @@
             <span class="pill red">Event Risk</span>
           </div>
         </div>
-        <div class="command-card animate-on-scroll tilt-on-hover">
+        <!-- <div class="command-card animate-on-scroll tilt-on-hover">
           <h3>Comments & Watchlists</h3>
           <p>Organize your ideas and notes per ticker with comments, watchlists, and tags.</p>
           <div class="mini-comment">
             “Watching NVDA into earnings — high IV, consider spreads instead of naked calls.”
           </div>
-        </div>
+        </div> -->
       </div>
     </section>
 
@@ -297,7 +296,7 @@
         <div class="scenario-node">
           <div class="node-dot"></div>
           <div class="node-label">
-            <h4>2020 · Pandemic Crash</h4>
+            <h4>2025 · Trade War Shock</h4>
             <p>Navigate historic drawdowns and violent reversals.</p>
           </div>
         </div>
@@ -315,13 +314,13 @@
             <p>Trade energy, transport, and volatility in a supply shock.</p>
           </div>
         </div>
-        <div class="scenario-node">
+        <!-- <div class="scenario-node">
           <div class="node-dot node-pulse"></div>
           <div class="node-label">
             <h4>Next · Your Custom Scenario</h4>
             <p>Design and test your own stress tests.</p>
           </div>
-        </div>
+        </div> -->
       </div>
     </section>
 
@@ -385,7 +384,7 @@
           </div>
           <span class="progress-label">62% to “Market Architect” badge</span>
         </div>
-        <div class="gam-card animate-on-scroll tilt-on-hover">
+        <!-- <div class="gam-card animate-on-scroll tilt-on-hover">
           <h3>Achievements</h3>
           <p>Collect badges for disciplined, consistent decisions.</p>
           <div class="badge-row">
@@ -393,7 +392,7 @@
             <span class="badge-pill">No-FOMO Week</span>
             <span class="badge-pill">Diversified Portfolio</span>
           </div>
-        </div>
+        </div> -->
       </div>
     </section>
 
@@ -404,10 +403,10 @@
         <h2>Turn the markets into your training ground.</h2>
         <p class="section-subtitle">
           Launch the BlackSealed simulator, explore real-time paper trading, and let Nyra guide your next decisions — before real capital is at stake.
-        </p>
+        </p>          <br>
         <div class="hero-actions">
-          <button class="btn primary-btn">Launch Simulator</button>
-          <button class="btn ghost-btn">View Docs & Guides</button>
+          <button class="btn primary-btn" onclick="window.location.href='/login'">Launch Simulator</button>
+          <!-- <button class="btn ghost-btn">View Docs & Guides</button> -->
         </div>
       </div>
     </section>
@@ -417,12 +416,7 @@
   <!-- FOOTER -->
   <footer class="bs-footer">
     <div>© <span id="year"></span> BlackSealed. All rights reserved.</div>
-    <div class="footer-links">
-      <a href="#">Docs</a>
-      <a href="#">Security</a>
-      <a href="#">Privacy</a>
-      <a href="#">Contact</a>
-    </div>
+
   </footer>
 
   <!-- Scripts -->
@@ -430,3 +424,4 @@
 </body>
 
 </html>
+`

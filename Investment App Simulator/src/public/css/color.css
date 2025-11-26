@@ -365,4 +365,8 @@ canvas {
     width: 100%; /* Full width for responsive design */
     box-sizing: border-box; /* Ensures padding doesn't overflow */
   }
-  
+  @media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
+}

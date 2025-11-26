@@ -1313,3 +1313,21 @@ html, body {
   padding: 15px !important;
   overflow:hidden
 }
+
+
+@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
+}
+.guide {
+  background-color: #e0ebff00;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px;
+    border: #E0EBFF 1.5px solid;
+    margin: 2px;
+}

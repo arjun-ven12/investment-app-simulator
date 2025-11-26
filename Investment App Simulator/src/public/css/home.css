@@ -443,4 +443,8 @@ scrollbar-width: none; /* Firefox */
 
 .my-scenarios::-webkit-scrollbar {
 display: none; /* Chrome/Safari/Edge */
+}@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
 }

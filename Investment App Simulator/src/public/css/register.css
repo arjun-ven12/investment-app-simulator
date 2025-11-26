@@ -319,3 +319,10 @@ margin-bottom: 20px !important;
 
 
 
+
+
+@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
+}
