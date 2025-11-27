@@ -1,81 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Investment Dashboard</title>
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <!-- Fonts & Icons -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="../css/investment.css" />
 
-    <!-- Socket.IO + Chart libraries -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <!-- App JS -->
-    <script src="../js/charts.js" defer></script>
-    <script src="../js/options.js" defer></script>
-    <script src="../js/stopMarketOrder.js" defer></script>
-    <script src="../js/home.js" defer></script>
-    <script src="../js/navbar.js" defer></script>
-    <script src="../js/web3auth.js" defer></script>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Dashboard</title>
+  <link rel="stylesheet" href="/css/chatbot.css">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js/dist/css/shepherd.css" />
+  <script src="https://cdn.jsdelivr.net/npm/shepherd.js/dist/js/shepherd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="../css/onboarding.css">
+  <script src="../js/onboarding.js" defer></script>
 
-  <body>
-    <input type="hidden" id="current-stock-id" value="" />
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- <h3>WatchList</h3> -->
-                                <h2>Watchlist</h2>
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/investment.css" />
 
-      <div class="search-container">
-        <input
-          type="text"
-          id="stock-search"
-          placeholder="Enter stock name or symbol"
-        />
-        <button id="search-button" style="margin-top: 10px;">Search</button>
-      </div>
-      <br />      
-      <h2>Search Results</h2>
-      <ul id="stock-list"></ul>
-      <br>
-      <h2>Favorited Stocks</h2>
-      <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
-      <div id="favorites-error-message" class="error-message"></div>
-      <div
-        id="error-message"
-        class="error-message"
-        style="margin-top: 8px"
-      ></div>
-      <div id="stocks-container" style="margin-top: 8px"></div>
+  <!-- Socket.IO + Chart libraries -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <!-- App JS -->
+  <script src="../js/charts.js" defer></script>
+  <script src="../js/options.js" defer></script>
+  <script src="../js/stopMarketOrder.js" defer></script>
+  <script src="../js/home.js" defer></script>
+  <script src="../js/navbar.js" defer></script>
+  <script src="../js/web3auth.js" defer></script>
+</head>
 
+<body>
+  <input type="hidden" id="current-stock-id" value="" />
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- <h3>WatchList</h3> -->
+    <h2>Watchlist</h2>
+
+    <div class="search-container">
+      <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
+      <button id="search-button" style="margin-top: 10px;">Search</button>
     </div>
+    <br />
+    <h2>Search Results</h2>
+    <ul id="stock-list"></ul>
+    <br>
+    <h2>Favorited Stocks</h2>
+    <ul id="favorite-stocks" class="favorite-stocks-grid"></ul>
+    <div id="favorites-error-message" class="error-message"></div>
+    <div id="error-message" class="error-message" style="margin-top: 8px"></div>
+    <div id="stocks-container" style="margin-top: 8px"></div>
+
+  </div>
 
 
-          <div id="market-status-banner">
-        <span id="market-status">Loading market status...</span>
-      </div>
+  <div id="market-status-banner">
+    <span id="market-status">Loading market status...</span>
+  </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Navbar -->
-      <div id="navbar-container"></div>
-      <!-- Dashboard Header -->
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+    <!-- Dashboard Header -->
 
 
-          <div class="tab-container">
+    <div class="tab-container">
       <button class="tab-button active" data-tab="stock-dashboard">Stock Dashboard</button>
       <button class="tab-button" data-tab="options-dashboard">Options Dashboard</button>
     </div>
@@ -83,36 +75,31 @@
     <div id="stock-dashboard" class="tab-content active">
 
       <!-- <div class="content"> -->
-        <br>
-        <br />
-        <h1>Stock Dashboard</h1>
+      <br>
+      <br />
+      <h1>Stock Dashboard</h1>
       <!-- </div> -->
       <!-- Chart + Trading Form -->
       <div class="container">
         <div class="chart-wrapper">
           <div class="chart-container">
             <form id="chart-form-intraday" class="chart-form">
-              <input
-                type="text"
-                name="chartSymbol"
-                placeholder="Enter symbol (e.g. AAPL)"
-                required
-              />
+              <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required />
               <div class="options-wrap">
-              <!-- <label for="range">Select Range:</label> -->
-              <select name="range" id="range">
-                <option value="1d">Last 1 Day</option>
-                <option value="1w" selected>Last 1 Week</option>
-                <option value="1m">Last 1 Month</option>
-                <option value="6m">Last 6 Months</option>
-                <option value="1y">Last 1 Year</option>
-              </select>
-              <div class="select-wrapper">
-                <select name="chartType" id="chartType">
-                  <option value="line">Line (Close Price)</option>
-                  <option value="candlestick">Candlestick</option>
+                <!-- <label for="range">Select Range:</label> -->
+                <select name="range" id="range">
+                  <option value="1d">Last 1 Day</option>
+                  <option value="1w" selected>Last 1 Week</option>
+                  <option value="1m">Last 1 Month</option>
+                  <option value="6m">Last 6 Months</option>
+                  <option value="1y">Last 1 Year</option>
                 </select>
-              </div>
+                <div class="select-wrapper">
+                  <select name="chartType" id="chartType">
+                    <option value="line">Line (Close Price)</option>
+                    <option value="candlestick">Candlestick</option>
+                  </select>
+                </div>
               </div>
               <button type="submit">Generate Chart</button>
 
@@ -120,10 +107,10 @@
             <div id="loading"></div>
             <div id="percentage2"></div>
             <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
-                                  <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
+            <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
               Reset Zoom
             </span>
-            </div>
+          </div>
         </div>
         <div class="trading-card">
           <form id="trading-form">
@@ -159,70 +146,38 @@
 
             <div class="form-group">
               <label for="price">Stock Price</label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                placeholder="Enter price"
-                step="0.01"
-              />
+              <input type="number" id="price" name="price" placeholder="Enter price" step="0.01" />
             </div>
 
             <div class="form-group">
               <label for="quantity">Quantity</label>
-              <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                placeholder="Enter quantity"
-              />
+              <input type="number" id="quantity" name="quantity" placeholder="Enter quantity" />
             </div>
 
-     
+
             <!-- Stop-Limit Trigger -->
             <div class="form-group hidden" id="stop-limit-trigger-container">
               <label for="stop-limit-trigger">Trigger Price</label>
-              <input
-                type="number"
-                id="stop-limit-trigger"
-                name="stop-limit-trigger"
-                placeholder="Enter trigger price"
-                step="0.01"
-              />
+              <input type="number" id="stop-limit-trigger" name="stop-limit-trigger" placeholder="Enter trigger price"
+                step="0.01" />
             </div>
 
             <!-- Stop-Market Trigger -->
             <div class="form-group hidden" id="stop-market-container">
               <label for="trigger-price">Trigger Price</label>
-              <input
-                type="number"
-                id="trigger-price"
-                name="trigger-price"
-                placeholder="Enter trigger price"
-                step="0.01"
-              />
+              <input type="number" id="trigger-price" name="trigger-price" placeholder="Enter trigger price"
+                step="0.01" />
             </div>
-                   <!-- Stop-Limit Price -->
+            <!-- Stop-Limit Price -->
             <div class="form-group hidden" id="stop-limit-container">
               <label for="stop-limit-price">Stop Limit Price</label>
-              <input
-                type="number"
-                id="stop-limit-price"
-                placeholder="Enter stop limit price"
-                step="0.01"
-              />
+              <input type="number" id="stop-limit-price" placeholder="Enter stop limit price" step="0.01" />
             </div>
 
-            
+
             <div class="form-group">
               <label for="amount">Amount</label>
-              <input
-                type="text"
-                id="amount"
-                name="amount"
-                placeholder="--"
-                readonly
-              />
+              <input type="text" id="amount" name="amount" placeholder="--" readonly />
             </div>
             <div id="buy-error" class="error-message"></div>
 
@@ -252,7 +207,7 @@
         <div class="chart-wrapper">
           <div class="chart-container">
             <!-- <div class="content trading-card2"></div> -->
-                         <h2>Company Details</h2>
+            <h2>Company Details</h2>
 
             <div class="company-card"></div>
           </div>
@@ -360,17 +315,17 @@
         </div>
       </div>
       <!-- Cancel confirmation popup -->
-<div id="cancel-popup" class="popup hidden">
-  <div class="popup-content">
-    <p>Are you sure you want to cancel?</p>
-    <br>
-    <button id="confirm-yes">Yes</button>
-    <button id="confirm-no">No</button>
-  </div>
-</div>
+      <div id="cancel-popup" class="popup hidden">
+        <div class="popup-content">
+          <p>Are you sure you want to cancel?</p>
+          <br>
+          <button id="confirm-yes">Yes</button>
+          <button id="confirm-no">No</button>
+        </div>
+      </div>
 
-<!-- Toast Notification -->
-<div id="toast" class="toast hidden"></div>
+      <!-- Toast Notification -->
+      <div id="toast" class="toast hidden"></div>
 
 
       <div class="chart-wrapper">
@@ -402,19 +357,19 @@
         </div>
         <ul id="comments-list"></ul>
       </div>-->
-    </div> 
+    </div>
 
 
 
 
 
 
-<!-- OPTIONS DASHBOARD -->
+    <!-- OPTIONS DASHBOARD -->
 
     <div id="options-dashboard" class="tab-content">
-        <br /><br>
-        <h1>Options Dashboard</h1>
-        <br>      
+      <br /><br>
+      <h1>Options Dashboard</h1>
+      <br>
 
       <div class="chart-wrapper">
         <div class="chart-container">
@@ -423,45 +378,45 @@
             <button type="submit">Get Option Contracts</button>
           </form>
           <div class="options-container"></div>
-        
+
         </div>
       </div>
-               
+
 
       <div class="options-card history-column">
-              <h1>Your Option Trades</h1>
+        <h1>Your Option Trades</h1>
 
-                <button id="export-option-trades" class="submit-button">Export Option Trades</button>
-                <br><br>
-            <table id="options-trades-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Stock Symbol</th>
-                <th>Contract Symbol</th>
-                <th>Side</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total Amount (Premium)</th>
-                <th>Strike Price</th>
-                <th>Expiry</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="options-trades-table-body"></tbody>
-          </table>
+        <button id="export-option-trades" class="submit-button">Export Option Trades</button>
+        <br><br>
+        <table id="options-trades-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Stock Symbol</th>
+              <th>Contract Symbol</th>
+              <th>Side</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total Amount (Premium)</th>
+              <th>Strike Price</th>
+              <th>Expiry</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="options-trades-table-body"></tbody>
+        </table>
       </div>
 
-        <div class="chart-container">
-                    <h1>Your Option Portfolio</h1>
+      <div class="chart-container">
+        <h1>Your Option Portfolio</h1>
 
-          <div id="options-portfolio-card"></div>
-        </div>
+        <div id="options-portfolio-card"></div>
+      </div>
 
 
-            <!-- Market Status Banner -->
+      <!-- Market Status Banner -->
       <!-- <div id="market-status-banner">
         <span id="market-status">Loading market status...</span>
       </div> -->
@@ -472,171 +427,172 @@
         <div class="content trading-card2"></div>
       </div> -->
     </div>
-    </div>
-    <!-- END main-content -->
-    <!-- Logout Script -->
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const logoutButton = document.getElementById("logoutButton");
+  </div>
+  <!-- END main-content -->
+  <!-- Logout Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutButton = document.getElementById("logoutButton");
 
-  if (logoutButton) {
-    logoutButton.addEventListener("click", () => {
-      // 1️⃣ Remove auth token
-      localStorage.removeItem("token");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", () => {
+          // 1️⃣ Remove auth token
+          localStorage.removeItem("token");
 
-      // 2️⃣ Clear ALL sessionStorage caches related to options
-//       for (let i = sessionStorage.length - 1; i >= 0; i--) {
-//         const key = sessionStorage.key(i);
-//         if (key && key.startsWith("options_contracts_")) {
-//           sessionStorage.removeItem(key);
-//         }
-//       }
-//            for (let i = sessionStorage.length - 1; i >= 0; i--) {
-//   const key = sessionStorage.key(i);
-//   sessionStorage.removeItem(key);
-// }
+          // 2️⃣ Clear ALL sessionStorage caches related to options
+          //       for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          //         const key = sessionStorage.key(i);
+          //         if (key && key.startsWith("options_contracts_")) {
+          //           sessionStorage.removeItem(key);
+          //         }
+          //       }
+          //            for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          //   const key = sessionStorage.key(i);
+          //   sessionStorage.removeItem(key);
+          // }
 
-// console.log('After clear:', Object.keys(sessionStorage));
-// console.log('After clear (localStorage):', Object.keys(localStorage));
+          // console.log('After clear:', Object.keys(sessionStorage));
+          // console.log('After clear (localStorage):', Object.keys(localStorage));
 
 
 
-      // 3️⃣ Confirm removal by clearing general session data if needed
-      // sessionStorage.clear(); // Uncomment if you want to clear everything
+          // 3️⃣ Confirm removal by clearing general session data if needed
+          // sessionStorage.clear(); // Uncomment if you want to clear everything
 
-      // 4️⃣ Small delay to ensure cache is cleared before redirect
-      setTimeout(() => {
-        alert("You have been logged out.");
-        window.location.href = "/login";
-      }, 100); // 100ms delay ensures browser flushes removals
+          // 4️⃣ Small delay to ensure cache is cleared before redirect
+          setTimeout(() => {
+            alert("You have been logged out.");
+            window.location.href = "/login";
+          }, 100); // 100ms delay ensures browser flushes removals
+        });
+      }
     });
-  }
-});
 
 
 
 
-        // window.addEventListener('DOMContentLoaded', () => {
-        //   const hash = window.location.hash;
+    // window.addEventListener('DOMContentLoaded', () => {
+    //   const hash = window.location.hash;
 
-        //   if (hash === '#options-dashboard') {
-        //     // Hide all tab contents
-        //     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    //   if (hash === '#options-dashboard') {
+    //     // Hide all tab contents
+    //     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
 
-        //     // Show the Options Dashboard content
-        //     const optionsTab = document.querySelector('#options-dashboard');
-        //     if (optionsTab) {
-        //       optionsTab.style.display = 'block';
-        //       optionsTab.scrollIntoView({ behavior: 'smooth' });
-        //     }
+    //     // Show the Options Dashboard content
+    //     const optionsTab = document.querySelector('#options-dashboard');
+    //     if (optionsTab) {
+    //       optionsTab.style.display = 'block';
+    //       optionsTab.scrollIntoView({ behavior: 'smooth' });
+    //     }
 
-        //     // Remove 'active' from all tab buttons
-        //     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    //     // Remove 'active' from all tab buttons
+    //     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
-        //     // Add 'active' to the Options tab button
-        //     const optionsButton = document.querySelector('[data-tab="options-dashboard"]');
-        //     if (optionsButton) {
-        //       optionsButton.classList.add('active');
-        //     }
-        //   }
-        // });
+    //     // Add 'active' to the Options tab button
+    //     const optionsButton = document.querySelector('[data-tab="options-dashboard"]');
+    //     if (optionsButton) {
+    //       optionsButton.classList.add('active');
+    //     }
+    //   }
+    // });
 
-        //           // Make hash update when clicking a tab button
-        //   document.querySelectorAll('.tab-button').forEach(btn => {
-        //     btn.addEventListener('click', () => {
-        //       const tabName = btn.getAttribute('data-tab');
-        //       window.location.hash = tabName; // updates URL hash
-        //     });
-        //   });
-      window.addEventListener('DOMContentLoaded', () => {
-  const hash = window.location.hash;
+    //           // Make hash update when clicking a tab button
+    //   document.querySelectorAll('.tab-button').forEach(btn => {
+    //     btn.addEventListener('click', () => {
+    //       const tabName = btn.getAttribute('data-tab');
+    //       window.location.hash = tabName; // updates URL hash
+    //     });
+    //   });
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash;
 
-  function activateTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    // Remove 'active' from all tab buttons
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      function activateTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        // Remove 'active' from all tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
-    // Show the requested tab
-    const tabContent = document.getElementById(tabName);
-    const tabButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+        // Show the requested tab
+        const tabContent = document.getElementById(tabName);
+        const tabButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
 
-    if (tabContent) tabContent.classList.add('active');
-    if (tabButton) tabButton.classList.add('active');
+        if (tabContent) tabContent.classList.add('active');
+        if (tabButton) tabButton.classList.add('active');
 
-    // Smooth scroll to the top of the main content
-    tabContent?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+        // Smooth scroll to the top of the main content
+        tabContent?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
-  // 🔹 If user visited with a hash (like #options-dashboard)
-  if (hash === '#options-dashboard') {
-    activateTab('options-dashboard');
-  }
+      // 🔹 If user visited with a hash (like #options-dashboard)
+      if (hash === '#options-dashboard') {
+        activateTab('options-dashboard');
+      }
 
-  // 🔹 Make clicking tab buttons update the hash
-  document.querySelectorAll('.tab-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabName = btn.getAttribute('data-tab');
-      activateTab(tabName);
-      window.location.hash = tabName;
+      // 🔹 Make clicking tab buttons update the hash
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabName = btn.getAttribute('data-tab');
+          activateTab(tabName);
+          window.location.hash = tabName;
+        });
+      });
     });
-  });
-});
 
-(function () {
-  const banner = document.getElementById('market-status-banner');
-  const sidebar = document.querySelector('.sidebar');
+    (function () {
+      const banner = document.getElementById('market-status-banner');
+      const sidebar = document.querySelector('.sidebar');
 
-  if (!sidebar) return;
+      if (!sidebar) return;
 
-  function adjustSidebar() {
-    // if banner not present, fallback to top: 0
-    if (!banner) {
-      sidebar.style.top = '0px';
-      sidebar.style.height = '100vh';
-      return;
-    }
+      function adjustSidebar() {
+        // if banner not present, fallback to top: 0
+        if (!banner) {
+          sidebar.style.top = '0px';
+          sidebar.style.height = '100vh';
+          return;
+        }
 
-    // get actual bottom coordinate of the banner (in px from viewport top)
-    const rect = banner.getBoundingClientRect();
-    // rect.bottom is the pixel position where the banner ends from the top of viewport
-    const topPx = Math.max(0, rect.bottom); // ensure non-negative
+        // get actual bottom coordinate of the banner (in px from viewport top)
+        const rect = banner.getBoundingClientRect();
+        // rect.bottom is the pixel position where the banner ends from the top of viewport
+        const topPx = Math.max(0, rect.bottom); // ensure non-negative
 
-    // set sidebar top and height so it starts immediately below banner
-    sidebar.style.top = `${topPx}px`;
-    sidebar.style.height = `calc(100vh - ${topPx}px)`;
-  }
+        // set sidebar top and height so it starts immediately below banner
+        sidebar.style.top = `${topPx}px`;
+        sidebar.style.height = `calc(100vh - ${topPx}px)`;
+      }
 
-  // run on load and on resize / font changes
-  window.addEventListener('load', adjustSidebar);
-  window.addEventListener('resize', adjustSidebar);
+      // run on load and on resize / font changes
+      window.addEventListener('load', adjustSidebar);
+      window.addEventListener('resize', adjustSidebar);
 
-  // If you change banner content dynamically, call adjustSidebar() again.
-  // For SPA route changes you might also call it after rendering new header.
-})();
+      // If you change banner content dynamically, call adjustSidebar() again.
+      // For SPA route changes you might also call it after rendering new header.
+    })();
 
-import { getProvider } from "./web3auth.js";
-import { ethers } from "ethers";
+    import { getProvider } from "./web3auth.js";
+    import { ethers } from "ethers";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const provider = getProvider(); // use shared provider
-    const signer = provider.getSigner();
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const provider = getProvider(); // use shared provider
+        const signer = provider.getSigner();
 
-    // Example: fetch user wallet balance
-    const balance = await signer.getBalance();
-    console.log("Wallet balance:", ethers.formatEther(balance));
+        // Example: fetch user wallet balance
+        const balance = await signer.getBalance();
+        console.log("Wallet balance:", ethers.formatEther(balance));
 
-    // Now you can use signer in your trade functions
-    // e.g., call your smart contract methods
-    // await optionLedger.recordOptionTrade(...);
-  } catch (err) {
-    console.error("Blockchain access failed:", err);
-  }
-});
+        // Now you can use signer in your trade functions
+        // e.g., call your smart contract methods
+        // await optionLedger.recordOptionTrade(...);
+      } catch (err) {
+        console.error("Blockchain access failed:", err);
+      }
+    });
 
 
-    </script>
-    <script src="../js/chatbot.js" defer></script>
-  </body>
+  </script>
+  <script src="../js/chatbot.js" defer></script>
+</body>
+
 </html>

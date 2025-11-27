@@ -1,0 +1,68 @@
+/* ============================================================================
+   BlackSealed Premium Shepherd Theme
+   ============================================================================ */
+
+.bs-onboard-theme {
+  background: rgba(14, 17, 23, 0.92);
+  color: #d4d7df;
+  border: 1px solid rgba(80, 90, 120, 0.35);
+  border-radius: 14px;
+  padding: 22px;
+  font-family: "Outfit", sans-serif;
+  max-width: 420px;
+  backdrop-filter: blur(14px);
+  animation: bsFade 0.35s ease-out;
+}
+
+@keyframes bsFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.shepherd-header,
+.shepherd-footer {
+  background: transparent !important;
+  border: none !important;
+}
+
+.shepherd-title {
+  font-size: 1.3rem;
+  color: #e9ecf5;
+  font-weight: 600;
+}
+
+.shepherd-text {
+  font-size: 0.95rem;
+  line-height: 1.45rem;
+  color: #c3c7d0;
+}
+
+.shepherd-button {
+  background: #4b7bfd;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.shepherd-button:hover {
+  background: #6aa0ff;
+}
+
+.shepherd-cancel-icon {
+  color: #999 !important;
+  transition: 0.3s;
+}
+
+.shepherd-cancel-icon:hover {
+  color: #ddd !important;
+}
+
+.shepherd-modal-overlay-container {
+  background: rgba(0,0,0,0.55) !important;
+  backdrop-filter: blur(6px);
+}

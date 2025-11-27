@@ -804,3 +804,21 @@ text-decoration: underline;
         zoom: 0.85; /* 85% size */
     }
 }
+
+@media (max-width: 600px) {
+    .detail-card h3 {
+  font-size: 1.5rem
+}
+
+.timeline-board {
+  margin-top: 0px;
+      padding: 60px 0px;
+      height: auto;
+
+
+}
+
+.bg-auras {
+  opacity: 50%
+}
+}

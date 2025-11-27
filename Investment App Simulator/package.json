@@ -28,6 +28,7 @@
         "openai": "^4.73.1",
         "pg": "^8.13.0",
         "readline-sync": "^1.4.10",
+        "shepherd.js": "^14.5.1",
         "socket.io": "^4.8.1",
         "solidity": "^0.0.1"
     },
@@ -50,17 +51,13 @@
         "postinstall": "npx prisma generate && npx hardhat compile",
         "migration:dev": "dotenv -e .env.development -- npx prisma migrate dev",
         "migration:reset": "dotenv -e .env.development -- npx prisma migrate reset",
-    
         "start": "concurrently \"npx hardhat node\" \"dotenv -e .env.development -- node ./src/server.js\"",
-    
         "chatbot": "node ./src/public/js/chatbot.js",
         "test": "playwright test --config=configs/playwright.config.js",
         "lint": "eslint -c configs/eslint.config.mjs ./src/*",
         "test-trace": "npm test -- --reporter=html --trace on",
-    
         "dev": "nodemon index.js",
         "chain": "npx hardhat node",
         "dev:all": "concurrently \"npm run chain\" \"npm run dev\""
     }
-    
 }
