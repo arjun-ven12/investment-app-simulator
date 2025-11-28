@@ -11,7 +11,7 @@ const chartsInvestmentRouter = require('./routers/chartInvestment');
 const realtimeRouter = require('./routers/realtime');
 const realLimitRouter = require('./routers/realLimit');
 const leaderboardRouter = require('./routers/leaderboard');
-
+const onboardingRouter = require('./routers/onboarding'); 
 const stockRouter = require('./routers/stock');
 const tradeOrderRouter = require('./routers/tradeOrder');
 
@@ -121,6 +121,7 @@ app.use("/api/chatbot", chatbotRouter);
 app.use("/guides", guideRouter)
 app.use("/ai-advice", aiAdviceRoutes);
 app.use("/auth", authRoutes);   
+app.use("/onboarding", onboardingRouter); 
 // Handle unknown resources
 app.use((req, res, next) => {
     next(createError(404, `Unknown resource ${req.method} ${req.originalUrl}`));

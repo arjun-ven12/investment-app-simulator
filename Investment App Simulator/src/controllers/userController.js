@@ -86,6 +86,8 @@ module.exports.register = async (req, res) => {
         verified: false,
         verifyToken,
         verifyExpires,
+        onboardingStage: "home",
+        skipOnboarding: false,
       },
     });
 
@@ -223,6 +225,8 @@ module.exports.login = async (req, res) => {
         id: user.id,
         email: user.email,
         username: user.username,
+        onboardingStage: user.onboardingStage,   // NEW
+        skipOnboarding: user.skipOnboarding      // NEW
       },
       token,
     });

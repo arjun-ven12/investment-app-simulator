@@ -89,7 +89,7 @@ body {
 main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 112px 20px 80px;
+  padding: 60px 20px 80px;
 }
 
 /* ---------- NAVBAR ---------- */
@@ -343,7 +343,6 @@ main {
     linear-gradient(135deg, transparent 0%, transparent 20%, rgba(87, 213, 255, 0.7) 40%, rgba(255, 138, 255, 0.8) 70%, transparent 100%);
   opacity: 0.9;
   transform-origin: left bottom;
-  animation: chart-sweep 5s infinite ease-in-out;
 }
 
 .chart-glow {
@@ -664,7 +663,7 @@ main {
 
 .node-dot {
   position: absolute;
-  left: -30px;
+  left: -25px;
   top: 4px;
   width: 12px;
   height: 12px;

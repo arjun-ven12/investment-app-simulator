@@ -1,68 +1,227 @@
-/* ============================================================================
-   BlackSealed Premium Shepherd Theme
-   ============================================================================ */
 
-.bs-onboard-theme {
-  background: rgba(14, 17, 23, 0.92);
-  color: #d4d7df;
-  border: 1px solid rgba(80, 90, 120, 0.35);
-  border-radius: 14px;
-  padding: 22px;
-  font-family: "Outfit", sans-serif;
-  max-width: 420px;
-  backdrop-filter: blur(14px);
-  animation: bsFade 0.35s ease-out;
+/* Shepherd container */
+.shepherd-element {
+  background: #0f0f11e4 !important;
+  color: #fff !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  /* box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.45),
+    0 0 25px rgba(0, 150, 255, 0.35),
+    0 0 45px rgba(255, 80, 200, 0.25) !important; */
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  position: relative;
 }
 
-@keyframes bsFade {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Aura effect behind the box */
+.shepherd-element::before {
+  content: "";
+  position: absolute;
+  inset: -20px; /* extend glow beyond box */
+  z-index: -1;
+  border-radius: 20px;
+  background: radial-gradient(
+    circle at top right,
+    rgba(0, 150, 255, 0.3),
+    rgba(255, 80, 200, 0.25),
+    transparent 70%
+  );
+  filter: blur(30px);
 }
 
-.shepherd-header,
-.shepherd-footer {
+/* Header */
+.shepherd-header {
   background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 14px 18px !important;
+}
+
+/* Title */
+.shepherd-title {
+  font-family: "Outfit", sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+}
+
+/* Text */
+.shepherd-text {
+  padding: 18px !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  color: #dcdcdc !important;
+}
+
+/* Footer */
+.shepherd-footer {
+  padding: 14px 18px !important;
+}
+
+/* Buttons */
+.shepherd-button {
+  font-family: "Outfit", sans-serif !important;
+  border-radius: 8px !important;
+  padding: 8px 18px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer;
   border: none !important;
 }
 
-.shepherd-title {
-  font-size: 1.3rem;
-  color: #e9ecf5;
-  font-weight: 600;
+/* Primary button (Next/Finish) */
+.shepherd-button:not([data-shepherd-button-secondary]) {
+  background: #E0EBFF !important;
+  color: rgb(0, 0, 0) !important;
+  box-shadow: 0 0 10px rgba(37, 124, 255, 0.4);
+  transition: 0.2s ease;
 }
 
-.shepherd-text {
-  font-size: 0.95rem;
-  line-height: 1.45rem;
-  color: #c3c7d0;
+.shepherd-button:not([data-shepherd-button-secondary]):hover {
+  background: #3b8dff !important;
+}
+
+/* Secondary (Back/Cancel) */
+.shepherd-button[data-shepherd-button-secondary="true"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ccc !important;
+}
+
+.shepherd-button[data-shepherd-button-secondary="true"]:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+/* ===============================
+   SECTION NAVIGATOR (BlackSealed UI)
+   =============================== */
+
+.bs-section-nav {
+  margin-top: 12px;
+  position: relative;
+  display: inline-block;
+  font-family: "Outfit", sans-serif;
+}
+
+/* Toggle button */
+.bs-section-nav-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e9f0ff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.25s ease;
+  backdrop-filter: blur(14px);
+}
+
+.bs-section-nav-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Dropdown container */
+.bs-section-nav-menu {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  background: rgba(15, 15, 17, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45),
+              0 0 20px rgba(37, 124, 255, 0.18),
+              0 0 30px rgba(255, 80, 200, 0.15);
+  display: none;
+  z-index: 999999;
+  min-width: 200px;
+}
+
+/* Activate dropdown */
+.bs-section-nav.is-open .bs-section-nav-menu {
+  display: block;
+}
+
+/* Items inside dropdown */
+.bs-section-nav-item {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e6e6e6;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.bs-section-nav-item:last-child {
+  margin-bottom: 0;
+}
+
+.bs-section-nav-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Active state */
+.bs-section-nav-item.is-active {
+  background: #E0EBFF;
+  color: #000;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 12px rgba(37, 124, 255, 0.35);
+}
+.shepherd-footer {
+  display: flex !important;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px !important;
+  background: rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .shepherd-button {
-  background: #4b7bfd;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: 0.25s;
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
-.shepherd-button:hover {
-  background: #6aa0ff;
+/* FORCE EVERY PART OF SHEPHERD TO USE OUTFIT */
+.shepherd-element,
+.shepherd-element * {
+  font-family: "Outfit", sans-serif !important;
+}
+.shepherd-button:not([data-shepherd-button-secondary]):hover {
+  background: #5fa1ff !important;
+  color: #000 !important;
+  box-shadow: 0 0 14px rgba(80, 150, 255, 0.55);
+  transform: translateY(-1px);
+}
+.shepherd-button[data-shepherd-button-secondary="true"]:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+}
+/* Make Shepherd popover wider */
+.shepherd-element {
+  width: 520px !important;
+  max-width: 520px !important;
 }
 
-.shepherd-cancel-icon {
-  color: #999 !important;
-  transition: 0.3s;
+/* Optional: ensure text wraps beautifully */
+.shepherd-text {
+  line-height: 1.55 !important;
+  word-break: normal !important;
 }
-
-.shepherd-cancel-icon:hover {
-  color: #ddd !important;
+.shepherd-button {
+  padding: 7px 14px !important;
+  font-size: 13.5px !important;
+  border-radius: 6px !important;
 }
-
-.shepherd-modal-overlay-container {
-  background: rgba(0,0,0,0.55) !important;
-  backdrop-filter: blur(6px);
+.shepherd-footer {
+  padding: 12px 18px !important;
+  gap: 6px !important;
 }
