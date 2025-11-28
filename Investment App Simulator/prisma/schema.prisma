@@ -184,6 +184,8 @@ model User {
   resetCode                   String?
   resetExpires                DateTime?
   failedLogins                Int                           @default(0)
+  onboardingStage             String                        @default("home")
+  skipOnboarding              Boolean                       @default(false)
   lockUntil                   DateTime?
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
