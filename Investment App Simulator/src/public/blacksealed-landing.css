@@ -1,3 +1,4 @@
+
 /* ============================================================
    BLACKSEALED — Landing Page (Trading-Focused · Futuristic)
    Dark theme · Glassmorphism · Animated
@@ -132,26 +133,60 @@ main {
   color: #eef4ff;
 }
 
+/* ===== BS NAV LINKS (styled like navbar-links) ===== */
+/* ============================
+   BlackSealed Nav Links — Fintech Style
+   ============================ */
+
+/* ==================================
+   BlackSealed Nav Links – Underline Hover Animation
+   ================================== */
+
 .bs-nav-links {
   display: flex;
   align-items: center;
-  gap: 18px;
-  font-size: 0.82rem;
+  gap: 40px;
 }
 
 .bs-nav-links a {
-  color: var(--text-soft);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 999px;
-  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  position: relative;
+  transition: color 0.35s cubic-bezier(.4, 0, .2, 1);
 }
 
-.bs-nav-links a:hover {
-  color: var(--text-main);
-  background: rgba(22, 31, 75, 0.7);
-  transform: translateY(-1px);
+/* Underline animation */
+.bs-nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0%;
+  height: 1px;
+  background: #ffffff;
+  transition: width 0.35s cubic-bezier(.4, 0, .2, 1);
 }
+
+/* Hover → grow underline */
+.bs-nav-links a:hover::after,
+.bs-nav-links a.active::after {
+  width: 100%;
+}
+
+/* Text color change on hover */
+.bs-nav-links a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+/* Active link */
+.bs-nav-links a.active {
+  color: #ffffff;
+}
+
 
 .bs-nav-actions {
   display: flex;
@@ -628,7 +663,6 @@ main {
   inset: 0;
   background:
     linear-gradient(135deg, transparent 0%, rgba(87, 213, 255, 0.8) 40%, rgba(255, 157, 255, 0.9) 80%, transparent 100%);
-  animation: chart-sweep 6s infinite ease-in-out;
 }
 
 .mini-tags {
