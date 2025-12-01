@@ -186,6 +186,8 @@ model User {
   failedLogins                Int                           @default(0)
   onboardingStage             String                        @default("home")
   skipOnboarding              Boolean                       @default(false)
+  scenarioConsoleStage        String      @default("not_started")
+  skipScenarioConsole         Boolean     @default(false)
   lockUntil                   DateTime?
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
