@@ -1331,3 +1331,60 @@ html, body {
     border: #E0EBFF 1.5px solid;
     margin: 2px;
 }
+
+/* ===============================
+   BlackSealed Tooltip System
+   Add class="bs-btn" + data-tooltip=""
+   =============================== */
+
+.bs-btn {
+  position: relative;
+  cursor: pointer;
+  /* OPTIONAL: makes button more elegant */
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Tooltip bubble */
+.bs-btn::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    opacity 0.25s cubic-bezier(.4,0,.2,1) 0.4s,
+    transform 0.25s cubic-bezier(.4,0,.2,1) 0.4s;
+  z-index: 9999;
+}
+
+/* Tooltip arrow */
+.bs-btn::after {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+  opacity: 0;
+  transition: opacity 0.25s cubic-bezier(.4,0,.2,1) 0.4s;
+  z-index: 9999;
+}
+
+/* Show tooltip */
+.bs-btn:hover::before,
+.bs-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}

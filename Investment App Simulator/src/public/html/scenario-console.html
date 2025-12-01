@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/shepherd.js/dist/js/shepherd.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js/dist/css/shepherd.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js/dist/css/shepherd.css">
   <link rel="stylesheet" href="../css/onboarding.css">
   <script src="../js/scenario-onboarding.js" defer></script>
   <!-- Main CSS -->
@@ -34,25 +34,26 @@
   <input type="hidden" id="current-stock-id" value="" />
   <!-- Sidebar -->
   <div class="sidebar">
-          <button class="guide" onclick="window.location.href='/guide?id=8'" >How To Use Scenarios - Guide</button>
-          <br>
+    <button class="guide" onclick="window.location.href='/guide?id=8'">How To Use Scenarios - Guide</button>
+    <br>
 
     <h1 class="sandboxh1">Scenario Details</h1>
     <div id="scenario-details" class="scenario-details">
-  <div class="kv"><span class="k">Title:</span> <span id="scenario-title" class="v">—</span></div>
-  <br>
-  <div class="kv"><span class="k">Description:</span> <span id="scenario-description" class="v">—</span></div>
-  <br>
-<div class="scenario-summary-grid">
-    <div class="kv"><span class="k">Start:</span> <span id="scenario-start-date" class="v">—</span></div>
-    <div class="kv"><span class="k">End:</span> <span id="scenario-end-date" class="v">—</span></div>
-    <div class="kv"><span class="k">Duration:</span> <span id="scenario-duration" class="v">—</span></div>
-    <div class="kv"><span class="k">Starting Balance:</span> <span id="scenario-initial-wallet" class="v">—</span></div>
-</div>
-<br>
-  <div class="kv"><span class="k">Recommended Symbols:</span></div>
-  <div id="scenario-allowed" class="chip-row"></div>
-</div>
+      <div class="kv"><span class="k">Title:</span> <span id="scenario-title" class="v">—</span></div>
+      <br>
+      <div class="kv"><span class="k">Description:</span> <span id="scenario-description" class="v">—</span></div>
+      <br>
+      <div class="scenario-summary-grid">
+        <div class="kv"><span class="k">Start:</span> <span id="scenario-start-date" class="v">—</span></div>
+        <div class="kv"><span class="k">End:</span> <span id="scenario-end-date" class="v">—</span></div>
+        <div class="kv"><span class="k">Duration:</span> <span id="scenario-duration" class="v">—</span></div>
+        <div class="kv"><span class="k">Starting Balance:</span> <span id="scenario-initial-wallet" class="v">—</span>
+        </div>
+      </div>
+      <br>
+      <div class="kv"><span class="k">Recommended Symbols:</span></div>
+      <div id="scenario-allowed" class="chip-row"></div>
+    </div>
   </div>
 
   <!-- Main Content -->
@@ -61,8 +62,8 @@
     <div class="main2">
       <div id="navbar-container"></div>
       <!-- Dashboard Header -->
-        <br />
-        <h1 class="sandboxh1">Sandbox Stock Dashboard</h1>
+      <br />
+      <h1 class="sandboxh1">Sandbox Stock Dashboard</h1>
       <div class="wallet-balance">
         <h3>Wallet Balance: $<span id="wallet-balance">0.00</span></h3>
         <div id="current-update-time">Current update: --</div>
@@ -73,7 +74,8 @@
         </div>
         <!-- Progress bar container -->
         <div
-          style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;" class="progressbar">
+          style="flex: 0.35; height: 8px; background: #000; border: 1px solid #fff; border-radius: 4px; overflow: hidden;"
+          class="progressbar">
           <div id="replay-progress"
             style="height: 100%; width: 0%; background: #fff; border-radius: 4px; transition: width 0.2s;"></div>
         </div>
@@ -97,12 +99,14 @@
                   <option value="line">Line (Close Price)</option>
                 </select>
               </div> -->
-              <button type="submit">Generate Chart</button>
+              <button class="bs-btn" data-tooltip="Generate chart to start trading" type="submit">
+                Generate Chart
+              </button>
             </form>
             <br>
-                        <div id="loading"></div>
+            <div id="loading"></div>
 
-            <div ><canvas id="myChart3" class="canvas3"></canvas></div>
+            <div><canvas id="myChart3" class="canvas3"></canvas></div>
             <div id="next-update-timer" style="color: #fff; margin-top: 10px;">Next update in: --s</div>
             <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
               Reset Zoom
@@ -160,17 +164,23 @@
               <input type="text" id="amount" name="amount" placeholder="--" readonly />
             </div>
             <div id="buy-error" class="error-message"></div>
-            <button type="submit" class="submit-button" id="submit-order">
+            <button class="submit-button bs-btn" data-tooltip="Submit a Market or Limit order" id="submit-order">
               Submit Order
             </button>
-                        <div id="buy-error" class="error-message"></div>
-              <div id="create-success" class="success-message"></div>
+            <div id="buy-error" class="error-message"></div>
+            <div id="create-success" class="success-message"></div>
           </form>
           <div class="replay-controls">
-            <button type="button" id="btn-play">Play</button>
-            <button type="button" id="btn-pause">Pause</button>
-            <button type="button" id="btn-save">Save & Exit</button>
-            <button id="btn-finish" class="control-btn">Finish</button>
+            <button id="btn-play" class="bs-btn" data-tooltip="Play scenario replay">Play</button>
+
+            <button id="btn-pause" class="bs-btn" data-tooltip="Pause scenario replay">Pause</button>
+
+            <button id="btn-save" class="bs-btn" data-tooltip="Save your progress and exit">Save & Exit</button>
+
+            <button id="btn-finish" class="control-btn bs-btn"
+              data-tooltip="Finish the scenario and generate AI insights">
+              Finish
+            </button>
             <label for="speed-select" style="color:#fff; margin-left:10px;">
               Speed:
               <div class="speed-bar-wrapper">
@@ -182,11 +192,12 @@
                   <option value="10">10x</option>
                 </select>
                 <div class="speed-buttons">
-                  <button data-value="1">1x</button>
-                  <button data-value="2">2x</button>
-                  <button data-value="4">4x</button>
-                  <button data-value="5">5x</button>
-                  <button data-value="10">10x</button>
+                  <button data-value="1" class="bs-btn" data-tooltip="Replay at 1x speed">1x</button>
+                  <button data-value="2" class="bs-btn" data-tooltip="Replay at 2x speed">2x</button>
+                  <button data-value="4" class="bs-btn" data-tooltip="Replay at 4x speed">4x</button>
+                  <button data-value="5" class="bs-btn" data-tooltip="Replay at 5x speed">5x</button>
+                  <button data-value="10" class="bs-btn" data-tooltip="Replay at 10x speed">10x</button>
+
                 </div>
               </div>
             </label>
@@ -205,7 +216,7 @@
         <div class="history-column">
           <h2>Your Trade History</h2>
           <div id="trades-error" class="error-message"></div>
-          <button id="export-trades" class="submit-button">
+          <button id="export-trades" class="submit-button bs-btn" data-tooltip="Download your trade history as CSV">
             Export Trade History
           </button>
           <table id="trades-table">
@@ -222,12 +233,12 @@
             <tbody id="trades-table-body"></tbody>
           </table>
           <br>
-      <div id="trades-pagination"></div>
+          <div id="trades-pagination"></div>
         </div>
         <div class="history-column">
           <h2>Your Limit Order History</h2>
           <div id="limit-orders-error" class="error-message"></div>
-          <button id="export-limit-orders" class="submit-button">
+          <button id="export-limit-orders" class="submit-button bs-btn" data-tooltip="Download all your limit orders as CSV">
             Export Limit Order History
           </button>
           <table id="limit-orders-table">
@@ -245,7 +256,7 @@
             <tbody id="limit-orders-table-body"></tbody>
           </table>
           <br>
-      <div id="limit-orders-pagination"></div>
+          <div id="limit-orders-pagination"></div>
         </div>
       </div>
       <!-- <div class="chart-container">
@@ -267,61 +278,67 @@
           </div>
         </div>
       </div>
-        <!-- Cancel confirmation popup -->
+      <!-- Cancel confirmation popup -->
       <div id="cancel-popup" class="popup hidden">
         <div class="popup-content">
-      <p>Are you sure you want to cancel?</p>
-      <br>
-      <button id="confirm-yes">Yes</button>
-      <button id="confirm-no">No</button>
+          <p>Are you sure you want to cancel?</p>
+          <br>
+          <button id="confirm-yes">Yes</button>
+          <button id="confirm-no">No</button>
         </div>
       </div>
-      
-         <div id="endScreenModal" class="modal">
+
+      <div id="endScreenModal" class="modal">
         <div class="modal-content endgame">
-      <header class="end-header">
-        <h1>Scenario Complete</h1>
-        <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
-        <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready.
-          <em>Each new run resets your balance and positions so you can try different strategies.</em>
-        </p>
-      </header>
-      <!-- Quick summary row -->
-      <div class="end-summary">
-        <div class="card kpi">
-          <div class="kpi-label">Final Portfolio Value</div>
-          <div id="kpi-total" class="kpi-value">—</div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-label">Cash Remaining</div>
-          <div id="kpi-cash" class="kpi-value">—</div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-label">Return</div>
-          <div id="kpi-return" class="kpi-value">—</div>
-        </div>
-        <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
-      </div>
-      <!-- Portfolio recap -->
-      <div class="portfolio-layout">
-        <div class="portfolio-chart-container">
-          <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
-        </div>
-        <div id="endStockCards" class="positions-section"></div>
-      </div>
-      <!-- AI insights -->
-      <div id="aiAdviceContainer" class="ai-block">
-        <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
-      </div>
-      <!-- Actions -->
-      <div class="buttons end-actions">
-        <button id="closeEndScreen" class="btn ghost">Close</button>
-        <button id="generateMoreInsights" class="btn secondary">Generate More Insights</button>
-      </div>
+          <header class="end-header">
+            <h1>Scenario Complete</h1>
+            <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
+            <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready.
+              <em>Each new run resets your balance and positions so you can try different strategies.</em>
+            </p>
+          </header>
+          <!-- Quick summary row -->
+          <div class="end-summary">
+            <div class="card kpi">
+              <div class="kpi-label">Final Portfolio Value</div>
+              <div id="kpi-total" class="kpi-value">—</div>
+            </div>
+            <div class="card kpi">
+              <div class="kpi-label">Cash Remaining</div>
+              <div id="kpi-cash" class="kpi-value">—</div>
+            </div>
+            <div class="card kpi">
+              <div class="kpi-label">Return</div>
+              <div id="kpi-return" class="kpi-value">—</div>
+            </div>
+            <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
+          </div>
+          <!-- Portfolio recap -->
+          <div class="portfolio-layout">
+            <div class="portfolio-chart-container">
+              <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
+            </div>
+            <div id="endStockCards" class="positions-section"></div>
+          </div>
+          <!-- AI insights -->
+          <div id="aiAdviceContainer" class="ai-block">
+            <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
+          </div>
+          <!-- Actions -->
+          <div class="buttons end-actions">
+            <button id="closeEndScreen" class="btn ghost bs-btn" data-tooltip="Close this summary">
+              Close
+            </button>
+
+            <button id="generateMoreInsights" class="btn secondary bs-btn"
+              data-tooltip="Ask AI for more detailed insights">
+              Generate More Insights
+            </button>
+          </div>
         </div>
       </div>
     </div>
-<!-- </div> -->
+    <!-- </div> -->
 
 </body>
 <script src="/socket.io/socket.io.js"></script>
