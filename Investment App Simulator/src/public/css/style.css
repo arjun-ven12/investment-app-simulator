@@ -193,3 +193,46 @@
         zoom: 0.85; /* 85% size */
     }
 }
+@media (max-width: 900px) {
+
+  .navbar-logo-img {
+    height: 28px; /* slightly smaller on mobile */
+  }
+
+  .navbar-brand-text {
+    font-size: 18px;
+  }
+}
+/* ================================
+   LOGO IN NAVBAR
+================================ */
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.navbar-logo-img {
+  height: 50px;           /* adjust size here */
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.1)); /* subtle */
+}
+
+.navbar-brand-text {
+  font-family: 'Outfit', sans-serif;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.navbar-brand:hover .navbar-brand-text {
+  opacity: 0.85;
+}
