@@ -6,7 +6,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Daily AI Advice provides personalised insights on your portfolio, trading behaviour, and opportunities for improvement. It refreshes every day at exactly 11:00 AM based on your latest trades, risk settings, and market conditions."
+          "text": "Daily AI Advice provides personalised insights on your portfolio, trading behaviour, and opportunities for improvement. It refreshes every day at exactly 09:00 AM. (UTC+08:00) based on your latest trades, risk settings, and market conditions."
         },
         {
           "type": "list",
@@ -27,7 +27,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Nyra AI evaluates all your trading activity and portfolio data each morning before generating your 11:00 AM update."
+          "text": "Nyra AI evaluates all your trading activity and portfolio data each morning before generating your 09:00 AM. (UTC+08:00) update."
         },
         {
           "type": "list",
@@ -42,7 +42,7 @@
         },
         {
           "type": "text",
-          "text": "If you make new trades during the day, they will be reflected in the next day's 11:00 AM advice update."
+          "text": "If you make new trades during the day, they will be reflected in the next day's 09:00 AM. (UTC+08:00) advice update."
         }
       ]
     },
@@ -100,7 +100,7 @@
         },
         {
           "type": "text",
-          "text": "Each card is updated at 11:00 AM daily and displays the exact timestamp of your latest update."
+          "text": "Each card is updated at 09:00 AM. (UTC+08:00) daily and displays the exact timestamp of your latest update."
         }
       ]
     },
@@ -111,7 +111,7 @@
         {
           "type": "list",
           "items": [
-            "Daily AI Advice is refreshed every day at 11:00 AM.",
+            "Daily AI Advice is refreshed every day at 09:00 AM. (UTC+08:00)",
             "Nyra’s insights adapt based on your risk tolerance and AI tone settings.",
             "Advice includes stock, options, behaviour, and scenario-based analysis.",
             "You can view your updated insights anytime under the AI Advice tab.",

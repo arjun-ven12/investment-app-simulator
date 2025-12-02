@@ -591,9 +591,6 @@ module.exports.getUserOptionAdvice = async (req, res) => {
   try {
     // A) Pull raw trades (counts, order types, holding days) + portfolio (authoritative P&L)
     const trades = await optionsModel.getUserOptionTrades(userId);
-    if (!trades || trades.length === 0) {
-      return res.status(404).json({ message: "No option trades found for this user." });
-    }
 const aiSettings = await loadUserAISettings(userId);
 
     const portfolioRes = await optionsModel.getUserOptionPortfolio(parseInt(userId, 10));

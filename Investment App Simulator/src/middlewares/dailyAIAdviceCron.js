@@ -78,7 +78,7 @@ async function generateDailyAdvice() {
 }
 
 cron.schedule(
-  "00 11 * * *",
+  "55 08 * * *",
   async () => {
     await generateDailyAdvice();
   },
