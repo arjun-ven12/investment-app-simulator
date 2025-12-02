@@ -156,3 +156,49 @@ module.exports.deleteAccount = async function deleteAccount(userId, password) {
     return { message: "Account deleted successfully" };
 };
 
+////////////////////////////////////////////////////////////////////////////////
+//////// SETTINGS - WALLET RESET
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+exports.resetUserPortfolio = async function resetUserPortfolio(userId, startingBalance) {
+  if (!userId || isNaN(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    // 1️⃣ Reset user's wallet
+    const updatedUser = await tx.user.update({
+      where: { id: Number(userId) },
+      data: { wallet: startingBalance },
+    });
+
+    // 2️⃣ Delete all stock trades
+    await tx.trade.deleteMany({ where: { userId: Number(userId) } });
+
+    // 3️⃣ Delete all limit orders
+    await tx.limitOrder.deleteMany({ where: { userId: Number(userId) } });
+
+    // 4️⃣ Delete all stop market orders
+    await tx.stopMarketOrder.deleteMany({ where: { userId: Number(userId) } });
+
+    // 5️⃣ Delete all stop limit orders
+    await tx.stopLimitOrder.deleteMany({ where: { userId: Number(userId) } });
+
+    // 6️⃣ Delete all option trades
+    await tx.optionTrade.deleteMany({ where: { userId: Number(userId) } });
+
+    // 7️⃣ Delete all option blockchain transactions
+    await tx.optionBlockchainTransaction.deleteMany({ where: { userId: Number(userId) } });
+
+    // 8️⃣ Optional: reset scenario cash balances (if you want)
+    await tx.scenarioParticipant.updateMany({
+      where: { userId: Number(userId) },
+      data: { cashBalance: 0, ended: false }, // reset cash and mark as not ended
+    });
+
+    return updatedUser;
+  });
+};

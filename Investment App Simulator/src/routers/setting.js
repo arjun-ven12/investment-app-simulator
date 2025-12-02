@@ -10,6 +10,6 @@ router.put('/change-password', jwtMiddleware.verifyToken, settingsController.cha
 router.put('/change-username', jwtMiddleware.verifyToken,settingsController.changeUsername);
 router.delete('/delete-account', jwtMiddleware.verifyToken,settingsController.deleteAccount);
 router.get('/me/auth-type', jwtMiddleware.verifyToken, settingsController.getAuthType);
-
+router.post('/reset-wallet', jwtMiddleware.verifyToken, settingsController.resetWalletController);
 
 module.exports = router;

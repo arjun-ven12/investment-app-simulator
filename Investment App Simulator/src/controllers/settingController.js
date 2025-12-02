@@ -102,3 +102,38 @@ module.exports.getAuthType = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
+////////////////////////////////////////////////////////////////////////////////
+//////// SETTINGS - WALLET RESET
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+exports.resetWalletController = function (req, res) {
+  const userId = Number(req.query.userId);
+  const { startingBalance } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  if (!startingBalance || isNaN(Number(startingBalance)) || Number(startingBalance) <= 0) {
+    return res.status(400).json({ message: "Starting balance must be a positive number" });
+  }
+
+  return settingsModel
+    .resetUserPortfolio(userId, Number(startingBalance))
+    .then((updatedUser) => {
+      return res.status(200).json({
+        message: "Wallet and portfolio reset successfully",
+        newBalance: updatedUser.wallet,
+      });
+    })
+    .catch((error) => {
+      console.error("Error resetting wallet and portfolio:", error);
+      return res.status(500).json({
+        message: "Error resetting wallet and portfolio",
+        error,
+      });
+    });
+};

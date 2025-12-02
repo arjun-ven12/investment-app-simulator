@@ -856,8 +856,8 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
     orderBy: { tradeDate: "asc" },
     select: {
       stockId: true,
-      quantity: true,     // raw quantity from DB (may be +ve for sell in your case)
-      totalAmount: true,  // total value of trade (positive)
+      quantity: true,     // raw quantity from DB (positive)
+      totalAmount: true,  // total value of trade
       tradeType: true     // "BUY" or "SELL"
     }
   });
@@ -874,105 +874,71 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
 
     if (!stockMap.has(stockId)) {
       stockMap.set(stockId, {
-        buyQueue: [], 
+        buyQueue: [],
         netQuantity: 0,
         realizedProfitLoss: 0,
         totalBoughtQty: 0,
         totalBoughtValue: 0,
+        totalSoldQty: 0,     // added
         totalSoldValue: 0
       });
     }
 
     const group = stockMap.get(stockId);
-
-    // Normalize sign based on tradeType (defensive)
     const side = (tradeType || "").toString().toUpperCase();
     const absQty = Math.abs(Number(quantity));
-    const signedQty = side === "BUY" ? absQty : -absQty; // BUY -> +, SELL -> -
 
     if (side === "BUY") {
-      // BUY: add to FIFO queue
       const pricePerShare = absQty > 0 ? Number(totalAmount) / absQty : 0;
-      group.buyQueue.push({
-        quantity: absQty,
-        pricePerShare
-      });
+      group.buyQueue.push({ quantity: absQty, pricePerShare });
       group.netQuantity += absQty;
       group.totalBoughtQty += absQty;
       group.totalBoughtValue += Number(totalAmount);
     } else if (side === "SELL") {
-      // SELL: compute proceeds and realize P&L against buyQueue (FIFO)
       const sellQty = absQty;
-      const sellProceeds = Number(totalAmount); // total proceeds for this sell
+      const sellProceeds = Number(totalAmount);
       group.totalSoldValue += sellProceeds;
+      group.totalSoldQty += sellQty; // track sold quantity
 
-      // If sellQty is 0 skip
-      if (sellQty > 0) {
-        // average sell price per share for this sell (used to prorate proceeds)
-        const avgSellPricePerShare = sellProceeds / sellQty;
+      let remainingToSell = sellQty;
+      const avgSellPricePerShare = sellQty > 0 ? sellProceeds / sellQty : 0;
 
-        let remainingToSell = sellQty;
+      while (remainingToSell > 0 && group.buyQueue.length > 0) {
+        const buy = group.buyQueue[0];
 
-        while (remainingToSell > 0 && group.buyQueue.length > 0) {
-          const buy = group.buyQueue[0];
-
-          if (buy.quantity <= remainingToSell) {
-            // fully consume this buy lot
-            const qtyMatched = buy.quantity;
-            const proceedsPortion = avgSellPricePerShare * qtyMatched;
-            const costPortion = buy.pricePerShare * qtyMatched;
-            group.realizedProfitLoss += proceedsPortion - costPortion;
-
-            remainingToSell -= qtyMatched;
-            group.buyQueue.shift();
-          } else {
-            // partially consume buy lot
-            const qtyMatched = remainingToSell;
-            const proceedsPortion = avgSellPricePerShare * qtyMatched;
-            const costPortion = buy.pricePerShare * qtyMatched;
-            group.realizedProfitLoss += proceedsPortion - costPortion;
-
-            buy.quantity -= qtyMatched; // reduce remaining quantity in that buy lot
-            remainingToSell = 0;
-          }
-        }
-
-        // If sell exceeds buyQueue (i.e. net short), we treat remainingToSell as sold without cost basis
-        // You might want to handle short positions differently — currently it will produce realized P&L only for matched lots.
-        if (remainingToSell > 0) {
-          // No buy lots left — treat remaining sell as realized with cost 0 (or handle as you prefer)
-          const proceedsPortion = avgSellPricePerShare * remainingToSell;
-          group.realizedProfitLoss += proceedsPortion - 0;
-          // remainingToSell = 0; // not necessary after this
+        if (buy.quantity <= remainingToSell) {
+          const qtyMatched = buy.quantity;
+          group.realizedProfitLoss += avgSellPricePerShare * qtyMatched - buy.pricePerShare * qtyMatched;
+          remainingToSell -= qtyMatched;
+          group.buyQueue.shift();
+        } else {
+          const qtyMatched = remainingToSell;
+          group.realizedProfitLoss += avgSellPricePerShare * qtyMatched - buy.pricePerShare * qtyMatched;
+          buy.quantity -= qtyMatched;
+          remainingToSell = 0;
         }
       }
 
-      // update net quantity (sell reduces net holdings)
-      group.netQuantity += -sellQty;
-    } else {
-      // Unknown tradeType: be defensive — ignore or log
-      console.warn(`Unknown tradeType "${tradeType}" for trade on stock ${stockId}. Skipping.`);
-      continue;
+      // remaining sells with no cost
+      if (remainingToSell > 0) {
+        group.realizedProfitLoss += avgSellPricePerShare * remainingToSell;
+      }
+
+      group.netQuantity -= sellQty;
     }
   }
 
   const openPositions = [];
   const closedPositions = [];
 
-  // Build positions
   for (const [stockId, group] of stockMap.entries()) {
-    const { buyQueue, netQuantity, realizedProfitLoss, totalBoughtQty, totalBoughtValue, totalSoldValue } = group;
+    const { buyQueue, netQuantity, realizedProfitLoss, totalBoughtQty, totalBoughtValue, totalSoldQty, totalSoldValue } = group;
 
-    // Stock details
     const stockDetails = await prisma.stock.findUnique({
       where: { stock_id: stockId },
-      select: {
-        symbol: true,
-        company: { select: { name: true } }
-      }
+      select: { symbol: true, company: { select: { name: true } } }
     });
 
-    // Latest price
     const latestPriceRecord = await prisma.intradayPrice3.findFirst({
       where: { stockId },
       orderBy: { date: "desc" },
@@ -980,15 +946,13 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
     });
     const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
 
-    // Open position (remaining shares)
+    // Open Positions
     if (netQuantity > 0) {
       const totalInvested = buyQueue.reduce((sum, b) => sum + b.quantity * b.pricePerShare, 0);
       const avgBuyPrice = netQuantity > 0 ? (totalInvested / netQuantity) : 0;
       const currentValue = latestPrice * netQuantity;
       const unrealizedProfitLoss = currentValue - totalInvested;
-      const unrealizedProfitLossPercent = totalInvested > 0
-        ? (unrealizedProfitLoss / totalInvested) * 100
-        : 0;
+      const unrealizedProfitLossPercent = totalInvested > 0 ? (unrealizedProfitLoss / totalInvested) * 100 : 0;
 
       openPositions.push({
         symbol: stockDetails?.symbol ?? "UNKNOWN",
@@ -1004,12 +968,13 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
       });
     }
 
-    // Closed / realized portion
+    // Closed Positions
     if (realizedProfitLoss !== 0 || totalSoldValue > 0) {
       closedPositions.push({
         symbol: stockDetails?.symbol ?? "UNKNOWN",
         companyName: stockDetails?.company?.name ?? "UNKNOWN",
         totalBoughtQty,
+        totalSoldQty,          // now included
         totalBoughtValue: totalBoughtValue.toFixed(2),
         totalSoldValue: totalSoldValue.toFixed(2),
         realizedProfitLoss: realizedProfitLoss.toFixed(2)
@@ -1019,7 +984,6 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
 
   return { openPositions, closedPositions };
 };
-
 
 
 

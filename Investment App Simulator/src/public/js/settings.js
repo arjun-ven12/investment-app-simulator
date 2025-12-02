@@ -329,3 +329,81 @@ async function loadAISettings() {
         console.error("Failed to load AI settings:", err);
     }
 }
+////////////////////////////////////////////////////////////////////////////////
+//////// SETTINGS - WALLET RESET
+////////////////////////////////////////////////////////////////////////////////
+const resetForm = document.getElementById('reset-wallet-form');
+const resetBtn = document.getElementById('reset-wallet-btn');
+const popup = document.getElementById('reset-popup');
+const confirmYes = document.getElementById('confirm-yes');
+const confirmNo = document.getElementById('confirm-no');
+const startingBalanceInput = document.getElementById('starting-balance');
+const resetMessage = document.getElementById('reset-message');
+
+// Retrieve user ID from localStorage
+const userId = localStorage.getItem("userId");
+
+// Safety check
+if (!userId) {
+  console.error("User ID not found in localStorage.");
+}
+
+// 1️⃣ When clicking reset → show confirmation popup
+resetForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  popup.classList.remove('hidden');
+});
+
+// 2️⃣ If user cancels → close popup
+confirmNo.addEventListener('click', () => {
+  popup.classList.add('hidden');
+});
+
+// 3️⃣ If user confirms → reset wallet
+confirmYes.addEventListener('click', async () => {
+  const startingBalance = Number(startingBalanceInput.value);
+
+  if (!startingBalance || startingBalance <= 0) {
+    showMessage("Starting balance must be greater than 0.", "error");
+    popup.classList.add('hidden');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/settings/reset-wallet?userId=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({ startingBalance })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showMessage(`Wallet & portfolio reset! New balance: $${data.newBalance}`, "success");
+
+      // refresh page
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } else {
+      showMessage(data.message || "Error resetting wallet.", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showMessage("Network or server error.", "error");
+  }
+
+  popup.classList.add('hidden');
+});
+
+// 4️⃣ Message helper
+function showMessage(message, type) {
+  resetMessage.textContent = message;
+  resetMessage.className = `reset-message ${type}`;
+  resetMessage.classList.remove('hidden');
+
+  setTimeout(() => resetMessage.classList.add('hidden'), 5000);
+}

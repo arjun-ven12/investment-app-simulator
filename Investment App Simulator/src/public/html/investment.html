@@ -36,12 +36,11 @@
   <input type="hidden" id="current-stock-id" value="" />
   <!-- Sidebar -->
   <div class="sidebar">
-    <!-- <h3>WatchList</h3> -->
     <h2>Watchlist</h2>
 
     <div class="search-container">
       <input type="text" id="stock-search" placeholder="Enter stock name or symbol" />
-      <button id="search-button" style="margin-top: 10px;">Search</button>
+      <button id="search-button" class="bs-btn" data-tooltip="Search for the entered stock" style="margin-top: 10px;">Search</button>
     </div>
     <br />
     <h2>Search Results</h2>
@@ -52,9 +51,7 @@
     <div id="favorites-error-message" class="error-message"></div>
     <div id="error-message" class="error-message" style="margin-top: 8px"></div>
     <div id="stocks-container" style="margin-top: 8px"></div>
-
   </div>
-
 
   <div id="market-status-banner">
     <span id="market-status">Loading market status...</span>
@@ -64,21 +61,28 @@
   <div class="main-content">
     <!-- Navbar -->
     <div id="navbar-container"></div>
-    <!-- Dashboard Header -->
-
 
     <div class="tab-container">
-      <button class="tab-button active" data-tab="stock-dashboard">Stock Dashboard</button>
-      <button class="tab-button" data-tab="options-dashboard">Options Dashboard</button>
+      <button class="tab-button active" data-tab="stock-dashboard" data-tooltip="View Stock Dashboard">Stock Dashboard</button>
+      <button class="tab-button" data-tab="options-dashboard" data-tooltip="View Options Dashboard">Options Dashboard</button>
     </div>
 
     <div id="stock-dashboard" class="tab-content active">
-
-      <!-- <div class="content"> -->
       <br>
-      <br />
+<div class="disclaimer">
+  <h2>Market Information:</h2>
+  <ul class="disclaimer-list">
+    <li><strong>Country:</strong> USA</li>
+    <li><strong>Derivatives Types:</strong> Stocks, Options</li>
+    <li><strong>Stocks Information:</strong> NASDAQ Exchange</li>
+    <li><strong>Intraday Stock Data:</strong> IEX (Investors Exchange)</li>
+  </ul>
+</div>
+
+
+      <br>
       <h1>Stock Dashboard</h1>
-      <!-- </div> -->
+
       <!-- Chart + Trading Form -->
       <div class="container">
         <div class="chart-wrapper">
@@ -86,7 +90,6 @@
             <form id="chart-form-intraday" class="chart-form">
               <input type="text" name="chartSymbol" placeholder="Enter symbol (e.g. AAPL)" required />
               <div class="options-wrap">
-                <!-- <label for="range">Select Range:</label> -->
                 <select name="range" id="range">
                   <option value="1d">Last 1 Day</option>
                   <option value="1w" selected>Last 1 Week</option>
@@ -101,17 +104,15 @@
                   </select>
                 </div>
               </div>
-              <button type="submit">Generate Chart</button>
-
+              <button class="bs-btn" data-tooltip="Generate chart to start trading" type="submit">Generate Chart</button>
             </form>
             <div id="loading"></div>
             <div id="percentage2"></div>
             <div class="chart-wrapper"><canvas id="myChart2"></canvas></div>
-            <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;">
-              Reset Zoom
-            </span>
+            <span id="reset-zoom" style="cursor: pointer; text-decoration: underline;" data-tooltip="Reset chart zoom">Reset Zoom</span>
           </div>
         </div>
+
         <div class="trading-card">
           <form id="trading-form">
             <h2>Trade Stock</h2>
@@ -136,6 +137,7 @@
                 <option value="stop-limit">Stop Limit Order</option>
               </select>
             </div>
+
             <div class="form-group hidden" id="timeframe-container">
               <label for="timeframe">Time Frame</label>
               <select id="timeframe" name="timeframe">
@@ -154,46 +156,35 @@
               <input type="number" id="quantity" name="quantity" placeholder="Enter quantity" />
             </div>
 
-
             <!-- Stop-Limit Trigger -->
             <div class="form-group hidden" id="stop-limit-trigger-container">
               <label for="stop-limit-trigger">Trigger Price</label>
-              <input type="number" id="stop-limit-trigger" name="stop-limit-trigger" placeholder="Enter trigger price"
-                step="0.01" />
+              <input type="number" id="stop-limit-trigger" name="stop-limit-trigger" placeholder="Enter trigger price" step="0.01" />
             </div>
 
             <!-- Stop-Market Trigger -->
             <div class="form-group hidden" id="stop-market-container">
               <label for="trigger-price">Trigger Price</label>
-              <input type="number" id="trigger-price" name="trigger-price" placeholder="Enter trigger price"
-                step="0.01" />
+              <input type="number" id="trigger-price" name="trigger-price" placeholder="Enter trigger price" step="0.01" />
             </div>
+
             <!-- Stop-Limit Price -->
             <div class="form-group hidden" id="stop-limit-container">
               <label for="stop-limit-price">Stop Limit Price</label>
               <input type="number" id="stop-limit-price" placeholder="Enter stop limit price" step="0.01" />
             </div>
 
-
             <div class="form-group">
               <label for="amount">Amount</label>
               <input type="text" id="amount" name="amount" placeholder="--" readonly />
             </div>
             <div id="buy-error" class="error-message"></div>
-
-
             <div id="create-success" class="success-message"></div>
-            <button type="submit" class="submit-button" id="submit-order">
-              Submit Order
-            </button>
+
+            <button type="submit" class="submit-button bs-btn" id="submit-order" data-tooltip="Submit your buy or sell order">Submit Order</button>
           </form>
         </div>
-        <!-- <div class="company-card"></div> -->
       </div>
-      <!-- Market Status Banner -->
-      <!-- <div id="market-status-banner">
-        <span id="market-status">Loading market status...</span>
-      </div> -->
 
       <!-- Portfolio / Investment Recommendations -->
       <div class="portfolio-container">
@@ -206,21 +197,18 @@
         </div>
         <div class="chart-wrapper">
           <div class="chart-container">
-            <!-- <div class="content trading-card2"></div> -->
             <h2>Company Details</h2>
-
             <div class="company-card"></div>
           </div>
         </div>
       </div>
+
       <!-- Trade History + Limit Orders -->
       <div class="history-container">
         <div class="history-column">
           <h2>Your Trade History</h2>
           <div id="trades-error" class="error-message"></div>
-          <button id="export-trades" class="submit-button">
-            Export Trade History
-          </button>
+          <button id="export-trades" class="submit-button bs-btn" data-tooltip="Export your trade history to CSV">Export Trade History</button>
           <table id="trades-table">
             <thead>
               <tr>
@@ -236,12 +224,11 @@
           </table>
           <div id="trades-pagination" style="margin-top: 10px"></div>
         </div>
+
         <div class="history-column">
           <h2>Your Limit Order History</h2>
           <div id="limit-orders-error" class="error-message"></div>
-          <button id="export-limit-orders" class="submit-button">
-            Export Limit Order History
-          </button>
+          <button id="export-limit-orders" class="submit-button bs-btn" data-tooltip="Export your limit order history to CSV">Export Limit Order History</button>
           <table id="limit-orders-table">
             <thead>
               <tr>
@@ -260,13 +247,12 @@
           <div id="limit-orders-pagination" style="margin-top: 10px"></div>
         </div>
       </div>
+
       <!-- Stop Orders -->
       <div class="history-container">
-
         <div class="history-column">
           <h2>Your Stop-Market Orders</h2>
-          <button id="export-stop-market" class="export-btn submit-button">Export Stop Market History</button>
-
+          <button id="export-stop-market" class="export-btn bs-btn submit-button" data-tooltip="Export your stop market order history">Export Stop Market History</button>
           <div id="stop-market-error" class="error-message"></div>
           <table id="stop-market-table">
             <thead>
@@ -281,16 +267,13 @@
               </tr>
             </thead>
             <tbody id="stop-market-table-body"></tbody>
-
           </table>
-          <br><br>
           <div id="stop-market-pagination" class="pagination"></div>
-
         </div>
+
         <div class="history-column">
           <h2>Your Stop-Limit Orders</h2>
-          <button id="export-stop-limit" class="export-btn submit-button">Export Stop Limit History</button>
-
+          <button id="export-stop-limit" class="export-btn submit-button bs-btn" data-tooltip="Export your stop limit order history">Export Stop Limit History</button>
           <div id="stop-limit-error" class="error-message"></div>
           <table id="stop-limit-table">
             <thead>
@@ -306,87 +289,95 @@
               </tr>
             </thead>
             <tbody id="stop-limit-table-body"></tbody>
-
           </table>
-          <br><br>
-
           <div id="stop-limit-pagination" class="pagination"></div>
-
         </div>
       </div>
+
       <!-- Cancel confirmation popup -->
       <div id="cancel-popup" class="popup hidden">
         <div class="popup-content">
           <p>Are you sure you want to cancel?</p>
           <br>
-          <button id="confirm-yes">Yes</button>
-          <button id="confirm-no">No</button>
+          <button id="confirm-yes" data-tooltip="Confirm the cancellation">Yes</button>
+          <button id="confirm-no" data-tooltip="Cancel the cancellation and close popup">No</button>
         </div>
       </div>
 
       <!-- Toast Notification -->
       <div id="toast" class="toast hidden"></div>
+<div class="chart-wrapper">
+  <div class="chart-container">
 
+    <!-- Open Positions Table -->
+    <h2>Open Positions</h2>
+    <table id="open-positions-table">
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Quantity</th>
+          <th>Avg Buy Price</th>
+          <th>Current Price</th>
+          <th>Total Invested</th>
+          <th>Current Value</th>
+          <th>Unrealized P/L</th>
+          <th>Realized P/L</th>
+        </tr>
+      </thead>
+      <tbody id="open-positions-table-body"></tbody>
+    </table>
 
-      <div class="chart-wrapper">
-        <div class="chart-container">
-          <div class="content trading-card2"></div>
-        </div>
-      </div>
+    <!-- Closed Positions Table -->
+    <h2>Closed Positions</h2>
+      <table id="closed-positions-table">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Total Bought Quantity</th>
+                        <th>Total Sold Quantity</th>
 
-      <!-- Stock Comments
-      <div class="content chart-container">
-        <h1>Search Stock Comments</h1>
-        <div id="comments-error" class="error-message"></div>
-        <div class="stock-symbol-search">
-          <label for="stock-symbol">Stock Symbol:</label>
-          <input
-            type="text"
-            id="stock-symbol"
-            placeholder="Enter stock symbol (e.g., AAPL)"
-          />
-          <button id="load-comments-button">Load Comments</button>
-        </div>
-        <div class="new-comment">
-          <textarea
-            id="comment-content"
-            rows="4"
-            placeholder="Write your comment here..."
-          ></textarea>
-          <button id="submit-comment-button2">Submit Comment</button>
-        </div>
-        <ul id="comments-list"></ul>
-      </div>-->
+            <th>Total Bought Value</th>
+            <th>Total Sold Value</th>
+            <th>Realized P/L</th>
+          </tr>
+        </thead>
+        <tbody id="closed-positions-table-body"></tbody>
+      </table>
+
+    <!-- Additional content / chart -->
+    <div class="content trading-card2"></div>
+<!-- <canvas id="portfolioPieChart" style="width:300px !important; height:300px !important;"></canvas> -->
+
+  </div>
+</div>
+
     </div>
 
-
-
-
-
-
     <!-- OPTIONS DASHBOARD -->
-
     <div id="options-dashboard" class="tab-content">
-      <br /><br>
+      <br />
+      <div class="disclaimer">
+  <h2>Market Information:</h2>
+  <ul class="disclaimer-list">
+    <li><strong>Country:</strong> USA</li>
+    <li><strong>Options Data: </strong> OPRA (Options Price Reporting Authority)</li>
+  </ul>
+</div><br>
       <h1>Options Dashboard</h1>
       <br>
-
       <div class="chart-wrapper">
         <div class="chart-container">
           <form id="options-form">
             <input type="text" name="optionSymbol" placeholder="Enter stock symbol (e.g. AAPL)" />
-            <button type="submit">Get Option Contracts</button>
+            <button type="submit" class="bs-btn" data-tooltip="Fetch option contracts for the entered stock">Get Option Contracts</button>
           </form>
           <div class="options-container"></div>
-
         </div>
       </div>
 
-
       <div class="options-card history-column">
         <h1>Your Option Trades</h1>
-
-        <button id="export-option-trades" class="submit-button">Export Option Trades</button>
+        <button id="export-option-trades" class="submit-button bs-btn" data-tooltip="Export all your option trades">Export Option Trades</button>
         <br><br>
         <table id="options-trades-table">
           <thead>
@@ -411,21 +402,8 @@
 
       <div class="chart-container">
         <h1>Your Option Portfolio</h1>
-
         <div id="options-portfolio-card"></div>
       </div>
-
-
-      <!-- Market Status Banner -->
-      <!-- <div id="market-status-banner">
-        <span id="market-status">Loading market status...</span>
-      </div> -->
-
-
-
-      <!-- <div class="chart-container">
-        <div class="content trading-card2"></div>
-      </div> -->
     </div>
   </div>
   <!-- END main-content -->

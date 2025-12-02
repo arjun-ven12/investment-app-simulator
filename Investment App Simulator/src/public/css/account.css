@@ -140,6 +140,7 @@ body {
 
 .settings-card input[type="text"],
 .settings-card input[type="password"],
+.settings-card input[type="number"],
 .settings-card select {
     width: 100%;
     padding: 12px 15px;
@@ -395,3 +396,36 @@ background-color: #E0EBFF;
         zoom: 0.85; /* 85% size */
     }
 }
+
+
+.settings-page {
+    background: linear-gradient(
+        to bottom,
+        #060712 0%,
+        #080914 15%,
+        #0A0C18 35%,
+        #0C0E1D 55%,
+        #0E1022 75%,
+        #050505 100%
+    );
+
+    min-height: 100vh;
+}
+.settings-page {
+    padding-top: 100px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0; /* optional */
+}
+
+.footer-fade {
+  height: 160px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.35) 30%,
+    rgba(0,0,0,0.7) 65%,
+    #000 100%
+  );
+}
+
