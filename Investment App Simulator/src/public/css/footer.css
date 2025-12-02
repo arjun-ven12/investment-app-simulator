@@ -8,13 +8,20 @@
 
 .bs-footer {
   max-width: 100%;
-  background: #000;          /* PURE BLACK */
+  background: rgb(0, 0, 0);  /* semi-transparent for blur effect */
+  /* backdrop-filter: blur(50px);      
+  -webkit-backdrop-filter: blur(50px); 
+   */
   padding: 70px 70px 40px;
   color: #d7d7d7;
   font-family: 'Outfit', sans-serif;
   position: relative;
   overflow: hidden;
+  z-index: 1000;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.12); /* subtle glass border */
 }
+
 
 /* ✦ Extremely subtle, cinematic luxury glow (barely visible) */
 .bs-footer::before {
