@@ -1,70 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Signing In...</title>
+
+  <!-- Load global auto-expiry logic -->
+  <script src="../js/authExpiry.js"></script>
+
   <style>
     body {
-      background-color: #000;
-      color: #fff;
-      font-family: 'Outfit', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin: 0;
       height: 100vh;
+      display: flex;
       flex-direction: column;
-      text-align: center;
+      justify-content: center;
+      align-items: center;
+      font-family: "Outfit", sans-serif;
+      background: radial-gradient(
+        circle at center,
+        #0d1b2a 0%,
+        #0a0f1f 40%,
+        #000 100%
+      );
+      color: #e1ecf7;
+      overflow: hidden;
     }
-    .spinner {
-      border: 4px solid #333;
-      border-top: 4px solid #60a5fa;
+
+    /* Glowing orb loader */
+    .orb {
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 15px;
+      background: radial-gradient(
+        circle at 30% 30%,
+        #6fb4ff,
+        #4a7bd3,
+        #1c2b4a
+      );
+      animation: pulse 1.8s infinite ease-in-out;
+      box-shadow: 0 0 20px rgba(111, 180, 255, 0.5);
+      margin-bottom: 22px;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 10px rgba(111, 180, 255, 0.3);
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(111, 180, 255, 0.6);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 10px rgba(111, 180, 255, 0.3);
+      }
+    }
+
+    h2 {
+      font-weight: 500;
+      font-size: 1.6rem;
+      opacity: 0;
+      animation: fadeIn 1.2s forwards 0.4s;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="spinner"></div>
-  <h2>Signing you in...</h2>
+  <div class="orb"></div>
+  <h2>Signing you in…</h2>
 
-<script>
-  (function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
 
-    if (!token) {
-      document.body.innerHTML = "<h2 style='color:red;'>Login failed. No token found.</h2>";
-      return;
-    }
+      if (!token) {
+        document.body.innerHTML =
+          "<h2 style='color:#ff7b7b;'>Login failed. No token found.</h2>";
+        return;
+      }
 
-    // Save token
-    localStorage.setItem('token', token);
+      // Save token
+      localStorage.setItem("token", token);
 
-    // ✅ Decode JWT to get user info
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const decodedPayload = JSON.parse(atob(base64));
+      // Decode JWT safely (base64url)
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const decodedPayload = JSON.parse(atob(base64));
 
-    const userId = decodedPayload.id;
-    const email = decodedPayload.email;
-    const username = email.split('@')[0]; // or fetch real one later
+      const userId = decodedPayload.id;
+      const email = decodedPayload.email;
+      const username =
+        decodedPayload.username ||
+        (email ? email.split("@")[0] : "User");
 
-    // Save in localStorage (so the rest of the app can use it)
-    localStorage.setItem('userId', userId);
-    localStorage.setItem('username', username);
-    localStorage.setItem('email', email);
+      // Save user info
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("email", email);
+      localStorage.setItem("username", username);
 
-    // Redirect to home
-    window.location.href = '/home';
-  })();
-</script>
+      // 🔥 Schedule auto logout based on JWT expiry
+      if (window.authExpiry) {
+        window.authExpiry.scheduleTokenExpiry();
+      }
 
+      // Redirect to home
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 400);
+    })();
+  </script>
 </body>
 </html>

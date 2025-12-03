@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
       initAuthVisibility();
       highlightActiveLink();
       initLogout();
+      checkTokenExpiry();       // 🔥 NEW: auto logout if expired
+      scheduleTokenExpiry();    // 🔥 NEW: auto logout when expiry time arrives
     })
     .catch(err => console.error("Failed to load navbar:", err));
 });
@@ -47,7 +49,6 @@ function initAuthVisibility() {
   ];
 
   if (token) {
-    // Show user-only buttons
     profileBtn?.classList.remove("d-none");
     logoutBtn?.classList.remove("d-none");
 
@@ -55,11 +56,9 @@ function initAuthVisibility() {
       document.getElementById(id)?.classList.remove("d-none")
     );
 
-    // Hide login/register
     loginBtn?.classList.add("d-none");
     registerBtn?.classList.add("d-none");
   } else {
-    // Hide logged-in buttons
     profileBtn?.classList.add("d-none");
     logoutBtn?.classList.add("d-none");
 
@@ -67,7 +66,6 @@ function initAuthVisibility() {
       document.getElementById(id)?.classList.add("d-none")
     );
 
-    // Show login/register
     loginBtn?.classList.remove("d-none");
     registerBtn?.classList.remove("d-none");
   }
@@ -95,7 +93,65 @@ function initLogout() {
   const logoutBtn = document.getElementById("logoutButton");
 
   logoutBtn?.addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "/login";
+    autoLogout();
   });
+}
+
+/* -----------------------------
+   AUTO-LOGOUT FUNCTION
+--------------------------------*/
+function autoLogout() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+/* -----------------------------
+   JWT DECODER
+--------------------------------*/
+function decodeToken(token) {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+}
+
+/* -----------------------------
+   CHECK IF TOKEN IS ALREADY EXPIRED
+--------------------------------*/
+function checkTokenExpiry() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const payload = decodeToken(token);
+  if (!payload || !payload.exp) return;
+
+  const now = Date.now() / 1000;
+  if (payload.exp < now) {
+    console.log("⚠️ Token expired — auto logging out.");
+    autoLogout();
+  }
+}
+
+/* -----------------------------
+   SCHEDULE AUTO-LOGOUT AT EXPIRY TIME
+--------------------------------*/
+function scheduleTokenExpiry() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const payload = decodeToken(token);
+  if (!payload || !payload.exp) return;
+
+  const msUntilExpiry = payload.exp * 1000 - Date.now();
+
+  if (msUntilExpiry > 0) {
+    console.log("⏱️ Auto-logout scheduled in", msUntilExpiry / 1000, "seconds");
+    setTimeout(() => {
+      console.log("⚠️ Token expired — auto logging out.");
+      autoLogout();
+    }, msUntilExpiry);
+  } else {
+    autoLogout();
+  }
 }
