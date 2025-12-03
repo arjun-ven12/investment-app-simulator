@@ -189,6 +189,8 @@ model User {
   scenarioConsoleStage        String      @default("not_started")
   skipScenarioConsole         Boolean     @default(false)
   lockUntil                   DateTime?
+  termsAccepted   Boolean  @default(false)   
+  termsAcceptedAt DateTime?                    
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
   Comment                     Comment[]

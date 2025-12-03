@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Complete Your Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: "Outfit", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      width: 520px;
+      background: #fff;
+      color: #000;
+      padding: 35px;
+      border-radius: 14px;
+    }
+    .terms-row {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>Before You Continue</h2>
+    <p>You must agree to our updated Terms & Conditions and Privacy Policy.</p>
+
+    <div class="terms-row">
+      <input type="checkbox" id="agree">
+      <label for="agree">
+        I agree to the
+        <a href="/terms" target="_blank">Terms & Conditions</a>
+        and
+        <a href="/privacy" target="_blank">Privacy Policy</a>.
+      </label>
+    </div>
+
+    <button id="continueBtn">Continue</button>
+  </div>
+
+  <script>
+    // Extract email + token from URL
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    const token = params.get("token");
+
+    document.getElementById("continueBtn").onclick = async () => {
+      if (!document.getElementById("agree").checked) {
+        alert("Please agree to the terms.");
+        return;
+      }
+
+      // Tell backend this Google user accepted terms
+      const res = await fetch("/auth/google/accept-terms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Save token locally — same as google-callback.html
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", email);
+
+        // Decode JWT to extract userId + username
+        try {
+          const decoded = JSON.parse(atob(token.split(".")[1]));
+          if (decoded.username) {
+            localStorage.setItem("username", decoded.username);
+          }
+          if (decoded.id) {
+            localStorage.setItem("userId", decoded.id);
+          }
+        } catch (e) {
+          console.warn("JWT decode failed:", e);
+        }
+
+        // Redirect directly to home (NO need to go back to login)
+        window.location.href = "/home";
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    };
+  </script>
+</body>
+</html>

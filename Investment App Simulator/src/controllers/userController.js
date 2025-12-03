@@ -88,6 +88,8 @@ module.exports.register = async (req, res) => {
         verifyExpires,
         onboardingStage: "home",
         skipOnboarding: false,
+        termsAccepted: req.body.termsAccepted === true,
+    termsAcceptedAt: req.body.termsAccepted ? new Date() : null,
       },
     });
 

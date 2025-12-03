@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const res = await fetch("/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, referralCode }),
+        body: JSON.stringify({ username, email, password, referralCode,  termsAccepted: document.getElementById("agreeTerms").checked }),
       });
 
       const data = await res.json();
