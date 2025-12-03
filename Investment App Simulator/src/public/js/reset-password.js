@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
             statusMessage.style.color = "#2ecc71";
 
             setTimeout(() => {
-                window.location.href = "login.html";
+                window.location.href = "/login";
             }, 1200);
         } catch (err) {
             console.error(err);

@@ -1289,7 +1289,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // Redirect after confirmation
-      window.location.href = "/html/scenarios.html";
+      window.location.href = "/scenarios";
     } catch (err) {
       console.error("Save error:", err);
       popupText.textContent = "Failed to save progress. Please try again.";
@@ -1752,7 +1752,7 @@ async function hideEndScreen() {
     console.log("✅ End screen closed and cleaned up");
 
     // 🚀 Redirect immediately (no delay)
-    window.location.href = "/html/scenarios.html";
+    window.location.href = "/scenarios";
   }
 }
 
@@ -1801,7 +1801,7 @@ function setupEndScreen() {
       await finalizeAndCleanUp();
       modal.style.display = "none";
       console.log("✅ End screen closed and cleaned up");
-      window.location.href = "/html/scenarios.html";
+      window.location.href = "/scenarios";
     });
   }
 
@@ -1811,7 +1811,7 @@ function setupEndScreen() {
       const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
       if (!scenarioId) return;
       // Force a fresh reload each time
-      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}&_=${Date.now()}`;
+      window.location.href = `/scenario-detailed-analysis?scenarioId=${scenarioId}&_=${Date.now()}`;
     });
   }
 }
@@ -1831,7 +1831,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Add timestamp to force reload
       const cacheBuster = Date.now();
-      window.location.href = `/html/scenario-detailed-analysis.html?scenarioId=${scenarioId}&t=${cacheBuster}`;
+      window.location.href = `/scenario-detailed-analysis?scenarioId=${scenarioId}&t=${cacheBuster}`;
     });
   }
 });

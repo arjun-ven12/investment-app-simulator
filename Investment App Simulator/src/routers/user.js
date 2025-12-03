@@ -33,7 +33,7 @@ router.get("/verify/:token", async (req, res) => {
 
     if (!user) {
       // redirect to a styled "failed" page
-      return res.redirect("/html/verify-failed.html");
+      return res.redirect("/verify-failed");
     }
 
     // ✅ Mark user as verified
@@ -43,10 +43,10 @@ router.get("/verify/:token", async (req, res) => {
     });
 
     // redirect to pretty confirmation page
-    res.redirect("/html/email-verified.html");
+    res.redirect("/email-verified");
   } catch (err) {
     console.error(err);
-    res.redirect("/html/verify-failed.html");
+    res.redirect("/verify-failed");
   }
 });
 

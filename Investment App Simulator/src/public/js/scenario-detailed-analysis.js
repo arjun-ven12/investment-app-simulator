@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.latestAiData = null;
 
       // ✅ Redirect
-      window.location.href = "/html/scenarios.html";
+      window.location.href = "/scenarios";
     }
   });
 });

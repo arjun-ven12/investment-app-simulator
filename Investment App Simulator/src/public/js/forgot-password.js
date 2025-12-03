@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
           statusMessage.style.color = "#2ecc71";
           statusMessage.textContent = "✅ Code verified! Redirecting...";
           localStorage.setItem("resetCode", code);
-          setTimeout(() => (window.location.href = "reset-password.html"), 1500);
+          setTimeout(() => (window.location.href = "/reset-password"), 1500);
         } else {
           statusMessage.style.color = "#ff4c4c";
           statusMessage.textContent =
