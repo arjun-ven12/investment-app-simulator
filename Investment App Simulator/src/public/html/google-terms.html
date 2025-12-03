@@ -14,6 +14,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      padding: 20px;
     }
     .card {
       width: 520px;
@@ -21,7 +22,26 @@
       color: #000;
       padding: 35px;
       border-radius: 14px;
+      position: relative;
     }
+
+    .warning {
+      display: none;
+      background: #ffe1df;
+      color: #9e1c1c;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      border: 1px solid #ffb6b0;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .terms-row {
       display: flex;
       gap: 8px;
@@ -41,6 +61,10 @@
 
 <body>
   <div class="card">
+
+    <!-- Premium inline warning (instead of alert()) -->
+    <div id="warningBox" class="warning"></div>
+
     <h2>Before You Continue</h2>
     <p>You must agree to our updated Terms & Conditions and Privacy Policy.</p>
 
@@ -58,18 +82,24 @@
   </div>
 
   <script>
-    // Extract email + token from URL
     const params = new URLSearchParams(window.location.search);
     const email = params.get("email");
     const token = params.get("token");
 
+    const warningBox = document.getElementById("warningBox");
+
+    function showWarning(msg) {
+      warningBox.textContent = msg;
+      warningBox.style.display = "block";
+    }
+
     document.getElementById("continueBtn").onclick = async () => {
+      // prettier warning instead of alert()
       if (!document.getElementById("agree").checked) {
-        alert("Please agree to the terms.");
+        showWarning("Please agree to the terms before continuing.");
         return;
       }
 
-      // Tell backend this Google user accepted terms
       const res = await fetch("/auth/google/accept-terms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,27 +109,24 @@
       const data = await res.json();
 
       if (data.success) {
-        // Save token locally — same as google-callback.html
+        // Save token locally — same as google-callback
         localStorage.setItem("token", token);
         localStorage.setItem("email", email);
 
-        // Decode JWT to extract userId + username
+        // Decode JWT to extract user info
         try {
           const decoded = JSON.parse(atob(token.split(".")[1]));
-          if (decoded.username) {
-            localStorage.setItem("username", decoded.username);
-          }
-          if (decoded.id) {
-            localStorage.setItem("userId", decoded.id);
-          }
+          if (decoded.username) localStorage.setItem("username", decoded.username);
+          if (decoded.id) localStorage.setItem("userId", decoded.id);
         } catch (e) {
           console.warn("JWT decode failed:", e);
         }
 
-        // Redirect directly to home (NO need to go back to login)
+        // Redirect to home
         window.location.href = "/home";
+
       } else {
-        alert("Something went wrong. Please try again.");
+        showWarning("Something went wrong. Please try again.");
       }
     };
   </script>
