@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (res.ok) {
       statusMessage.style.color = "#2ecc71";
-      statusMessage.textContent = "✅ Code sent! Check your email.";
+      statusMessage.textContent = "✔ Code sent! Check your email.";
       // Save email so reset-password page can retrieve it later
       localStorage.setItem("resetEmail", emailValue);
       // Replace form with code entry UI and inline resend text
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (seconds <= 0) {
             clearInterval(countdownInterval);
             resendText.textContent = `(Resend Code)`;
-            resendText.style.color = "#ffffff";
+            resendText.style.color = "#000000ff";
             resendText.style.cursor = "pointer";
             resendText.style.textDecoration = "underline";
             resendText.addEventListener("click", resendCode);

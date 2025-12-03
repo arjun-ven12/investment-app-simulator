@@ -212,6 +212,13 @@
 
 
 
+a.bs-back-to-top {
+  text-decoration: none;
+  font-style: normal;
+    transition: opacity 0.3s ease;
+
+}
+
 /* .footer-fade {
   height: 160px;
   background: linear-gradient(

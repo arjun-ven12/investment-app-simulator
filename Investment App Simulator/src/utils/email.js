@@ -1,74 +1,213 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
+// -----------------------------------------------------------------------------
+// GLOBAL EMAIL WRAPPER — premium white card, dark-mode safe, no logo
+// -----------------------------------------------------------------------------
+function blackSealedWrapper(content) {
+  return `
+  <!-- Load Outfit font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Prevent dark mode inversion -->
+  <style>
+    :root {
+      color-scheme: light;
+      supported-color-schemes: light;
+    }
+
+    html, body, .email-container {
+      background: #ffffff !important;
+      color: #0f172a !important; /* slate-900 */
+      -webkit-text-size-adjust: none !important;
+    }
+
+    /* Gmail iOS Fix */
+    u + .body .email-container {
+      background: #ffffff !important;
+    }
+
+    .no-invert {
+      filter: none !important;
+      -webkit-filter: none !important;
+    }
+  </style>
+
+  <div class="email-container no-invert" style="
+    background:#ffffff;
+    padding:40px;
+    border-radius:18px;
+    max-width:580px;
+    margin:auto;
+    color:#0f172a;
+    font-family:'Outfit', Arial, sans-serif;
+    border:1px solid rgba(0,0,0,0.08);
+  ">
+
+    <!-- BRANDING — pure text, premium look -->
+    <div style="
+      text-align:center;
+      font-size:2rem;
+      font-weight:700;
+      margin-bottom:26px;
+      color:#000000;
+      letter-spacing:-0.4px;
+    ">
+      BlackSealed
+    </div>
+
+    ${content}
+
+    <!-- FOOTER -->
+    <div style="
+      margin-top:40px;
+      padding-top:20px;
+      border-top:1px solid rgba(0,0,0,0.08);
+      text-align:center;
+      font-size:0.8rem;
+      color:#6b7280;
+      line-height:1.6;
+    ">
+      © 2025 BlackSealed. All rights reserved.<br>
+      Simulation platform — not financial advice.<br>
+      <a href="mailto:${process.env.EMAIL_USER}" style="color:#3b82f6; text-decoration:none;">
+        ${process.env.EMAIL_USER}
+      </a>
+    </div>
+
+  </div>
+  `;
+}
+
+// -----------------------------------------------------------------------------
+// TRANSPORTER (Gmail)
+// -----------------------------------------------------------------------------
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// -----------------------------------------------------------------------------
+// VERIFICATION EMAIL
+// -----------------------------------------------------------------------------
 async function sendVerificationEmail(email, token) {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+  const link = `${process.env.APP_URL}/user/verify/${token}`;
 
-    // 💎 Use clean route
-    const link = `${process.env.APP_URL}/user/verify/${token}`;
+  const html = blackSealedWrapper(`
+    <h2 style="
+      text-align:center;
+      color:#111;
+      font-size:1.8rem;
+      font-weight:700;
+      margin-bottom:10px;
+    ">Verify Your Email</h2>
 
-    const info = await transporter.sendMail({
-      from: `"Sealed Paper Trading" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Verify your email address",
-      html: `
-        <div style="font-family:Outfit, sans-serif; background:#fafafa; padding:30px; border-radius:12px; max-width:500px; margin:auto; color:#111;">
-          <h2 style="text-align:center; color:#2563eb; margin-bottom:0.5rem;">Sealed Paper Trading</h2>
-          <p style="text-align:center; margin-bottom:1.5rem;">Welcome aboard! Please verify your email address to activate your account.</p>
-          <div style="text-align:center; margin:20px 0;">
-            <a href="${link}" style="display:inline-block; background:#2563eb; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Verify Email</a>
-          </div>
-          <p style="text-align:center; color:#555;">Or copy and paste this link into your browser:</p>
-          <p style="word-break:break-all; text-align:center; color:#2563eb;">${link}</p>
-          <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:#777;">This link expires in 1 hour.</p>
-        </div>
-      `,
-    });
+    <p style="
+      text-align:center;
+      color:#444;
+      line-height:1.6;
+      margin-bottom:26px;
+    ">
+      Welcome to <strong>BlackSealed</strong> — the next generation of simulated trading.<br>
+      Click the button below to verify your email.
+    </p>
 
-    console.log("✅ Verification email sent:", info.messageId);
-  } catch (err) {
-    console.error("❌ Email send error:", err);
-    throw err;
-  }
+    <div style="text-align:center; margin:28px 0;">
+      <a href="${link}" style="
+        display:inline-block;
+        background:#000;
+        color:#fff;
+        padding:14px 34px;
+        border-radius:12px;
+        text-decoration:none;
+        font-size:1rem;
+        font-weight:600;
+      ">Verify Email</a>
+    </div>
+
+    <p style="text-align:center; color:#666; margin-bottom:6px;">Or copy this link:</p>
+
+    <p style="text-align:center; word-break:break-all; color:#000; font-size:0.9rem;">
+      ${link}
+    </p>
+
+    <p style="
+      text-align:center;
+      margin-top:25px;
+      font-size:0.85rem;
+      color:#777;
+    ">This verification link expires in 1 hour.</p>
+  `);
+
+  await transporter.sendMail({
+    from: `"BlackSealed" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Verify your BlackSealed account",
+    html,
+  });
+
+  console.log("✅ Verification email sent to:", email);
 }
 
+// -----------------------------------------------------------------------------
+// PASSWORD RESET EMAIL
+// -----------------------------------------------------------------------------
 async function sendPasswordResetCode(email, code) {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+  const html = blackSealedWrapper(`
+    <h2 style="
+      text-align:center;
+      color:#111;
+      font-size:1.8rem;
+      font-weight:700;
+      margin-bottom:12px;
+    ">Reset Your Password</h2>
 
-    const info = await transporter.sendMail({
-      from: `"Sealed Paper Trading" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your Password Reset Code",
-      html: `
-        <div style="font-family:Outfit, sans-serif; color:#111; background:#fafafa; padding:30px; border-radius:10px; max-width:500px; margin:auto;">
-          <h2 style="text-align:center; color:#2563eb;">Sealed Paper Trading</h2>
-          <p style="text-align:center;">Use the code below to reset your password:</p>
-          <h1 style="text-align:center; font-size:2.5rem; letter-spacing:6px; color:#2563eb;">${code}</h1>
-          <p style="text-align:center;">This code will expire in 15 minutes.</p>
-          <p style="text-align:center; font-size:0.9rem; color:#666;">If you didn’t request a password reset, you can safely ignore this email.</p>
-        </div>
-      `,
-    });
+    <p style="
+      text-align:center;
+      color:#444;
+      margin-bottom:24px;
+      line-height:1.6;
+    ">
+      Use the code below to reset your BlackSealed password.
+    </p>
 
-    console.log("✅ Password reset code sent:", info.messageId);
-  } catch (err) {
-    console.error("❌ Password reset code email error:", err);
-    throw err;
-  }
+    <div style="
+      text-align:center;
+      font-size:2.4rem;
+      font-weight:700;
+      letter-spacing:12px;
+      color:#000;
+      margin:32px 0;
+    ">${code}</div>
+
+    <p style="
+      text-align:center;
+      color:#777;
+      font-size:0.9rem;
+    ">This code expires in 15 minutes.</p>
+
+    <p style="
+      text-align:center;
+      margin-top:20px;
+      font-size:0.85rem;
+      color:#777;
+    ">If you didn’t request this, you can safely ignore it.</p>
+  `);
+
+  await transporter.sendMail({
+    from: `"BlackSealed" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Your BlackSealed Password Reset Code",
+    html,
+  });
+
+  console.log("✅ Password reset code sent to:", email);
 }
 
+// -----------------------------------------------------------------------------
+// EXPORTS
+// -----------------------------------------------------------------------------
 module.exports = { sendVerificationEmail, sendPasswordResetCode };
