@@ -92,7 +92,10 @@ server.listen(port, () => {
 
 require("./middlewares/dailyAIAdviceCron");
 require("./middlewares/dailyImageforNews");
-
+require('./middlewares/limitOrderCron');
+require('./middlewares/databasePriceCron');
+require('./middlewares/optionDatabaseCron');
+require('./middlewares/optionSettleCron');
 // require('dotenv').config();
 // require('./middlewares/limitOrderCron');
 // require('./middlewares/databasePriceCron');

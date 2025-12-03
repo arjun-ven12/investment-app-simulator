@@ -314,7 +314,6 @@ padding: 30px 0px;
 /* Warning card shake */
 .warning-card {
   margin-top: 15px;
-  background-color: #ff4c4c;
   color: #fff;
   padding: 12px 16px;
   border-radius: 8px;
@@ -438,9 +437,9 @@ padding: 30px 0px;
   padding: 14px 16px;
   margin-bottom: 18px;
   border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.1);
+  border-colour: rgb(0, 0, 0) 2px solid;
   /* subtle red tint */
-  color: #ffffff;
+  color: #000000;
   font-size: 0.95rem;
   text-align: left;
   transition: all 0.3s ease;

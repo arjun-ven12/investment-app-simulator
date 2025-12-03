@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { DateTime } = require('luxon'); // install: npm i luxon
 const prisma = require('../../prisma/prismaClient');
 const { processLimitOrders } = require('../models/Charts');
-const { processStopMarketOrders } = require('../models/stopLoss');
+const { processStopMarketOrders } = require('../models/stopMarket');
 const { processStopLimitOrders } = require('../models/stopLimit');
 
 async function getAllStockIds() {

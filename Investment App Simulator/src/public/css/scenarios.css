@@ -2543,3 +2543,108 @@ height: 100% !important;
         zoom: 0.85; /* 85% size */
     }
 }
+
+
+/* 
+@media (max-width: 768px) {
+  .fullbox {
+    display: block;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #globe-layer,
+  #globe-ui,
+  .insideleft,
+  .grid-left {
+    height: 300px !important;     
+    min-height: 300px !important;
+    max-height: 300px !important;
+    /* min-width: 300px !important;
+    max-width: 100% !important; 
+  }
+
+  #globe-layer canvas {
+    width: 100% !important;
+    height: 300px !important;
+  }
+
+  body {
+    overflow-y: auto !important; 
+    }
+} */
+
+@media (max-width: 600px) {
+  .insideleft {
+    display: none;
+  }
+
+
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #openScenariosBtn {
+    position: static !important;
+        z-index: auto !important  ;
+    width: auto !important;
+        background-color: #E0EBFF;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem; /* Increased font size from 0.8rem */
+    transition: background 0.3s, transform 0.2s;
+    border-radius: 6px; /* Increased border radius from 4px to 6px */
+    border: none;
+    margin: 30px 10px; /* Increased margin from 1px to 2px */
+  }
+
+  /* Make the overlay visible on mobile */
+  #floatingScenariosOverlay {
+    position: static !important;   
+    z-index: auto !important;      
+    margin-top: 20px;
+    padding-left: 10px;
+        padding-top: 0px;
+
+  }
+
+  .bs-footer{
+    margin-top: 50px !important;
+  }
+.floating-scenarios-title {
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+
+
+    #floatingScenariosOverlay.show {
+    display: block !important;
+    position: static !important;   
+    z-index: auto !important;      
+    margin-top: 20px;
+    padding-left: 0px;
+    padding-top: 0px;
+  }
+
+  /* Ensure cards are visible */
+  #floating-scenario-list {
+    position: relative;
+    z-index: 50;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .floating-card {
+    position: relative;
+    z-index: 100;
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
