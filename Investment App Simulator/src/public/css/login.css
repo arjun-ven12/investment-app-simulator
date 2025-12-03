@@ -1585,3 +1585,6 @@ p {
 .return-link a {
   color: black;
 }
+.left-panel h1 {
+padding-left:15px;
+}
