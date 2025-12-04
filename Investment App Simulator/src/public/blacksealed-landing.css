@@ -1076,7 +1076,7 @@ body::before {
 #bs-terminal-text {
     font-family: "JetBrains Mono", monospace;
     font-size: 0.95rem;
-    color: #bfe0ff;
+    color: #E0EBFF;
     text-shadow: 0 0 8px rgba(120,150,255,0.4);
     white-space: pre-wrap;
 }
