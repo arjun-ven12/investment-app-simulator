@@ -57,6 +57,7 @@ model Stock {
   StopMarketOrder StopMarketOrder[]
   StopLimitOrder  StopLimitOrder[]
   contracts       OptionContract[]
+  stockHoldings   StockHolding[]
 
   @@index([symbol])
 }
@@ -186,11 +187,11 @@ model User {
   failedLogins                Int                           @default(0)
   onboardingStage             String                        @default("home")
   skipOnboarding              Boolean                       @default(false)
-  scenarioConsoleStage        String      @default("not_started")
-  skipScenarioConsole         Boolean     @default(false)
+  scenarioConsoleStage        String                        @default("not_started")
+  skipScenarioConsole         Boolean                       @default(false)
   lockUntil                   DateTime?
-  termsAccepted   Boolean  @default(false)   
-  termsAcceptedAt DateTime?                    
+  termsAccepted               Boolean                       @default(false)
+  termsAcceptedAt             DateTime?
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
   Comment                     Comment[]
@@ -222,6 +223,7 @@ model User {
   sessions                    Session[]
   notificationSetting         NotificationSetting?
   loginActivities             LoginActivity[]
+  stockHoldings               StockHolding[]
 }
 
 model Referral {
@@ -239,6 +241,21 @@ model Referral {
   referralUsages      ReferralUsage[]
   referredUsers       User[]          @relation("UserReferredBy")
   ReferralBadge       ReferralBadge[]
+}
+
+model StockHolding {
+  id              Int    @id @default(autoincrement())
+  userId          Int
+  stockId         Int
+  symbol          String // optional if you want quick access without joining Stock
+  currentQuantity Int    @default(0)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+
+  @@unique([userId, stockId]) // one row per user per stock
+  @@index([userId])
+  @@index([stockId])
 }
 
 model ReferralUsage {
