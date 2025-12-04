@@ -1139,3 +1139,8 @@ body::before {
     opacity: 0;
     transition: opacity 0.7s ease; /* fade-in after loader disappears */
 }
+@media (min-width: 1000px) and (max-width: 1400px) {
+    body {
+        zoom: 0.85; /* 85% size */
+    }
+}
