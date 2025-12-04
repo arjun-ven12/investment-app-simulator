@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,28 +8,26 @@
 
   <!-- Fonts & Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
-    <link rel="stylesheet" href="../css/footer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
+  <link rel="stylesheet" href="../css/footer.css" />
   <link rel="stylesheet" href="../css/news.css" />
   <link rel="stylesheet" href="/css/chatbot.css" />
 </head>
 
 <body>
-<!-- Scroll Progress Beam -->
-<!-- Vertical Scroll Progress Bar -->
-<div id="scroll-progress-vertical"></div>
-<div id="top"></div>
+  <!-- Scroll Progress Beam -->
+  <!-- Vertical Scroll Progress Bar -->
+  <div id="scroll-progress-vertical"></div>
+  <div id="top"></div>
 
 
   <div id="navbar-container"></div>
-<div class="bg-auras">
-  <div class="aura"></div>
-  <div class="aura"></div>
-  <div class="aura"></div>
-</div>
+  <div class="bg-auras">
+    <div class="aura"></div>
+    <div class="aura"></div>
+    <div class="aura"></div>
+  </div>
 
 
   <!-- Hero -->
@@ -38,20 +37,20 @@
   </section>
 
 
-<section class="news-header">
-  <h2 class="news-title">Latest Insights</h2>
-  <div class="chips" id="category-chips"></div>
-</section>
+  <section class="news-header">
+    <h2 class="news-title">Latest Insights</h2>
+    <div class="chips" id="category-chips"></div>
+  </section>
 
-<!-- Articles Grid -->
-<section class="articles">
-  <div class="grid" id="news-container"></div>
-  <div id="pagination-controls" class="pagination-wrapper">
+  <!-- Articles Grid -->
+  <section class="articles">
+    <div class="grid" id="news-container"></div>
+    <div id="pagination-controls" class="pagination-wrapper">
     </div>
-  <div id="error-message"></div>
-</section>
+    <div id="error-message"></div>
+  </section>
 
-<!-- Floating Saved Tab
+  <!-- Floating Saved Tab
 <div class="folder-tab-wrapper" id="folderTabWrapper">
   <div id="folderTab" class="folder-tab">Saved</div>
 
@@ -66,18 +65,18 @@
   </div>
 </div> -->
 
-<script>
-window.addEventListener("scroll", () => {
-  const bar = document.getElementById("scroll-progress-vertical");
-  if (!bar) return;
+  <script>
+    window.addEventListener("scroll", () => {
+      const bar = document.getElementById("scroll-progress-vertical");
+      if (!bar) return;
 
-  const scrollTop = window.scrollY;
-  const docHeight = document.body.scrollHeight - window.innerHeight;
-  const scrolled = (scrollTop / docHeight) * 100;
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrolled = (scrollTop / docHeight) * 100;
 
-  bar.style.height = scrolled + "%";
-});
-</script>
+      bar.style.height = scrolled + "%";
+    });
+  </script>
 
 
 
@@ -87,24 +86,24 @@ window.addEventListener("scroll", () => {
   <script src="../js/navbar.js"></script>
   <script src="../js/authExpiry.js" defer></script>
   <script src="../js/chatbot.js" defer></script>
-      <div class="footer-fade"></div>
-    <footer class="bs-footer">
+  <div class="footer-fade"></div>
+  <footer class="bs-footer">
 
-        <div class="bs-footer-container">
+    <div class="bs-footer-container">
 
-            <!-- LEFT — BRAND + MISSION -->
-            <div class="bs-footer-left">
-                <div class="bs-footer-brand">
-                    <img src="../assets/blacksealedlogo.png" class="bs-footer-logo" alt="BlackSealed Logo">
-                    <div class="bs-footer-title">BlackSealed</div>
-                </div>
+      <!-- LEFT — BRAND + MISSION -->
+      <div class="bs-footer-left">
+        <div class="bs-footer-brand">
+          <img src="../assets/blacksealedlogo.png" class="bs-footer-logo" alt="BlackSealed Logo">
+          <div class="bs-footer-title">BlackSealed</div>
+        </div>
 
-                <p class="bs-footer-mission">
-                    A simulated environment for practicing real-world trading strategies with
-                    AI-powered insights, historical event scenarios, and blockchain-verified execution.
-                </p>
+        <p class="bs-footer-mission">
+          A simulated environment for practicing real-world trading strategies with
+          AI-powered insights, historical event scenarios, and blockchain-verified execution.
+        </p>
 
-                <!-- Socials (optional, can remove any)
+        <!-- Socials (optional, can remove any)
       <div class="bs-footer-socials">
         <a href="#"><i class="fab fa-x-twitter"></i></a>
         <a href="#"><i class="fab fa-linkedin"></i></a>
@@ -112,43 +111,44 @@ window.addEventListener("scroll", () => {
         <a href="#"><i class="fab fa-facebook"></i></a>
       </div> -->
 
-                <!-- BACK TO TOP -->
-                <a href="#top" class="bs-back-to-top"> ↑ Back to Top</a>
+        <!-- BACK TO TOP -->
+        <a href="#top" class="bs-back-to-top"> ↑ Back to Top</a>
 
-            </div>
+      </div>
 
-            <!-- MIDDLE — SITE MAP -->
-            <div class="bs-footer-mid">
-                <h4>Site Map</h4>
-                <ul>
-                    <li><a href="/home">Homepage</a></li>
-                    <li><a href="/investment">Invest</a></li>
-                    <li><a href="/scenarios">Scenarios</a></li>
-                    <li><a href="/blockchain">Blockchain Explorer</a></li>
-                    <li><a href="/allGuides">Academy</a></li>
-                    <li><a href="/referral">Referral</a></li>
-                    <li><a href="/setting">Settings</a></li>
-                </ul>
-            </div>
+      <!-- MIDDLE — SITE MAP -->
+      <div class="bs-footer-mid">
+        <h4>Site Map</h4>
+        <ul>
+          <li><a href="/home">Homepage</a></li>
+          <li><a href="/investment">Invest</a></li>
+          <li><a href="/scenarios">Scenarios</a></li>
+          <li><a href="/blockchain">Blockchain Explorer</a></li>
+          <li><a href="/allGuides">Academy</a></li>
+          <li><a href="/referral">Referral</a></li>
+          <li><a href="/setting">Settings</a></li>
+        </ul>
+      </div>
 
-            <!-- RIGHT — LEGAL -->
-            <div class="bs-footer-right">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="/terms.html">Terms of Service</a></li>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
-                </ul>
-            </div>
+      <!-- RIGHT — LEGAL -->
+      <div class="bs-footer-right">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms.html">Terms of Service</a></li>
+          <li><a href="/privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
 
-        </div>
+    </div>
 
-        <!-- COPYRIGHT BAR -->
-        <div class="bs-footer-bottom">
-            <span class="footer-copyright-symbol">©</span> 2025 BlackSealed. All rights reserved.
-            Simulation environment only — no real trading or financial advice.
-            Support: <a href="mailto:theblacksealed@gmail.com">theblacksealed@gmail.com</a>
-        </div>
+    <!-- COPYRIGHT BAR -->
+    <div class="bs-footer-bottom">
+      <span class="footer-copyright-symbol">©</span> 2025 BlackSealed. All rights reserved.
+      Simulation environment only — no real trading or financial advice.
+      Support: <a href="mailto:theblacksealed@gmail.com">theblacksealed@gmail.com</a>
+    </div>
 
-    </footer>
+  </footer>
 </body>
+
 </html>

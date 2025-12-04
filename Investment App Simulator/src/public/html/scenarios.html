@@ -9,30 +9,31 @@
   <link rel="stylesheet" href="../css/scenarios.css" />
 
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js/dist/css/shepherd.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js/dist/css/shepherd.css" />
   <script src="https://cdn.jsdelivr.net/npm/shepherd.js/dist/js/shepherd.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-      <link rel="stylesheet" href="../css/onboarding.css">
-              <link rel="stylesheet" href="../css/footer.css" />
+  <link rel="stylesheet" href="../css/onboarding.css">
+  <link rel="stylesheet" href="../css/footer.css" />
 
-<script src="../js/onboarding.js" defer></script>
+  <script src="../js/onboarding.js" defer></script>
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
 </head>
 
 <body>
   <!-- 🌐 View Scenarios Button -->
-<button id="openScenariosBtn" class="view-scenarios-btn">
-  View All Scenarios
-</button>
+  <button id="openScenariosBtn" class="view-scenarios-btn">
+    View All Scenarios
+  </button>
 
   <!-- ✨ Ambient Background -->
   <div id="starfield"></div>
   <div id="navbar-container"></div>
-<!-- 🌍 Floating Globe Scenarios -->
-<div id="floatingScenariosOverlay">
-  <h2 class="floating-scenarios-title">Available Scenarios</h2>
-  <div id="floating-scenario-list"></div>
-  <button id="closeFloatingScenarios" class="floating-close">×</button>
-</div>
+  <!-- 🌍 Floating Globe Scenarios -->
+  <div id="floatingScenariosOverlay">
+    <h2 class="floating-scenarios-title">Available Scenarios</h2>
+    <div id="floating-scenario-list"></div>
+    <button id="closeFloatingScenarios" class="floating-close">×</button>
+  </div>
 
   <!-- 🌍 GLOBE SCENE -->
   <div class="fullbox">
@@ -91,55 +92,55 @@
   <!-- ============================================================
      AI Insights Popup — BlackSealed Glass Modal
 ============================================================ -->
-<div id="aiInsightsPopup">
-  <div id="aiInsightsContent">
-    <span id="aiInsightsClose" onclick="closeInsightsPopup()">×</span>
-    <div id="aiInsightsBody" class="markdown-text">Loading...</div>
+  <div id="aiInsightsPopup">
+    <div id="aiInsightsContent">
+      <span id="aiInsightsClose" onclick="closeInsightsPopup()">×</span>
+      <div id="aiInsightsBody" class="markdown-text">Loading...</div>
+    </div>
   </div>
-</div>
-<div id="scenarioOverlay" class="bs-overlay">
-  <div class="bs-card">
+  <div id="scenarioOverlay" class="bs-overlay">
+    <div class="bs-card">
 
-    <button id="scenarioOverlayClose" class="bs-close">×</button>
+      <button id="scenarioOverlayClose" class="bs-close">×</button>
 
-    <div class="bs-tags">
-      <span id="scenarioRegionTag" class="bs-tag"></span>
-      <span id="scenarioVolTag" class="bs-tag"></span>
+      <div class="bs-tags">
+        <span id="scenarioRegionTag" class="bs-tag"></span>
+        <span id="scenarioVolTag" class="bs-tag"></span>
+      </div>
+
+      <h2 id="scenarioTitle" class="bs-title"></h2>
+      <p id="scenarioDesc" class="bs-desc"></p>
+
+      <div class="bs-info">
+        <div><strong>Start:</strong> <span id="scenarioStart"></span></div>
+        <div><strong>End:</strong> <span id="scenarioEnd"></span></div>
+        <div><strong>Starting Balance:</strong> <span id="scenarioBalance"></span></div>
+      </div>
+
+      <div class="bs-buttons">
+        <button id="scenarioJoinBtn" class="bs-btn-primary">Join Mission</button>
+        <button id="scenarioCancelBtn" class="bs-btn-secondary">Cancel</button>
+      </div>
+
     </div>
-
-    <h2 id="scenarioTitle" class="bs-title"></h2>
-    <p id="scenarioDesc" class="bs-desc"></p>
-
-    <div class="bs-info">
-      <div><strong>Start:</strong> <span id="scenarioStart"></span></div>
-      <div><strong>End:</strong> <span id="scenarioEnd"></span></div>
-      <div><strong>Starting Balance:</strong> <span id="scenarioBalance"></span></div>
-    </div>
-
-    <div class="bs-buttons">
-      <button id="scenarioJoinBtn" class="bs-btn-primary">Join Mission</button>
-      <button id="scenarioCancelBtn" class="bs-btn-secondary">Cancel</button>
-    </div>
-
   </div>
-</div>
   <footer class="bs-footer">
 
-        <div class="bs-footer-container">
+    <div class="bs-footer-container">
 
-            <!-- LEFT — BRAND + MISSION -->
-            <div class="bs-footer-left">
-                <div class="bs-footer-brand">
-                    <img src="../assets/blacksealedlogo.png" class="bs-footer-logo" alt="BlackSealed Logo">
-                    <div class="bs-footer-title">BlackSealed</div>
-                </div>
+      <!-- LEFT — BRAND + MISSION -->
+      <div class="bs-footer-left">
+        <div class="bs-footer-brand">
+          <img src="../assets/blacksealedlogo.png" class="bs-footer-logo" alt="BlackSealed Logo">
+          <div class="bs-footer-title">BlackSealed</div>
+        </div>
 
-                <p class="bs-footer-mission">
-                    A simulated environment for practicing real-world trading strategies with
-                    AI-powered insights, historical event scenarios, and blockchain-verified execution.
-                </p>
+        <p class="bs-footer-mission">
+          A simulated environment for practicing real-world trading strategies with
+          AI-powered insights, historical event scenarios, and blockchain-verified execution.
+        </p>
 
-                <!-- Socials (optional, can remove any)
+        <!-- Socials (optional, can remove any)
       <div class="bs-footer-socials">
         <a href="#"><i class="fab fa-x-twitter"></i></a>
         <a href="#"><i class="fab fa-linkedin"></i></a>
@@ -147,45 +148,45 @@
         <a href="#"><i class="fab fa-facebook"></i></a>
       </div> -->
 
-                <!-- BACK TO TOP -->
-                <button class="bs-back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-                    ↑ Back to Top
-                </button>
-            </div>
+        <!-- BACK TO TOP -->
+        <button class="bs-back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+          ↑ Back to Top
+        </button>
+      </div>
 
-            <!-- MIDDLE — SITE MAP -->
-            <div class="bs-footer-mid">
-                <h4>Site Map</h4>
-                <ul>
-                    <li><a href="/home">Homepage</a></li>
-                    <li><a href="/investment">Invest</a></li>
-                    <li><a href="/scenarios">Scenarios</a></li>
-                    <li><a href="/blockchain">Blockchain Explorer</a></li>
-                    <li><a href="/allGuides">Academy</a></li>
-                    <li><a href="/referral">Referral</a></li>
-                    <li><a href="/setting">Settings</a></li>
-                </ul>
-            </div>
+      <!-- MIDDLE — SITE MAP -->
+      <div class="bs-footer-mid">
+        <h4>Site Map</h4>
+        <ul>
+          <li><a href="/home">Homepage</a></li>
+          <li><a href="/investment">Invest</a></li>
+          <li><a href="/scenarios">Scenarios</a></li>
+          <li><a href="/blockchain">Blockchain Explorer</a></li>
+          <li><a href="/allGuides">Academy</a></li>
+          <li><a href="/referral">Referral</a></li>
+          <li><a href="/setting">Settings</a></li>
+        </ul>
+      </div>
 
-            <!-- RIGHT — LEGAL -->
-            <div class="bs-footer-right">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="/terms.html">Terms of Service</a></li>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
-                </ul>
-            </div>
+      <!-- RIGHT — LEGAL -->
+      <div class="bs-footer-right">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms.html">Terms of Service</a></li>
+          <li><a href="/privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
 
-        </div>
+    </div>
 
-        <!-- COPYRIGHT BAR -->
-        <div class="bs-footer-bottom">
-            <span class="footer-copyright-symbol">©</span> 2025 BlackSealed. All rights reserved.
-            Simulation environment only — no real trading or financial advice.
-            Support: <a href="mailto:theblacksealed@gmail.com">theblacksealed@gmail.com</a>
-        </div>
+    <!-- COPYRIGHT BAR -->
+    <div class="bs-footer-bottom">
+      <span class="footer-copyright-symbol">©</span> 2025 BlackSealed. All rights reserved.
+      Simulation environment only — no real trading or financial advice.
+      Support: <a href="mailto:theblacksealed@gmail.com">theblacksealed@gmail.com</a>
+    </div>
 
-    </footer>
+  </footer>
 
 
   <!-- 🧠 Internal UI Scripts -->

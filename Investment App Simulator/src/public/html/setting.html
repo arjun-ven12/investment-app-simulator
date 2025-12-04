@@ -7,11 +7,12 @@
     <title>Settings — BlackSealed</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/account.css" />
     <link rel="stylesheet" href="../css/footer.css" />
     <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
 </head>
 
 <body class="settings-page">
@@ -73,23 +74,24 @@
             </section>
             <section class="settings-card">
                 <div class="reset-wallet-container">
-                <h2>Reset Wallet</h2>
-                <p class="sub">Reset Wallet & Choose Starting Balance.</p>
-                <form id="reset-wallet-form">                
-                <label for="starting-balance">Enter starting balance:</label>
-                <input type="number" id="starting-balance" min="1" placeholder="100000" />
-                    <button type="submit" id="reset-wallet-btn" class="primary-btn">Reset Wallet & Portfolio</button>
-                </form>
+                    <h2>Reset Wallet</h2>
+                    <p class="sub">Reset Wallet & Choose Starting Balance.</p>
+                    <form id="reset-wallet-form">
+                        <label for="starting-balance">Enter starting balance:</label>
+                        <input type="number" id="starting-balance" min="1" placeholder="100000" />
+                        <button type="submit" id="reset-wallet-btn" class="primary-btn">Reset Wallet &
+                            Portfolio</button>
+                    </form>
                 </div>
 
                 <!-- Confirmation Popup -->
                 <div id="reset-popup" class="popup hidden">
-                <div class="popup-content">
-                    <p>Are you sure you want to reset your account?</p>
-                    <br>
-                    <button id="confirm-yes">Yes</button>
-                    <button id="confirm-no">No</button>
-                </div>
+                    <div class="popup-content">
+                        <p>Are you sure you want to reset your account?</p>
+                        <br>
+                        <button id="confirm-yes">Yes</button>
+                        <button id="confirm-no">No</button>
+                    </div>
                 </div>
 
                 <div id="reset-message" class="reset-message hidden"></div>

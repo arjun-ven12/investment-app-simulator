@@ -1,28 +1,28 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Option OHLC Chart</title>
-      <link rel="stylesheet" href="../css/investment.css" />
+  <link rel="stylesheet" href="../css/investment.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.0"></script>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-        <script src="../js/options.js" defer></script>
-                <script src="../js/ohlc.js" defer></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script src="../js/options.js" defer></script>
+  <script src="../js/ohlc.js" defer></script>
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
 </head>
-<body class="ohlc-body"> 
+
+<body class="ohlc-body">
 
 
-    <button id="back-button" class="button">
-      ← Back to Investments
-    </button>
+  <button id="back-button" class="button">
+    ← Back to Investments
+  </button>
 
 
   <div class="container2">
@@ -48,7 +48,7 @@
         </div> 
         <button type="submit">Generate Chart</button>  -->
 
-      <button type="button" onclick="window.location.reload()">Refresh</button>
+        <button type="button" onclick="window.location.reload()">Refresh</button>
       </form>
 
       <div class="chart-wrapper">
@@ -115,7 +115,7 @@
           <div class="form-group">
             <label for="limit-amount">Amount</label>
             <input type="text" id="limit-amount" name="limit-amount" placeholder="--" readonly />
-           <p>1 Contract = 100 Share(s)</p>
+            <p>1 Contract = 100 Share(s)</p>
 
           </div>
         </div>
@@ -147,5 +147,3 @@
 </body>
 
 </html>
-
-
