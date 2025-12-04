@@ -1,69 +1,105 @@
-// ============================================================
-// BLACKSEALED — Landing Page Interactions
-// Starfield · Scroll Reveal · Year · (Simple) Tilt
-// ============================================================
 
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. STARFIELD
-  const starfield = document.getElementById("starfield");
-  if (starfield) {
-    const STAR_COUNT = 140;
-    const frag = document.createDocumentFragment();
+// -----------------------------------------
+// STARFIELD + PARALLAX (2D, WORKING)
+// -----------------------------------------
+const canvas = document.getElementById("constellation-canvas");
+const ctx = canvas.getContext("2d");
 
-    for (let i = 0; i < STAR_COUNT; i++) {
-      const star = document.createElement("div");
-      star.className = "star";
-      const size = Math.random() * 2 + 1;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-      star.style.top = `${Math.random() * 100}%`;
-      star.style.left = `${Math.random() * 100}%`;
-      star.style.animationDelay = `${Math.random() * 6}s`;
-      frag.appendChild(star);
-    }
-    starfield.appendChild(frag);
-  }
+let mouseX = 0.5;
+let mouseY = 0.5;
 
-  // 2. SCROLL REVEAL
-  const revealEls = document.querySelectorAll(".animate-on-scroll");
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+// create stars
+const stars = Array.from({ length: 140 }, () => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  r: Math.random() * 1.4 + 0.3,
+  s: Math.random() * 0.4 + 0.1,
+}));
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  stars.forEach((star) => {
+    // parallax movement
+    const px = (mouseX - 0.5) * 15;
+    const py = (mouseY - 0.5) * 15;
+
+    ctx.beginPath();
+    ctx.arc(star.x + px, star.y + py, star.r, 0, Math.PI * 2);
+    const tint = 0.45 + Math.random() * 0.15;
+    ctx.fillStyle = `rgba(224,235,255,${tint})`;
+
+    ctx.fill();
+
+    // slow drift
+    star.x += star.s * 0.2;
+    if (star.x > canvas.width) star.x = 0;
+  });
+
+  requestAnimationFrame(render);
+}
+
+render();
+
+// mouse parallax
+document.addEventListener("mousemove", (e) => {
+  mouseX = e.clientX / window.innerWidth;
+  mouseY = e.clientY / window.innerHeight;
+});
+// Smooth scrolling for nav links
+document.querySelectorAll('.bs-nav-links a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - 90, // offset for navbar
+        behavior: "smooth"
       });
-    },
-    { threshold: 0.12 }
-  );
-
-  revealEls.forEach((el) => observer.observe(el));
-
-  // 3. FOOTER YEAR
-  const yearEl = document.getElementById("year");
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear();
-  }
-
-  // 4. SIMPLE TILT ON HOVER (mouse-based)
-  const tiltEls = document.querySelectorAll(".tilt-on-hover");
-  tiltEls.forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -4;
-      const rotateY = ((x - centerX) / centerX) * 4;
-
-      card.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
-    });
-
-    card.addEventListener("mouseleave", () => {
-      card.style.transform =
-        "perspective(700px) rotateX(0deg) rotateY(0deg) translateY(0)";
-    });
+    }
   });
 });
+// Navbar appears only when scrolling
+window.addEventListener("scroll", () => {
+  const nav = document.querySelector(".bs-nav");
+  if (window.scrollY > 50) {
+    nav.classList.add("scrolled");
+  } else {
+    nav.classList.remove("scrolled");
+  }
+});
+
+// ---------------------------------------------
+// AUTO-HIGHLIGHT NAV LINKS ON SCROLL
+// ---------------------------------------------
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".bs-nav-links a");
+
+function updateActiveNav() {
+    let current = "";
+
+    sections.forEach(sec => {
+        const top = sec.offsetTop - 150;
+        const bottom = top + sec.offsetHeight;
+
+        if (window.scrollY >= top && window.scrollY < bottom) {
+            current = sec.getAttribute("id");
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === `#${current}`) {
+            link.classList.add("active");
+        }
+    });
+}
+
+window.addEventListener("scroll", updateActiveNav);

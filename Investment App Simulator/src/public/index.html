@@ -2,426 +2,434 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlackSealed — Paper Trading Platform</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Scripts (external files only) -->
+  <script src="loading.js" defer></script>
+  <script src="index.js" defer></script>
+
   <!-- Styles -->
-  <link rel="stylesheet" href="blacksealed-landing.css" />
-  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
+  <link rel="stylesheet" href="blacksealed-landing.css">
 </head>
 
 <body>
-  <!-- Ambient Background -->
-  <div id="starfield"></div>
-  <div class="background-glow glow-top-left"></div>
-  <div class="background-glow glow-bottom-right"></div>
 
-  <!-- NAVBAR -->
-  <header class="bs-nav">
-    <div class="bs-nav-left">
-      <!-- <div class="logo-orb"></div> -->
-      <span class="logo-text">BlackSealed</span>
-    </div>
-    <nav class="bs-nav-links">
-      <a href="#platform">Platform</a>
-      <a href="#ai">Nyra AI</a>
-      <a href="#markets">Markets</a>
-      <a href="#scenarios">Scenarios</a>
-      <a href="#ledger">Ledger</a>
-      <a href="#gamification">Gamification</a>
-    </nav>
-    <div class="bs-nav-actions">
-      <button class="btn primary-btn" onclick="window.location.href='/login'">Launch Simulator</button>
-    </div>
-  </header>
+  <!-- ============================
+       FULLSCREEN TERMINAL LOADER 
+     ============================ -->
 
-  <!-- MAIN -->
-  <main>
 
-    <!-- HERO SECTION -->
-    <section class="hero" id="top">
-      <div class="hero-content">
-        <p class="section-tag">NEXT-GEN PAPER TRADING</p>
-        <h1>
-          Master the markets<br />
-          with <span class="accent">AI-driven trading intelligence.</span>
-        </h1>
-        <p class="hero-subtitle">
-          BlackSealed is an AI-powered paper trading platform for stocks & options — combining
-          real-time simulations, institutional-grade analytics, and blockchain-verified trade history.
-        </p>
-        <div class="hero-actions">
-          <button class="btn primary-btn" onclick="window.location.href='/login'">Start Trading</button>
-          <!-- <button class="btn ghost-btn">View Platform Demo</button> -->
-        </div>
+<div id="bs-loading-screen">
+  <div class="bs-loader-center">
+      <pre id="bs-terminal-text"></pre>
 
-        <!-- <div class="hero-metrics">
-          <div class="metric-card">
-            <span class="metric-label">Simulated Volume</span>
-            <span class="metric-value">$12.7M+</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">Trades Executed</span>
-            <span class="metric-value">51,284</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">Scenario Attempts</span>
-            <span class="metric-value">236</span>
-          </div>
-        </div> -->
+      <div class="bs-loader-bar">
+          <div class="bs-loader-fill"></div>
       </div>
 
-      <!-- Hero Visual Cluster -->
-      <div class="hero-visual">
-        <!-- Main Chart Card -->
-        <div class="hero-card chart-card tilt-on-hover">
-          <div class="card-header">
-            <span class="card-title">AAPL / NASDAQ</span>
-            <span class="card-pill">Paper • Live Feed</span>
-          </div>
-          <div class="hero-chart-placeholder">
-            <div class="chart-line"></div>
-            <div class="chart-glow"></div>
-            <div class="chart-marker marker-1"></div>
-            <div class="chart-marker marker-2"></div>
-            <div class="chart-marker marker-3"></div>
-          </div>
-          <div class="chart-footer">
-            <span>1D</span>
-            <span>5D</span>
-            <span class="active">1M</span>
-            <span>6M</span>
-            <span>1Y</span>
-          </div>
-        </div>
-
-        <!-- Order Card -->
-        <div class="hero-card order-card tilt-on-hover">
-          <div class="card-header">
-            <span class="card-title">New Order</span>
-            <span class="card-pill green">Simulated</span>
-          </div>
-          <div class="order-body">
-            <div class="order-row">
-              <span>Order Type</span>
-              <span class="pill">Limit</span>
-            </div>
-            <div class="order-row">
-              <span>Side</span>
-              <span class="pill green">Buy</span>
-            </div>
-            <div class="order-row">
-              <span>Quantity</span>
-              <span>24</span>
-            </div>
-            <div class="order-row">
-              <span>Limit Price</span>
-              <span>$272.40</span>
-            </div>
-            <button class="btn primary-btn full-btn">Place Paper Trade</button>
-          </div>
-        </div>
-
-        <!-- Portfolio + AI card -->
-        <div class="hero-card portfolio-card tilt-on-hover">
-          <div class="card-header">
-            <span class="card-title">Portfolio Snapshot</span>
-            <span class="card-pill">Nyra AI</span>
-          </div>
-          <div class="portfolio-body">
-            <div class="portfolio-row">
-              <span>Total Value</span>
-              <span>$117,501.28</span>
-            </div>
-            <div class="portfolio-row">
-              <span>Unrealized P/L</span>
-              <span class="green">+ $1,023.44</span>
-            </div>
-            <div class="portfolio-row">
-              <span>Realized P/L</span>
-              <span class="green">+ $312.09</span>
-            </div>
-            <div class="ai-pill">
-              <div class="ai-orb"></div>
-              <span>“Portfolio is tech-heavy. Consider diversifying into defensives.”</span>
-            </div>
-          </div>
-        </div>
+      <div class="bs-loader-sub">
+          BLACKSEALED INTELLIGENCE SYSTEM · MODULE NYRA.AI
       </div>
-    </section>
+  </div>
+</div>
 
-    <!-- PLATFORM SECTION -->
-    <section class="section" id="platform">
-      <div class="section-header animate-on-scroll">
-        <p class="section-tag">THE PLATFORM</p>
-        <h2>More than paper trading. A full market lab.</h2>
-        <p class="section-subtitle">
-          Execute complex orders, explore options, and stress-test your strategy — all in a safe,
-          simulated environment that feels like a real trading terminal.
-        </p>
+
+  <!-- Aurora background -->
+  <div class="aurora"></div>
+
+  <!-- Starfield -->
+  <canvas id="constellation-canvas"></canvas>
+
+  <!-- ============================
+           MAIN PAGE CONTENT
+     ============================ -->
+  <div id="bs-main-content" style="display:none;">
+
+
+    <!-- NAVBAR -->
+    <header class="bs-nav">
+      <div class="bs-nav-left">
+        <span class="logo-text">BlackSealed</span>
       </div>
 
-      <div class="feature-grid">
-        <article class="feature-card animate-on-scroll tilt-on-hover">
-          <h3>Real-Time Paper Trading</h3>
-          <p>
-            Market, limit, stop-limit & stop-market orders with simulated execution logic,
-            live pricing feeds, order history, and cancellable open orders.
+      <nav class="bs-nav-links">
+        <a href="#platform">Platform</a>
+        <a href="#ai">Nyra AI</a>
+        <a href="#markets">Markets</a>
+        <a href="#scenarios">Scenarios</a>
+        <a href="#ledger">Ledger</a>
+        <a href="#gamification">Gamification</a>
+      </nav>
+
+      <div class="bs-nav-actions">
+        <button class="btn primary-btn" onclick="window.location.href='/login'">Launch Simulator</button>
+      </div>
+    </header>
+
+    <!-- ============================
+              HERO SECTION
+       ============================ -->
+    <main>
+      <section class="hero" id="top">
+        <div class="hero-content">
+
+          <!-- LEFT: Text -->
+          <div>
+            <p class="section-tag">NEXT-GEN PAPER TRADING</p>
+
+            <h1>
+              Master the markets<br>
+              with <span class="accent">AI-driven trading intelligence.</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              BlackSealed is an AI-powered paper trading platform for stocks & options — combining
+              real-time simulations, institutional-grade analytics, and blockchain-verified trade history.
+            </p>
+
+            <div class="hero-actions">
+              <button class="btn primary-btn" onclick="window.location.href='/login'">Start Trading</button>
+            </div>
+          </div>
+
+          <!-- RIGHT: Cards -->
+          <div class="hero-visual">
+            <!-- Chart -->
+            <div class="hero-card chart-card">
+              <div class="card-header">
+                <span class="card-title">AAPL / NASDAQ</span>
+                <span class="card-pill">Paper • Live Feed</span>
+              </div>
+
+              <div class="hero-chart-placeholder">
+                <div class="chart-line"></div>
+                <div class="chart-marker marker-1"></div>
+                <div class="chart-marker marker-2"></div>
+                <div class="chart-marker marker-3"></div>
+              </div>
+
+              <div class="chart-footer">
+                <span>1D</span>
+                <span>5D</span>
+                <span class="active">1M</span>
+                <span>6M</span>
+                <span>1Y</span>
+              </div>
+            </div>
+
+            <!-- Order Card -->
+            <div class="hero-card order-card">
+              <div class="card-header">
+                <span class="card-title">New Order</span>
+                <span class="card-pill green">Simulated</span>
+              </div>
+
+              <div class="order-body">
+                <div class="order-row"><span>Order Type</span><span class="pill">Limit</span></div>
+                <div class="order-row"><span>Side</span><span class="pill green">Buy</span></div>
+                <div class="order-row"><span>Quantity</span><span>24</span></div>
+                <div class="order-row"><span>Limit Price</span><span>$272.40</span></div>
+
+                <button class="btn primary-btn full-btn">Place Paper Trade</button>
+              </div>
+            </div>
+
+            <!-- Portfolio Card -->
+            <div class="hero-card portfolio-card">
+              <div class="card-header">
+                <span class="card-title">Portfolio Snapshot</span>
+                <span class="card-pill">Nyra AI</span>
+              </div>
+
+              <div class="portfolio-body">
+                <div class="portfolio-row"><span>Total Value</span><span>$117,501.28</span></div>
+                <div class="portfolio-row"><span>Unrealized P/L</span><span class="green">+ $1,023.44</span></div>
+                <div class="portfolio-row"><span>Realized P/L</span><span class="green">+ $312.09</span></div>
+
+                <div class="ai-pill">
+                  <div class="ai-orb"></div>
+                  <span>"Portfolio is tech-heavy. Consider diversifying into defensives."</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================
+               PLATFORM SECTION
+         ============================ -->
+      <section class="section" id="platform">
+        <div class="section-header">
+          <p class="section-tag">THE PLATFORM</p>
+          <h2>More than paper trading. A full market lab.</h2>
+          <p class="section-subtitle">
+            Execute complex orders, explore options, and stress-test your strategy — all in a safe,
+            simulated environment that feels like a real trading terminal.
           </p>
-          <ul>
-            <li>Portfolio P/L tracking</li>
-            <li>Watchlists & stock search</li>
-          </ul>
-        </article>
+        </div>
 
-        <article class="feature-card animate-on-scroll tilt-on-hover">
-          <h3>Options Included</h3>
-          <p>
-            Trade calls and puts in a controlled environment with full visibility over contracts,
-            expiries, open interest, and realized vs unrealized options P/L.
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Real-Time Paper Trading</h3>
+            <p>
+              Market, limit, stop-limit & stop-market orders with simulated execution logic,
+              live pricing feeds, order history, and cancellable open orders.
+            </p>
+            <ul>
+              <li>Portfolio P/L tracking</li>
+              <li>Watchlists & stock search</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <h3>Options Included</h3>
+            <p>
+              Trade calls and puts in a controlled environment with full visibility over contracts,
+              expiries, open interest, and realized vs unrealized options P/L.
+            </p>
+            <ul>
+              <li>Buy/Sell Calls & Puts</li>
+              <li>Options portfolio view</li>
+              <li>Open, closed & expired states</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <h3>Portfolio Analytics</h3>
+            <p>
+              Visualize sector exposure, historical equity curves, and trade-level performance with
+              allocation breakdowns and realized/unrealized performance.
+            </p>
+            <ul>
+              <li>Sector breakdowns</li>
+              <li>Equity curve</li>
+              <li>Recent trades</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <h3>News & Market Data</h3>
+            <p>
+              Surface the stories that matter to your portfolio with integrated news, bookmarks, likes,
+              and context-aware sentiment.
+            </p>
+            <ul>
+              <li>Real-time headlines</li>
+              <li>Bookmark & react</li>
+              <li>Company fundamentals</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================
+                NYRA AI
+         ============================ -->
+      <section class="section section-split" id="ai">
+        <div class="split-text">
+          <p class="section-tag">NYRA AI</p>
+          <h2>Your AI portfolio strategist.</h2>
+          <p class="section-subtitle">
+            Nyra reads your portfolio like a seasoned risk manager — highlighting strengths,
+            exposing concentration risk, and suggesting practical diversification moves.
           </p>
-          <ul>
-            <li>Buy/Sell Calls & Puts</li>
-            <li>Options portfolio view</li>
-            <li>Open, closed & expired states</li>
-          </ul>
-        </article>
 
-        <article class="feature-card animate-on-scroll tilt-on-hover">
-          <h3>Portfolio Analytics</h3>
-          <p>
-            Visualize sector exposure, historical equity curves, and trade-level performance with
-            allocation breakdowns and realized/unrealized performance.
+          <div class="pill-list">
+            <span class="pill">Portfolio critique</span>
+            <span class="pill">Scenario analysis</span>
+            <span class="pill">Diversification ideas</span>
+            <span class="pill">Behavioral feedback</span>
+          </div>
+        </div>
+
+        <!-- ORB -->
+        <div class="split-visual nyra-container">
+          <div class="nyra-orb">
+            <!-- Your NYRA SVG goes here. -->
+            <!-- I did not modify the SVG itself; paste as-is -->
+            <!-- (You can paste the full <svg> block here again) -->
+          </div>
+
+          <div class="ai-tooltip">
+            "If AAPL drops 10%, your portfolio drawdown is -6.2%. Consider hedging with less-correlated sectors."
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================
+               MARKETS
+         ============================ -->
+      <section class="section" id="markets">
+        <div class="section-header">
+          <p class="section-tag">MARKET COMMAND CENTER</p>
+          <h2>Everything a serious trader expects — minus the real risk.</h2>
+        </div>
+
+        <div class="command-grid">
+          <div class="command-card">
+            <h3>Dynamic Charts</h3>
+            <p>Candlestick, intraday, and zoomable historical views for every symbol you simulate.</p>
+            <div class="mini-chart"><div class="mini-line"></div></div>
+          </div>
+
+          <div class="command-card">
+            <h3>Live Sentiment</h3>
+            <p>Track how news and sentiment could impact your positions before you click buy.</p>
+            <div class="mini-tags">
+              <span class="pill green">Bullish</span>
+              <span class="pill red">Event Risk</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================
+               SCENARIOS
+         ============================ -->
+      <section class="section" id="scenarios">
+        <div class="section-header">
+          <p class="section-tag">SCENARIO TRAINING</p>
+          <h2>Replay the markets like a mission — without making it the whole platform.</h2>
+          <p class="section-subtitle">
+            Scenarios are self-contained training environments powered by real historical data.
+            Each mission gets its own portfolio, attempts, and Nyra post-game insights.
           </p>
-          <ul>
-            <li>Sector & industry breakdowns</li>
-            <li>Equity distribution</li>
-            <li>Recent trades & activity feed</li>
-          </ul>
-        </article>
+        </div>
 
-        <article class="feature-card animate-on-scroll tilt-on-hover">
-          <h3>News & Market Data</h3>
-          <p>
-            Surface the stories that matter to your portfolio with integrated news, bookmarks, likes,
-            and context-aware sentiment.
+        <div class="scenario-timeline">
+          <div class="scenario-node">
+            <div class="node-dot"></div>
+            <div class="node-label">
+              <h4>2025 · Trade War Shock</h4>
+              <p>Navigate historic drawdowns and violent reversals.</p>
+            </div>
+          </div>
+
+          <div class="scenario-node">
+            <div class="node-dot"></div>
+            <div class="node-label">
+              <h4>2022 · Inflation Reversal</h4>
+              <p>Rotate through sectors as policy and inflation collide.</p>
+            </div>
+          </div>
+
+          <div class="scenario-node">
+            <div class="node-dot"></div>
+            <div class="node-label">
+              <h4>2024 · Oil Supply Crunch</h4>
+              <p>Trade energy, transport, and volatility in a supply shock.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================
+                 LEDGER
+         ============================ -->
+      <section class="section section-split" id="ledger">
+        <div class="split-text">
+          <p class="section-tag">BLOCKCHAIN-VERIFIED</p>
+          <h2>Every trade leaves a trail.</h2>
+          <p class="section-subtitle">
+            A private blockchain ledger records each simulated execution — creating a tamper-evident
+            history of your decisions for audits, competitions, and learning.
           </p>
-          <ul>
-            <li>Real-time headlines</li>
-            <li>Bookmark & react</li>
-            <li>Company fundamentals</li>
+
+          <ul class="bullet-list">
+            <li>SHA-256 hashed trade blocks</li>
+            <li>Genesis block on initialization</li>
+            <li>Automatic chain validation</li>
+            <li>Optional on-chain anchoring</li>
           </ul>
-        </article>
-      </div>
-    </section>
-
-    <!-- NYRA AI SECTION -->
-    <section class="section section-split" id="ai">
-      <div class="split-text animate-on-scroll">
-        <p class="section-tag">NYRA AI</p>
-        <h2>Your AI portfolio strategist.</h2>
-        <p class="section-subtitle">
-          Nyra reads your portfolio like a seasoned risk manager — highlighting strengths,
-          exposing concentration risk, and suggesting practical diversification moves.
-        </p>
-        <div class="pill-list">
-          <span class="pill">Portfolio critique</span>
-          <span class="pill">Scenario analysis</span>
-          <span class="pill">Diversification ideas</span>
-          <span class="pill">Behavioral feedback</span>
         </div>
-      </div>
 
-      <div class="split-visual animate-on-scroll">
-        <div class="ai-orb-large">
-          <div class="ai-orb-ring ring-1"></div>
-          <div class="ai-orb-ring ring-2"></div>
-          <div class="ai-orb-core"></div>
-        </div>
-        <div class="ai-tooltip">
-          “If AAPL drops 10%, your portfolio drawdown is -6.2%. Consider hedging with less-correlated sectors.”
-        </div>
-      </div>
-    </section>
+        <div class="split-visual">
+          <div class="ledger-stack">
+            <div class="ledger-block">
+              <span>Block #128</span>
+              <span>AAPL • Buy 24 @ 272.40</span>
+            </div>
+            <div class="ledger-connector"></div>
 
-    <!-- MARKET COMMAND CENTER -->
-    <section class="section" id="markets">
-      <div class="section-header animate-on-scroll">
-        <p class="section-tag">MARKET COMMAND CENTER</p>
-        <h2>Everything a serious trader expects — minus the real risk.</h2>
-      </div>
+            <div class="ledger-block">
+              <span>Block #129</span>
+              <span>TSLA • Sell 5 @ 214.10</span>
+            </div>
+            <div class="ledger-connector"></div>
 
-      <div class="command-grid">
-        <div class="command-card animate-on-scroll tilt-on-hover">
-          <h3>Dynamic Charts</h3>
-          <p>Candlestick, intraday, and zoomable historical views for every symbol you simulate.</p>
-          <div class="mini-chart">
-            <div class="mini-line"></div>
+            <div class="ledger-block">
+              <span>Block #130</span>
+              <span>Portfolio Hash: 9f3a…e72</span>
+            </div>
           </div>
         </div>
-        <div class="command-card animate-on-scroll tilt-on-hover">
-          <h3>Live Sentiment</h3>
-          <p>Track how news and sentiment could impact your positions before you click buy.</p>
-          <div class="mini-tags">
-            <span class="pill green">Bullish</span>
-            <span class="pill red">Event Risk</span>
+      </section>
+
+      <!-- ============================
+             GAMIFICATION
+         ============================ -->
+      <section class="section" id="gamification">
+        <div class="section-header">
+          <p class="section-tag">GAMIFICATION</p>
+          <h2>Serious tools, playful progression.</h2>
+        </div>
+
+        <div class="gamification-grid">
+          <div class="gam-card">
+            <h3>Leaderboards</h3>
+            <p>Compete on risk-adjusted returns, not just raw P/L.</p>
+
+            <div class="mini-leaderboard">
+              <div><span>#1</span> <span>NyraLabs</span> <span class="green">+18.3%</span></div>
+              <div><span>#2</span> <span>GammaGirl</span> <span class="green">+15.1%</span></div>
+              <div><span>#3</span> <span>PaperBull</span> <span class="green">+12.7%</span></div>
+            </div>
+          </div>
+
+          <div class="gam-card">
+            <h3>Referral Progress</h3>
+            <p>Invite friends, unlock scenarios and analytics boosts.</p>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 62%;"></div>
+            </div>
+            <span class="progress-label">62% to earning 5000</span>
           </div>
         </div>
-        <!-- <div class="command-card animate-on-scroll tilt-on-hover">
-          <h3>Comments & Watchlists</h3>
-          <p>Organize your ideas and notes per ticker with comments, watchlists, and tags.</p>
-          <div class="mini-comment">
-            “Watching NVDA into earnings — high IV, consider spreads instead of naked calls.”
-          </div>
-        </div> -->
-      </div>
-    </section>
+      </section>
 
-    <!-- SCENARIOS -->
-    <section class="section" id="scenarios">
-      <div class="section-header animate-on-scroll">
-        <p class="section-tag">SCENARIO TRAINING</p>
-        <h2>Replay the markets like a mission — without making it the whole platform.</h2>
-        <p class="section-subtitle">
-          Scenarios are self-contained training environments powered by real historical data.
-          Each mission gets its own portfolio, attempts, and Nyra post-game insights.
-        </p>
-      </div>
+      <!-- ============================
+              CTA
+         ============================ -->
+      <section class="section CTA-section">
+        <div class="cta-card">
+          <p class="section-tag">READY TO START?</p>
+          <h2>Turn the markets into your training ground.</h2>
+          <p class="section-subtitle">
+            Launch the BlackSealed simulator, explore real-time paper trading, and let Nyra guide your next decisions —
+            before real capital is at stake.
+          </p>
 
-      <div class="scenario-timeline animate-on-scroll">
-        <div class="scenario-node">
-          <div class="node-dot"></div>
-          <div class="node-label">
-            <h4>2025 · Trade War Shock</h4>
-            <p>Navigate historic drawdowns and violent reversals.</p>
+          <div class="hero-actions">
+            <button class="btn primary-btn" onclick="window.location.href='/login'">Launch Simulator</button>
           </div>
         </div>
-        <div class="scenario-node">
-          <div class="node-dot"></div>
-          <div class="node-label">
-            <h4>2022 · Inflation Reversal</h4>
-            <p>Rotate through sectors as policy and inflation collide.</p>
-          </div>
-        </div>
-        <div class="scenario-node">
-          <div class="node-dot"></div>
-          <div class="node-label">
-            <h4>2024 · Oil Supply Crunch</h4>
-            <p>Trade energy, transport, and volatility in a supply shock.</p>
-          </div>
-        </div>
-        <!-- <div class="scenario-node">
-          <div class="node-dot node-pulse"></div>
-          <div class="node-label">
-            <h4>Next · Your Custom Scenario</h4>
-            <p>Design and test your own stress tests.</p>
-          </div>
-        </div> -->
-      </div>
-    </section>
+      </section>
 
-    <!-- BLOCKCHAIN LEDGER -->
-    <section class="section section-split" id="ledger">
-      <div class="split-text animate-on-scroll">
-        <p class="section-tag">BLOCKCHAIN-VERIFIED</p>
-        <h2>Every trade leaves a trail.</h2>
-        <p class="section-subtitle">
-          A private blockchain ledger records each simulated execution — creating a tamper-evident
-          history of your decisions for audits, competitions, and learning.
-        </p>
-        <ul class="bullet-list">
-          <li>SHA-256 hashed trade blocks</li>
-          <li>Genesis block on initialization</li>
-          <li>Automatic chain validation</li>
-          <li>Optional on-chain anchoring</li>
-        </ul>
-      </div>
-      <div class="split-visual animate-on-scroll">
-        <div class="ledger-stack">
-          <div class="ledger-block">
-            <span>Block #128</span>
-            <span>AAPL • Buy 24 @ 272.40</span>
-          </div>
-          <div class="ledger-connector"></div>
-          <div class="ledger-block">
-            <span>Block #129</span>
-            <span>TSLA • Sell 5 @ 214.10</span>
-          </div>
-          <div class="ledger-connector"></div>
-          <div class="ledger-block">
-            <span>Block #130</span>
-            <span>Portfolio Hash: 9f3a…e72</span>
-          </div>
-        </div>
-      </div>
-    </section>
+    </main>
 
-    <!-- GAMIFICATION -->
-    <section class="section" id="gamification">
-      <div class="section-header animate-on-scroll">
-        <p class="section-tag">GAMIFICATION</p>
-        <h2>Serious tools, playful progression.</h2>
-      </div>
-      <div class="gamification-grid">
-        <div class="gam-card animate-on-scroll tilt-on-hover">
-          <h3>Leaderboards</h3>
-          <p>Compete on risk-adjusted returns, not just raw P/L.</p>
-          <div class="mini-leaderboard">
-            <div><span>#1</span> <span>NyraLabs</span> <span class="green">+18.3%</span></div>
-            <div><span>#2</span> <span>GammaGirl</span> <span class="green">+15.1%</span></div>
-            <div><span>#3</span> <span>PaperBull</span> <span class="green">+12.7%</span></div>
-          </div>
-        </div>
-        <div class="gam-card animate-on-scroll tilt-on-hover">
-          <h3>Referral Progress</h3>
-          <p>Invite friends, unlock scenarios and analytics boosts.</p>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 62%;"></div>
-          </div>
-          <span class="progress-label">62% to earning 5000</span>
-        </div>
-        <!-- <div class="gam-card animate-on-scroll tilt-on-hover">
-          <h3>Achievements</h3>
-          <p>Collect badges for disciplined, consistent decisions.</p>
-          <div class="badge-row">
-            <span class="badge-pill">First 10 Trades</span>
-            <span class="badge-pill">No-FOMO Week</span>
-            <span class="badge-pill">Diversified Portfolio</span>
-          </div>
-        </div> -->
-      </div>
-    </section>
+    <!-- FOOTER -->
+    <footer class="bs-footer">
+      <div>© <span id="year"></span> BlackSealed. All rights reserved.</div>
+    </footer>
 
-    <!-- CTA -->
-    <section class="section CTA-section">
-      <div class="cta-card animate-on-scroll">
-        <p class="section-tag">READY TO START?</p>
-        <h2>Turn the markets into your training ground.</h2>
-        <p class="section-subtitle">
-          Launch the BlackSealed simulator, explore real-time paper trading, and let Nyra guide your next decisions —
-          before real capital is at stake.
-        </p> <br>
-        <div class="hero-actions">
-          <button class="btn primary-btn" onclick="window.location.href='/login'">Launch Simulator</button>
-          <!-- <button class="btn ghost-btn">View Docs & Guides</button> -->
-        </div>
-      </div>
-    </section>
+  </div> <!-- END mainContent -->
 
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="bs-footer">
-    <div>© <span id="year"></span> BlackSealed. All rights reserved.</div>
-
-  </footer>
-
-  <!-- Scripts -->
-  <script src="index.js"></script>
 </body>
-
 </html>

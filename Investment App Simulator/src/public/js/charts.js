@@ -2152,8 +2152,8 @@ window.addEventListener('DOMContentLoaded', function () {
       tradingForm.reset();
       amountInput.value = '--';
       timeframeContainer.classList.add('hidden');
-      document.querySelector('#stop-limit-container').classList.add('hidden');
-      document.querySelector('#stop-loss-container').classList.add('hidden');
+      // document.querySelector('#stop-limit-container').classList.add('hidden');
+      // document.querySelector('#stop-loss-container').classList.add('hidden');
     } catch (err) {
       console.error(err);
       errorMessage.textContent = err.message || 'Error creating limit order.';
