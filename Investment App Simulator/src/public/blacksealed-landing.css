@@ -1143,4 +1143,75 @@ body::before {
     body {
         zoom: 0.85; /* 85% size */
     }
+}/* ============================
+   STARFIELD — MOBILE FIX
+   ============================ */
+#constellation-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* MOBILE ADAPTATION */
+@media (max-width: 768px) {
+  #constellation-canvas {
+    width: 100vw;
+    height: 100vh;
+    transform: scale(1.4); /* upscale so stars don’t clump */
+    transform-origin: center;
+    opacity: 0.8; /* softer for readability */
+  }
+}
+
+@media (max-width: 480px) {
+  #constellation-canvas {
+    transform: scale(1.65);
+    opacity: 0.75;
+  }
+}
+/* ============================
+   NYRA AI — MOBILE STACK FIX
+   ============================ */
+
+@media (max-width: 900px) {
+  .section-split {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+
+  .split-text {
+    order: 1;
+    text-align: center;
+  }
+
+  .nyra-container {
+    order: 2;
+    margin-top: 2rem;
+    transform: none !important; /* remove desktop shift */
+    display: flex;
+    justify-content: center;
+  }
+
+  .nyra-orb {
+    width: 250px;     /* shrink for phones */
+    margin: 0 auto;
+  }
+
+  .ai-tooltip {
+    width: 90%;
+    max-width: 320px;
+    margin: 1.5rem auto 0;
+    font-size: 0.85rem;
+  }
+}
+
+/* EXTRA SMALL PHONES */
+@media (max-width: 480px) {
+  .nyra-orb {
+    width: 200px;
+  }
 }
