@@ -1215,3 +1215,52 @@ body::before {
     width: 200px;
   }
 }
+/* DEFAULT OUTLINE BUTTON (Hero, Order Card, CTA, etc.) */
+.primary-btn {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255,255,255,0.9) !important;
+    border-radius: 10px !important;
+    padding: 0.75rem 1.8rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+/* HOVER — turns fully white */
+.primary-btn:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 20px rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+}
+/* NAVBAR BUTTON – stays filled white */
+.nav-btn {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: 12px;
+}
+
+/* Hover behavior for navbar button */
+.nav-btn:hover {
+    background: #ffffff !important; /* stays white */
+    color: #000000 !important;
+    box-shadow: 0 0 25px rgba(255,255,255,0.35);
+    transform: translateY(-2px);
+}
+/* SCENARIO TIMELINE */
+
+.node-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 1.5px solid #ffffff;
+    flex-shrink: 0;
+    z-index: 1;
+    margin-top: 10px;
+    margin-left: 15px;
+}
