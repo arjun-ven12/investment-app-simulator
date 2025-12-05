@@ -5,49 +5,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Option OHLC Chart</title>
-  <link rel="stylesheet" href="../css/investment.css" />
 
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/investment.css" />
+  <link rel="stylesheet" href="../css/footer.css" />
+  <link rel="stylesheet" href="/css/chatbot.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png" />
+
+  <!-- ChartJS -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+  <!-- Scripts -->
   <script src="../js/options.js" defer></script>
   <script src="../js/ohlc.js" defer></script>
-  <link rel="icon" type="image/png" sizes="48x48" href="../assets/sealedfavicon.png">
+  <script src="../js/navbar.js" defer></script>
+  <script src="../js/chatbot.js" defer></script>
 </head>
+
 
 <body class="ohlc-body">
 
+  <!-- ===========================
+        NAVBAR (loaded dynamically)
+  ============================ -->
+  <div id="navbar-container"></div>
 
+  <!-- Back Button -->
   <button id="back-button" class="button">
     ← Back to Investments
   </button>
 
-
+  <!-- ===========================
+        MAIN LAYOUT
+  ============================ -->
   <div class="container2">
     <div class="chart-container">
-
 
       <h2 id="symbol-heading">Option OHLC</h2>
 
       <!-- Chart form -->
       <form id="chart-form-ohlc" class="chart-form">
-        <!-- <label for="range">Select Range:</label>
-        <select name="range" id="range" disabled>
-          <option value="1d" selected>Last 1 Day</option>
-        </select>
--->
-
-
-        <!-- <div class="select-wrapper">
-          <select name="chartType" id="chartType">
-            <option value="line" selected>Line (Close Price)</option>
-            <option value="candlestick">Candlestick</option>
-          </select>
-        </div> 
-        <button type="submit">Generate Chart</button>  -->
-
         <button type="button" onclick="window.location.reload()">Refresh</button>
       </form>
 
@@ -56,11 +59,12 @@
       </div>
     </div>
 
+    <!-- Trading Card -->
     <div class="trading-card">
       <form id="trading-form">
         <h2>Trade Option</h2>
 
-        <!-- Buy/Sell radio -->
+        <!-- Buy/Sell -->
         <div class="form-group-radio">
           <label class="pretty-radio">
             <input type="radio" name="side" value="buy" checked />
@@ -72,7 +76,7 @@
           </label>
         </div>
 
-        <!-- Order type -->
+        <!-- Order Type -->
         <div class="form-group">
           <label for="order-type">Order Type</label>
           <select id="order-type" name="order-type">
@@ -81,7 +85,7 @@
           </select>
         </div>
 
-        <!-- Market order fields -->
+        <!-- Market Fields -->
         <div class="market-fields">
           <div class="form-group">
             <label for="market-price">Price</label>
@@ -100,7 +104,7 @@
           </div>
         </div>
 
-        <!-- Limit order fields -->
+        <!-- Limit Fields -->
         <div class="limit-fields hidden">
           <div class="form-group">
             <label for="limit-price">Price</label>
@@ -116,7 +120,6 @@
             <label for="limit-amount">Amount</label>
             <input type="text" id="limit-amount" name="limit-amount" placeholder="--" readonly />
             <p>1 Contract = 100 Share(s)</p>
-
           </div>
         </div>
 
@@ -129,7 +132,7 @@
   </div>
 
   <script>
-    // Toggle market/limit fields
+    // Toggle fields for market/limit
     const orderTypeSelect = document.getElementById('order-type');
     const marketFields = document.querySelector('.market-fields');
     const limitFields = document.querySelector('.limit-fields');
@@ -144,6 +147,63 @@
       }
     });
   </script>
-</body>
 
+  <!-- ===========================
+        FOOTER (same as allGuides)
+  ============================ -->
+  <div class="footer-fade"></div>
+  <footer class="bs-footer">
+
+    <div class="bs-footer-container">
+      <!-- Left -->
+      <div class="bs-footer-left">
+        <div class="bs-footer-brand">
+          <img src="../assets/blacksealedlogo.png" class="bs-footer-logo" alt="BlackSealed Logo">
+          <div class="bs-footer-title">BlackSealed</div>
+        </div>
+
+        <p class="bs-footer-mission">
+          A simulated environment for practicing real-world trading strategies with
+          AI-powered insights, historical event scenarios, and blockchain-verified execution.
+        </p>
+
+        <button class="bs-back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+          ↑ Back to Top
+        </button>
+      </div>
+
+      <!-- Middle -->
+      <div class="bs-footer-mid">
+        <h4>Site Map</h4>
+        <ul>
+          <li><a href="/home">Homepage</a></li>
+          <li><a href="/investment">Invest</a></li>
+          <li><a href="/scenarios">Scenarios</a></li>
+          <li><a href="/blockchain">Blockchain Explorer</a></li>
+          <li><a href="/allGuides">Academy</a></li>
+          <li><a href="/referral">Referral</a></li>
+          <li><a href="/setting">Settings</a></li>
+        </ul>
+      </div>
+
+      <!-- Right -->
+      <div class="bs-footer-right">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms" target="_blank">Terms & Conditions</a></li>
+          <li><a href="/privacy" target="_blank">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bs-footer-bottom">
+      <span class="footer-copyright-symbol">©</span>
+      2025 BlackSealed. All rights reserved.
+      Simulation environment only — no real trading or financial advice.
+      Support: <a href="mailto:theblacksealed@gmail.com">theblacksealed@gmail.com</a>
+    </div>
+
+  </footer>
+
+</body>
 </html>

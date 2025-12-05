@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+  // 🚨 If NO TOKEN → immediately force logout + stop execution
+  if (!localStorage.getItem("token")) {
+    console.log("⚠️ No token detected — redirecting to login.");
+    window.location.href = "/login";
+    return;
+  }
+
   const container = document.getElementById("navbar-container");
 
   // Load navbar HTML
@@ -11,8 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
       initAuthVisibility();
       highlightActiveLink();
       initLogout();
-      checkTokenExpiry();       // 🔥 NEW: auto logout if expired
-      scheduleTokenExpiry();    // 🔥 NEW: auto logout when expiry time arrives
+      checkTokenExpiry();       // 🔥 auto logout if expired
+      scheduleTokenExpiry();    // 🔥 auto logout when expiry time arrives
     })
     .catch(err => console.error("Failed to load navbar:", err));
 });
