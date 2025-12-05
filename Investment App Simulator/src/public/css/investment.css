@@ -2378,4 +2378,17 @@ display: flex !important;
   width: 50%; /* Two items per row */
   margin-bottom: 6px;
   line-height: 1.4;
+}@media (max-width: 768px) {
+    .disclaimer {
+        width: 100%; /* Full width on small screens */
+    }
+
+    .disclaimer-list li {
+        width: 100%; /* Single column on small screens */
+    }
+
+    .portfolioTables {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
