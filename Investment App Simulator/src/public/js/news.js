@@ -410,32 +410,32 @@ async function displayNews(newsList = currentNewsList) {
         readMore.className = "read-more";
         readMore.textContent = "Read more";
 
-        const bookmarkBtn = document.createElement("button");
-        bookmarkBtn.className = "bookmark-btn";
-        updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(key));
+        // const bookmarkBtn = document.createElement("button");
+        // bookmarkBtn.className = "bookmark-btn";
+        // updateBookmarkButtonUI(bookmarkBtn, userBookmarks.includes(key));
 
-        bookmarkBtn.onclick = async () => {
-             const isBookmarked = userBookmarks.includes(key);
+        // bookmarkBtn.onclick = async () => {
+        //      const isBookmarked = userBookmarks.includes(key);
 
-            if (isBookmarked) {
-                updateBookmarkButtonUI(bookmarkBtn, false);
-                userBookmarks = userBookmarks.filter((id) => id !== key);
-                await removeBookmark(bookmarkIdFromDrawer(key));
-                const existing = bookmarkContainer.querySelector(`[data-bookmark-id="${key}"]`);
-                if (existing) existing.remove();
+        //     if (isBookmarked) {
+        //         updateBookmarkButtonUI(bookmarkBtn, false);
+        //         userBookmarks = userBookmarks.filter((id) => id !== key);
+        //         await removeBookmark(bookmarkIdFromDrawer(key));
+        //         const existing = bookmarkContainer.querySelector(`[data-bookmark-id="${key}"]`);
+        //         if (existing) existing.remove();
 
-                if (!bookmarkContainer.querySelector(".news-card")) {
-                    const emptyMsg = document.createElement("div");
-                    emptyMsg.className = "empty-state";
-                    emptyMsg.textContent = "No saved news yet.";
-                    bookmarkContainer.appendChild(emptyMsg);
-                }
-            } else {
-                updateBookmarkButtonUI(bookmarkBtn, true);
-                const result = await bookmarkNews(news);
-                if (result?.success) userBookmarks.push(key);
-            }
-        };
+        //         if (!bookmarkContainer.querySelector(".news-card")) {
+        //             const emptyMsg = document.createElement("div");
+        //             emptyMsg.className = "empty-state";
+        //             emptyMsg.textContent = "No saved news yet.";
+        //             bookmarkContainer.appendChild(emptyMsg);
+        //         }
+        //     } else {
+        //         updateBookmarkButtonUI(bookmarkBtn, true);
+        //         const result = await bookmarkNews(news);
+        //         if (result?.success) userBookmarks.push(key);
+        //     }
+        // };
 
         const likeBtn = document.createElement("button");
         likeBtn.className = "like-btn";
@@ -463,7 +463,7 @@ async function displayNews(newsList = currentNewsList) {
 
         const actions = document.createElement("div");
         actions.className = "actions";
-        actions.append(readMore, bookmarkBtn, likeBtn);
+        actions.append(readMore, likeBtn);
 
         card.append(source, headline, summary, actions, viewsDiv);
         newsContainer.appendChild(card);
