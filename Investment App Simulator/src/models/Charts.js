@@ -1,4 +1,3 @@
-
 const { parse } = require('path');
 const prisma = require('../../prisma/prismaClient');
 
@@ -103,40 +102,8 @@ module.exports.getStockChartData = function getStockChartData(symbol, timeFrame)
 
 
 
-// module.exports.getCompanyDetails = function getCompanyDetails(symbol) {
-//     if (!symbol || typeof symbol !== 'string') {
-//         throw new Error(`Invalid company symbol: ${symbol}`);
-//     }
 
-//     return prisma.company
-//         .findUnique({
-//             where: { symbol: symbol.toUpperCase() }, 
-//         })
-//         .then(company => {
-//             if (!company) {
-//                 throw new Error(`Company with symbol "${symbol}" not found`);
-//             }
 
-//             return {
-//                 id: company.id,
-//                 symbol: company.symbol,
-//                 name: company.name,
-//                 founded: company.founded,
-//                 employees: company.employees,
-//                 address: company.address,
-//                 city: company.city,
-//                 country: company.country,
-//                 zipCode: company.zipCode,
-//                 phone: company.phone,
-//                 website: company.website,
-//                 description: company.description,
-//             };
-//         })
-//         .catch(error => {
-//             console.error('Error fetching company details:', error);
-//             throw error;
-//         });
-// };
 
 
 
@@ -151,155 +118,6 @@ module.exports.getStockChartData = function getStockChartData(symbol, timeFrame)
 
 
 
-
-
-
-
-
-
-
-
-
-// module.exports.tradeStock = async function tradeStock(userId, stockId, quantity, price, tradeType) {
-//     if (!userId || !stockId || !quantity || !price || !tradeType) {
-//         throw new Error('Missing required trade data.');
-//     }
-
-//     const totalAmount = quantity * price;
-
-//     // function isMarketOpen() {
-//     //     const now = new Date();
-//     //     const currentHour = now.getHours();
-//     //     const currentMinute = now.getMinutes();
-
-//     //     //setting market hours
-//     //     const marketOpen = { hour: 9, minute: 00 }; 
-//     //     const marketClose = { hour: 23, minute: 50 }; 
-
-//     //     // Check if current time is within market hours
-//     //     if (
-//     //         currentHour < marketOpen.hour ||
-//     //         (currentHour === marketOpen.hour && currentMinute < marketOpen.minute) || 
-//     //         currentHour > marketClose.hour ||
-//     //         (currentHour === marketClose.hour && currentMinute > marketClose.minute) 
-//     //     ) {
-//     //         return false;
-//     //     }
-//     //     return true;
-//     // }
-
-//     // if (!isMarketOpen()) {
-//     //     throw new Error('Trading is allowed only between 9:30 AM and 3:30 PM.');
-//     // }
-
-//     const user = await prisma.user.findUnique({
-//         where: { id: userId },
-//     });
-
-//     if (!user) {
-//         throw new Error(`User with ID ${userId} not found`);
-//     }
-
-//     // Check for sufficient funds 
-//     if (tradeType === 'BUY' && user.wallet < totalAmount) {
-//         throw new Error('Insufficient funds');
-//     }
-
-//     // SELL - checking quanity
-//     if (tradeType === 'SELL') {
-//         const netStockQuantity = await prisma.trade.aggregate({
-//             where: { userId, stockId },
-//             _sum: { quantity: true },
-//         });
-
-//         const ownedQuantity = netStockQuantity._sum.quantity || 0; 
-
-//         if (ownedQuantity < quantity) {
-//             throw new Error('Insufficient stock quantity to sell');
-//         }
-//     }
-
-//     const newWalletBalance =
-//         tradeType === 'BUY' ? user.wallet - totalAmount : user.wallet + totalAmount;
-
-//     // Create trade and update wallet
-//     return prisma.$transaction([
-//         prisma.trade.create({
-//             data: {
-//                 userId,
-//                 stockId,
-//                 quantity: tradeType === 'BUY' ? quantity : -quantity, 
-//                 price,
-//                 totalAmount,
-//                 tradeType,
-//             },
-//         }),
-//         prisma.user.update({
-//             where: { id: userId },
-//             data: { wallet: newWalletBalance },
-//         }),
-//     ])
-//         .then(([trade]) => ({
-//             message: `${tradeType} trade successful`,
-//             trade,
-//             wallet: newWalletBalance,
-//         }))
-//         .catch((error) => {
-//             console.error('Error processing trade:', error);
-//             throw error;
-//         });
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// module.exports.getLatestPrice = function getLatestPrice(stockId) {
-//     if (!stockId) {
-//         throw new Error('Stock ID is required.');
-//     }
-
-//     return prisma.histPrice
-//         .findFirst({
-//             where: { stock_id: stockId },
-//             orderBy: { date: 'desc' },
-//             select: { close_price: true },
-//         })
-//         .then(function (latestPrice) {
-//             if (!latestPrice) {
-//                 throw new Error('No price data available for this stock');
-//             }
-
-//             return latestPrice.close_price;
-//         })
-//         .catch(function (error) {
-//             console.error('Error fetching latest price:', error);
-//             throw error;
-//         });
-// };
 
 
 
@@ -384,467 +202,6 @@ module.exports.getStockIdBySymbol = function getStockIdBySymbol(symbol) {
 
 
 
-
-
-// module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
-//     if (!userId || typeof userId !== 'number') {
-//         throw new Error(`Invalid user ID: ${userId}`);
-//     }
-
-//     // 1. Fetch all trades for the user
-//     const userTrades = await prisma.trade.findMany({
-//         where: { userId },
-//         select: {
-//             stockId: true,
-//             quantity: true,    // Positive for both BUY and SELL in your system
-//             totalAmount: true, // Positive for both BUY and SELL
-//             tradeType: true    // 'BUY' or 'SELL'
-//         }
-//     });
-
-//     if (!userTrades || userTrades.length === 0) {
-//         return [];
-//     }
-
-//     // 2. Group trades by stockId
-//     const stockMap = new Map(); // { stockId => { buyQuantity, buyAmount, sellQuantity, sellAmount } }
-
-//     // 3. Accumulate BUY vs SELL data
-//     for (const trade of userTrades) {
-//         const { stockId, quantity, totalAmount, tradeType } = trade;
-
-//         // Initialize the group record if missing
-//         if (!stockMap.has(stockId)) {
-//             stockMap.set(stockId, {
-//                 buyQuantity: 0,
-//                 buyAmount: 0,
-//                 sellQuantity: 0,
-//                 sellAmount: 0
-//             });
-//         }
-
-//         const group = stockMap.get(stockId);
-
-//         if (tradeType === 'BUY') {
-//             // BUY trades
-//             group.buyQuantity += quantity;          // All positive
-//             group.buyAmount += Number(totalAmount); // All positive
-//         } else if (tradeType === 'SELL') {
-//             // SELL trades
-//             group.sellQuantity += quantity;         // All positive in your system
-//             group.sellAmount += Number(totalAmount);// All positive
-//         }
-//     }
-
-//     // 4. Calculate net quantity & amount for each stock, fetch details
-//     const portfolio = [];
-
-//     for (const [stockId, group] of stockMap.entries()) {
-//         const { buyQuantity, buyAmount, sellQuantity, sellAmount } = group;
-
-//         // netQuantity = total buys - total sells
-//         const netQuantity = buyQuantity + sellQuantity;
-//         // netAmount = total buyAmount - total sellAmount
-//         const netAmount = buyAmount - sellAmount;
-
-//         // 5. Skip if netQuantity <= 0 (user no longer owns the stock)
-//         if (netQuantity <= 0) {
-//             continue;
-//         }
-
-//         // 6. Fetch stock details (symbol, company name)
-//         const stockDetails = await prisma.stock.findUnique({
-//             where: { stock_id: stockId },
-//             select: {
-//                 symbol: true,
-//                 company: { select: { name: true } },
-//             },
-//         });
-
-//         portfolio.push({
-//             symbol: stockDetails?.symbol ?? 'UNKNOWN',
-//             companyName: stockDetails?.company?.name ?? 'UNKNOWN',
-//             quantity: netQuantity,
-//             totalAmount: netAmount,
-//         });
-//     }
-
-//     return portfolio;
-// };
-
-// module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
-//   if (!userId || typeof userId !== 'number') {
-//     throw new Error(`Invalid user ID: ${userId}`);
-//   }
-
-//   // 1. Fetch all trades for the user
-//   const userTrades = await prisma.trade.findMany({
-//     where: { userId },
-//     orderBy: { tradeDate: 'asc' },
-//     select: {
-//       stockId: true,
-//       quantity: true,     // already signed (+ for buy, - for sell)
-//       totalAmount: true,  // already signed as well?
-//       tradeType: true
-//     }
-//   });
-
-//   if (!userTrades || userTrades.length === 0) {
-//     return { openPositions: [], closedPositions: [] };
-//   }
-
-//   // 2. Group trades by stockId
-//   const stockMap = new Map();
-
-//   for (const trade of userTrades) {
-//     const { stockId, quantity, totalAmount } = trade;
-
-//     if (!stockMap.has(stockId)) {
-//       stockMap.set(stockId, {
-//         netQuantity: 0,
-//         netAmount: 0,
-//         realizedProfitLoss: 0
-//       });
-//     }
-
-//     const group = stockMap.get(stockId);
-
-//     // signed quantities and amounts
-//     group.netQuantity += quantity;
-//     group.netAmount += Number(totalAmount);
-
-//     // realized P&L logic: if quantity < 0 (sell), add profit/loss
-//     if (quantity < 0) {
-//       group.realizedProfitLoss += Number(totalAmount); 
-//       // ⚠️ adjust this depending on how you store SELL totalAmount
-//     }
-//   }
-
-//   const openPositions = [];
-//   const closedPositions = [];
-
-//   for (const [stockId, group] of stockMap.entries()) {
-//     const { netQuantity, netAmount, realizedProfitLoss } = group;
-
-//     // fetch stock details
-//     const stockDetails = await prisma.stock.findUnique({
-//       where: { stock_id: stockId },
-//       select: {
-//         symbol: true,
-//         company: { select: { name: true } }
-//       }
-//     });
-
-//     // fetch latest price
-//     const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-//       where: { stockId },
-//       orderBy: { date: 'desc' },
-//       select: { closePrice: true }
-//     });
-
-//     const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
-
-//     if (netQuantity > 0) {
-//       // still holding this stock → open position
-//       const avgBuyPrice = netAmount / netQuantity;
-//       const totalInvested = avgBuyPrice * netQuantity;
-
-//       const currentValue = latestPrice * netQuantity;
-//       const unrealizedProfitLoss = currentValue - totalInvested;
-//       const unrealizedProfitLossPercent = totalInvested > 0
-//         ? (unrealizedProfitLoss / totalInvested) * 100
-//         : 0;
-
-//       openPositions.push({
-//         symbol: stockDetails?.symbol ?? 'UNKNOWN',
-//         companyName: stockDetails?.company?.name ?? 'UNKNOWN',
-//         quantity: netQuantity,
-//         avgBuyPrice: avgBuyPrice.toFixed(2),
-//         currentPrice: latestPrice.toFixed(2),
-//         totalInvested: totalInvested.toFixed(2),
-//         currentValue: currentValue.toFixed(2),
-//         unrealizedProfitLoss: unrealizedProfitLoss.toFixed(2),
-//         unrealizedProfitLossPercent: unrealizedProfitLossPercent.toFixed(2) + '%',
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     } else {
-//       // no shares left → closed position
-//       closedPositions.push({
-//         symbol: stockDetails?.symbol ?? 'UNKNOWN',
-//         companyName: stockDetails?.company?.name ?? 'UNKNOWN',
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     }
-//   }
-
-//   return { openPositions, closedPositions };
-// };
-
-
-// module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
-//   if (!userId || typeof userId !== 'number') {
-//     throw new Error(`Invalid user ID: ${userId}`);
-//   }
-
-//   const userTrades = await prisma.trade.findMany({
-//     where: { userId },
-//     orderBy: { tradeDate: 'asc' },
-//     select: {
-//       stockId: true,
-//       quantity: true,     // + for buy, - for sell
-//       totalAmount: true,  // positive number
-//       tradeType: true
-//     }
-//   });
-
-//   if (!userTrades || userTrades.length === 0) {
-//     return { openPositions: [], closedPositions: [] };
-//   }
-
-//   const stockMap = new Map();
-
-//   for (const trade of userTrades) {
-//     const { stockId, quantity, totalAmount } = trade;
-
-//     if (!stockMap.has(stockId)) {
-//       stockMap.set(stockId, {
-//         buyQueue: [], // track remaining bought shares for FIFO
-//         netQuantity: 0,
-//         realizedProfitLoss: 0
-//       });
-//     }
-
-//     const group = stockMap.get(stockId);
-
-//     if (quantity > 0) {
-//       // BUY → push to queue
-//       group.buyQueue.push({
-//         quantity,
-//         pricePerShare: Number(totalAmount) / quantity
-//       });
-//       group.netQuantity += quantity;
-//     } else if (quantity < 0) {
-//       // SELL → calculate realized P&L using FIFO
-//       let sellQty = -quantity; // make positive
-//       let sellProceeds = Number(totalAmount);
-
-//       while (sellQty > 0 && group.buyQueue.length > 0) {
-//         const buy = group.buyQueue[0];
-//         if (buy.quantity <= sellQty) {
-//           // fully consume this buy
-//           group.realizedProfitLoss += (buy.pricePerShare * buy.quantity * -1) + (buy.quantity / -quantity) * sellProceeds;
-//           sellQty -= buy.quantity;
-//           group.buyQueue.shift();
-//         } else {
-//           // partially consume this buy
-//           group.realizedProfitLoss += (buy.pricePerShare * sellQty * -1) + (sellQty / -quantity) * sellProceeds;
-//           buy.quantity -= sellQty;
-//           sellQty = 0;
-//         }
-//       }
-
-//       group.netQuantity += quantity; // quantity is negative
-//     }
-//   }
-
-//   const openPositions = [];
-//   const closedPositions = [];
-
-//   for (const [stockId, group] of stockMap.entries()) {
-//     const { buyQueue, netQuantity, realizedProfitLoss } = group;
-
-//     // fetch stock details
-//     const stockDetails = await prisma.stock.findUnique({
-//       where: { stock_id: stockId },
-//       select: {
-//         symbol: true,
-//         company: { select: { name: true } }
-//       }
-//     });
-
-//     // fetch latest price
-//     const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-//       where: { stockId },
-//       orderBy: { date: 'desc' },
-//       select: { closePrice: true }
-//     });
-
-//     const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
-
-//     if (netQuantity > 0) {
-//       // still holding shares → open position
-//       const totalInvested = buyQueue.reduce((sum, b) => sum + b.quantity * b.pricePerShare, 0);
-//       const avgBuyPrice = totalInvested / netQuantity;
-
-//       const currentValue = latestPrice * netQuantity;
-//       const unrealizedProfitLoss = currentValue - totalInvested;
-//       const unrealizedProfitLossPercent = totalInvested > 0
-//         ? (unrealizedProfitLoss / totalInvested) * 100
-//         : 0;
-
-//       openPositions.push({
-//         symbol: stockDetails?.symbol ?? 'UNKNOWN',
-//         companyName: stockDetails?.company?.name ?? 'UNKNOWN',
-//         quantity: netQuantity,
-//         avgBuyPrice: avgBuyPrice.toFixed(2),
-//         currentPrice: latestPrice.toFixed(2),
-//         totalInvested: totalInvested.toFixed(2),
-//         currentValue: currentValue.toFixed(2),
-//         unrealizedProfitLoss: unrealizedProfitLoss.toFixed(2),
-//         unrealizedProfitLossPercent: unrealizedProfitLossPercent.toFixed(2) + '%',
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     } else {
-//       // no shares left → closed position
-//       closedPositions.push({
-//         symbol: stockDetails?.symbol ?? 'UNKNOWN',
-//         companyName: stockDetails?.company?.name ?? 'UNKNOWN',
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     }
-//   }
-
-//   return { openPositions, closedPositions };
-// };
-
-// module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
-//   if (!userId || typeof userId !== "number") {
-//     throw new Error(`Invalid user ID: ${userId}`);
-//   }
-
-//   const userTrades = await prisma.trade.findMany({
-//     where: { userId },
-//     orderBy: { tradeDate: "asc" },
-//     select: {
-//       stockId: true,
-//       quantity: true,     // + for buy, - for sell
-//       totalAmount: true,  // positive number (total value of trade)
-//       tradeType: true
-//     }
-//   });
-
-//   if (!userTrades || userTrades.length === 0) {
-//     return { openPositions: [], closedPositions: [] };
-//   }
-
-//   const stockMap = new Map();
-
-//   for (const trade of userTrades) {
-//     const { stockId, quantity, totalAmount } = trade;
-
-//     if (!stockMap.has(stockId)) {
-//       stockMap.set(stockId, {
-//         buyQueue: [], 
-//         netQuantity: 0,
-//         realizedProfitLoss: 0,
-//         totalBoughtQty: 0,
-//         totalBoughtValue: 0,
-//         totalSoldValue: 0
-//       });
-//     }
-
-//     const group = stockMap.get(stockId);
-
-//     if (quantity > 0) {
-//       // BUY
-//       group.buyQueue.push({
-//         quantity,
-//         pricePerShare: Number(totalAmount) / quantity
-//       });
-//       group.netQuantity += quantity;
-//       group.totalBoughtQty += quantity;
-//       group.totalBoughtValue += Number(totalAmount);
-//     } else if (quantity < 0) {
-//       // SELL
-//       let sellQty = -quantity; // convert to positive
-//       const sellProceeds = Number(totalAmount);
-//       group.totalSoldValue += sellProceeds;
-
-//       // Allocate proceeds using FIFO
-//       while (sellQty > 0 && group.buyQueue.length > 0) {
-//         const buy = group.buyQueue[0];
-//         if (buy.quantity <= sellQty) {
-//           // fully consume this buy
-//           const proceedsPortion = (buy.quantity / -quantity) * sellProceeds;
-//           group.realizedProfitLoss += proceedsPortion - (buy.pricePerShare * buy.quantity);
-//           sellQty -= buy.quantity;
-//           group.buyQueue.shift();
-//         } else {
-//           // partially consume this buy
-//           const proceedsPortion = (sellQty / -quantity) * sellProceeds;
-//           group.realizedProfitLoss += proceedsPortion - (buy.pricePerShare * sellQty);
-//           buy.quantity -= sellQty;
-//           sellQty = 0;
-//         }
-//       }
-
-//       group.netQuantity += quantity; // quantity is negative
-//     }
-//   }
-
-//   const openPositions = [];
-//   const closedPositions = [];
-
-//   for (const [stockId, group] of stockMap.entries()) {
-//     const { buyQueue, netQuantity, realizedProfitLoss, totalBoughtQty, totalBoughtValue, totalSoldValue } = group;
-
-//     // stock details
-//     const stockDetails = await prisma.stock.findUnique({
-//       where: { stock_id: stockId },
-//       select: {
-//         symbol: true,
-//         company: { select: { name: true } }
-//       }
-//     });
-
-//     // latest price
-//     const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-//       where: { stockId },
-//       orderBy: { date: "desc" },
-//       select: { closePrice: true }
-//     });
-
-//     const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
-
-//     if (netQuantity > 0) {
-//       // still holding shares → open position
-//       const totalInvested = buyQueue.reduce((sum, b) => sum + b.quantity * b.pricePerShare, 0);
-//       const avgBuyPrice = totalInvested / netQuantity;
-
-//       const currentValue = latestPrice * netQuantity;
-//       const unrealizedProfitLoss = currentValue - totalInvested;
-//       const unrealizedProfitLossPercent = totalInvested > 0
-//         ? (unrealizedProfitLoss / totalInvested) * 100
-//         : 0;
-
-//       openPositions.push({
-//         symbol: stockDetails?.symbol ?? "UNKNOWN",
-//         companyName: stockDetails?.company?.name ?? "UNKNOWN",
-//         quantity: netQuantity,
-//         avgBuyPrice: avgBuyPrice.toFixed(2),
-//         currentPrice: latestPrice.toFixed(2),
-//         totalInvested: totalInvested.toFixed(2),
-//         currentValue: currentValue.toFixed(2),
-//         unrealizedProfitLoss: unrealizedProfitLoss.toFixed(2),
-//         unrealizedProfitLossPercent: unrealizedProfitLossPercent.toFixed(2) + "%",
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     } else {
-//       // fully sold → closed position
-//       closedPositions.push({
-//         symbol: stockDetails?.symbol ?? "UNKNOWN",
-//         companyName: stockDetails?.company?.name ?? "UNKNOWN",
-//         totalBoughtQty,
-//         totalBoughtValue: totalBoughtValue.toFixed(2),
-//         totalSoldValue: totalSoldValue.toFixed(2),
-//         realizedProfitLoss: realizedProfitLoss.toFixed(2)
-//       });
-//     }
-//   }
-
-//   return { openPositions, closedPositions };
-// };
-
 module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
   if (!userId || typeof userId !== "number") {
     throw new Error(`Invalid user ID: ${userId}`);
@@ -856,9 +213,9 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
     orderBy: { tradeDate: "asc" },
     select: {
       stockId: true,
-      quantity: true,     // raw quantity from DB (positive)
-      totalAmount: true,  // total value of trade
-      tradeType: true     // "BUY" or "SELL"
+      quantity: true,
+      totalAmount: true,
+      tradeType: true
     }
   });
 
@@ -879,7 +236,7 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
         realizedProfitLoss: 0,
         totalBoughtQty: 0,
         totalBoughtValue: 0,
-        totalSoldQty: 0,     // added
+        totalSoldQty: 0,
         totalSoldValue: 0
       });
     }
@@ -898,7 +255,7 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
       const sellQty = absQty;
       const sellProceeds = Number(totalAmount);
       group.totalSoldValue += sellProceeds;
-      group.totalSoldQty += sellQty; // track sold quantity
+      group.totalSoldQty += sellQty;
 
       let remainingToSell = sellQty;
       const avgSellPricePerShare = sellQty > 0 ? sellProceeds / sellQty : 0;
@@ -919,7 +276,6 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
         }
       }
 
-      // remaining sells with no cost
       if (remainingToSell > 0) {
         group.realizedProfitLoss += avgSellPricePerShare * remainingToSell;
       }
@@ -974,12 +330,32 @@ module.exports.getUserPortfolio = async function getUserPortfolio(userId) {
         symbol: stockDetails?.symbol ?? "UNKNOWN",
         companyName: stockDetails?.company?.name ?? "UNKNOWN",
         totalBoughtQty,
-        totalSoldQty,          // now included
+        totalSoldQty,
         totalBoughtValue: totalBoughtValue.toFixed(2),
         totalSoldValue: totalSoldValue.toFixed(2),
         realizedProfitLoss: realizedProfitLoss.toFixed(2)
       });
     }
+
+    // **Upsert into StockHolding**
+    await prisma.stockHolding.upsert({
+      where: {
+        userId_stockId: {
+          userId,
+          stockId
+        }
+      },
+      update: {
+        currentQuantity: netQuantity,
+        symbol: stockDetails?.symbol ?? "UNKNOWN"
+      },
+      create: {
+        userId,
+        stockId,
+        symbol: stockDetails?.symbol ?? "UNKNOWN",
+        currentQuantity: netQuantity
+      }
+    });
   }
 
   return { openPositions, closedPositions };
@@ -1218,76 +594,7 @@ exports.favoriteStock = function favoriteStock(userId, symbol) {
 //////////////////////////////////////////////////
 
 
-// // Model for creating a limit order
-// exports.createLimitOrder = async function createLimitOrder(userId, stockId, quantity, limitPrice, orderType) {
-//     if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
-//       throw new Error("All fields (userId, stockId, quantity, limitPrice, orderType) are required.");
-//     }
-  
-//     return prisma.limitOrder.create({
-//       data: {
-//         userId,
-//         stockId,
-//         quantity,
-//         limitPrice,
-//         orderType,
-//         status: "PENDING",
-//       },
-//     });
-//   };
-  
 
-
-  
-
-  
-// exports.processLimitOrders = async function processLimitOrders(stockId, currentPrice) {
-//     if (!stockId || !currentPrice) {
-//         throw new Error("Stock ID and current price are required.");
-//     }
-
-//     const pendingOrders = await prisma.limitOrder.findMany({
-//         where: {
-//             stockId,
-//             status: "PENDING",
-//         },
-//     });
-
-//     const executedOrders = [];
-
-//     for (const order of pendingOrders) {
-//         // Check if the limit condition is met
-//         if (
-//             (order.orderType === "BUY" && currentPrice <= order.limitPrice) ||
-//             (order.orderType === "SELL" && currentPrice >= order.limitPrice)
-//         ) {
-//             // Mark the limit order as EXECUTED
-//             await prisma.limitOrder.update({
-//                 where: { id: order.id },
-//                 data: { status: "EXECUTED" },
-//             });
-
-//             // Instead of creating a trade directly, call tradeStock for wallet logic
-//             try {
-//                 await exports.tradeStock(
-//                     order.userId,
-//                     order.stockId,
-//                     order.quantity,
-//                     currentPrice,
-//                     order.orderType
-//                 );
-
-//                 // Push the executed order info to the array
-//                 executedOrders.push(order);
-//             } catch (err) {
-//                 console.error('Error executing limit order trade:', err);
-//                 // Optionally update the order to CANCELLED or revert?
-//             }
-//         }
-//     }
-
-//     return executedOrders;
-// };
 //////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
@@ -1511,204 +818,7 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
   const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
   
   
-  // module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
-  //     if (!symbol) throw new Error('Stock symbol is required.');
-  
-  //     // Default to past 7 days if no dates provided
-  //     const now = new Date();
-  //     const defaultTo = now.toISOString().split('T')[0];
-  //     const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  //         .toISOString()
-  //         .split('T')[0];
-  
-  //     const params = new URLSearchParams({
-  //         access_key: API_KEY,
-  //         symbols: symbol,
-  //         sort: 'ASC',
-  //         limit: 1000,
-  //         date_from: dateFrom || defaultFrom,
-  //         date_to: dateTo || defaultTo
-  //     });
-  
-  //     const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
-  
-  //     try {
-  //         const response = await fetch(url);
-  //         if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
-  //         const data = await response.json();
-  
-  //         if (!data.data || data.data.length === 0) {
-  //             throw new Error('No intraday data found for this symbol.');
-  //         }
-  
-  //         // Upsert stock in DB
-  //         const stock = await prisma.stock.upsert({
-  //             where: { symbol: symbol },
-  //             update: {},
-  //             create: { symbol: symbol }
-  //         });
-  
-  //         console.log(`Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`);
-  
-  //         // Upsert each intraday price into IntradayPrice3 table
-  //         for (const item of data.data) {
-  //             try {
-  //                 const dateObj = new Date(item.date);
-  //                 dateObj.setMilliseconds(0); // normalize milliseconds
-  //                 dateObj.setSeconds(0); // optional: normalize seconds if API provides exact minute data
-  
-  //                 await prisma.intradayPrice3.upsert({
-  //                     where: {
-  //                         stockId_date: {
-  //                             stockId: stock.stock_id,
-  //                             date: dateObj
-  //                         }
-  //                     },
-  //                     update: {
-  //                         openPrice: item.open,
-  //                         highPrice: item.high,
-  //                         lowPrice: item.low,
-  //                         closePrice: item.close,
-  //                         volume: item.volume
-  //                     },
-  //                     create: {
-  //                         stockId: stock.stock_id,
-  //                         date: dateObj,
-  //                         openPrice: item.open,
-  //                         highPrice: item.high,
-  //                         lowPrice: item.low,
-  //                         closePrice: item.close,
-  //                         volume: item.volume
-  //                     }
-  //                 });
-  
-  //                 // console.log(`Upserted price for ${symbol} at ${dateObj.toISOString()}`);
-  //             } catch (err) {
-  //                 console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
-  //             }
-  //         }
-  
-  //         // Convert API data to Chart.js-friendly format
-  //         const labels = data.data.map(item => item.date);
-  //         const prices = data.data.map(item => item.close);
-  
-  //         return {
-  //             labels,
-  //             datasets: [
-  //                 {
-  //                     label: `${symbol} Price`,
-  //                     data: prices,
-  //                     borderColor: 'white',
-  //                     fill: false,
-  //                 }
-  //             ]
-  //         };
-  
-  //     } catch (err) {
-  //         console.error('Error fetching intraday data:', err);
-  //         throw err;
-  //     }
-  // };
-  
-  
-  
-  
-  
-  
-  
-  // module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
-  //     if (!symbol) throw new Error('Stock symbol is required.');
-  
-  //     // Default to past 7 days if no dates provided
-  //     const now = new Date();
-  //     const defaultTo = now.toISOString().split('T')[0];
-  //     const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  //         .toISOString()
-  //         .split('T')[0];
-  
-  //     const params = new URLSearchParams({
-  //         access_key: API_KEY,
-  //         symbols: symbol,
-  //         sort: 'ASC',
-  //         limit: 1000,
-  //         date_from: dateFrom || defaultFrom,
-  //         date_to: dateTo || defaultTo
-  //     });
-  
-  //     const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
-  
-  //     try {
-  //         const response = await fetch(url);
-  //         if (!response.ok) throw new Error(`Marketstack API error: ${response.status}`);
-  //         const data = await response.json();
-  
-  //         if (!data.data || data.data.length === 0) {
-  //             throw new Error('No intraday data found for this symbol.');
-  //         }
-  
-  //         // Upsert stock in DB
-  //         const stock = await prisma.stock.upsert({
-  //             where: { symbol: symbol },
-  //             update: {},
-  //             create: { symbol: symbol }
-  //         });
-  
-  //         console.log(`Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`);
-  
-  //         // Upsert each intraday price into IntradayPrice3 table
-  //         for (const item of data.data) {
-  //             try {
-  //                 const dateObj = new Date(item.date);
-  //                 dateObj.setMilliseconds(0); // normalize milliseconds
-  //                 dateObj.setSeconds(0); // optional: normalize seconds
-  
-  //                 await prisma.intradayPrice3.upsert({
-  //                     where: {
-  //                         stockId_date: {
-  //                             stockId: stock.stock_id,
-  //                             date: dateObj
-  //                         }
-  //                     },
-  //                     update: {
-  //                         openPrice: item.open,
-  //                         highPrice: item.high,
-  //                         lowPrice: item.low,
-  //                         closePrice: item.close,
-  //                         volume: item.volume
-  //                     },
-  //                     create: {
-  //                         stockId: stock.stock_id,
-  //                         date: dateObj,
-  //                         openPrice: item.open,
-  //                         highPrice: item.high,
-  //                         lowPrice: item.low,
-  //                         closePrice: item.close,
-  //                         volume: item.volume
-  //                     }
-  //                 });
-  //             } catch (err) {
-  //                 console.error(`Failed to upsert intraday price for ${symbol} at ${item.date}:`, err);
-  //             }
-  //         }
-  
-  //         // Return OHLC array for candlestick chart
-  //         const ohlcData = data.data.map(item => ({
-  //             date: item.date,
-  //             openPrice: item.open,
-  //             highPrice: item.high,
-  //             lowPrice: item.low,
-  //             closePrice: item.close
-  //         }));
-  
-  //         return ohlcData;
-  
-  //     } catch (err) {
-  //         console.error('Error fetching intraday data:', err);
-  //         throw err;
-  //     }
-  // };
-  
-  
+
 
   module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
     if (!symbol) throw new Error('Stock symbol is required.');
@@ -1821,365 +931,146 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
 
   
   
-  
-  // module.exports.tradeStock = async function tradeStock(userId, stockId, quantity, tradeType) {
-  //     if (!userId || !stockId || !quantity || !tradeType) {
-  //         throw new Error('Missing required trade data.');
-  //     }
-  
-  //     // Fetch the latest intraday price from intradayPrice2
-  //     const latestPrice = await prisma.intradayPrice3.findFirst({
-  //         where: { stockId },
-  //         orderBy: { date: 'desc' },
-  //     });
-  
-  //     if (!latestPrice) {
-  //         throw new Error('No intraday price found for this stock.');
-  //     }
-  
-  //     const price = Number(latestPrice.closePrice); // use closePrice as trade price
-  //     const totalAmount = quantity * price;
-  
-  //     const user = await prisma.user.findUnique({ where: { id: userId } });
-  //     if (!user) throw new Error(`User with ID ${userId} not found`);
-  
-  //     // Check for sufficient funds (BUY)
-  //     if (tradeType === 'BUY' && user.wallet < totalAmount) {
-  //         throw new Error('Insufficient funds');
-  //     }
-  
-  //     // Check for sufficient stock quantity (SELL)
-  //     if (tradeType === 'SELL') {
-  //         const netStockQuantity = await prisma.trade.aggregate({
-  //             where: { userId, stockId },
-  //             _sum: { quantity: true },
-  //         });
-  
-  //         const ownedQuantity = netStockQuantity._sum.quantity || 0;
-  //         if (ownedQuantity < quantity) {
-  //             throw new Error('Insufficient stock quantity to sell');
-  //         }
-  //     }
-  
-  //     const newWalletBalance =
-  //         tradeType === 'BUY' ? user.wallet - totalAmount : user.wallet + totalAmount;
-  
-  //     // Execute trade and update wallet atomically
-  //     return prisma.$transaction([
-  //         prisma.trade.create({
-  //             data: {
-  //                 userId,
-  //                 stockId,
-  //                 quantity: tradeType === 'BUY' ? quantity : -quantity,
-  //                 price,
-  //                 totalAmount,
-  //                 tradeType,
-  //             },
-  //         }),
-  //         prisma.user.update({
-  //             where: { id: userId },
-  //             data: { wallet: newWalletBalance },
-  //         }),
-  //     ])
-  //     .then(([trade]) => ({
-  //         message: `${tradeType} trade successful`,
-  //         trade,
-  //         wallet: newWalletBalance,
-  //     }))
-  //     .catch((error) => {
-  //         console.error('Error processing trade:', error);
-  //         throw error;
-  //     });
-  // };
-  
-  
-  
-  // const crypto = require('crypto'); // for generating fake tx hash
-  
-  // module.exports.tradeStock = async function tradeStock(userId, stockId, quantity, tradeType) {
-  //     if (!userId || !stockId || !quantity || !tradeType) {
-  //         throw new Error('Missing required trade data.');
-  //     }
-  
-  //     // Fetch latest intraday price
-  //     const latestPrice = await prisma.intradayPrice3.findFirst({
-  //         where: { stockId },
-  //         orderBy: { date: 'desc' },
-  //     });
-  //     if (!latestPrice) throw new Error('No intraday price found for this stock.');
-  
-  //     const price = Number(latestPrice.closePrice);
-  //     const totalAmount = quantity * price;
-  
-  //     // Fetch user
-  //     const user = await prisma.user.findUnique({ where: { id: userId } });
-  //     if (!user) throw new Error(`User with ID ${userId} not found`);
-  
-  //     // Check funds or holdings
-  //     if (tradeType === 'BUY' && user.wallet < totalAmount) throw new Error('Insufficient funds');
-  //     if (tradeType === 'SELL') {
-  //         const netStockQuantity = await prisma.trade.aggregate({
-  //             where: { userId, stockId },
-  //             _sum: { quantity: true },
-  //         });
-  //         const ownedQuantity = netStockQuantity._sum.quantity || 0;
-  //         if (ownedQuantity < quantity) throw new Error('Insufficient stock quantity to sell');
-  //     }
-  
-  //     const newWalletBalance = tradeType === 'BUY' ? user.wallet - totalAmount : user.wallet + totalAmount;
-  
-  //     // Atomic transaction
-  //     return prisma.$transaction(async (prismaTx) => {
-  //         // 1️⃣ Create trade
-  //         const trade = await prismaTx.trade.create({
-  //             data: {
-  //                 userId,
-  //                 stockId,
-  //                 quantity: tradeType === 'BUY' ? quantity : -quantity,
-  //                 price,
-  //                 totalAmount,
-  //                 tradeType,
-  //             },
-  //         });
-  
-  //         // 2️⃣ Update user wallet
-  //         await prismaTx.user.update({
-  //             where: { id: userId },
-  //             data: { wallet: newWalletBalance },
-  //         });
-  
-  //         // 3️⃣ Simulated blockchain transaction
-  //         const txHash = '0x' + crypto.randomBytes(16).toString('hex'); // fake hash
-  //         const gasUsed = Math.round(Math.random() * 1000); // fake gas
-  //         const blockNumber = Math.floor(Math.random() * 1000000); // fake block number
-  
-  //         await prismaTx.blockchainTransaction.create({
-  //             data: {
-  //                 userId,
-  //                 symbol: latestPrice.stockId.toString(),
-  //                 tradeType,
-  //                 gasUsed,
-  //                 transactionHash: txHash,
-  //                 blockNumber,
-  //             },
-  //         });
-  
-  //         // 4️⃣ Return everything
-  //         return {
-  //             message: `${tradeType} trade successful`,
-  //             trade,
-  //             wallet: newWalletBalance,
-  //             blockchain: { txHash, gasUsed, blockNumber },
-  //         };
-  //     }).catch((error) => {
-  //         console.error('Error processing trade:', error);
-  //         throw error;
-  //     });
-  // };
-  
-  
-  // services/tradeStockWithSimChain.js
-  
-  
-  // const crypto = require('crypto');
-  
-  /**
-   * tradeStock(userId, stockId, quantity, tradeType, options)
-   *
-   * - Executes stock trade (creates Trade + updates User.wallet) inside a transaction.
-   * - Simulates a blockchain transaction using ethers utils (keccak256) + random gas.
-   * - Persists the simulated blockchain tx into prisma.blockchainTransaction.
-   *
-   * options (optional):
-   *  - gasMin (default 21000)
-   *  - gasMax (default 150000)
-   *  - gasPriceGweiMin (default 1)
-   *  - gasPriceGweiMax (default 100)
-   *  - simulateOnly (default true) // if false later you could wire real on-chain call
-   *  - symbolFetch (default true) // try to fetch stock symbol for nice ledger entries
-   */
-  
-  
-  
+
   exports.tradeStock = async (userId, stockId, quantity, tradeType) => {
-    console.log("🔹 Running tradeStock...");
-    console.log({ userId, stockId, quantity, tradeType });
-  
-    return prisma.$transaction(async (tx) => {
-      const priceRecord = await tx.intradayPrice3.findFirst({
-        where: { stockId },
-        orderBy: { date: "desc" },
-      });
-  
-      if (!priceRecord) throw new Error("No price data found!");
-  
-      const price = priceRecord.closePrice;
-      const totalAmount = price * quantity;
-  
-      console.log("💰 Trade Info =>", { price, totalAmount });
-  
-      const user = await tx.user.findUnique({ where: { id: userId } });
-      if (!user) throw new Error("User not found!");
-          if (tradeType === "BUY" && user.wallet < totalAmount ) {
-              
-            throw new Error("Insufficient funds to place this buy stop-market order");
-        
+  console.log("🔹 Running tradeStock...");
+  console.log({ userId, stockId, quantity, tradeType });
+
+  return prisma.$transaction(async (tx) => {
+    const priceRecord = await tx.intradayPrice3.findFirst({
+      where: { stockId },
+      orderBy: { date: "desc" },
+    });
+
+    if (!priceRecord) throw new Error("No price data found!");
+
+    const price = priceRecord.closePrice;
+    const totalAmount = price * quantity;
+
+    console.log("💰 Trade Info =>", { price, totalAmount });
+
+    const user = await tx.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error("User not found!");
+
+    // 🔹 Fetch or create stock holding row
+    let holding = await tx.stockHolding.findUnique({
+      where: { userId_stockId: { userId, stockId } },
+    });
+
+    if (!holding) {
+      // If SELL requested but no holding exists
+      if (tradeType === "SELL") {
+        throw new Error("You do not own this stock.");
       }
-      let updatedWallet = user.wallet;
-      if (tradeType === "BUY") {
-        updatedWallet -= totalAmount;
-      } else if (tradeType === "SELL") {
-        updatedWallet += totalAmount;
-      }
-  
-      await tx.user.update({
-        where: { id: userId },
-        data: { wallet: updatedWallet },
-      });
-      console.log("💼 Wallet updated:", updatedWallet);
-  
-      const trade = await tx.trade.create({
+
+      // If BUY, create a new holding row with 0 qty
+      holding = await tx.stockHolding.create({
         data: {
           userId,
           stockId,
-          quantity,
-          tradeType,
-          price,
-          totalAmount,
-        },
-      });
-  
-      console.log("DB trade created:", trade.id);
-  
-      console.log("Sending transaction to Hardhat blockchain...");
-  
-      const txResponse = await ledgerContract.recordTrade(
-        stockId.toString(), // ✅ symbol as string
-        tradeType,
-        quantity,
-        Math.round(price * 100) // ✅ convert to integer like blockchain expects (e.g. cents)
-      );
-  
-      console.log("Waiting for tx confirmation...");
-      const receipt = await txResponse.wait();
-  
-      console.log("Blockchain Transaction Mined");
-      console.log({
-        txHash: receipt.hash,
-        gasUsed: receipt.gasUsed.toString(),
-        blockNumber: receipt.blockNumber,
-      });
-  
-      await tx.blockchainTransaction.create({
-        data: {
-          userId,
           symbol: stockId.toString(),
-          tradeType,
-          gasUsed: Number(receipt.gasUsed),
-          transactionHash: receipt.hash,
-          blockNumber: receipt.blockNumber,
+          currentQuantity: 0,
         },
       });
-  
-      console.log("Stored blockchain transaction in DB");
-  
-      return {
-        success: true,
-        message: "Trade completed with blockchain event",
-        tradeId: trade.id,
-        blockchainTx: receipt.hash,
-      };
+    }
+
+    // 🔹 VALIDATION: SELL requires enough shares
+    if (tradeType === "SELL") {
+      if (holding.currentQuantity < quantity) {
+        throw new Error(
+          `Insufficient shares. You have ${holding.currentQuantity}, but tried to sell ${quantity}.`
+        );
+      }
+    }
+
+    // 🔹 VALIDATION: BUY requires enough wallet balance
+    if (tradeType === "BUY" && user.wallet < totalAmount) {
+      throw new Error("Insufficient funds to complete this buy order.");
+    }
+
+    // 🔹 Update wallet
+    let updatedWallet = user.wallet;
+    if (tradeType === "BUY") {
+      updatedWallet -= totalAmount;
+    } else if (tradeType === "SELL") {
+      updatedWallet += totalAmount;
+    }
+
+    await tx.user.update({
+      where: { id: userId },
+      data: { wallet: updatedWallet },
     });
-  };
-  
-  
-  
-  
-  // module.exports.getCompanyDetails = async function getCompanyDetails(symbol) {
-  //     if (!symbol || typeof symbol !== 'string') {
-  //         throw new Error(`Invalid company symbol: ${symbol}`);
-  //     }
-  
-  //     const upperSymbol = symbol.toUpperCase();
-  
-  //     try {
-  //         const response = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${upperSymbol}&token=${FINNHUB_API_KEY}`);
-  //         if (!response.ok) throw new Error(`Finnhub API error: ${response.status}`);
-  //         const data = await response.json();
-  
-  //         if (!data || !data.name) {
-  //             throw new Error(`Company data not found on Finnhub for symbol "${upperSymbol}"`);
-  //         }
-  
-  //         return {
-  //             symbol: data.ticker,
-  //             name: data.name,
-  //             country: data.country || null,
-  //             currency: data.currency || null,
-  //             exchange: data.exchange || null,
-  //             founded: data.ipo ? parseInt(data.ipo.split('-')[0]) : null,
-  //             phone: data.phone || null,
-  //             website: data.weburl || null,
-  //             industry: data.finnhubIndustry || null,
-  //             marketCapitalization: data.marketCapitalization || null,
-  //             shareOutstanding: data.shareOutstanding || null,
-  //             logo: data.logo || null,
-  //         };
-  //     } catch (error) {
-  //         console.error('Error fetching company details:', error);
-  //         throw error;
-  //     }
-  // };
-  
-  
-  
-  // module.exports.getCompanyDetails = async function getCompanyDetails(symbol) {
-  //   if (!symbol || typeof symbol !== 'string') {
-  //     throw new Error(`Invalid company symbol: ${symbol}`);
-  //   }
-  
-  //   const upperSymbol = symbol.toUpperCase();
-  
-  //   try {
-  //     const response = await fetch(
-  //       `https://finnhub.io/api/v1/stock/profile2?symbol=${upperSymbol}&token=${FINNHUB_API_KEY}`
-  //     );
-  //     if (!response.ok) throw new Error(`Finnhub API error: ${response.status}`);
-  //     const data = await response.json();
-  
-  //     if (!data || !data.name) {
-  //       throw new Error(`Company data not found on Finnhub for symbol "${upperSymbol}"`);
-  //     }
-  
-  //     const companyData = {
-  //       symbol: data.ticker,
-  //       name: data.name,
-  //       country: data.country || null,
-  //       currency: data.currency || null,
-  //       exchange: data.exchange || null,
-  //       founded: data.ipo ? parseInt(data.ipo.split('-')[0]) : null,
-  //       phone: data.phone || null,
-  //       website: data.weburl || null,
-  //       industry: data.finnhubIndustry || null,
-  //       marketCapitalization: data.marketCapitalization || null,
-  //       shareOutstanding: data.shareOutstanding || null,
-  //       logo: data.logo || null,
-  //     };
-  
-  //     // Insert or update company record in Prisma
-  //     const company = await prisma.company.upsert({
-  //       where: { symbol: companyData.symbol },
-  //       update: companyData,
-  //       create: companyData,
-  //     });
-  
-  //     return company;
-  //   } catch (error) {
-  //     console.error('Error fetching company details:', error);
-  //     throw error;
-  //   }
-  // };
-  
+
+    console.log("💼 Wallet updated:", updatedWallet);
+
+    // 🔹 Update holdings table (increase/decrease stock)
+    const updatedQuantity =
+      tradeType === "BUY"
+        ? holding.currentQuantity + quantity
+        : holding.currentQuantity - quantity;
+
+    await tx.stockHolding.update({
+      where: { userId_stockId: { userId, stockId } },
+      data: { currentQuantity: updatedQuantity },
+    });
+
+    console.log("📦 Updated StockHolding:", updatedQuantity);
+
+    // 🔹 Create trade record
+    const trade = await tx.trade.create({
+      data: {
+        userId,
+        stockId,
+        quantity,
+        tradeType,
+        price,
+        totalAmount,
+      },
+    });
+
+    console.log("DB trade created:", trade.id);
+
+    // 🔹 Send transaction to blockchain
+    console.log("Sending transaction to Hardhat blockchain...");
+    const txResponse = await ledgerContract.recordTrade(
+      stockId.toString(),
+      tradeType,
+      quantity,
+      Math.round(price * 100)
+    );
+
+    console.log("Waiting for tx confirmation...");
+    const receipt = await txResponse.wait();
+
+    console.log("Blockchain Transaction Mined");
+    console.log({
+      txHash: receipt.hash,
+      gasUsed: receipt.gasUsed.toString(),
+      blockNumber: receipt.blockNumber,
+    });
+
+    await tx.blockchainTransaction.create({
+      data: {
+        userId,
+        symbol: stockId.toString(),
+        tradeType,
+        gasUsed: Number(receipt.gasUsed),
+        transactionHash: receipt.hash,
+        blockNumber: receipt.blockNumber,
+      },
+    });
+
+    console.log("Stored blockchain transaction in DB");
+
+    return {
+      success: true,
+      message: "Trade completed with blockchain event",
+      tradeId: trade.id,
+      blockchainTx: receipt.hash,
+    };
+  });
+};
+
   
   
   
@@ -2258,278 +1149,240 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
   /////////// LIMIT ORDER PRICES
   /////////////////////////////////////////////
   
-  // Model for creating a limit order
-  // exports.createLimitOrder = async function createLimitOrder(userId, stockId, quantity, limitPrice, orderType) {
-  //     if (!userId || !stockId || !quantity || !limitPrice || !orderType) {
-  //         throw new Error("All fields (userId, stockId, quantity, limitPrice, orderType) are required.");
-  //     }
-  
-  //     return prisma.limitOrder.create({
-  //         data: {
-  //             userId,
-  //             stockId,
-  //             quantity,
-  //             limitPrice,
-  //             orderType,
-  //             status: "PENDING",
-  //         },
-  //     });
-  // };
-  
-  
-  // exports.createLimitOrder = async function createLimitOrder(userId, stockId, quantity, limitPrice, orderType, timeframe, status) {
-  //   if (!userId || !stockId || !quantity || !limitPrice || !orderType || !timeframe || !status) {
-  //     throw new Error("All fields are required.");
-  //   }
-  
-  //   return prisma.limitOrder.create({
-  //     data: {
-  //       userId,
-  //       stockId,
-  //       quantity,
-  //       limitPrice,
-  //       orderType,
-  //       timeframe,
-  //       status,
-  //     },
-  //   });
-  // };
-  
-  
-  
-  // exports.processLimitOrders = async function processLimitOrders(stockId) {
-  //   if (!stockId) {
-  //     throw new Error("Stock ID is required.");
-  //   }
-  
-  //   const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-  //     where: { stockId },
-  //     orderBy: { date: 'desc' },
-  //   });
-  
-  //   if (!latestPriceRecord) {
-  //     console.log("No price data found for this stock.");
-  //     return [];
-  //   }
-  
-  //   const currentPrice = latestPriceRecord.closePrice;
-  
-  //   const now = new Date();
-  //     const sgTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
-  
-  //       const marketOpen = new Date(sgTime);
-  //       marketOpen.setHours(9, 15, 0, 0);
-  
-  //       const marketClose = new Date(sgTime);
-  //       marketClose.setHours(18, 0, 0, 0);
-  
-  //   const pendingOrders = await prisma.limitOrder.findMany({
-  //     where: {
-  //       stockId,
-  //       status: { in: ["PENDING", "DAY ORDER"] },
-  //     },
-  //   });
-  
-  //   const executedOrders = [];
-  
-  //   for (const order of pendingOrders) {
-  //     // Update status for DAY orders if market opens
-  //    if (order.timeframe === "day" && order.status === "PENDING" && now >= marketOpen && now <= marketClose) {
-  
-  //   // if (order.timeframe === "day" && order.status === "PENDING" ) {
-  //       await prisma.limitOrder.update({
-  //         where: { id: order.id },
-  //         data: { status: "DAY ORDER" },
-  //       });
-  //       order.status = "DAY ORDER";
-  //     }
-  
-  //     // Skip if DAY order is outside market hours
-  //     if (order.timeframe === "day" && order.status === "PENDING" && (now < marketOpen || now > marketClose)) {
-  //       continue;
-  //     }
-  
-  //     // Cancel DAY orders after market close
-  //     if (order.timeframe === "day" && order.status === "DAY ORDER" && now > marketClose) {
-  //       await prisma.limitOrder.update({
-  //         where: { id: order.id },
-  //         data: { status: "CANCELLED" },
-  //       });
-  //       continue;
-  //     }
-  
-  //     // Check if limit condition is met
-  //     const buyTriggered = order.orderType === "BUY" && currentPrice <= order.limitPrice;
-  //     const sellTriggered = order.orderType === "SELL" && currentPrice >= order.limitPrice;
-  
-  //     if (buyTriggered || sellTriggered) {
-  //       await prisma.limitOrder.update({
-  //         where: { id: order.id },
-  //         data: { status: "EXECUTED" },
-  //       });
-  
-  //       try {
-  //         await exports.tradeStock(
-  //           order.userId,
-  //           order.stockId,
-  //           order.quantity,
-  //           order.orderType // correct BUY/SELL string
-  //         );
-  
-          
-  
-  //         executedOrders.push(order);
-  //       } catch (err) {
-  //         console.error('Error executing limit order trade:', err);
-  //       }
-  //     }
-  //   }
-  
-  //   return executedOrders;
-  // };
-  
-  
-  
   
   exports.processLimitOrders = async function processLimitOrders(stockId) {
-    if (!stockId) throw new Error("Stock ID is required.");
-  
-    const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-      where: { stockId },
-      orderBy: { date: "desc" },
-    });
-  
-    if (!latestPriceRecord) {
-      console.log("No price data found for this stock.");
-      return [];
+  if (!stockId) throw new Error("Stock ID is required.");
+
+  const latestPriceRecord = await prisma.intradayPrice3.findFirst({
+    where: { stockId },
+    orderBy: { date: "desc" },
+  });
+
+  if (!latestPriceRecord) {
+    console.log("No price data found for this stock.");
+    return [];
+  }
+
+  const currentPrice = latestPriceRecord.closePrice;
+  const now = new Date();
+  const sgTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+
+  const marketOpen = new Date(sgTime);
+  marketOpen.setHours(9, 15, 0, 0);
+
+  const marketClose = new Date(sgTime);
+  marketClose.setHours(18, 0, 0, 0);
+
+  const pendingOrders = await prisma.limitOrder.findMany({
+    where: { stockId, status: { in: ["PENDING", "DAY ORDER"] } },
+  });
+
+  const executedOrders = [];
+
+  for (const order of pendingOrders) {
+
+    // Handle DAY order timing
+    if (order.timeframe === "day" && order.status === "PENDING" && now >= marketOpen && now <= marketClose) {
+      await prisma.limitOrder.update({
+        where: { id: order.id },
+        data: { status: "DAY ORDER" }
+      });
+      order.status = "DAY ORDER";
     }
-  
-    const currentPrice = latestPriceRecord.closePrice;
-    const now = new Date();
-    const sgTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
-  
-    const marketOpen = new Date(sgTime);
-    marketOpen.setHours(9, 15, 0, 0);
-  
-    const marketClose = new Date(sgTime);
-    marketClose.setHours(18, 0, 0, 0);
-  
-    const pendingOrders = await prisma.limitOrder.findMany({
-      where: { stockId, status: { in: ["PENDING", "DAY ORDER"] } },
-    });
-  
-    const executedOrders = [];
-  
-    for (const order of pendingOrders) {
-      if (order.timeframe === "day" && order.status === "PENDING" && now >= marketOpen && now <= marketClose) {
-        await prisma.limitOrder.update({ where: { id: order.id }, data: { status: "DAY ORDER" } });
-        order.status = "DAY ORDER";
-      }
-  
-      if (order.timeframe === "day" && order.status === "PENDING" && (now < marketOpen || now > marketClose)) continue;
-      if (order.timeframe === "day" && order.status === "DAY ORDER" && now > marketClose) {
-        await prisma.limitOrder.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
-        continue;
-      }
-  
-      const buyTriggered = order.orderType === "BUY" && currentPrice <= order.limitPrice;
-      const sellTriggered = order.orderType === "SELL" && currentPrice >= order.limitPrice;
-  
-  
-  if (buyTriggered || sellTriggered) {
-          await prisma.limitOrder.update({ where: { id: order.id }, data: { status: "EXECUTED" } });
-  
-          try {
-              const tradeResult = await exports.tradeStock(order.userId, order.stockId, order.quantity, order.orderType);
-              console.log(`💰 Trade executed in DB: ${order.orderType} ${order.quantity} ${order.stockId} at ${currentPrice}`);
-            let nonce = await provider.getTransactionCount(signer.address);
-  
-              // Send transaction to Hardhat blockchain with explicit nonce
-              const tx = await ledger.recordTrade(
-                  order.stockId.toString(),
-                  order.orderType,
-                  order.quantity,
-                  Math.floor(currentPrice),
-                  { nonce } // use the current nonce
-              );
-              await tx.wait();
-              console.log(`🧾 Recorded trade on blockchain: TxHash ${tx.hash}`);
-  
-              nonce++; // increment for next transaction in the batch
-  
-          } catch (err) {
-              console.error("Error executing limit order:", err);
+
+    if (order.timeframe === "day" && order.status === "PENDING" &&
+        (now < marketOpen || now > marketClose)) continue;
+
+    if (order.timeframe === "day" && order.status === "DAY ORDER" && now > marketClose) {
+      await prisma.limitOrder.update({
+        where: { id: order.id },
+        data: { status: "CANCELLED" }
+      });
+      continue;
+    }
+
+    const buyTriggered = order.orderType === "BUY" && currentPrice <= order.limitPrice;
+    const sellTriggered = order.orderType === "SELL" && currentPrice >= order.limitPrice;
+
+    if (buyTriggered || sellTriggered) {
+
+      // Mark as executed
+      await prisma.limitOrder.update({
+        where: { id: order.id },
+        data: { status: "EXECUTED" }
+      });
+
+      try {
+        // 🧾 Execute the trade in DB
+        await exports.tradeStock(order.userId, order.stockId, order.quantity, order.orderType);
+
+        // 📈 Update stockholdings
+        let holding = await prisma.stockHolding.findUnique({
+          where: {
+            userId_stockId: {
+              userId: order.userId,
+              stockId: order.stockId
+            }
           }
+        });
+
+        // if (!holding) {
+        //   // Create new record only for BUY
+        //   if (order.orderType === "BUY") {
+        //     await prisma.stockHolding.create({
+        //       data: {
+        //         userId: order.userId,
+        //         stockId: order.stockId,
+        //         quantity: order.quantity
+        //       }
+        //     });
+        //   } else {
+        //     console.error("❌ SELL attempted but user has no holdings.");
+        //     continue;
+        //   }
+        // } else {
+          let updatedQty = holding.quantity;
+
+          if (order.orderType === "BUY") {
+            updatedQty += order.quantity;
+          } else if (order.orderType === "SELL") {
+            updatedQty -= order.quantity;
+            if (updatedQty < 0) {
+              console.error("❌ SELL would result in negative stockholding. Skipping.");
+              continue;
+            }
+          }
+
+          await prisma.stockHolding.update({
+            where: { id: holding.id },
+            data: { quantity: updatedQty }
+          });
+        //}
+
+        console.log(`💹 Updated holdings for user ${order.userId}.`);
+
+        // 🪙 Send transaction to blockchain
+        let nonce = await provider.getTransactionCount(signer.address);
+
+        const tx = await ledger.recordTrade(
+          order.stockId.toString(),
+          order.orderType,
+          order.quantity,
+          Math.floor(currentPrice),
+          { nonce }
+        );
+        await tx.wait();
+
+        console.log(`🧾 Recorded trade on blockchain: TxHash ${tx.hash}`);
+
+      } catch (err) {
+        console.error("Error executing limit order:", err);
       }
-    
     }
-  
-    return executedOrders;
-  };
+  }
+
+  return executedOrders;
+};
+
   
   
   
 
-  
-  
   
   exports.createLimitOrder = async function createLimitOrder(
-    userId,
-    stockId,
-    quantity,
-    limitPrice,
-    orderType,  // "BUY" or "SELL"
-    timeframe,
-    status
-  ) {
-    if (!userId || !stockId || !quantity || !limitPrice || !orderType || !timeframe || !status) {
-      throw new Error("All fields are required.");
-    }
-  
-    // 1️⃣ Fetch latest market price for the stock
-    const latestPriceRecord = await prisma.intradayPrice3.findFirst({
-      where: { stockId },
-      orderBy: { date: 'desc' },
-      select: { closePrice: true }
-    });
-  
-    if (!latestPriceRecord) {
-      throw new Error("Could not fetch latest market price for the stock.");
-    }
-          const user = await prisma.user.findUnique({ where: { id: userId } });
-          const totalCost = quantity * parseFloat(limitPrice);
+  userId,
+  stockId,
+  quantity,
+  limitPrice,
+  orderType,  // "BUY" or "SELL"
+  timeframe,
+  status
+) {
+  if (!userId || !stockId || !quantity || !limitPrice || !orderType || !timeframe || !status) {
+    throw new Error("All fields are required.");
+  }
 
-    const latestPrice = Number(latestPriceRecord.closePrice);
-  
-    // 2️⃣ Validate limit price against market price
-    if (orderType.toUpperCase() === "BUY" && limitPrice >= latestPrice) {
-      throw new Error(`Buy limit price (${limitPrice}) must be below current market price (${latestPrice}).`);
+  // 🔹 1. Fetch latest price
+  const latestPriceRecord = await prisma.intradayPrice3.findFirst({
+    where: { stockId },
+    orderBy: { date: 'desc' },
+    select: { closePrice: true }
+  });
+
+  if (!latestPriceRecord) {
+    throw new Error("Could not fetch latest market price for the stock.");
+  }
+
+  const latestPrice = Number(latestPriceRecord.closePrice);
+
+  // 🔹 2. Fetch user
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found.");
+
+  const totalCost = quantity * parseFloat(limitPrice);
+
+  // ===========================
+  // 🔥 BUY LIMIT VALIDATION
+  // ===========================
+  if (orderType.toUpperCase() === "BUY") {
+    
+    // Buy limit must be BELOW current market price
+    if (limitPrice >= latestPrice) {
+      throw new Error(
+        `Buy limit price (${limitPrice}) must be *below* current market price (${latestPrice}).`
+      );
     }
 
-          if (orderType.toUpperCase() === "BUY" && user.wallet < totalCost ) {
-              
-            throw new Error("Insufficient funds to place this buy stop-market order");
-        
-      }
-  
-    if (orderType.toUpperCase() === "SELL" && limitPrice <= latestPrice) {
-      throw new Error(`Sell limit price (${limitPrice}) must be above current market price (${latestPrice}).`);
+    // Check wallet balance
+    if (user.wallet < totalCost) {
+      throw new Error("Insufficient funds to place this buy limit order.");
     }
-  
-    // 3️⃣ Create limit order if valid
-    return prisma.limitOrder.create({
-      data: {
-        userId,
-        stockId,
-        quantity,
-        limitPrice,
-        orderType,
-        timeframe,
-        status,
-      },
+  }
+
+  // ===========================
+  // 🔥 SELL LIMIT VALIDATION
+  // ===========================
+  if (orderType.toUpperCase() === "SELL") {
+
+    // Sell limit must be ABOVE current market price
+    if (limitPrice <= latestPrice) {
+      throw new Error(
+        `Sell limit price (${limitPrice}) must be *above* current market price (${latestPrice}).`
+      );
+    }
+
+    // Check StockHolding table
+    const holding = await prisma.stockHolding.findUnique({
+      where: { userId_stockId: { userId, stockId } }
     });
-  };
-  
+
+    if (!holding) {
+      throw new Error("You do not own this stock, so you cannot place a sell limit order.");
+    }
+
+    if (holding.currentQuantity < quantity) {
+      throw new Error(
+        `Insufficient shares. You own ${holding.currentQuantity}, but attempted to sell ${quantity}.`
+      );
+    }
+  }
+
+  // ===========================
+  // 3️⃣ Create Limit Order
+  // ===========================
+  return prisma.limitOrder.create({
+    data: {
+      userId,
+      stockId,
+      quantity,
+      limitPrice,
+      orderType,
+      timeframe,
+      status,
+    },
+  });
+};
+
 
   
   
@@ -2554,4 +1407,4 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
       where: { id: orderId },
       data: { status: 'CANCELLED' },
     });
-  };
+  }
