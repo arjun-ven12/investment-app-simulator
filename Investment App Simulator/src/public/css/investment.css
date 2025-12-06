@@ -1330,7 +1330,7 @@ body {
 
 
 /* Ensure chart container has a fixed height */
-#myChart2, #recommendationChart, .fullscreen-chart canvas {
+#myChart2, #ohlc-chart, #recommendationChart, .fullscreen-chart canvas {
     width: 100% !important;
     height: 400px !important; /* Setting a fixed height for a bigger chart appearance, or a percentage if the parent is fixed */
 }
@@ -1914,6 +1914,12 @@ body {
     height: 550px !important
     }
 
+
+    #ohlc-chart { 
+        width: 100% !important;
+        height: 550px !important
+        }
+    
     #myChart3.canvas3 {
     width: 100% !important;
     height: 500px !important;
@@ -2391,4 +2397,14 @@ display: flex !important;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
+
+
+}
+
+
+
+
+
+.ohlc-body {
+    padding-top: 100px;
 }
