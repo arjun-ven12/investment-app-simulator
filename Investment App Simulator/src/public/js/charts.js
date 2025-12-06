@@ -2185,3 +2185,60 @@ window.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+
+  // -------------------------------
+  // USER INFO
+  // -------------------------------
+  async function fetchUserDetails() {
+    if (!userId) return null;
+    if (!token) return null;
+
+    try {
+      const res = await fetch(`/user/get/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        console.error("Failed to fetch user details:", data.message);
+        return null;
+      }
+      return data.user || data;
+    } catch (err) {
+      console.error("Error fetching user details:", err);
+      return null;
+    }
+  }
+// Utility function to capitalize the first letter of each word in a string.
+// This handles multi-word names (e.g., 'john doe' -> 'John Doe').
+const capitalizeName = (str) => {
+    if (!str) return '';
+    // Ensure string is lowercased first, split by space, capitalize each word, and rejoin.
+    return str.toLowerCase().split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+};
+
+async function updateWalletBalances() {
+  const user = await fetchUserDetails();
+  if (!user || user.wallet === undefined) return;
+
+  const formatted = Number(user.wallet).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  // Update Stock Dashboard wallet
+  const stockWallet = document.getElementById("wallet-balance-stock");
+  if (stockWallet) stockWallet.textContent = formatted;
+
+  // Update Options Dashboard wallet
+  const optionsWallet = document.getElementById("wallet-balance-options");
+  if (optionsWallet) optionsWallet.textContent = formatted;
+}
+
+
+document.addEventListener("DOMContentLoaded", updateWalletBalances);
+
