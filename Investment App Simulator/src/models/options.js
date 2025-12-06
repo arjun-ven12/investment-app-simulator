@@ -1,6 +1,3 @@
-
-
-
 const API_KEY= "PK60NYDKHQH512R4Q7SH"
 const API_SECRET= "Oi4N2rq28YKLnti1lsRuFldwOhtwStQ1pJ56eURs"
 
@@ -731,6 +728,10 @@ module.exports.placeBuyCallOrder = async function ({
     throw new Error("Insufficient wallet balance");
   }
 
+    if (orderType === "LIMIT" && user.wallet < totalAmount) {
+    throw new Error("Insufficient wallet balance");
+  }
+
   // Deduct wallet if MARKET
   if (orderType === "MARKET") {
     await prisma.user.update({
@@ -808,52 +809,10 @@ await prisma.optionBlockchainTransaction.create({
 
 
 
-
-
-// // Auto-execute pending LIMIT Buy Call orders
-// module.exports.executePendingLimitCalls = async function () {
-//   // Find all pending LIMIT BUY orders
-//   const pendingOrders = await prisma.optionTrade.findMany({
-//     where: { tradeType: 'BUY', orderType: 'LIMIT' },
-//     include: { user: true, contract: true }
-//   });
-
-//   const executedOrders = [];
-
-//   for (const trade of pendingOrders) {
-//     // Fetch current market price directly from the option contract
-//     const currentPrice = trade.contract.closePrice;
-
-//     if (!currentPrice) continue; // skip if no closePrice available
-
-//     // Execute if contract closePrice <= limit buy price
-//     if (currentPrice <= trade.price) {
-//       const totalCost = currentPrice * trade.quantity * 100; // execute at market (closePrice)
-
-//       if (trade.user.wallet < totalCost) continue; // skip if insufficient funds
-
-//       // Deduct wallet balance
-//       await prisma.user.update({
-//         where: { id: trade.userId },
-//         data: { wallet: trade.user.wallet - totalCost }
-//       });
-
-//       // Mark trade as executed
-//       const executedTrade = await prisma.optionTrade.update({
-//         where: { id: trade.id },
-//         data: { orderType: 'MARKET', totalAmount: totalCost, price: currentPrice }
-//       });
-
-//       executedOrders.push(executedTrade);
-//     }
-//   }
-
-//   return executedOrders;
-// };
-
-
 // Auto-execute pending LIMIT Buy Call orders
 module.exports.executePendingLimitCalls = async function () {
+  const now = new Date();
+
   // Find all pending LIMIT BUY orders
   const pendingOrders = await prisma.optionTrade.findMany({
     where: { tradeType: "BUY", orderType: "LIMIT" },
@@ -863,21 +822,47 @@ module.exports.executePendingLimitCalls = async function () {
   const executedOrders = [];
 
   for (const trade of pendingOrders) {
-    const currentPrice = trade.contract.closePrice;
-    if (!currentPrice) continue; // skip if no closePrice
+    const contract = trade.contract;
+    const currentPrice = contract.closePrice;
 
-    // Execute if contract closePrice <= limit buy price
+    // Skip if no live price yet
+    if (!currentPrice) continue;
+
+    const isExpired = contract.expirationDate <= now;
+
+    // 1️⃣ Handle expired contract → mark order as EXPIRED
+    if (isExpired) {
+      await prisma.optionTrade.update({
+        where: { id: trade.id },
+        data: {
+          orderType: "EXPIRED",
+          totalAmount: 0
+        }
+      });
+
+      executedOrders.push({
+        ...trade,
+        status: "EXPIRED"
+      });
+
+      console.log(`❌ LIMIT BUY CALL order ${trade.id} expired and marked EXPIRED.`);
+
+      continue; // ⛔ Skip further processing
+    }
+
+    // 2️⃣ Execute normal LIMIT BUY flow
+
+    // Execute if closePrice <= LIMIT price
     if (currentPrice <= trade.price) {
       const totalCost = currentPrice * trade.quantity * 100; // 1 contract = 100 shares
-      if (trade.user.wallet < totalCost) continue; // skip if insufficient funds
 
-      // Deduct wallet balance
+      // Deduct wallet
       await prisma.user.update({
         where: { id: trade.userId },
         data: { wallet: trade.user.wallet - totalCost },
       });
 
-      // Update trade to MARKET status
+      // Convert LIMIT → MARKET
       const executedTrade = await prisma.optionTrade.update({
         where: { id: trade.id },
         data: {
@@ -887,12 +872,11 @@ module.exports.executePendingLimitCalls = async function () {
         },
       });
 
-      console.log(`💰 Executed LIMIT → MARKET Option Trade: ${executedTrade.id}`);
+      console.log(`💰 Executed LIMIT → MARKET Buy Call: ${executedTrade.id}`);
 
-      // Send to blockchain
-      console.log("📤 Sending executed option trade to blockchain...");
+      // Blockchain call
       const txResponse = await optionLedger.recordOptionTrade(
-        trade.contract.id,
+        contract.id,
         "BUY",
         "MARKET",
         trade.quantity,
@@ -900,35 +884,24 @@ module.exports.executePendingLimitCalls = async function () {
         totalCost
       );
 
-      console.log("⏳ Waiting for blockchain confirmation...");
       const receipt = await txResponse.wait();
 
-      console.log("✅ Blockchain Transaction Mined:");
-      console.log({
-        txHash: txResponse.hash,
-        gasUsed: receipt.gasUsed,
-        blockNumber: receipt.blockNumber,
-      });
-
-      // Record blockchain transaction in DB
       await prisma.optionBlockchainTransaction.create({
         data: {
           userId: trade.userId,
-          symbol: trade.contract.symbol,
+          symbol: contract.symbol,
           tradeType: "BUY",
           gasUsed: Number(receipt.gasUsed),
           blockNumber: receipt.blockNumber,
-          underlyingSymbol: trade.contract.underlyingSymbol,
-          optionType: trade.contract.type,
-          strikePrice: trade.contract.strikePrice,
-          expirationDate: trade.contract.expirationDate,
+          underlyingSymbol: contract.underlyingSymbol,
+          optionType: contract.type,
+          strikePrice: contract.strikePrice,
+          expirationDate: contract.expirationDate,
           contracts: trade.quantity,
           premium: currentPrice,
           transactionHash: txResponse.hash,
         },
       });
-
-      console.log("💾 Option trade recorded in blockchain DB");
 
       executedOrders.push(executedTrade);
     }
@@ -938,202 +911,99 @@ module.exports.executePendingLimitCalls = async function () {
 };
 
 
-// // Settle all Buy Call trades where the contract has expired
-// module.exports.settleExpiredBuyCallTrades = async function () {
-//   const now = new Date();
-
-//   // 1. Get all BUY CALL trades that have been executed (MARKET) and contract has expired
-//   const tradesToSettle = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'BUY',
-//       orderType: 'MARKET',
-//       contract: { type: 'call', expirationDate: { lte: now } }
-//     },
-//     include: { contract: true, user: true }
-//   });
-
-//   const settledTrades = [];
-
-//   for (const trade of tradesToSettle) {
-//     const { contract, user, quantity, price } = trade;
-//     const strike = contract.strikePrice;
-
-//     // 🔹 Get underlying stock
-//     const stock = await prisma.stock.findUnique({
-//       where: { symbol: contract.underlyingSymbol },
-//       select: { stock_id: true }
-//     });
-
-//     if (!stock) continue;
-
-//     // 🔹 Fetch final close price of underlying from IntradayPrice3
-//     const latestPrice = await prisma.intradayPrice3.findFirst({
-//       where: { stockId: stock.stock_id },
-//       orderBy: { date: 'desc' },
-//       select: { closePrice: true }
-//     });
-
-//     if (!latestPrice) continue;
-//     const underlyingFinalPrice = Number(latestPrice.closePrice);
-
-//     // Calculate intrinsic value
-//     const intrinsicValue = Math.max(0, underlyingFinalPrice - strike);
-
-//     // Profit per share = intrinsic value - premium paid
-//     const pnlPerShare = intrinsicValue - price;
-//     const totalPnL = pnlPerShare * quantity * 100; // contract size = 100
-
-//     // Update user wallet
-//     await prisma.user.update({
-//       where: { id: user.id },
-//       data: { wallet: user.wallet + totalPnL }
-//     });
-
-//     // Update the trade as settled (store realized P&L)
-//     const settledTrade = await prisma.optionTrade.update({
-//       where: { id: trade.id },
-//       data: { totalAmount: totalPnL }
-//     });
-
-//     settledTrades.push({
-//       tradeId: trade.id,
-//       userId: trade.userId,
-//       symbol: contract.symbol,
-//       underlyingSymbol: contract.underlyingSymbol,
-//       strike,
-//       underlyingFinalPrice,
-//       premiumPaid: price,
-//       pnl: totalPnL
-//     });
-//   }
-
-//   return settledTrades;
-// };
-
-// Settle all Buy Call trades where the contract has expired
 module.exports.settleExpiredBuyCallTrades = async function () {
   const now = new Date();
 
-  // 1️⃣ Find all BUY CALL MARKET trades that have expired but not marked EXPIRED
   const tradesToSettle = await prisma.optionTrade.findMany({
     where: {
       tradeType: "BUY",
       orderType: "MARKET",
-      contract: { type: "CALL", expirationDate: { lte: now } },
+      contract: { type: "CALL", expirationDate: { lte: now } }
     },
-    include: { contract: true, user: true },
+    include: { contract: true, user: true }
   });
 
   const settledTrades = [];
 
   for (const trade of tradesToSettle) {
     const { contract, user, quantity, price } = trade;
-    const strike = contract.strikePrice;
     const contractSize = contract.size || 100;
+    const strike = contract.strikePrice;
 
-    if (trade.orderType === "EXPIRED") continue;
-
-    // 2️⃣ Get underlying stock ID
+    // get underlying price at expiration
     const stock = await prisma.stock.findUnique({
       where: { symbol: contract.underlyingSymbol },
-      select: { stock_id: true },
+      select: { stock_id: true }
     });
     if (!stock) continue;
 
-    // 3️⃣ Fetch final close price of underlying
     const latestPrice = await prisma.intradayPrice3.findFirst({
       where: { stockId: stock.stock_id },
       orderBy: { date: "desc" },
-      select: { closePrice: true },
+      select: { closePrice: true }
     });
     if (!latestPrice) continue;
 
     const underlyingFinalPrice = Number(latestPrice.closePrice);
 
-    // 4️⃣ Compute P&L
-    const intrinsicValue = Math.max(0, underlyingFinalPrice - strike);
-    const pnlPerShare = intrinsicValue - price;
-    const totalPnL = pnlPerShare * quantity * contractSize;
+    // intrinsic value
+    const intrinsicValue =
+      underlyingFinalPrice > strike
+        ? (underlyingFinalPrice - strike) * quantity * contractSize
+        : 0;
 
-    // 5️⃣ Update wallet (credit if profit, debit if loss)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { wallet: user.wallet + totalPnL },
-    });
+    // -------------- CASE 1: ITM → exercise --------------
+    if (underlyingFinalPrice > strike) {
+      const shareCost = strike * quantity * contractSize;
 
-    // 6️⃣ Mark trade as expired
+      // Deduct cost to buy shares
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { wallet: user.wallet - shareCost }
+      });
+
+      // Add shares to holdings
+      await prisma.stockHolding.upsert({
+        where: {
+          userId_stockId: { userId: user.id, stockId: stock.stock_id }
+        },
+        update: { quantity: { increment: quantity * contractSize } },
+        create: {
+          userId: user.id,
+          stockId: stock.stock_id,
+          quantity: quantity * contractSize
+        }
+      });
+
+      console.log(
+        `🏆 BUY CALL exercised for trade ${trade.id} → delivered ${quantity *
+          contractSize} shares`
+      );
+    }
+
+    // -------------- CASE 2: OTM → worthless, do nothing --------------
+
+    // Mark trade as expired
     await prisma.optionTrade.update({
       where: { id: trade.id },
       data: {
-        totalAmount: totalPnL,
         orderType: "EXPIRED",
-      },
+        totalAmount: intrinsicValue - price * quantity * contractSize
+      }
     });
 
-    console.log(`✅ Settled expired BUY CALL trade ${trade.id}`);
-
-    // 7️⃣ Send blockchain settlement
-    try {
-      console.log(`Sending settlement for BUY CALL trade ${trade.id} to blockchain...`);
-
-      const txResponse = await optionLedger.settleOptionTrade(
-        contract.id,                                // contractId
-        "BUY",                                      // tradeType
-        quantity,                                   // quantity
-        Math.round(strike * 100),                   // scaled strike price
-        Math.round(underlyingFinalPrice * 100),     // scaled final price
-        BigInt(Math.round(totalPnL))                // P&L (can be negative)
-      );
-
-      const receipt = await txResponse.wait();
-
-      console.log(`🟢 Blockchain settlement confirmed for trade ${trade.id}`);
-      console.log(`   TxHash: ${txResponse.hash}, Gas: ${receipt.gasUsed}, Block: ${receipt.blockNumber}`);
-
-      // 8️⃣ Record blockchain transaction
-      await prisma.optionBlockchainTransaction.create({
-        data: {
-          userId: user.id,
-          symbol: contract.symbol,
-          tradeType: "BUY",
-          gasUsed: Number(receipt.gasUsed),
-          blockNumber: receipt.blockNumber,
-          underlyingSymbol: contract.underlyingSymbol,
-          optionType: contract.type,
-          strikePrice: contract.strikePrice,
-          expirationDate: contract.expirationDate,
-          contracts: quantity,
-          premium: price,
-          transactionHash: txResponse.hash,
-        },
-      });
-
-      console.log(`💾 Blockchain record stored for BUY CALL trade ${trade.id}`);
-    } catch (err) {
-      console.error(`❌ Blockchain settlement failed for trade ${trade.id}:`, err);
-    }
-
-    // 9️⃣ Add to summary output
     settledTrades.push({
       tradeId: trade.id,
-      userId: trade.userId,
-      symbol: contract.symbol,
-      underlyingSymbol: contract.underlyingSymbol,
       strike,
       underlyingFinalPrice,
-      premiumPaid: price,
-      pnl: totalPnL,
-      orderType: "EXPIRED",
+      exercised: underlyingFinalPrice > strike,
+      sharesDelivered: underlyingFinalPrice > strike ? quantity * contractSize : 0,
+      pnl: intrinsicValue - price * quantity * contractSize
     });
   }
 
-  console.log(`✅ ${settledTrades.length} BUY CALL trades settled successfully.`);
   return settledTrades;
 };
-
-
-
-
 
 
 
@@ -1147,69 +1017,6 @@ module.exports.settleExpiredBuyCallTrades = async function () {
 ////////////////////////////////////////////////////
 //// PLACE SELL CALL - MARKET/LIMIT ORDER
 ////////////////////////////////////////////////////
-
-
-
-
-// module.exports.placeSellCallOrder = async function ({ userId, contractId, quantity, price, orderType }) {
-//   if (!userId || !contractId || !quantity || !orderType) {
-//     throw new Error('Missing required trade data');
-//   }
-
-//   // 🔹 Resolve numeric contractId from symbol if it's a string
-//   let numericContractId = contractId;
-//   if (typeof contractId === 'string') {
-//     const contract = await prisma.optionContract.findUnique({ where: { symbol: contractId } });
-//     if (!contract) throw new Error('Option contract not found');
-//     numericContractId = contract.id;
-//   }
-
-//   const totalAmount = price * quantity * 100; // premium collected = credited to seller wallet
-
-//   if (orderType === 'MARKET') {
-//     const user = await prisma.user.findUnique({ where: { id: userId } });
-//     if (!user) throw new Error('User not found');
-
-//     // Seller gets premium credited instantly
-//     await prisma.user.update({
-//       where: { id: userId },
-//       data: { wallet: user.wallet + totalAmount }
-//     });
-
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId,
-//         tradeType: 'SELL',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount
-//       }
-//     });
-
-//     return { trade, executed: true };
-//   }
-
-//   // LIMIT order: store only
-//   if (orderType === 'LIMIT') {
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId,
-//         tradeType: 'SELL',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount
-//       }
-//     });
-
-//     return { trade, executed: false };
-//   }
-
-//   throw new Error('Invalid order type');
-// };
 module.exports.placeSellCallOrder = async function ({
   userId,
   contractId,
@@ -1228,20 +1035,51 @@ module.exports.placeSellCallOrder = async function ({
   if (!contract) throw new Error("Option contract not found");
   const numericContractId = contract.id;
 
-  const totalAmount = Math.round(price * quantity * 100); // 1 contract = 100 shares
+  const sharesPerContract = 100; // standard contract size
+  const totalSharesRequired = quantity * sharesPerContract;
+  const totalAmount = Math.round(price * quantity * sharesPerContract);
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error("User not found");
 
-  // Credit wallet if MARKET
+  // ✅ Check if user owns enough underlying shares
+  const userHolding = await prisma.stockHolding.findUnique({
+    where: {
+      userId_stockId: {
+        userId,
+        stockId: contract.stockId // assuming contract has stockId
+      }
+    }
+  });
+
+  const ownedShares = userHolding ? userHolding.currentQuantity : 0;
+
+  if (ownedShares < totalSharesRequired) {
+    throw new Error(
+      `Insufficient shares for sell call. You own ${ownedShares}, but need ${totalSharesRequired}.`
+    );
+  }
+
+  // ✅ Credit wallet immediately if MARKET order
   if (orderType === "MARKET") {
     await prisma.user.update({
       where: { id: userId },
       data: { wallet: user.wallet + totalAmount }
     });
+
+    // Deduct shares used for covered call
+    await prisma.stockHolding.update({
+      where: {
+        userId_stockId: {
+          userId,
+          stockId: contract.stockId
+        }
+      },
+      data: { currentQuantity: ownedShares - totalSharesRequired }
+    });
   }
 
-  // Create off-chain trade record
+  // ✅ Create off-chain trade record
   const trade = await prisma.optionTrade.create({
     data: {
       userId,
@@ -1254,9 +1092,7 @@ module.exports.placeSellCallOrder = async function ({
     }
   });
 
-  console.log(`Option trade stored in DB: ${trade.id}`);
-
-  // Send blockchain transaction for MARKET orders
+  // ✅ Send blockchain transaction for MARKET orders
   if (orderType === "MARKET") {
     console.log("Sending option trade to blockchain...");
 
@@ -1265,20 +1101,12 @@ module.exports.placeSellCallOrder = async function ({
       "SELL",
       "MARKET",
       quantity,
-      Math.round(price * 100),
+      Math.round(price * sharesPerContract),
       totalAmount
     );
 
     const receipt = await txResponse.wait();
 
-    console.log("Blockchain Transaction Mined:");
-    console.log({
-      txHash: txResponse.hash,
-      gasUsed: receipt.gasUsed,
-      blockNumber: receipt.blockNumber
-    });
-
-    // Store blockchain metadata
     await prisma.optionBlockchainTransaction.create({
       data: {
         userId,
@@ -1295,72 +1123,14 @@ module.exports.placeSellCallOrder = async function ({
         transactionHash: txResponse.hash
       }
     });
-
-    console.log("Option trade recorded in blockchain DB");
   }
 
   return { trade, executed: orderType === "MARKET" };
 };
-
-
-
-// module.exports.executeSellCallLimitOrders = async function () {
-//   // 1. Get all contracts that have at least one pending LIMIT SELL order
-//   const contractsWithOrders = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'SELL',
-//       orderType: 'LIMIT'
-//     },
-//     select: { contractId: true },
-//     distinct: ['contractId']
-//   });
-
-//   const executedOrders = [];
-
-//   // 2. Loop through contracts that have pending LIMIT SELL orders
-//   for (const { contractId } of contractsWithOrders) {
-//     const contract = await prisma.optionContract.findUnique({ where: { id: contractId } });
-//     if (!contract || contract.closePrice === null) continue;
-
-//     const currentPrice = contract.closePrice; // fetch automatically
-
-//     // 3. Get pending LIMIT SELL orders for this contract
-//     const pendingOrders = await prisma.optionTrade.findMany({
-//       where: {
-//         contractId,
-//         tradeType: 'SELL',
-//         orderType: 'LIMIT'
-//       }
-//     });
-
-//     // 4. Process each order
-//     for (const order of pendingOrders) {
-//       if (currentPrice >= order.price) {
-//         const user = await prisma.user.findUnique({ where: { id: order.userId } });
-
-//         // Credit premium
-//         await prisma.user.update({
-//           where: { id: user.id },
-//           data: { wallet: user.wallet + order.totalAmount }
-//         });
-
-//         // Mark order as executed (switch to MARKET)
-//         const executed = await prisma.optionTrade.update({
-//           where: { id: order.id },
-//           data: { orderType: 'MARKET' }
-//         });
-
-//         executedOrders.push(executed);
-//       }
-//     }
-//   }
-
-//   return executedOrders;
-// };
-
-
 module.exports.executeSellCallLimitOrders = async function () {
-  // 1. Get all contracts that have at least one pending LIMIT SELL order
+  const now = new Date();
+
+  // 1️⃣ Get all contracts that have pending LIMIT SELL orders
   const contractsWithOrders = await prisma.optionTrade.findMany({
     where: {
       tradeType: 'SELL',
@@ -1372,14 +1142,16 @@ module.exports.executeSellCallLimitOrders = async function () {
 
   const executedOrders = [];
 
-  // 2. Loop through contracts that have pending LIMIT SELL orders
   for (const { contractId } of contractsWithOrders) {
-    const contract = await prisma.optionContract.findUnique({ where: { id: contractId } });
-    if (!contract || contract.closePrice === null) continue;
+    const contract = await prisma.optionContract.findUnique({
+      where: { id: contractId }
+    });
 
-    const currentPrice = contract.closePrice; // fetch automatically
+    if (!contract) continue;
 
-    // 3. Get pending LIMIT SELL orders for this contract
+    const isExpired = contract.expirationDate <= now;
+
+    // 2️⃣ Fetch pending LIMIT SELL orders for this contract
     const pendingOrders = await prisma.optionTrade.findMany({
       where: {
         contractId,
@@ -1389,28 +1161,82 @@ module.exports.executeSellCallLimitOrders = async function () {
       include: { user: true }
     });
 
-    // 4. Process each order
+    // 3️⃣ Handle expiration OR execution
     for (const order of pendingOrders) {
-      if (currentPrice >= order.price) {
-        const totalAmount = currentPrice * order.quantity * 100; // contract size = 100
+      if (isExpired) {
+        // 3a️⃣ Contract expired → mark order EXPIRED
+        await prisma.optionTrade.update({
+          where: { id: order.id },
+          data: {
+            orderType: 'EXPIRED',
+            totalAmount: 0
+          }
+        });
 
-        // Credit user wallet
+        executedOrders.push({
+          ...order,
+          status: "EXPIRED"
+        });
+
+        continue; // ⛔ Skip further processing
+      }
+
+      // 3b️⃣ If not expired, continue with execution logic
+      if (contract.closePrice === null) continue;
+
+      const currentPrice = contract.closePrice;
+
+      // LIMIT condition
+      if (currentPrice >= order.price) {
+        const totalAmount = currentPrice * order.quantity * 100;
+
+        // Credit wallet
         await prisma.user.update({
           where: { id: order.userId },
           data: { wallet: order.user.wallet + totalAmount }
         });
 
-        // Mark order as executed (switch to MARKET)
+        // Deduct underlying shares
+        const holding = await prisma.stockHolding.findUnique({
+          where: {
+            userId_stockId: {
+              userId: order.userId,
+              stockId: contract.stock_id
+            }
+          }
+        });
+
+        if (!holding) {
+          throw new Error(
+            `UserHolding not found for user ${order.userId} and stock ${contract.underlyingSymbol}`
+          );
+        }
+
+        await prisma.stockHolding.update({
+          where: {
+            userId_stockId: {
+              userId: order.userId,
+              stockId: contract.stock_id
+            }
+          },
+          data: {
+            currentQuantity: holding.currentQuantity - order.quantity * 100
+          }
+        });
+
+        // Mark as executed (market)
         const executed = await prisma.optionTrade.update({
           where: { id: order.id },
-          data: { orderType: 'MARKET', price: currentPrice, totalAmount }
+          data: {
+            orderType: 'MARKET',
+            price: currentPrice,
+            totalAmount
+          }
         });
 
         executedOrders.push(executed);
 
-        // Send blockchain transaction
-        console.log(`📤 Sending executed LIMIT SELL to blockchain for order ${order.id}...`);
-
+        // Blockchain
         const txResponse = await optionLedger.recordOptionTrade(
           contractId,
           "SELL",
@@ -1422,9 +1248,6 @@ module.exports.executeSellCallLimitOrders = async function () {
 
         const receipt = await txResponse.wait();
 
-        console.log(`✅ Blockchain transaction mined: ${txResponse.hash}`);
-
-        // Store blockchain metadata
         await prisma.optionBlockchainTransaction.create({
           data: {
             userId: order.userId,
@@ -1441,94 +1264,12 @@ module.exports.executeSellCallLimitOrders = async function () {
             transactionHash: txResponse.hash
           }
         });
-
-        console.log(`💾 Blockchain info stored for order ${order.id}`);
       }
     }
   }
 
   return executedOrders;
 };
-
-
-
-
-// module.exports.settleExpiredSellCallTrades = async function () {
-//   const now = new Date();
-
-//   // 1. Get all SELL CALL trades where contract has expired and order executed (MARKET)
-//   const tradesToSettle = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'SELL',
-//       orderType: 'MARKET',
-//       contract: { type: 'call', expirationDate: { lte: now } }
-//     },
-//     include: { contract: true, user: true }
-//   });
-
-//   const settledTrades = [];
-
-//   for (const trade of tradesToSettle) {
-//     const { contract, user, quantity, price } = trade;
-//     const strike = contract.strikePrice;
-//     const contractSize = 100;
-
-//     // 🔹 Get the underlying stock ID
-//     const stock = await prisma.stock.findUnique({
-//       where: { symbol: contract.underlyingSymbol },
-//       select: { stock_id: true }
-//     });
-
-//     if (!stock) continue;
-
-//     // 🔹 Fetch the latest underlying close price from IntradayPrice3
-//     const latestPrice = await prisma.intradayPrice3.findFirst({
-//       where: { stockId: stock.stock_id },
-//       orderBy: { date: 'desc' },
-//       select: { closePrice: true }
-//     });
-
-//     if (!latestPrice) continue;
-//     const underlyingFinalPrice = Number(latestPrice.closePrice);
-
-//     let pnl = 0;
-
-//     if (underlyingFinalPrice <= strike) {
-//       // Option expires worthless → seller keeps premium
-//       pnl = price * quantity * contractSize; 
-//     } else {
-//       // Option exercised → seller loses
-//       const intrinsicLoss = (underlyingFinalPrice - strike) * quantity * contractSize;
-//       const premium = price * quantity * contractSize;
-//       pnl = premium - intrinsicLoss; // can be negative
-//     }
-
-//     // Update wallet with P&L
-//     await prisma.user.update({
-//       where: { id: user.id },
-//       data: { wallet: user.wallet + pnl }
-//     });
-
-//     // Mark trade as settled (update totalAmount with P&L)
-//     await prisma.optionTrade.update({
-//       where: { id: trade.id },
-//       data: { totalAmount: trade.totalAmount + pnl }
-//     });
-
-//     settledTrades.push({
-//       tradeId: trade.id,
-//       userId: trade.userId,
-//       symbol: contract.symbol,
-//       underlyingSymbol: contract.underlyingSymbol,
-//       strike,
-//       underlyingFinalPrice,
-//       premiumReceived: price,
-//       pnl
-//     });
-//   }
-
-//   return settledTrades;
-// };
 
 module.exports.settleExpiredSellCallTrades = async function () {
   const now = new Date();
@@ -1555,15 +1296,16 @@ module.exports.settleExpiredSellCallTrades = async function () {
     const { contract, user, quantity, price } = trade;
     const strike = contract.strikePrice;
     const contractSize = contract.size || 100;
+    const totalShares = quantity * contractSize;
 
-    // 2️⃣ Fetch underlying stock (if stored by symbol)
+    // 2️⃣ Fetch underlying stock (via symbol)
     const stock = await prisma.stock.findUnique({
       where: { symbol: contract.underlyingSymbol },
       select: { stock_id: true }
     });
     if (!stock) continue;
 
-    // 3️⃣ Get the most recent underlying close price
+    // 3️⃣ Get latest underlying close price
     const latestPrice = await prisma.intradayPrice3.findFirst({
       where: { stockId: stock.stock_id },
       orderBy: { date: 'desc' },
@@ -1573,45 +1315,59 @@ module.exports.settleExpiredSellCallTrades = async function () {
 
     const underlyingFinalPrice = Number(latestPrice.closePrice);
 
-    // 4️⃣ Calculate P&L
+    // 4️⃣ Calculate wallet credit
     const premium = price * quantity * contractSize;
-    let pnl = 0;
+    let walletCredit = 0;
 
-    if (underlyingFinalPrice <= strike) {
-      // Option expires worthless → seller keeps premium
-      pnl = premium;
-    } else {
-      // Option exercised → seller must sell underlying below market
-      const intrinsicLoss = (underlyingFinalPrice - strike) * quantity * contractSize;
-      pnl = premium - intrinsicLoss;
-    }
+if (underlyingFinalPrice <= strike) {
+  // OTM → Option expires worthless
+  // Shares were reserved earlier → return them
+  await prisma.stockHolding.updateMany({
+    where: {
+      userId: user.id,
+      symbol: contract.underlyingSymbol
+    },
+    data: { currentQuantity: { increment: totalShares } }
+  });
 
-    // 5️⃣ Update seller’s wallet balance
+  // No wallet change (premium was already received)
+  walletCredit = 0;
+
+} else {
+  // ITM → Shares are taken permanently, user receives strike * shares
+  walletCredit = strike * totalShares;
+
+  // DO NOT add premium again
+}
+
+
+    // 5️⃣ Update user's wallet
     await prisma.user.update({
       where: { id: user.id },
-      data: { wallet: user.wallet + pnl }
+      data: { wallet: user.wallet + walletCredit } // no premium added again
     });
+    
 
     // 6️⃣ Mark trade as settled/expired
     await prisma.optionTrade.update({
       where: { id: trade.id },
       data: {
         orderType: 'EXPIRED',
-        totalAmount: pnl
+        totalAmount: walletCredit
       }
     });
 
-    // 7️⃣ Blockchain Settlement
+    // 7️⃣ Blockchain settlement
     try {
       console.log(`Settling Sell CALL trade ${trade.id} on blockchain...`);
 
       const txResponse = await optionLedger.settleOptionTrade(
-        contract.id,                     // contractId
-        'SELL',                          // tradeType
-        quantity,                        // quantity
-        Math.round(strike * 100),        // strikePrice (scaled)
-        Math.round(underlyingFinalPrice * 100), // final underlying price (scaled)
-        BigInt(Math.round(pnl))          // totalPnL (int)
+        contract.id,
+        'SELL',
+        quantity,
+        Math.round(strike * 100),
+        Math.round(underlyingFinalPrice * 100),
+        BigInt(Math.round(walletCredit))
       );
 
       const receipt = await txResponse.wait();
@@ -1619,7 +1375,7 @@ module.exports.settleExpiredSellCallTrades = async function () {
       console.log(`Blockchain settlement confirmed for trade ${trade.id}`);
       console.log(`   TxHash: ${txResponse.hash}, Gas: ${receipt.gasUsed}, Block: ${receipt.blockNumber}`);
 
-      // 8️⃣ Log blockchain transaction in DB
+      // Store blockchain transaction in DB
       await prisma.optionBlockchainTransaction.create({
         data: {
           userId: trade.userId,
@@ -1642,7 +1398,7 @@ module.exports.settleExpiredSellCallTrades = async function () {
       console.error(`Blockchain settlement failed for trade ${trade.id}:`, err);
     }
 
-    // 9️⃣ Add result to output
+    // 8️⃣ Add result to output
     settledTrades.push({
       tradeId: trade.id,
       userId: trade.userId,
@@ -1651,7 +1407,8 @@ module.exports.settleExpiredSellCallTrades = async function () {
       strike,
       underlyingFinalPrice,
       premium,
-      pnl
+      walletCredit,
+      totalShares
     });
   }
 
@@ -1660,78 +1417,10 @@ module.exports.settleExpiredSellCallTrades = async function () {
 
 
 
-
-
-
-
-
 ////////////////////////////////////////////////////
 //// PLACE BUY PUT - MARKET/LIMIT ORDER
 ////////////////////////////////////////////////////
 
-
-// /**
-//  * Place Buy Put Order (Market or Limit)
-//  */module.exports.placeBuyPutOrder = async function ({ userId, contractId, quantity, price, orderType }) {
-//   if (!userId || !contractId || !quantity || !orderType) {
-//     throw new Error('Missing required trade data');
-//   }
-
-//   // 🔹 Resolve numeric contractId from symbol string
-//   const contract = await prisma.optionContract.findUnique({
-//     where: { symbol: contractId } // contractId here is actually the symbol string
-//   });
-
-//   if (!contract) throw new Error('Contract not found');
-
-//   const numericContractId = contract.id;
-//   const totalAmount = price * quantity * 100; // premium paid upfront
-
-//   if (orderType === 'MARKET') {
-//     const user = await prisma.user.findUnique({ where: { id: userId } });
-//     if (!user) throw new Error('User not found');
-//     if (user.wallet < totalAmount) throw new Error('Insufficient wallet balance');
-
-//     // Deduct premium from wallet
-//     await prisma.user.update({
-//       where: { id: userId },
-//       data: { wallet: user.wallet - totalAmount }
-//     });
-
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId, // use numeric ID here
-//         tradeType: 'BUY',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount
-//       }
-//     });
-
-//     return { trade, executed: true };
-//   }
-
-//   // LIMIT → store only
-//   if (orderType === 'LIMIT') {
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId, // use numeric ID here
-//         tradeType: 'BUY',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount
-//       }
-//     });
-
-//     return { trade, executed: false };
-//   }
-
-//   throw new Error('Invalid order type');
-// };
 
 
 module.exports.placeBuyPutOrder = async function ({ userId, contractId, quantity, price, orderType }) {
@@ -1756,23 +1445,12 @@ module.exports.placeBuyPutOrder = async function ({ userId, contractId, quantity
   if (orderType === 'MARKET' && user.wallet < totalAmount) {
     throw new Error('Insufficient wallet balance');
   }
-// const latestPriceData = await prisma.optionHistPrice.findFirst({
-//     where: { contractId: numericContractId },
-//     orderBy: { date: 'desc' }, // latest by date
-//     select: { closePrice: true },
-//   });
 
-//   if (!latestPriceData) {
-//     throw new Error('No historical price found for this option contract.');
-//   }
 
-//   const latestPrice = latestPriceData.closePrice;
+    if (orderType === 'LIMIT' && user.wallet < totalAmount) {
+    throw new Error('Insufficient wallet balance');
+  }
 
-//   if (price >= latestPrice) {
-//     throw new Error(
-//       `Limit BUY order price (${price}) should be below the current price (${latestPrice}).`
-//     );
-//   }
 
 
   // Deduct wallet if MARKET
@@ -1848,72 +1526,15 @@ module.exports.placeBuyPutOrder = async function ({ userId, contractId, quantity
 };
 
 
-// module.exports.executeBuyPutLimitOrders = async function () {
-//   // 1. Get all contracts that have at least one pending LIMIT BUY order for puts
-//   const contractsWithOrders = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'BUY',
-//       orderType: 'LIMIT',
-//       contract: { type: 'put' } // ensure only puts
-//     },
-//     select: { contractId: true },
-//     distinct: ['contractId']
-//   });
-
-//   const executedOrders = [];
-
-//   // 2. Loop through contracts with pending LIMIT BUY PUT orders
-//   for (const { contractId } of contractsWithOrders) {
-//     const contract = await prisma.optionContract.findUnique({ where: { id: contractId } });
-//     if (!contract || contract.closePrice === null) continue;
-
-//     const currentPrice = contract.closePrice; // automatically fetch current price
-
-//     // 3. Get pending LIMIT BUY PUT orders for this contract
-//     const pendingOrders = await prisma.optionTrade.findMany({
-//       where: {
-//         contractId,
-//         tradeType: 'BUY',
-//         orderType: 'LIMIT'
-//       },
-//       include: { user: true } // include user for wallet update
-//     });
-
-//     // 4. Process each pending order
-//     for (const order of pendingOrders) {
-//       // Execute if currentPrice <= limit price
-//       if (currentPrice <= order.price) {
-//         const totalCost = currentPrice * order.quantity * 100;
-
-//         if (order.user.wallet < totalCost) continue; // skip if insufficient funds
-
-//         // Deduct wallet balance
-//         await prisma.user.update({
-//           where: { id: order.userId },
-//           data: { wallet: order.user.wallet - totalCost }
-//         });
-
-//         // Mark order as executed (switch to MARKET)
-//         const executed = await prisma.optionTrade.update({
-//           where: { id: order.id },
-//           data: { orderType: 'MARKET', totalAmount: totalCost, price: currentPrice }
-//         });
-
-//         executedOrders.push(executed);
-//       }
-//     }
-//   }
-
-//   return executedOrders;
-// };
-
 module.exports.executeBuyPutLimitOrders = async function () {
-  // 1. Get all contracts that have at least one pending LIMIT BUY order for puts
+  const now = new Date();
+
+  // 1. Get all contracts with pending LIMIT BUY PUT orders
   const contractsWithOrders = await prisma.optionTrade.findMany({
     where: {
       tradeType: 'BUY',
       orderType: 'LIMIT',
-      contract: { type: 'PUT' } // ensure only puts
+      contract: { type: 'PUT' }
     },
     select: { contractId: true },
     distinct: ['contractId']
@@ -1921,12 +1542,16 @@ module.exports.executeBuyPutLimitOrders = async function () {
 
   const executedOrders = [];
 
-  // 2. Loop through contracts with pending LIMIT BUY PUT orders
+  // 2. Loop through contracts
   for (const { contractId } of contractsWithOrders) {
-    const contract = await prisma.optionContract.findUnique({ where: { id: contractId } });
+    const contract = await prisma.optionContract.findUnique({
+      where: { id: contractId }
+    });
+
     if (!contract || contract.closePrice === null) continue;
 
     const currentPrice = contract.closePrice;
+    const isExpired = contract.expirationDate <= now;
 
     // 3. Get pending LIMIT BUY PUT orders for this contract
     const pendingOrders = await prisma.optionTrade.findMany({
@@ -1938,31 +1563,56 @@ module.exports.executeBuyPutLimitOrders = async function () {
       include: { user: true }
     });
 
-    // 4. Process each pending order
+    // 4. Process each pending LIMIT order
     for (const order of pendingOrders) {
+
+      // 4️⃣ If contract expired → mark EXPIRED and skip
+      if (isExpired) {
+        await prisma.optionTrade.update({
+          where: { id: order.id },
+          data: {
+            orderType: 'EXPIRED',
+            totalAmount: 0
+          }
+        });
+
+        executedOrders.push({
+          ...order,
+          status: 'EXPIRED'
+        });
+
+        console.log(`❌ LIMIT BUY PUT order ${order.id} expired → marked EXPIRED`);
+        continue; // Stop here for expired orders
+      }
+
+      // 5️⃣ Normal LIMIT execution: Buy PUT if currentPrice <= limit price
       if (currentPrice <= order.price) {
         const totalCost = currentPrice * order.quantity * 100;
         const user = order.user;
 
-        if (user.wallet < totalCost) continue; // skip if insufficient funds
+        if (user.wallet < totalCost) continue; // insufficient funds
 
-        // Deduct wallet balance
+        // Deduct wallet
         await prisma.user.update({
           where: { id: user.id },
           data: { wallet: user.wallet - totalCost }
         });
 
-        // Mark order as executed (switch to MARKET)
+        // Convert LIMIT → MARKET
         const executedTrade = await prisma.optionTrade.update({
           where: { id: order.id },
-          data: { orderType: 'MARKET', totalAmount: totalCost, price: currentPrice }
+          data: {
+            orderType: 'MARKET',
+            totalAmount: totalCost,
+            price: currentPrice
+          }
         });
 
         executedOrders.push(executedTrade);
 
-        // 🔹 Send executed order to blockchain
+        // 🔹 Blockchain execution
         try {
-          console.log(`Sending executed Buy PUT order ${order.id} to blockchain...`);
+          console.log(`Sending executed Buy PUT ${order.id} to blockchain...`);
 
           const txResponse = await optionLedger.recordOptionTrade(
             contract.id,
@@ -1975,14 +1625,9 @@ module.exports.executeBuyPutLimitOrders = async function () {
 
           const receipt = await txResponse.wait();
 
-          console.log(`Blockchain Transaction Mined for order ${order.id}:`);
-          console.log({
-            txHash: txResponse.hash,
-            gasUsed: receipt.gasUsed,
-            blockNumber: receipt.blockNumber
-          });
+          console.log(`Blockchain Mined: ${txResponse.hash}`);
 
-          // Store blockchain transaction
+          // Store blockchain metadata
           await prisma.optionBlockchainTransaction.create({
             data: {
               userId: user.id,
@@ -2000,9 +1645,8 @@ module.exports.executeBuyPutLimitOrders = async function () {
             }
           });
 
-          console.log(`Executed Buy PUT order ${order.id} recorded in blockchain DB`);
         } catch (err) {
-          console.error(`Blockchain transaction failed for order ${order.id}:`, err);
+          console.error(`Blockchain TX failed for ${order.id}:`, err);
         }
       }
     }
@@ -2011,152 +1655,85 @@ module.exports.executeBuyPutLimitOrders = async function () {
   return executedOrders;
 };
 
-
-
-
-
-
-// module.exports.settleBuyPutOrders = async function () {
-//   const now = new Date();
-
-//   // 1. Get all BUY PUT trades where contract has expired and order is MARKET (executed)
-//   const tradesToSettle = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'BUY',
-//       orderType: 'MARKET',
-//       contract: { type: 'put', expirationDate: { lte: now } }
-//     },
-//     include: { contract: true, user: true }
-//   });
-
-//   const settledTrades = [];
-
-//   for (const trade of tradesToSettle) {
-//     const strike = trade.contract.strikePrice;
-//     const premiumPaid = trade.price;
-
-//     // 🔹 Get the underlying stock
-//     const stock = await prisma.stock.findUnique({
-//       where: { symbol: trade.contract.underlyingSymbol },
-//       select: { stock_id: true }
-//     });
-
-//     if (!stock) continue;
-
-//     // 🔹 Get the latest close price from IntradayPrice3
-//     const latestPrice = await prisma.intradayPrice3.findFirst({
-//       where: { stockId: stock.stock_id },
-//       orderBy: { date: 'desc' },
-//       select: { closePrice: true }
-//     });
-
-//     if (!latestPrice) continue;
-//     const underlyingPrice = Number(latestPrice.closePrice);
-
-//     // Calculate PnL
-//     let pnlPerShare = 0;
-//     if (underlyingPrice < strike) {
-//       // In-the-money: payoff = strike - underlying - premium
-//       pnlPerShare = (strike - underlyingPrice) - premiumPaid;
-//     } else {
-//       // Out-of-the-money: lose premium
-//       pnlPerShare = -premiumPaid;
-//     }
-
-//     const totalPnL = pnlPerShare * trade.quantity * 100;
-
-//     // Update user wallet
-//     await prisma.user.update({
-//       where: { id: trade.userId },
-//       data: { wallet: trade.user.wallet + totalPnL }
-//     });
-
-//     // Mark trade as settled (update totalAmount with PnL)
-//     await prisma.optionTrade.update({
-//       where: { id: trade.id },
-//       data: { totalAmount: trade.totalAmount + totalPnL }
-//     });
-
-//     settledTrades.push({
-//       tradeId: trade.id,
-//       userId: trade.userId,
-//       symbol: trade.contract.symbol,
-//       underlyingSymbol: trade.contract.underlyingSymbol,
-//       strike,
-//       underlyingPrice,
-//       premiumPaid,
-//       pnl: totalPnL
-//     });
-//   }
-
-//   return settledTrades;
-// };
-
 module.exports.settleBuyPutOrders = async function () {
   const now = new Date();
 
-  // 1. Get all BUY PUT trades where contract has expired and order is MARKET (executed)
+  // 1. Get all executed BUY PUT trades whose contracts have now expired
   const tradesToSettle = await prisma.optionTrade.findMany({
     where: {
       tradeType: 'BUY',
       orderType: 'MARKET',
-      contract: { type: 'PUT', expirationDate: { lte: now } }
+      contract: {
+        type: 'PUT',
+        expirationDate: { lte: now }
+      }
     },
     include: { contract: true, user: true }
   });
 
   const settledTrades = [];
+  const contractSize = 100;
 
   for (const trade of tradesToSettle) {
     const { contract, user, quantity, price } = trade;
     const strike = contract.strikePrice;
-    const premiumPaid = price;
-    const contractSize = 100;
+    const premiumPerContract = price; // already correct
+    const premiumTotal = premiumPerContract * quantity * contractSize;
 
-    // 🔹 Get the underlying stock
+    // Get underlying stock id
     const stock = await prisma.stock.findUnique({
       where: { symbol: contract.underlyingSymbol },
       select: { stock_id: true }
     });
-
     if (!stock) continue;
 
-    // 🔹 Get latest underlying close price
+    // Get latest underlying closing price
     const latestPrice = await prisma.intradayPrice3.findFirst({
       where: { stockId: stock.stock_id },
-      orderBy: { date: 'desc' },
+      orderBy: { date: "desc" },
       select: { closePrice: true }
     });
-
     if (!latestPrice) continue;
+
     const underlyingPrice = Number(latestPrice.closePrice);
 
-    // Calculate PnL
+    // -----------------------------
+    // 2. Compute PnL (correct logic)
+    // -----------------------------
     let pnl = 0;
+
     if (underlyingPrice < strike) {
-      // Option is in-the-money → buyer profits
-      pnl = (strike - underlyingPrice - premiumPaid) * quantity * contractSize;
+      // ITM → buyer profits
+      const intrinsic = (strike - underlyingPrice) * quantity * contractSize;
+      pnl = intrinsic - premiumTotal;
     } else {
-      // Option out-of-the-money → buyer loses premium
-      pnl = -premiumPaid * quantity * contractSize;
+      // OTM → buyer loses entire premium
+      pnl = -premiumTotal;
     }
 
-    // Update user wallet
+    // -----------------------------
+    // 3. Update wallet correctly
+    // -----------------------------
     await prisma.user.update({
       where: { id: user.id },
       data: { wallet: user.wallet + pnl }
     });
 
-    // Mark trade as settled
+    // -----------------------------
+    // 4. Mark trade as settled
+    // -----------------------------
     await prisma.optionTrade.update({
       where: { id: trade.id },
-      data: { totalAmount: trade.totalAmount + pnl, orderType: 'EXPIRED' }
+      data: {
+        totalAmount: pnl,        // ← CORRECT (net PnL only)
+        orderType: "EXPIRED"
+      }
     });
 
-    // 🔹 Send settlement to blockchain
+    // -----------------------------
+    // 5. Send settlement to blockchain
+    // -----------------------------
     try {
-      console.log(`Sending settlement for Buy PUT trade ${trade.id} to blockchain...`);
-
       const txResponse = await optionLedger.settleOptionTrade(
         contract.id,
         'BUY',
@@ -2168,14 +1745,6 @@ module.exports.settleBuyPutOrders = async function () {
 
       const receipt = await txResponse.wait();
 
-      console.log(`Blockchain Settlement Mined for trade ${trade.id}:`);
-      console.log({
-        txHash: txResponse.hash,
-        gasUsed: receipt.gasUsed,
-        blockNumber: receipt.blockNumber
-      });
-
-      // Store blockchain settlement
       await prisma.optionBlockchainTransaction.create({
         data: {
           userId: user.id,
@@ -2188,16 +1757,16 @@ module.exports.settleBuyPutOrders = async function () {
           strikePrice: strike,
           expirationDate: contract.expirationDate,
           contracts: quantity,
-          premium: premiumPaid,
+          premium: premiumPerContract,
           transactionHash: txResponse.hash
         }
       });
 
-      console.log(`Settlement for Buy PUT trade ${trade.id} recorded in blockchain DB`);
-    } catch (err) {
-      console.error(`Blockchain settlement failed for trade ${trade.id}:`, err);
+    } catch (e) {
+      console.error(`Blockchain settlement failed for Buy PUT trade ${trade.id}:`, e);
     }
 
+    // Push summary of settlement
     settledTrades.push({
       tradeId: trade.id,
       userId: user.id,
@@ -2205,7 +1774,7 @@ module.exports.settleBuyPutOrders = async function () {
       underlyingSymbol: contract.underlyingSymbol,
       strike,
       underlyingPrice,
-      premiumPaid,
+      premiumPaid: premiumPerContract,
       pnl
     });
   }
@@ -2229,137 +1798,88 @@ module.exports.settleBuyPutOrders = async function () {
 ////////////////////////////////////////////////////
 //// PLACE SELL PUT - MARKET/LIMIT ORDER
 ////////////////////////////////////////////////////
-
-
-// // Place Sell Put Order (Market or Limit)
-// module.exports.placeSellPutOrder = async function ({ userId, contractId, quantity, price, orderType }) {
-//   if (!userId || !contractId || !quantity || !orderType) {
-//     throw new Error('Missing required trade data');
-//   }
-
-//   // 🔹 Resolve numeric contractId if frontend sends symbol string
-//   let numericContractId = contractId;
-//   if (typeof contractId === 'string') {
-//     const contract = await prisma.optionContract.findUnique({ where: { symbol: contractId } });
-//     if (!contract) throw new Error('Option contract not found');
-//     numericContractId = contract.id;
-//   }
-
-//   const premium = price * quantity * 100; // seller receives upfront premium
-
-//   if (orderType === 'MARKET') {
-//     const user = await prisma.user.findUnique({ where: { id: userId } });
-//     if (!user) throw new Error('User not found');
-
-//     // Credit premium to seller immediately
-//     await prisma.user.update({
-//       where: { id: userId },
-//       data: { wallet: user.wallet + premium }
-//     });
-
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId,
-//         tradeType: 'SELL',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount: premium
-//       }
-//     });
-
-//     return { trade, executed: true };
-//   }
-
-//   // LIMIT → record, but do not execute yet
-//   if (orderType === 'LIMIT') {
-//     const trade = await prisma.optionTrade.create({
-//       data: {
-//         userId,
-//         contractId: numericContractId,
-//         tradeType: 'SELL',
-//         orderType,
-//         quantity,
-//         price,
-//         totalAmount: premium
-//       }
-//     });
-
-//     return { trade, executed: false };
-//   }
-
-//   throw new Error('Invalid order type');
-// };
-
 module.exports.placeSellPutOrder = async function ({ userId, contractId, quantity, price, orderType }) {
   if (!userId || !contractId || !quantity || !orderType) {
-    throw new Error('Missing required trade data');
+    throw new Error("Missing required trade data");
   }
 
-  // 🔹 Resolve numeric contractId if frontend sends symbol string
+  // Resolve contract by symbol or ID
   let numericContractId = contractId;
-  const contract = typeof contractId === 'string'
-    ? await prisma.optionContract.findUnique({ where: { symbol: contractId } })
-    : await prisma.optionContract.findUnique({ where: { id: contractId } });
+  const contract =
+    typeof contractId === "string"
+      ? await prisma.optionContract.findUnique({ where: { symbol: contractId } })
+      : await prisma.optionContract.findUnique({ where: { id: contractId } });
 
-  if (!contract) throw new Error('Option contract not found');
-  if (typeof contractId === 'string') numericContractId = contract.id;
-
-  const premium = price * quantity * 100; // seller receives upfront premium
+  if (!contract) throw new Error("Option contract not found");
+  if (typeof contractId === "string") numericContractId = contract.id;
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error("User not found");
 
-  // For MARKET orders: credit wallet and send to blockchain
-  if (orderType === 'MARKET') {
-    await prisma.user.update({
+  const contractSize = contract.size || 100;
+  const premium = price * quantity * contractSize;
+
+  // SELL PUT requires collateral = strikePrice * quantity * contractSize
+  const requiredCollateral = contract.strikePrice * quantity * contractSize;
+
+  if (user.wallet < requiredCollateral) {
+    throw new Error("Insufficient wallet balance to cover potential PUT obligation");
+  }
+
+  // ============================================================
+  // 1️⃣ Deduct collateral ONCE for both MARKET and LIMIT
+  // ============================================================
+  const userAfterCollateral = await prisma.user.update({
+    where: { id: userId },
+    data: { wallet: user.wallet - requiredCollateral }
+  });
+
+  console.log(`Collateral deducted: ${requiredCollateral} for user ${userId}`);
+
+
+  // ============================================================
+  // 2️⃣ MARKET ORDER → executes immediately
+  // ============================================================
+  if (orderType === "MARKET") {
+    const userAfterPremium = await prisma.user.update({
       where: { id: userId },
-      data: { wallet: user.wallet + premium }
+      data: { wallet: userAfterCollateral.wallet + premium }
     });
 
-    // 1️⃣ Create trade locally
+    console.log(`Premium credited: ${premium} for user ${userId}`);
+
+    // Store MARKET trade
     const trade = await prisma.optionTrade.create({
       data: {
         userId,
         contractId: numericContractId,
-        tradeType: 'SELL',
-        orderType,
+        tradeType: "SELL",
+        orderType: "MARKET",
         quantity,
         price,
         totalAmount: premium
       }
     });
 
-    console.log(`Sell PUT trade stored in DB: ${trade.id}`);
+    console.log(`MARKET Sell PUT trade stored: ${trade.id}`);
 
-    // 2️⃣ Send trade to blockchain
+    // Send to blockchain
     try {
-      console.log(`Sending Sell PUT trade ${trade.id} to blockchain...`);
-
       const txResponse = await optionLedger.recordOptionTrade(
         numericContractId,
-        'SELL',
-        'MARKET',
+        "SELL",
+        "MARKET",
         quantity,
         Math.round(price * 100),
         premium
       );
-
       const receipt = await txResponse.wait();
 
-      console.log(`Blockchain Transaction Mined for trade ${trade.id}:`, {
-        txHash: txResponse.hash,
-        gasUsed: receipt.gasUsed,
-        blockNumber: receipt.blockNumber
-      });
-
-      // 3️⃣ Store blockchain transaction
       await prisma.optionBlockchainTransaction.create({
         data: {
           userId,
           symbol: contract.symbol,
-          tradeType: 'SELL',
+          tradeType: "SELL",
           gasUsed: Number(receipt.gasUsed),
           blockNumber: receipt.blockNumber,
           underlyingSymbol: contract.underlyingSymbol,
@@ -2371,112 +1891,37 @@ module.exports.placeSellPutOrder = async function ({ userId, contractId, quantit
           transactionHash: txResponse.hash
         }
       });
-
-      console.log(`Sell PUT trade ${trade.id} recorded in blockchain DB`);
     } catch (err) {
-      console.error(`Blockchain transaction failed for Sell PUT trade ${trade.id}:`, err);
+      console.error(`Blockchain transaction failed for Sell PUT MARKET:`, err);
     }
 
     return { trade, executed: true };
   }
 
-  // LIMIT orders: store only
-if (orderType === 'LIMIT') {
-  // Step 1: Get latest price for this contract
-  // const latestPriceData = await prisma.optionHistPrice.findFirst({
-  //   where: { contractId: numericContractId },
-  //   orderBy: { date: 'desc' }, // latest by date
-  //   select: { closePrice: true },
-  // });
 
-  // if (!latestPriceData) {
-  //   throw new Error('No historical price found for this option contract.');
-  // }
+  // ============================================================
+  // 3️⃣ LIMIT ORDER → store only (premium added later)
+  // ============================================================
+  if (orderType === "LIMIT") {
+    const trade = await prisma.optionTrade.create({
+      data: {
+        userId,
+        contractId: numericContractId,
+        tradeType: "SELL",
+        orderType: "LIMIT",
+        quantity,
+        price,
+        totalAmount: premium
+      }
+    });
 
-  // const latestPrice = latestPriceData.closePrice;
+    console.log(`LIMIT Sell PUT stored (pending execution): ${trade.id}`);
 
-  // if (price <= latestPrice) {
-  //   throw new Error(
-  //     `Limit SELL order price (${price}) must be above the current price (${latestPrice}).`
-  //   );
-  // }
+    return { trade, executed: false };
+  }
 
-  // Step 3: Create limit order only if valid
-  const trade = await prisma.optionTrade.create({
-    data: {
-      userId,
-      contractId: numericContractId,
-      tradeType,
-      orderType,
-      quantity,
-      price,
-      totalAmount: premium,
-    },
-  });
-
-  return { trade, executed: false };
-}
-
-
-  throw new Error('Invalid order type');
+  throw new Error("Invalid order type");
 };
-
-
-
-
-// // Execute all pending Sell Put LIMIT orders automatically
-// module.exports.executeSellPutLimitOrders = async function () {
-//   // 1. Find all pending Sell Put LIMIT trades
-//   const trades = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'SELL',
-//       orderType: 'LIMIT',
-//       contract: { type: 'put' }
-//     },
-//     include: { user: true, contract: true }
-//   });
-
-//   const executedOrders = [];
-
-//   for (const trade of trades) {
-//     if (!trade.contract || trade.contract.closePrice === null) continue;
-
-//     const currentPrice = trade.contract.closePrice;
-
-//     // 2. Check execution condition (buyer is willing if currentPrice >= limit)
-//     if (currentPrice >= trade.price) {
-//       const premium = trade.price * trade.quantity * 100;
-
-//       // Credit seller's wallet
-//       await prisma.user.update({
-//         where: { id: trade.userId },
-//         data: { wallet: trade.user.wallet + premium }
-//       });
-
-//       // Mark as executed (switch LIMIT → MARKET)
-//       const executedTrade = await prisma.optionTrade.update({
-//         where: { id: trade.id },
-//         data: {
-//           orderType: 'MARKET',
-//           price: trade.price, // execution at limit price
-//           totalAmount: premium
-//         }
-//       });
-
-//       executedOrders.push({
-//         tradeId: trade.id,
-//         userId: trade.userId,
-//         symbol: trade.contract.symbol,
-//         strike: trade.contract.strikePrice,
-//         currentPrice,
-//         premium,
-//         executed: true
-//       });
-//     }
-//   }
-
-//   return executedOrders;
-// };
 
 
 module.exports.executeSellPutLimitOrders = async function () {
@@ -2577,94 +2022,17 @@ module.exports.executeSellPutLimitOrders = async function () {
 };
 
 
-// // Settle all expired Sell Put MARKET trades automatically
-// module.exports.settleExpiredSellPutTrades = async function () {
-//   // 1. Find all sell put trades with MARKET order type where contract has expired
-//   const now = new Date();
-//   const trades = await prisma.optionTrade.findMany({
-//     where: {
-//       tradeType: 'SELL',
-//       orderType: 'MARKET',
-//       contract: {
-//         type: 'put',
-//         expirationDate: { lte: now }
-//       }
-//     },
-//     include: {
-//       user: true,
-//       contract: {
-//         include: { stock: true }
-//       }
-//     }
-//   });
-
-//   const settledResults = [];
-
-//   for (const trade of trades) {
-//     const { contract, user, quantity, price } = trade;
-//     const strike = contract.strikePrice;
-//     const contractSize = contract.size || 100; // default 100 if not set
-
-//     // 2. Find the latest underlying price from IntradayPrice3
-//     const latestPrice = await prisma.intradayPrice3.findFirst({
-//       where: { stockId: contract.stockId },
-//       orderBy: { date: 'desc' }
-//     });
-
-//     if (!latestPrice) continue; // skip if no price found
-
-//     const underlyingFinalPrice = parseFloat(latestPrice.closePrice);
-//     let pnl = 0;
-
-//     // 3. Calculate settlement
-//     if (underlyingFinalPrice >= strike) {
-//       // Option expires worthless → seller keeps premium
-//       pnl = price * quantity * contractSize; // already credited
-//     } else {
-//       // Option exercised → seller buys stock at strike
-//       const intrinsicLoss = (strike - underlyingFinalPrice) * quantity * contractSize;
-//       const premium = price * quantity * contractSize;
-//       pnl = premium - intrinsicLoss;
-
-//       // Update seller’s wallet with net P&L
-//       await prisma.user.update({
-//         where: { id: user.id },
-//         data: { wallet: user.wallet + pnl }
-//       });
-//     }
-
-//     // 4. Update trade record with settlement result
-//     const updatedTrade = await prisma.optionTrade.update({
-//       where: { id: trade.id },
-//       data: { totalAmount: pnl }
-//     });
-
-//     settledResults.push({
-//       tradeId: trade.id,
-//       userId: user.id,
-//       symbol: contract.underlyingSymbol,
-//       strike,
-//       underlyingFinalPrice,
-//       pnl
-//     });
-//   }
-
-//   return settledResults;
-// };
-
-
-
 // Settle all expired Sell Put MARKET trades automatically
 module.exports.settleExpiredSellPutTrades = async function () {
   const now = new Date();
 
-  // 1️⃣ Find all SELL PUT trades where contract expired
+  // 1️⃣ Find all SELL PUT trades where contract is expired
   const trades = await prisma.optionTrade.findMany({
     where: {
-      tradeType: 'SELL',
-      orderType: 'MARKET',
+      tradeType: "SELL",
+      orderType: "MARKET",
       contract: {
-        type: 'PUT',
+        type: "PUT",
         expirationDate: { lte: now }
       }
     },
@@ -2679,93 +2047,108 @@ module.exports.settleExpiredSellPutTrades = async function () {
   const settledResults = [];
 
   for (const trade of trades) {
-    const { contract, user, quantity, price } = trade;
+    const { contract, user, quantity, collateral } = trade;
+
     const strike = contract.strikePrice;
     const contractSize = contract.size || 100;
+    const totalShares = quantity * contractSize;
 
     // 2️⃣ Fetch latest underlying price
     const latestPrice = await prisma.intradayPrice3.findFirst({
       where: { stockId: contract.stockId },
-      orderBy: { date: 'desc' }
+      orderBy: { date: "desc" }
     });
+
     if (!latestPrice) continue;
 
     const underlyingFinalPrice = parseFloat(latestPrice.closePrice);
-    const premium = price * quantity * contractSize;
 
-    let pnl = 0;
+    let assigned = false;
 
-    // 3️⃣ Calculate settlement outcome
+    // Start wallet update with collateral release
+    let walletUpdate = collateral; // always return collateral
+
+    // 3️⃣ Settlement logic
+
     if (underlyingFinalPrice >= strike) {
-      // Option expires worthless — seller keeps premium
-      pnl = premium;
+      // PUT expires worthless
+      // Only collateral returned (already in walletUpdate)
+
     } else {
-      // Option exercised — seller buys underlying below market
-      const intrinsicLoss = (strike - underlyingFinalPrice) * quantity * contractSize;
-      pnl = premium - intrinsicLoss;
+      // PUT is assigned — seller must buy the shares
+      assigned = true;
+
+      const costToBuyShares = strike * totalShares;
+
+      // Release collateral + spend cash to buy shares
+      walletUpdate = walletUpdate - costToBuyShares;
+
+      // Add shares to user's holdings
+      await prisma.stockHolding.upsert({
+        where: { userId_stockId: { userId: user.id, stockId: contract.stockId } },
+        create: {
+          userId: user.id,
+          stockId: contract.stockId,
+          symbol: contract.symbol,
+          currentQuantity: totalShares
+        },
+        update: {
+          currentQuantity: { increment: totalShares }
+        }
+      });
     }
 
-    // 4️⃣ Update seller wallet with P&L
+    // 4️⃣ Update wallet (premium was already added on trade creation)
     await prisma.user.update({
       where: { id: user.id },
-      data: { wallet: user.wallet + pnl }
+      data: { wallet: user.wallet + walletUpdate }
     });
 
-    // 5️⃣ Update trade record
+    // 5️⃣ Mark trade as expired
     const updatedTrade = await prisma.optionTrade.update({
       where: { id: trade.id },
       data: {
-        totalAmount: pnl,
-        orderType: 'EXPIRED'
+        orderType: "EXPIRED",
+        totalAmount: 0 // settlement does not add PnL
       }
     });
 
-    // 6️⃣ Send settlement to blockchain
+    // 6️⃣ Blockchain settlement
     try {
       console.log(`Settling Sell PUT trade ${trade.id} on blockchain...`);
 
-        const txResponse = await optionLedger.settleOptionTrade(
-            trade.contractId,
-            'SELL',
-            quantity,
-            Math.round(strike * 100),
-            Math.round(underlyingFinalPrice * 100),
-            BigInt(Math.round(pnl))
-        );
+      const tx = await optionLedger.settleOptionTrade(
+        trade.contractId,
+        "SELL",
+        quantity,
+        Math.round(strike * 100),
+        Math.round(underlyingFinalPrice * 100),
+        BigInt(0) // settlement PnL is always 0
+      );
 
+      const receipt = await tx.wait();
 
-      const receipt = await txResponse.wait();
-
-      console.log(`Blockchain settlement confirmed for trade ${trade.id}:`, {
-        txHash: txResponse.hash,
-        gasUsed: receipt.gasUsed,
-        blockNumber: receipt.blockNumber
-      });
-
-      // Store blockchain transaction record
       await prisma.optionBlockchainTransaction.create({
         data: {
           userId: trade.userId,
           symbol: contract.symbol,
-          tradeType: 'SELL',
+          tradeType: "SELL",
           gasUsed: Number(receipt.gasUsed),
           blockNumber: receipt.blockNumber,
           underlyingSymbol: contract.underlyingSymbol,
-          optionType: 'put',
+          optionType: "put",
           strikePrice: strike,
           expirationDate: contract.expirationDate,
           contracts: quantity,
-          premium: price,
-          transactionHash: txResponse.hash
+          premium: trade.price, // original premium
+          transactionHash: tx.hash
         }
       });
-
-      console.log(`Settlement recorded on blockchain DB for trade ${trade.id}`);
     } catch (err) {
       console.error(`Blockchain settlement failed for Sell PUT trade ${trade.id}:`, err);
     }
 
-    // 7️⃣ Add to settled results
+    // 7️⃣ Return settlement output
     settledResults.push({
       tradeId: trade.id,
       userId: user.id,
@@ -2773,14 +2156,15 @@ module.exports.settleExpiredSellPutTrades = async function () {
       underlyingSymbol: contract.underlyingSymbol,
       strike,
       underlyingFinalPrice,
-      pnl
+      assigned,
+      sharesReceived: assigned ? totalShares : 0,
+      collateralReturned: collateral,
+      cashSpentOnAssignment: assigned ? strike * totalShares : 0
     });
   }
 
   return settledResults;
 };
-
-
 
 
 
@@ -2844,101 +2228,6 @@ exports.getUserOptionTrades = function getUserOptionTrades(userId) {
 
 
 
-// module.exports.getUserOptionPortfolio = async function (userId) {
-//   if (!userId) throw new Error('Missing userId');
-
-//   const now = new Date();
-
-//   // 1. Get all user trades with contract and stock info
-//   const trades = await prisma.optionTrade.findMany({
-//     where: { userId },
-//     include: {
-//       contract: {
-//         include: {
-//           stock: true,
-//         },
-//       },
-//     },
-//   });
-
-//   if (trades.length === 0) return { portfolio: [] };
-
-//   // 2. Group by underlying symbol
-//   const portfolio = {};
-
-//   for (const trade of trades) {
-//     const { contract, price, quantity, totalAmount, tradeType } = trade;
-//     const symbol = contract.underlyingSymbol;
-//     const strike = contract.strikePrice;
-//     const contractSize = contract.size || 100;
-//     const isExpired = new Date(contract.expirationDate) <= now;
-
-//     // Get latest underlying stock price
-//     const latestPrice = await prisma.intradayPrice3.findFirst({
-//       where: { stockId: contract.stockId },
-//       orderBy: { date: 'desc' },
-//     });
-
-//     const underlyingPrice = latestPrice
-//       ? parseFloat(latestPrice.closePrice)
-//       : null;
-
-//     // Calculate unrealized PnL
-//     let unrealizedPnL = 0;
-//     let realizedPnL = 0;
-
-//     // For expired contracts → realized
-//     if (isExpired) {
-//       realizedPnL = totalAmount;
-//     } else if (underlyingPrice !== null) {
-//       // For active ones → unrealized
-//       if (contract.type === 'call') {
-//         const intrinsic = Math.max(0, underlyingPrice - strike);
-//         const optionValue = intrinsic * quantity * contractSize;
-//         unrealizedPnL =
-//           tradeType === 'BUY'
-//             ? optionValue - price * quantity * contractSize
-//             : price * quantity * contractSize - optionValue;
-//       } else if (contract.type === 'put') {
-//         const intrinsic = Math.max(0, strike - underlyingPrice);
-//         const optionValue = intrinsic * quantity * contractSize;
-//         unrealizedPnL =
-//           tradeType === 'BUY'
-//             ? optionValue - price * quantity * contractSize
-//             : price * quantity * contractSize - optionValue;
-//       }
-//     }
-
-//     if (!portfolio[symbol]) {
-//       portfolio[symbol] = {
-//         underlyingSymbol: symbol,
-//         totalContracts: 0,
-//         totalShares: 0,
-//         activeContracts: 0,
-//         expiredContracts: 0,
-//         openPositions: 0,
-//         closedPositions: 0,
-//         realizedPnL: 0,
-//         unrealizedPnL: 0,
-//       };
-//     }
-
-//     portfolio[symbol].totalContracts += 1;
-//     portfolio[symbol].totalShares += quantity * contractSize;
-//     portfolio[symbol].realizedPnL += realizedPnL;
-//     portfolio[symbol].unrealizedPnL += unrealizedPnL;
-
-//     if (isExpired) {
-//       portfolio[symbol].expiredContracts += 1;
-//       portfolio[symbol].closedPositions += 1;
-//     } else {
-//       portfolio[symbol].activeContracts += 1;
-//       portfolio[symbol].openPositions += 1;
-//     }
-//   }
-
-//   return { portfolio: Object.values(portfolio) };
-// };
 
 module.exports.getUserOptionPortfolio = async function (userId) {
   if (!userId) throw new Error("Missing userId");
