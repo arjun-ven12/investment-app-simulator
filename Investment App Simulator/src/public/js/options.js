@@ -1,8 +1,3 @@
-
-
-
-
-
 window.addEventListener('pageshow', (event) => {
   if (event.persisted) {
     // Page was restored from the cache, force a reload
@@ -800,7 +795,14 @@ form.addEventListener('submit', async (evt) => {
 
   } catch (err) {
     console.error(err);
-    optionsContainer.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+        if (err.message.includes("contracts.filter is not a function")) {
+              optionsContainer.innerHTML = `<p class="error-message" style=" color: #ff4d4f; 
+    font-weight: 500;"> Error: Invalid symbol or no data available. Try entering a stock symbol.</p>`;
+
+    } else {
+    optionsContainer.innerHTML = `<p class="error-message" style=" color: #ff4d4f; 
+    font-weight: 500;">Error: ${err.message}</p>`;
+    }
   }
 });
 

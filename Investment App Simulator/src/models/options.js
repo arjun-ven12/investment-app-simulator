@@ -1,8 +1,10 @@
-const API_KEY= "PK60NYDKHQH512R4Q7SH"
-const API_SECRET= "Oi4N2rq28YKLnti1lsRuFldwOhtwStQ1pJ56eURs"
+require('dotenv').config();
 
-const ALPHA_VANTAGE_API_KEY = "FEVHNHDH7GK3G3BF"
-const POLYGON_API_KEY = "GmN8ThlyrYE40pn2cFY657cNad05nqgQ"
+const API_KEY= process.env.ALPACA_API_KEY;
+const API_SECRET= process.env.ALPACA_API_SECRET;
+
+const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
+const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
 const prisma = require('./prismaClient'); // import the Prisma instance
 const fetch = require('node-fetch');
 
@@ -20,7 +22,6 @@ const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS, 
   ledgerAbi, 
   signer);
-
 //////////////////////////////////////////////////
 /// GET OPTIONS CONTRACTS BY SYMBOL (ex AAPL)
 /////////////////////////////////////////////////

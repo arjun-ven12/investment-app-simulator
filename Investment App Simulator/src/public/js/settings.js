@@ -1,4 +1,3 @@
-
 window.addEventListener("DOMContentLoaded", async () => {
 
     const authType = await getAuthType();
@@ -198,7 +197,21 @@ function toast(message, type = "info") {
     }, 3000);
 }
 
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
+  // Trigger animation
+  setTimeout(() => toast.classList.add('show'), 100);
+
+  // Remove toast after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
 // --------------------------------------
 // DELETE ACCOUNT
 // --------------------------------------
@@ -207,41 +220,37 @@ function initDeleteAccount(authType) {
     if (!form) return;
 
     const popup = document.getElementById("delete-popup");
-    const yesBtn = document.getElementById("confirm-yes");
-    const noBtn = document.getElementById("confirm-no");
+    const yesBtn = document.getElementById("delete-yes");
+    const noBtn = document.getElementById("delete-no");
 
-    // Helper functions
+    const pwInput = document.getElementById("deletePassword");
+
     const showPopup = () => popup.classList.remove("hidden");
     const hidePopup = () => popup.classList.add("hidden");
 
-    form.addEventListener("submit", async e => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         let password = null;
 
         if (authType === "local") {
-            password = document.getElementById("deletePassword").value.trim();
-
+            password = pwInput ? pwInput.value.trim() : "";
             if (!password) {
-                showPopupMessage("Please enter your password.");
+                showToast("Please enter your password.", "error");
                 return;
             }
         }
 
-        // Show confirmation popup instead of alert()
         showPopup();
 
-        // Wait for Yes or No
-        const userChoice = await new Promise(resolve => {
+        const userChoice = await new Promise((resolve) => {
             yesBtn.onclick = () => resolve(true);
             noBtn.onclick = () => resolve(false);
         });
 
         hidePopup();
+        if (!userChoice) return;
 
-        if (!userChoice) return; // User clicked No
-
-        // Proceed with delete request
         const res = await fetch("/settings/delete-account", {
             method: "DELETE",
             headers: {
@@ -254,18 +263,20 @@ function initDeleteAccount(authType) {
         const data = await res.json();
 
         if (data.error) {
-            showPopupMessage(data.error);
+            showPopupMessage(data.error, () => {
+                // 🔥 FORCE RELOAD FOR INCORRECT PASSWORD
+                window.location.reload();
+            });
             return;
         }
 
-        // Success
+        // Success delete — no reload
         showPopupMessage("Your account has been deleted.", () => {
             localStorage.removeItem("token");
             window.location.href = "/login";
         });
     });
 
-    // Message popup utility
     function showPopupMessage(message, callback) {
         popup.querySelector(".popup-content").innerHTML = `
             <p>${message}</p>

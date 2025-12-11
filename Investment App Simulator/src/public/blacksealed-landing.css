@@ -1141,7 +1141,7 @@ body::before {
 }
 @media (min-width: 1000px) and (max-width: 1400px) {
     body {
-        zoom: 0.85; /* 85% size */
+        zoom: 0.8; /* 85% size */
     }
 }/* ============================
    STARFIELD — MOBILE FIX

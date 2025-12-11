@@ -1,5 +1,3 @@
-
-
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem('userId');
   // ===== Element references =====
@@ -431,6 +429,8 @@ tradingForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   buyError.textContent = "";
 successMessage.textContent = '';
+    const userId = localStorage.getItem('userId');
+    const price = parseFloat(priceInput.value);
 
   const side = tradingForm.querySelector("input[name='side']:checked")?.value;
   const orderType = orderTypeSelect.value;
@@ -468,10 +468,12 @@ successMessage.textContent = '';
         triggerPrice,
         limitPrice,
         tradeType: (side || "").toUpperCase(),
+        userId: parseInt(userId),
+        currentPrice: parseFloat(price)
       };
       console.log("🟦 Stop-Limit Request Body:", bodyData);
 
-      const res = await fetch("/stop-limit/create", {
+      const res = await fetch(`/stop-limit/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

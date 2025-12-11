@@ -1,18 +1,17 @@
-
 const stopLimitModel = require('../models/stopLimit');
 const socketBroadcast = require('../socketBroadcast');
 
 exports.createStopLimitOrderController = async (req, res) => {
-  const { stockId, quantity, triggerPrice, limitPrice, tradeType } = req.body;
-  const userId = req.user.id;
+  const { stockId, quantity, triggerPrice, limitPrice, tradeType, userId, currentPrice } = req.body;
 
-  if (!stockId || !quantity || !triggerPrice || !limitPrice || !tradeType) {
+  if (!stockId || !quantity || !triggerPrice || !limitPrice || !tradeType || !userId, !currentPrice) {
     return res.status(400).json({ message: "All fields are required." });
   }
 
   try {
     // Create the new order
-    await stopLimitModel.createStopLimitOrder(userId, stockId, quantity, triggerPrice, limitPrice, tradeType);
+    console.log (userId, stockId, quantity, triggerPrice, limitPrice, tradeType, currentPrice)
+    await stopLimitModel.createStopLimitOrder({ userId, stockId, quantity, triggerPrice, limitPrice, tradeType, currentPrice});
 
     // Get the full table after creation
     const updatedTable = await stopLimitModel.getUserStopLimitOrders(userId);

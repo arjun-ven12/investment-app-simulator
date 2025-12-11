@@ -1,12 +1,15 @@
 const { parse } = require('path');
 const prisma = require('../../prisma/prismaClient');
+  require('dotenv').config();
 
 const fetch = require("node-fetch");
-const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
+
+const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY; 
+
+
 const cron = require('node-cron');
 const crypto = require('crypto'); // for fake transaction hash
 const { ethers } = require('ethers');
-require("dotenv").config();
 
 const ledgerAbi = require("../../artifacts/contracts/tradeLedger.sol/TradeLedger.json").abi;
 
@@ -813,9 +816,10 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
   
   
   
+
+
   
-  
-  const API_KEY = '26d603eb0f773cc49609fc81898d4b9c';
+  const API_KEY = process.env.MARKETSTACK_API_KEY;
   
   
 

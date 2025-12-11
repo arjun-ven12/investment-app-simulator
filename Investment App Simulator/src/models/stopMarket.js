@@ -1,4 +1,3 @@
-
 const prisma = require('../../prisma/prismaClient');
 const { ethers } = require('ethers');
 require("dotenv").config();
@@ -20,13 +19,18 @@ const ledgerContract = new ethers.Contract(
 const ledger = new ethers.Contract(process.env.LEDGER_ADDRESS, ledgerAbi, signer);
 
 // Create a stop-market order (BUY or SELL)
-module.exports.createStopMarketOrder = async (userId, stockId, quantity, triggerPrice, tradeType) => {
+
+module.exports.createStopMarketOrder = async function (userId, stockId, quantity, triggerPrice, tradeType) {
+    if (!userId) throw new Error("Missing userId");
+
     const latestPrice = await module.exports.getLatestPrice(stockId);
 
+    // ---------------- BUY STOP-MARKET ----------------
     if (tradeType === "BUY") {
-         if (triggerPrice <= latestPrice) {
-             throw new Error(`Buy stop-market trigger (${triggerPrice}) must be higher than current market price (${latestPrice})`);
-         }
+
+        if (triggerPrice <= latestPrice) {
+            throw new Error(`Buy stop-market trigger (${triggerPrice}) must be higher than current market price (${latestPrice})`);
+        }
 
         const user = await prisma.user.findUnique({ where: { id: userId } });
         const totalCost = quantity * parseFloat(triggerPrice);
@@ -34,113 +38,47 @@ module.exports.createStopMarketOrder = async (userId, stockId, quantity, trigger
         if (!user || user.wallet < totalCost) {
             throw new Error("Insufficient funds to place this buy stop-market order");
         }
+    }
 
-    } else if (tradeType === "SELL") {
+    // ---------------- SELL STOP-MARKET ----------------
+    else if (tradeType === "SELL") {
+
         if (triggerPrice >= latestPrice) {
             throw new Error(`Sell stop-market trigger (${triggerPrice}) must be lower than current market price (${latestPrice})`);
         }
 
-        const trades = await prisma.trade.findMany({ where: { userId, stockId } });
-        const totalOwned = trades.reduce((sum, t) => sum + t.quantity, 0);
+        // Read stockHoldings instead of reading trades
+        const holding = await prisma.stockHolding.findUnique({
+            where: { userId_stockId: { userId, stockId } }
+        });
 
+        const totalOwned = holding?.currentQuantity ?? 0;
+
+        // Count pending SELL stop-market orders
         const pendingOrders = await prisma.stopMarketOrder.findMany({
             where: { userId, stockId, status: "PENDING", tradeType: "SELL" }
         });
+
         const totalPending = pendingOrders.reduce((sum, o) => sum + o.quantity, 0);
 
         if (quantity + totalPending > totalOwned) {
-            throw new Error("Insufficient shares to place this sell stop-market order considering pending orders");
+            throw new Error("Insufficient shares (including reserved shares) to place this sell stop-market order");
         }
     }
 
+    // Create order
     return prisma.stopMarketOrder.create({
         data: {
             userId,
             stockId,
             quantity,
             triggerPrice,
-            tradeType,   // ✅ FIXED
+            tradeType,
             status: "PENDING"
         }
     });
 };
 
-// Get user's stop-market orders
-module.exports.getUserStopMarketOrders = async (userId) => {
-  return prisma.stopMarketOrder.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      tradeType: true,       // currently STOP_MARKET or STOP_LIMIT
-      quantity: true,
-      triggerPrice: true,
-      limitPrice: true,
-      status: true,
-      createdAt: true,
-      stock: {
-        select: {
-          symbol: true,      // return stock symbol instead of stockId
-        },
-      },
-    },
-  });
-};
-// Process stop-market orders
-
-// module.exports.processStopMarketOrders = async (stockId) => {
-//     const pendingOrders = await prisma.stopMarketOrder.findMany({
-//         where: { stockId, status: 'PENDING' }
-//     });
-
-//     const executedOrders = [];
-
-//     for (const order of pendingOrders) {
-//         const latestPrice = await module.exports.getLatestPrice(order.stockId);
-
-//         if (order.tradeType === "BUY" && latestPrice >= parseFloat(order.triggerPrice)) {
-//             await prisma.trade.create({
-//                 data: {
-//                     userId: order.userId,
-//                     stockId: order.stockId,
-//                     quantity: order.quantity,
-//                     tradeType: 'BUY',
-//                     price: latestPrice,
-//                     totalAmount: latestPrice * order.quantity,
-//                 },
-//             });
-//             await prisma.user.update({
-//                 where: { id: order.userId },
-//                 data: { wallet: { decrement: latestPrice * order.quantity } }
-//             });
-//             await prisma.stopMarketOrder.update({
-//                 where: { id: order.id },
-//                 data: { status: 'EXECUTED', updatedAt: new Date() }
-//             });
-//             executedOrders.push(order.id);
-//             console.log(`Executed BUY stop-market order ${order.id} at ${latestPrice}`);
-//         } else if (order.tradeType === "SELL" && latestPrice <= parseFloat(order.triggerPrice)) {
-//             await prisma.trade.create({
-//                 data: {
-//                     userId: order.userId,
-//                     stockId: order.stockId,
-//                     quantity: order.quantity,
-//                     tradeType: 'SELL',
-//                     price: latestPrice,
-//                     totalAmount: latestPrice * order.quantity,
-//                 },
-//             });
-//             await prisma.stopMarketOrder.update({
-//                 where: { id: order.id },
-//                 data: { status: 'EXECUTED', updatedAt: new Date() }
-//             });
-//             executedOrders.push(order.id);
-//             console.log(`Executed SELL stop-market order ${order.id} at ${latestPrice}`);
-//         }
-//     }
-
-//     return executedOrders;
-// };
 
 module.exports.processStopMarketOrders = async (stockId) => {
   const pendingOrders = await prisma.stopMarketOrder.findMany({
@@ -149,7 +87,6 @@ module.exports.processStopMarketOrders = async (stockId) => {
 
   const executedOrders = [];
 
-  // Get current nonce from signer
   let nonce = await provider.getTransactionCount(signer.address);
 
   for (const order of pendingOrders) {
@@ -160,78 +97,92 @@ module.exports.processStopMarketOrders = async (stockId) => {
     const isSellTriggered =
       order.tradeType === "SELL" && latestPrice <= parseFloat(order.triggerPrice);
 
-    if (isBuyTriggered || isSellTriggered) {
-      // Update DB
-      const totalAmount = latestPrice * order.quantity;
-      if (order.tradeType === "BUY") {
-        await prisma.user.update({
-          where: { id: order.userId },
-          data: { wallet: { decrement: totalAmount } },
-        });
-      } else if (order.tradeType === "SELL") {
-        await prisma.user.update({
-          where: { id: order.userId },
-          data: { wallet: { increment: totalAmount } },
-        });
-      }
+    if (!isBuyTriggered && !isSellTriggered) continue;
 
-      const trade = await prisma.trade.create({
-        data: {
+    const totalAmount = latestPrice * order.quantity;
+
+    // ---------------- WALLET UPDATE ----------------
+    if (order.tradeType === "BUY") {
+      await prisma.user.update({
+        where: { id: order.userId },
+        data: { wallet: { decrement: totalAmount } }
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: order.userId },
+        data: { wallet: { increment: totalAmount } }
+      });
+    }
+
+    // ---------------- STOCK HOLDING UPDATE ----------------
+    if (order.tradeType === "BUY") {
+      await prisma.stockHolding.upsert({
+        where: { userId_stockId: { userId: order.userId, stockId: order.stockId } },
+        update: { currentQuantity: { increment: order.quantity } },
+        create: {
           userId: order.userId,
           stockId: order.stockId,
-          quantity: order.quantity,
+          symbol: "", // optional if you want to fill symbol
+          currentQuantity: order.quantity
+        }
+      });
+    } else if (order.tradeType === "SELL") {
+      await prisma.stockHolding.update({
+        where: { userId_stockId: { userId: order.userId, stockId: order.stockId } },
+        data: { currentQuantity: { decrement: order.quantity } }
+      });
+    }
+
+    // ---------------- RECORD TRADE (same as before) ----------------
+    const trade = await prisma.trade.create({
+      data: {
+        userId: order.userId,
+        stockId: order.stockId,
+        quantity: order.quantity,
+        tradeType: order.tradeType,
+        price: latestPrice,
+        totalAmount,
+      },
+    });
+
+    await prisma.stopMarketOrder.update({
+      where: { id: order.id },
+      data: { status: "EXECUTED", updatedAt: new Date() },
+    });
+
+    executedOrders.push(order.id);
+
+    // ---------------- BLOCKCHAIN LOGIC (unchanged) ----------------
+    try {
+      const tx = await ledger.recordTrade(
+        order.stockId.toString(),
+        order.tradeType,
+        order.quantity,
+        Math.floor(latestPrice),
+        { nonce }
+      );
+      const receipt = await tx.wait();
+
+      await prisma.blockchainTransaction.create({
+        data: {
+          userId: order.userId,
+          symbol: order.stockId.toString(),
           tradeType: order.tradeType,
-          price: latestPrice,
-          totalAmount,
+          gasUsed: Number(receipt.gasUsed),
+          transactionHash: receipt.hash,
+          blockNumber: receipt.blockNumber,
         },
       });
 
-      await prisma.stopMarketOrder.update({
-        where: { id: order.id },
-        data: { status: "EXECUTED", updatedAt: new Date() },
-      });
-
-      executedOrders.push(order.id);
-      console.log(
-        `Executed ${order.tradeType} stop-market order ${order.id} at ${latestPrice}`
-      );
-
-      // Record trade on blockchain
-      try {
-        const tx = await ledger.recordTrade(
-          order.stockId.toString(),
-          order.tradeType,
-          order.quantity,
-          Math.floor(latestPrice), // blockchain expects integer
-          { nonce }
-        );
-        const receipt = await tx.wait();
-
-        // Store blockchain transaction in DB
-        await prisma.blockchainTransaction.create({
-          data: {
-            userId: order.userId,
-            symbol: order.stockId.toString(),
-            tradeType: order.tradeType,
-            gasUsed: Number(receipt.gasUsed),
-            transactionHash: receipt.hash,
-            blockNumber: receipt.blockNumber,
-          },
-        });
-
-        console.log(
-          `🧾 Recorded trade on blockchain: TxHash ${receipt.hash}, Gas: ${receipt.gasUsed}`
-        );
-
-        nonce++; // increment for next transaction
-      } catch (err) {
-        console.error("Error recording trade on blockchain:", err);
-      }
+      nonce++;
+    } catch (err) {
+      console.error("Error recording trade on blockchain:", err);
     }
   }
 
   return executedOrders;
 };
+
 
 // Process all pending stop-market orders across all stocks with blockchain integration
 module.exports.processAllPendingOrders = async () => {
@@ -256,17 +207,35 @@ module.exports.processAllPendingOrders = async () => {
       const totalAmount = latestPrice * order.quantity;
 
       // Update user wallet for BUY/SELL
-      if (order.tradeType === "BUY") {
-        await prisma.user.update({
-          where: { id: order.userId },
-          data: { wallet: { decrement: totalAmount } },
-        });
-      } else if (order.tradeType === "SELL") {
-        await prisma.user.update({
-          where: { id: order.userId },
-          data: { wallet: { increment: totalAmount } },
-        });
-      }
+if (order.tradeType === "BUY") {
+  await prisma.user.update({
+    where: { id: order.userId },
+    data: { wallet: { decrement: totalAmount } },
+  });
+
+  await prisma.stockHolding.upsert({
+    where: { userId_stockId: { userId: order.userId, stockId: order.stockId } },
+    update: { currentQuantity: { increment: order.quantity } },
+    create: {
+      userId: order.userId,
+      stockId: order.stockId,
+      symbol: "",
+      currentQuantity: order.quantity
+    }
+  });
+
+} else if (order.tradeType === "SELL") {
+  await prisma.user.update({
+    where: { id: order.userId },
+    data: { wallet: { increment: totalAmount } },
+  });
+
+  await prisma.stockHolding.update({
+    where: { userId_stockId: { userId: order.userId, stockId: order.stockId } },
+    data: { currentQuantity: { decrement: order.quantity } }
+  });
+}
+
 
       // Create DB trade
       const trade = await prisma.trade.create({
@@ -329,6 +298,29 @@ module.exports.processAllPendingOrders = async () => {
   }
 
   return executedOrders;
+};
+
+
+// Get user's stop-market orders
+module.exports.getUserStopMarketOrders = async (userId) => {
+  return prisma.stopMarketOrder.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      tradeType: true,       // currently STOP_MARKET or STOP_LIMIT
+      quantity: true,
+      triggerPrice: true,
+      limitPrice: true,
+      status: true,
+      createdAt: true,
+      stock: {
+        select: {
+          symbol: true,      // return stock symbol instead of stockId
+        },
+      },
+    },
+  });
 };
 
 // Get latest stock price

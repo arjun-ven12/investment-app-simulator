@@ -106,7 +106,7 @@
                     <div id="deletePwRow">
                         <input type="password" id="deletePassword" placeholder="Confirm Password">
                     </div>
-                    <button type="submit" class="danger-btn">Delete Account</button>
+                    <button type="submit" class="danger-btn" id="delete-btn">Delete Account</button>
                 </form>
             </section>
         </main>
@@ -117,9 +117,11 @@
         <div class="popup-content">
             <p>Are you sure you want to delete your account?</p>
             <br>
-            <button id="confirm-yes">Yes</button>
-            <button id="confirm-no">No</button>
+            <button id="delete-yes">Yes</button>
+            <button id="delete-no">No</button>
         </div>
+        <div id="delete-error-box" style="color: red; margin-top: 10px;"></div>
+
     </div>
 
     <script src="../js/settings.js" defer></script>

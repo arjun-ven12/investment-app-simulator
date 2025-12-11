@@ -2408,3 +2408,9 @@ display: flex !important;
 .ohlc-body {
     padding-top: 100px;
 }
+
+@media (min-width: 1000px) {
+    .sidebar {
+        padding-bottom: 100px ;
+    }
+}

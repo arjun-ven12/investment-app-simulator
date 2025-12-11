@@ -1588,3 +1588,16 @@ p.desc {
 .return-link a {
   color: black;
 }
+
+.container {
+  height: 100%;;
+}
+
+#warningText {
+  color: rgb(255, 76, 76);
+}
+
+
+.login-link {
+  padding-left: 5px !important;
+}

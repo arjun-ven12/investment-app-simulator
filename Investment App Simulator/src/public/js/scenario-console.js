@@ -1,3 +1,18 @@
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => toast.classList.add('show'), 100);
+
+  // Remove toast after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
 
 
 const limitPriceInput = document.getElementById("limitPrice");
@@ -579,8 +594,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(`/scenarios/${scenarioId}/stocks/${symbol}/data`);
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to fetch scenario data");
-            if (!data.chartData?.length) throw new Error("No chart data");
+            if (!res.ok)   {  showToast(`Invalid symbol entered or no data available.`, 'error') };
+;
+            if (!data.chartData?.length) {showToast(`Invalid symbol entered or no data available.`, 'error')};
 
             allSymbolsData[symbol] = data.chartData.map(item => ({ x: new Date(item.date), c: item.closePrice }));
             fullData = allSymbolsData[symbol];
@@ -624,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error(err);
-            alert(err.message);
+            // alert(err.message);
         }
     }
 
@@ -1310,7 +1326,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 document.querySelectorAll(".speed-buttons button").forEach(btn => {
     btn.addEventListener("click", () => {

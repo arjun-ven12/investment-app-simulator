@@ -1,9 +1,24 @@
-
 window.currentStockId = null;
 ////////////////////////////////////////////////////
 //////// HTML Frontend Fields
 ///////////////////////////////////////////////////
 
+// ✅ Toast Function
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => toast.classList.add('show'), 100);
+
+  // Remove toast after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
 function renderPaginationControls() {
   const totalPages = Math.ceil(allTrades.length / pageSize);
   const paginationContainer = document.getElementById('trade-pagination');
@@ -133,8 +148,8 @@ window.addEventListener('DOMContentLoaded', function () {
   function searchStocks() {
     const query = searchInput.value.trim();
     if (!query) {
-      alert('Please enter a stock name or symbol.');
-      return;
+    showToast(`Please enter a company name or stock symbol.`, 'error');
+return;
     }
 
     fetch(`/stocks/search-stocks?query=${encodeURIComponent(query)}`)
@@ -769,9 +784,11 @@ intradayForm.addEventListener('submit', async function (e) {
         const difference = result.difference;
         const percentageChange = result.percentageChange;
 
-        if (!Array.isArray(ohlcData) || ohlcData.length === 0) {
-            throw new Error('No OHLC data');
-        }
+if (!Array.isArray(ohlcData) || ohlcData.length === 0) {
+    showToast(`Invalid symbol entered or no data available.`, 'error');
+
+}
+
 
         // DISPLAY PRICE % & DIFFERENCE
         const percentageDiv = document.getElementById("percentage2");
@@ -913,7 +930,7 @@ percentageDiv.innerHTML = `
 
     } catch (err) {
       console.error(err);
-      alert(err.message);
+    showToast(`Invalid symbol entered or no data available`, 'error');
     }
   });
 
@@ -1397,7 +1414,7 @@ errorEl.textContent = ''; // clear any previous errors
     // else {
     //   alert('Only market orders are supported for now.');
     // }
-
+updateWalletBalances()
   } catch (err) {
     console.error(err);
     errorEl.textContent = `Trade failed: ${err.message}`;
@@ -2152,6 +2169,7 @@ window.addEventListener('DOMContentLoaded', function () {
       tradingForm.reset();
       amountInput.value = '--';
       timeframeContainer.classList.add('hidden');
+
       // document.querySelector('#stop-limit-container').classList.add('hidden');
       // document.querySelector('#stop-loss-container').classList.add('hidden');
     } catch (err) {
@@ -2241,4 +2259,3 @@ async function updateWalletBalances() {
 
 
 document.addEventListener("DOMContentLoaded", updateWalletBalances);
-
