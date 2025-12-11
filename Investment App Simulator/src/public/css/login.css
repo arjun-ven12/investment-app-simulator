@@ -1620,3 +1620,8 @@ p.desc {
   border-radius: 0px !important;
 }
 
+@media(min-height: 800px) {
+  .right-panel {
+    justify-content: center;
+  }
+}
