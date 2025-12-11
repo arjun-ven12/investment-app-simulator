@@ -775,3 +775,6 @@ margin-top: 20px;
 *::after {
   font-family: 'Outfit', sans-serif !important;
 }
+html {
+  overflow-x: hidden
+}
