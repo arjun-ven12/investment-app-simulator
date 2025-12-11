@@ -9,37 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Task {
-  id       Int              @id @default(autoincrement())
-  name     String
-  statusId Int
-  status   Status           @relation(fields: [statusId], references: [id])
-  persons  TaskAssignment[]
-}
-
-model Status {
-  id    Int    @id @default(autoincrement())
-  text  String @unique
-  tasks Task[]
-}
-
-model Person {
-  id     Int              @id @default(autoincrement())
-  email  String           @unique
-  name   String
-  avatar String?
-  tasks  TaskAssignment[]
-}
-
-model TaskAssignment {
-  taskId     Int
-  personId   Int
-  assignedAt DateTime @default(now())
-  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@id([taskId, personId], name: "assignmentId")
-}
 
 model Stock {
   stock_id        Int               @id @default(autoincrement())
@@ -540,7 +509,7 @@ model OptionHistPrice {
 
 model Scenario {
   id              Int                   @id @default(autoincrement())
-  title           String
+  title           String                @unique
   description     String?
   startDate       DateTime
   endDate         DateTime
