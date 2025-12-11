@@ -353,3 +353,14 @@ margin-bottom: 20px !important;
 .terms-row label a:hover {
   text-decoration: underline;
 }
+/* Make terms and privacy links visibly clickable */
+.terms-row a {
+    text-decoration: underline !important;
+    color: #E0EBFF; /* matches your button accents */
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.terms-row a:hover {
+    font-weight: 650;
+}

@@ -167,7 +167,7 @@ return;
       })
       .catch(function (error) {
         console.error('Error searching for stocks:', error);
-        errorMessage.textContent = 'An error occurred while searching for stocks.';
+          showToast(`No stocks found.`, 'error');
       });
   }
 
@@ -176,7 +176,8 @@ return;
     errorMessage.textContent = '';
 
     if (!stocks || stocks.length === 0) {
-      errorMessage.textContent = 'No stocks found.';
+          showToast(`No stocks found.`, 'error');
+
       return;
     }
 
@@ -241,13 +242,6 @@ return;
     searchStocks();
   });
 });
-
-
-
-
-
-
-
 //////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
