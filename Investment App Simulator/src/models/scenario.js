@@ -1,5 +1,6 @@
 const prisma = require("./prismaClient");
-const API_KEY = "26d603eb0f773cc49609fc81898d4b9c";
+require('dotenv').config();
+const API_KEY = process.env.MARKETSTACK_API_KEY;
 const { Prisma } = require("@prisma/client");
 const { ScenarioAttemptStatus } = require("@prisma/client");
 

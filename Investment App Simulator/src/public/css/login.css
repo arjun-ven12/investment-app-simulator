@@ -20,23 +20,24 @@ body {
 }
 
 .left-panel .overlay {
-    padding: 60px;
-    text-align: left;
-    max-width: 700px; 
-    color: rgba(255, 255, 255, 0.95);
-    background-color: rgba(0, 0, 0, 0);
-    border-radius: 12px;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+  padding: 60px;
+  text-align: left;
+  max-width: 700px;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
-/* Right Panel */
+
 .right-panel {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-    background-color: whitesmoke;
-padding: 30px 0px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: whitesmoke;
+  padding: 30px 0px;
 }
 
 
@@ -759,8 +760,7 @@ input[type="email"] {
 
 /* Smooth transition for password input and icon */
 input[type="password"],
-input[type="email"] 
-input[type="text"] {
+input[type="email"] input[type="text"] {
   transition: opacity 0.25s ease-in-out;
 }
 
@@ -794,10 +794,10 @@ body {
 
 
 .left-panel .tagline {
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: #bbb;
-    margin-bottom: 20px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #bbb;
+  margin-bottom: 20px;
 }
 
 
@@ -809,13 +809,13 @@ body {
   transform: translateX(50px);
   opacity: 0;
   animation: slideIn 0.8s forwards;
-overflow: visible;
+  overflow: visible;
   width: 600px;
   padding: 30px 30px;
   border-radius: 12px;
   background-color: whitesmoke;
   text-align: center;
-height:auto;
+  height: auto;
 }
 
 body {
@@ -1350,7 +1350,7 @@ body {
 #googleSignInBtn:hover,
 #microsoftSignInBtn:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* optional: active press state so they drop back down */
@@ -1396,148 +1396,160 @@ body {
   .main-wrapper {
     width: 100%;
   }
+
   .desc {
     margin-left: 0px;
   }
 
-    .left-panel {
-        padding: 60px 0;
-                height: auto;
+  .left-panel {
+    padding: 60px 0;
+    height: auto;
 
-    }
-.form-card form button[type="submit"] {
-  margin-top: 15px;
-  font-size: 14px;
-}
-    #googleSignInBtn, #microsoftSignInBtn {
-      font-size: 14px !important;
-    }
-    .left-panel .overlay {
-        padding: 10px 20px;
-        width: 100%;
-    }
-    .left-panel::before {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .left-panel h1 {
-        font-size: 2rem !important;
-                margin-left: 0px !important;
-    }
-    .left-panel .tagline {
-        font-size: 0.8rem;
-                margin-left: 0px;
+  }
 
-    }
+  .form-card form button[type="submit"] {
+    margin-top: 15px;
+    font-size: 14px;
+  }
 
+  #googleSignInBtn,
+  #microsoftSignInBtn {
+    font-size: 14px !important;
+  }
 
+  .left-panel .overlay {
+    padding: 10px 20px;
+    width: 100%;
+  }
 
+  .left-panel::before {
+    width: 100% !important;
+    height: 100% !important;
+  }
 
-        
-    .left-panel .desc {
-        font-size: 0.8rem;
-                margin-left: 0px;
+  .left-panel h1 {
+    font-size: 2rem !important;
+    margin-left: 0px !important;
+  }
 
-    }
-    
-    .right-panel {
-        padding: 30px 10px;
-    }
-    
+  .left-panel .tagline {
+    font-size: 0.8rem;
+    margin-left: 0px;
 
-    .form-card h1 {
-        font-size: 1.5rem;
-    }
-    
-    #googleSignInBtn, #microsoftSignInBtn {
-        font-size: 0.9rem;
-        padding: 10px 10px;
-        height: 50px !important;
-    }
-    
-    .oauth-icon {
-        width: 18px;
-        height: 18px;
-    }
+  }
 
 
-.right-panel {
-        height: auto;
-        padding: 40px 15px;
-        overflow: visible !important;
-        background-color: whitesmoke;
-    }
 
 
-    .form-card {
-        width: 100%;
-        max-width: 500px; 
-        padding: 0px !important;
-        position: relative;
-        height: 100%;
-        margin-bottom: 0px;
-    }
-    
-    /* Stack form rows vertically (for username/email) */
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    .form-row input {
-        margin-bottom: 18px; 
-    }
 
-    /* Stack password rows vertically */
-    .password-row {
-        flex-direction: column; 
-    }
-    
-    /* Fix the password toggle positioning for stacked inputs */
-    .password-row > input {
-        width: 100%;
-        margin-bottom: 15px; /* Re-establish spacing */
-    }
+  .left-panel .desc {
+    font-size: 0.8rem;
+    margin-left: 0px;
 
-    /* Target the password toggle for the first password input (inside the first password-row) */
-    #togglePassword {
-        /* Position relative to the parent form-card/right-panel */
-        position: absolute;
-        top: 15px; /* Aligns with the first password input */
-        right: 36px; 
-        transform: translateY(0);
-    }
-    
-    /* Target the password toggle for the second password input (inside the second password-row) */
-    #toggleConfirmPassword {
-        /* Position relative to the parent form-card/right-panel */
-        position: absolute;
-        top: 15px; /* Aligns with the confirm password input */
-        right: 36px;
-        transform: translateY(0);
-    }
+  }
 
-    .form-card h1 {
-      text-align: left;
-      padding-top: 5px;
-    }
-    
-    .form-card .subtitle {
-      display: none;
-    }
+  .right-panel {
+    padding: 30px 10px;
+  }
 
-    .container {
-      display: flex;
-              flex-direction: column;
 
-    }
+  .form-card h1 {
+    font-size: 1.5rem;
+  }
+
+  #googleSignInBtn,
+  #microsoftSignInBtn {
+    font-size: 0.9rem;
+    padding: 10px 10px;
+    height: 50px !important;
+  }
+
+  .oauth-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+
+  .right-panel {
+    height: auto;
+    padding: 40px 15px;
+    overflow: visible !important;
+    background-color: whitesmoke;
+  }
+
+
+  .form-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 0px !important;
+    position: relative;
+    height: 100%;
+    margin-bottom: 0px;
+  }
+
+  /* Stack form rows vertically (for username/email) */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-row input {
+    margin-bottom: 18px;
+  }
+
+  /* Stack password rows vertically */
+  .password-row {
+    flex-direction: column;
+  }
+
+  /* Fix the password toggle positioning for stacked inputs */
+  .password-row>input {
+    width: 100%;
+    margin-bottom: 15px;
+    /* Re-establish spacing */
+  }
+
+  /* Target the password toggle for the first password input (inside the first password-row) */
+  #togglePassword {
+    /* Position relative to the parent form-card/right-panel */
+    position: absolute;
+    top: 15px;
+    /* Aligns with the first password input */
+    right: 36px;
+    transform: translateY(0);
+  }
+
+  /* Target the password toggle for the second password input (inside the second password-row) */
+  #toggleConfirmPassword {
+    /* Position relative to the parent form-card/right-panel */
+    position: absolute;
+    top: 15px;
+    /* Aligns with the confirm password input */
+    right: 36px;
+    transform: translateY(0);
+  }
+
+  .form-card h1 {
+    text-align: left;
+    padding-top: 5px;
+  }
+
+  .form-card .subtitle {
+    display: none;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+
+  }
 }
 
 @media (max-width: 1300px) {
   .left-panel {
-  padding-left: 0;
+    padding-left: 0;
 
-}
+  }
 
 }
 
@@ -1556,9 +1568,10 @@ body {
 
 
 @media (min-width: 1000px) and (max-width: 1400px) {
-    body {
-        zoom: 0.85; /* 85% size */
-    }
+  body {
+    zoom: 0.85;
+    /* 85% size */
+  }
 }
 
 
@@ -1567,7 +1580,7 @@ body {
 
 h2 {
   color: black;
-  padding:20px;
+  padding: 20px;
 }
 
 
@@ -1590,7 +1603,8 @@ p.desc {
 }
 
 .container {
-  height: 100%;;
+  height: 100%;
+  ;
 }
 
 #warningText {
@@ -1600,4 +1614,8 @@ p.desc {
 
 .login-link {
   padding-left: 5px !important;
+}
+
+.form-card {
+  border-radius: 0px !important;
 }
