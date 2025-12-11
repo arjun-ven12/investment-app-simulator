@@ -225,3 +225,114 @@
   padding: 12px 18px !important;
   gap: 6px !important;
 }
+/* ============================================
+   MOBILE / TABLET RESPONSIVENESS
+   ============================================ */
+@media (max-width: 768px) {
+  /* Shepherd container */
+  .shepherd-element {
+    width: 90% !important;
+    max-width: 90% !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+  }
+
+  .shepherd-element::before {
+    inset: -10px;
+    filter: blur(20px);
+  }
+
+  /* Header */
+  .shepherd-header {
+    padding: 12px !important;
+  }
+
+  .shepherd-title {
+    font-size: 16px !important;
+  }
+
+  /* Text */
+  .shepherd-text {
+    padding: 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* Footer */
+  .shepherd-footer {
+    padding: 12px !important;
+    gap: 6px !important;
+  }
+
+  .shepherd-button {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+  }
+
+  /* Section Navigator */
+  .bs-section-nav {
+    width: 100%;
+  }
+
+  .bs-section-nav-toggle {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .bs-section-nav-menu {
+    width: 100%;
+    min-width: unset;
+    top: 50px;
+  }
+
+  .bs-section-nav-item {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Shepherd container becomes nearly full-width */
+  .shepherd-element {
+    width: 95% !important;
+    max-width: 95% !important;
+    border-radius: 10px !important;
+  }
+
+  /* Softer glow on very small screens */
+  .shepherd-element::before {
+    inset: -4px;
+    filter: blur(14px);
+  }
+
+  /* Text scaling */
+  .shepherd-title {
+    font-size: 15px !important;
+  }
+
+  .shepherd-text {
+    font-size: 13px !important;
+    padding: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Buttons wrap on small screens */
+  .shepherd-footer {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .shepherd-button {
+    width: 100%;
+    text-align: center;
+    padding: 10px !important;
+    margin-bottom: 6px;
+  }
+
+  /* Section Navigator — bigger tap targets */
+  .bs-section-nav-item {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
