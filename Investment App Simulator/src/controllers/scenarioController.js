@@ -22,6 +22,7 @@ module.exports.createScenarioController = async (req, res) => {
   }
 };
 
+
 module.exports.getAllScenariosController = async (req, res) => {
   try {
     const scenarios = await scenarioModel.getAllScenarios(req.query);

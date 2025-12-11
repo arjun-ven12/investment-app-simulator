@@ -192,6 +192,7 @@ function updateReferralHistoryTable(history) {
 `;
 
 
+
     container.appendChild(row);
   });
 }

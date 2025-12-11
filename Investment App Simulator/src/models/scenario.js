@@ -4,6 +4,7 @@ const API_KEY = process.env.MARKETSTACK_API_KEY;
 const { Prisma } = require("@prisma/client");
 const { ScenarioAttemptStatus } = require("@prisma/client");
 
+
 // --- SCENARIO CRUD ---
 module.exports.createScenario = async (data) => {
   // Debug: verify incoming data
