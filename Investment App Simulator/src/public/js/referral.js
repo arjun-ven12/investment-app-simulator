@@ -162,30 +162,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function updateReferralHistoryTable(history) {
-    const container = document.getElementById("referralHistory");
-    if (!container) return;
-    container.innerHTML = "";
+function updateReferralHistoryTable(history) {
+  const container = document.getElementById("referralHistory");
+  if (!container) return;
+  container.innerHTML = "";
 
-    history.forEach((item) => {
-      const row = document.createElement("tr");
-      const date = new Date(item.usedAt).toLocaleString();
-      row.innerHTML = `
-        <td>
-          <div class="user-cell">
-            <i class="fa-solid fa-user"></i>
-            <div class="user-info">
-              <span class="username">${item.usedBy}</span>
-              <span class="action-sub">used your referral</span>
-            </div>
-          </div>
-        </td>
-        <td>${item.referralOwner}</td>
-        <td>${date}</td>
-      `;
-      container.appendChild(row);
-    });
-  }
+  history.forEach((item) => {
+    const row = document.createElement("tr");
+    const date = new Date(item.usedAt).toLocaleString();
+
+    const creditColor = item.credits > 0 ? "#00ff9d" : "#64748b"; // neon green or muted gray
+
+    row.innerHTML = `
+  <td>
+    <div class="user-cell">
+      <i class="fa-solid fa-user"></i>
+      <div class="user-info">
+        <span class="username">${item.usedBy}</span>
+        <span class="action-sub">${item.action}</span>
+      </div>
+    </div>
+  </td>
+  <td>${item.referralOwner}</td>
+    <td class="credits-cell">
+    ${item.credits !== null ? `+$${item.credits}` : "—"}
+  </td>
+  <td>${date}</td>
+
+`;
+
+
+    container.appendChild(row);
+  });
+}
+
+
+
 
   /* ============================================================
      PROGRESS BAR

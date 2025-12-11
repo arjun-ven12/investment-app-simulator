@@ -97,50 +97,64 @@ async function sendVerificationEmail(email, token) {
   const link = `${process.env.APP_URL}/user/verify/${token}`;
 
   const html = blackSealedWrapper(`
-    <h2 style="
-      text-align:center;
-      color:#111;
-      font-size:1.8rem;
-      font-weight:700;
-      margin-bottom:10px;
-    ">Verify Your Email</h2>
+  <h2 style="
+    text-align:center;
+    color:#111;
+    font-size:1.8rem;
+    font-weight:700;
+    margin-bottom:10px;
+  ">Verify Your Email</h2>
 
-    <p style="
-      text-align:center;
-      color:#444;
-      line-height:1.6;
-      margin-bottom:26px;
-    ">
-      Welcome to <strong>BlackSealed</strong> — the next generation of simulated trading.<br>
-      Click the button below to verify your email.
-    </p>
+  <p style="
+    text-align:center;
+    color:#444;
+    line-height:1.6;
+    margin-bottom:26px;
+  ">
+    Welcome to <strong>BlackSealed</strong> — the next generation of simulated trading.<br>
+    Click the button below to verify your email.
+  </p>
 
-    <div style="text-align:center; margin:28px 0;">
-      <a href="${link}" style="
-        display:inline-block;
-        background:#000;
-        color:#fff;
-        padding:14px 34px;
-        border-radius:12px;
-        text-decoration:none;
-        font-size:1rem;
-        font-weight:600;
-      ">Verify Email</a>
-    </div>
+  <div style="text-align:center; margin:28px 0;">
+    <a href="${link}" style="
+      display:inline-block;
+      background:#000;
+      color:#fff;
+      padding:14px 34px;
+      border-radius:12px;
+      text-decoration:none;
+      font-size:1rem;
+      font-weight:600;
+    ">Verify Email</a>
+  </div>
 
-    <p style="text-align:center; color:#666; margin-bottom:6px;">Or copy this link:</p>
+  <p style="text-align:center; color:#666; margin-bottom:6px;">Or copy this link:</p>
 
-    <p style="text-align:center; word-break:break-all; color:#000; font-size:0.9rem;">
-      ${link}
-    </p>
+  <p style="text-align:center; word-break:break-all; color:#000; font-size:0.9rem;">
+    ${link}
+  </p>
 
-    <p style="
-      text-align:center;
-      margin-top:25px;
-      font-size:0.85rem;
-      color:#777;
-    ">This verification link expires in 1 hour.</p>
-  `);
+  <p style="
+    text-align:center;
+    margin-top:25px;
+    font-size:0.85rem;
+    color:#777;
+  ">
+    This verification link expires in 1 hour.
+  </p>
+
+  <!-- NEW DISCLAIMER -->
+  <p style="
+    text-align:center;
+    margin-top:20px;
+    font-size:0.85rem;
+    color:#999;
+    line-height:1.5;
+  ">
+    If you did not create a BlackSealed account, you can safely ignore this email.<br>
+    No changes will be made unless you verify your address.
+  </p>
+`);
 
   await transporter.sendMail({
     from: `"BlackSealed" <${process.env.EMAIL_USER}>`,

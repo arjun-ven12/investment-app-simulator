@@ -79,41 +79,18 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
   const alreadyUsed = await prisma.referralUsage.findFirst({
     where: { userId, referralId: referral.id },
   });
-  if (alreadyUsed) throw new Error('Referral link already used by this user');
+  if (alreadyUsed) throw new Error('Referral already used by this user');
 
-  // Increment stats
-  const newSuccessfulReferrals = referral.successfulReferrals + 1;
-  const newCredits = calculateCredits(newSuccessfulReferrals);
-
-  const [updatedReferral] = await prisma.$transaction([
-    prisma.referral.update({
-      where: { id: referral.id },
-      data: {
-        referralSignups: { increment: 1 },
-        successfulReferrals: { increment: 1 },
-        creditsEarned: newCredits,
-        tier: { increment: 1 }, // optional
-      },
-    }),
-    prisma.referralUsage.create({
-      data: { userId, referralId: referral.id, status: 'SUCCESSFUL' },
-    }),
-    prisma.user.update({
-      where: { id: referral.userId },
-      data: { wallet: { increment: newCredits } },
-    }),
-  ]);
-
-  // Broadcast referral update to referral owner
-  broadcastReferralUpdate(referral.userId, {
-    referralSignups: updatedReferral.referralSignups,
-    successfulReferrals: updatedReferral.successfulReferrals,
-    creditsEarned: updatedReferral.creditsEarned,
+  // Create pending referral usage
+  await prisma.referralUsage.create({
+    data: {
+      userId,
+      referralId: referral.id,
+      status: "PENDING",
+    },
   });
-const updatedHistory = await module.exports.getReferralHistory(referral.userId);
-broadcastReferralHistoryUpdate(referral.userId, updatedHistory);
 
-  return { ownerId: referral.userId, updatedReferral };
+  return { message: "Referral recorded. Reward released after email verification." };
 };
 
 
@@ -125,15 +102,15 @@ module.exports.getReferralHistory = async function (userId) {
   const history = await prisma.referralUsage.findMany({
     where: { 
       OR: [
-        { userId },               // usage by this user
-        { referral: { userId } }  // usage of this user's referral
+        { userId },               // user used a referral
+        { referral: { userId } }  // user owns the referral that others used
       ]
     },
     include: {
-      user: { select: { username: true } }, // who used the referral
+      user: { select: { username: true } }, 
       referral: {
         include: {
-          user: { select: { username: true } } // owner of referral
+          user: { select: { username: true, id: true } } 
         }
       }
     },
@@ -143,13 +120,23 @@ module.exports.getReferralHistory = async function (userId) {
   return history.map(item => {
     const usedByName = item.user?.username ?? 'Unknown';
     const ownerName = item.referral?.user?.username ?? 'Unknown';
+    const ownerId = item.referral?.user?.id; // 🔥 Needed to check who owns referral
 
-    let actionText = '';
-    if (item.userId === userId) {
-      actionText = `You used ${ownerName}'s referral`;
-    } else if (item.referral?.userId === userId) {
+    let actionText = "";
+    let creditsToShow = null; // 🔥 hide credits for non-owner by default
+
+    if (item.referral?.userId === userId) {
+      // YOU are the referral owner
       actionText = `${usedByName} used your referral`;
-    } else {
+      creditsToShow = item.creditsEarned ?? 0; // show credits ONLY to owner
+    } 
+    else if (item.userId === userId) {
+      // YOU used someone's referral
+      actionText = `You used ${ownerName}'s referral`;
+      creditsToShow = null; // 🔒 hide owner credits
+    } 
+    else {
+      // fallback (should rarely happen)
       actionText = `${usedByName} used ${ownerName}'s referral`;
     }
 
@@ -159,8 +146,8 @@ module.exports.getReferralHistory = async function (userId) {
       usedBy: usedByName,
       referralOwner: ownerName,
       usedAt: item.createdAt,
+      credits: creditsToShow,    // 👈 NEW — safe credit visibility
       referralLink: item.referral?.referralLink ?? 'N/A'
     };
   });
 };
-
