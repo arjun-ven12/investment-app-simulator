@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const prisma = require("../../prisma/prismaClient"); // your Prisma client
+const prisma = require("../../prisma/prismaClient");
 const referralModel = require("../models/referral");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const userModel = require("../models/user");
@@ -8,75 +8,56 @@ const crypto = require("crypto");
 const { sendVerificationEmail, sendPasswordResetCode } = require("../utils/email");
 
 
+// ---------------------------------------------------------
+// EMAIL VALIDATION (Option A - safest, production-friendly)
+// ---------------------------------------------------------
+function isRealEmail(email) {
+  // Strong format validation (same used by Stripe)
+  const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-
-const dns = require("dns");
-const emailExistence = require("email-existence");
-
-
-
-// simple domain + SMTP validation
-async function isRealEmail(email) {
-  // basic regex
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!regex.test(email)) return false;
 
-  // check MX records
-  const domain = email.split("@")[1];
-  const mxExists = await new Promise((resolve) => {
-    dns.resolveMx(domain, (err, addresses) => {
-      if (err || !addresses?.length) resolve(false);
-      else resolve(true);
-    });
-  });
-  if (!mxExists) return false;
-
-  // optional SMTP probe (can be slow)
-  const exists = await new Promise((resolve) => {
-    emailExistence.check(email, (err, res) => {
-      if (err) resolve(false);
-      else resolve(res);
-    });
-  });
-
-  return exists;
+  // All REAL validation is done via clicking the verification link
+  return true;
 }
-//////////////////////////////////////////////////////
+
+
+
+// ---------------------------------------------------------
 // REGISTER USER
-//////////////////////////////////////////////////////
+// ---------------------------------------------------------
 module.exports.register = async (req, res) => {
   const { email, username, password, name, referralCode } = req.body;
 
   try {
-    // 1️⃣ Validate email format before continuing
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Please provide a valid email address." });
-    }
-
-    // ✅ new check: verify if email actually exists
-    const isValid = await isRealEmail(email);
-    if (!isValid) {
+    // 1️⃣ Basic format validation (safe for Render + Gmail)
+    if (!isRealEmail(email)) {
       return res.status(400).json({
-        message: "This email address appears invalid or unreachable. Please use a real email.",
+        message: "Please enter a valid email address.",
       });
     }
+
     // 2️⃣ Check if user already exists
     const existingUser = await prisma.user.findFirst({
-      where: { OR: [{ email }, { username }] },
+      where: {
+        OR: [{ email }, { username }],
+      },
     });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email or username already exists." });
+      return res.status(400).json({
+        message: "Email or username already exists.",
+      });
     }
 
     // 3️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4️⃣ Generate verification token and expiry
+    // 4️⃣ Generate verification token
     const verifyToken = crypto.randomBytes(32).toString("hex");
-    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000);
 
-    // 5️⃣ Create user (unverified)
+    // 5️⃣ Create unverified user
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -89,16 +70,16 @@ module.exports.register = async (req, res) => {
         onboardingStage: "home",
         skipOnboarding: false,
         termsAccepted: req.body.termsAccepted === true,
-    termsAcceptedAt: req.body.termsAccepted ? new Date() : null,
+        termsAcceptedAt: req.body.termsAccepted ? new Date() : null,
       },
     });
 
     // 6️⃣ Send verification email
     await sendVerificationEmail(email, verifyToken);
 
-    // 7️⃣ Create referral info (optional)
+    // 7️⃣ Create referral tracking row
     const referralCodeUse = crypto.randomBytes(5).toString("hex");
-    const userReferralLink = `https://www.sealed-fi.com/referral/${username}-${referralCodeUse}`;
+    const userReferralLink = `https://theblacksealed.com/referral/${username}-${referralCodeUse}`;
 
     await prisma.referral.create({
       data: {
@@ -113,7 +94,7 @@ module.exports.register = async (req, res) => {
       },
     });
 
-    // 8️⃣ Handle referral usage
+    // 8️⃣ Handle referral usage (if any)
     if (referralCode) {
       try {
         await referralModel.useReferralLink(newUser.id, referralCode);
@@ -122,9 +103,9 @@ module.exports.register = async (req, res) => {
       }
     }
 
-    // ✅ 9️⃣ Do NOT log user in yet — just return success message
+    // 9️⃣ Return success
     return res.status(201).json({
-      message: "Verification email sent. Please check your inbox to verify your account.",
+      message: "Verification email sent. Please check your inbox.",
     });
 
   } catch (error) {
@@ -133,18 +114,20 @@ module.exports.register = async (req, res) => {
   }
 };
 
-//////////////////////////////////////////////////////
+
+
+
+// ---------------------------------------------------------
 // LOGIN USER
-//////////////////////////////////////////////////////
-// at top of file if you want easy tweaks
-const MAX_ATTEMPTS = 3;           // allowed wrong passwords
-const LOCK_WINDOW_MIN = 5;       // lockout duration
+// ---------------------------------------------------------
+const MAX_ATTEMPTS = 3;
+const LOCK_WINDOW_MIN = 5;
 
 module.exports.login = async (req, res) => {
   const { email, username, password } = req.body;
 
   try {
-    // 1) Find the user by email OR username
+    // 1) Find user
     const user = await prisma.user.findFirst({
       where: {
         OR: [
@@ -154,34 +137,36 @@ module.exports.login = async (req, res) => {
       },
     });
 
-    // Uniform "invalid" to avoid user enumeration
     if (!user) return res.status(401).json({ message: "Invalid credentials." });
 
+    // 2) Check lockout
     if (user.lockUntil && new Date() < user.lockUntil) {
       return res.status(403).json({
         message: "Account temporarily locked.",
-        lockUntil: user.lockUntil, // 🔥 send this timestamp
+        lockUntil: user.lockUntil,
       });
     }
-    // 3) SSO-only accounts can’t use password login
+
+    // 3) SSO-only accounts
     if ((user.googleId || user.microsoftId) && !user.password) {
       return res.status(403).json({
-        message: `Please sign in using ${user.googleId ? "Google" : "Microsoft"} — this account doesn’t have a password.`,
+        message: `Please sign in using ${user.googleId ? "Google" : "Microsoft"}.`,
       });
     }
 
-    // 4) Email verification check
+    // 4) Require email verification
     if (!user.verified) {
-      return res.status(403).json({ message: "Please verify your email before logging in." });
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+      });
     }
 
-    // 5) Compare password
+    // 5) Password check
     const isMatch = await bcrypt.compare(password || "", user.password || "");
 
     if (!isMatch) {
       const nextFailed = (user.failedLogins || 0) + 1;
 
-      // Hit threshold? start lock, and reset the counter
       if (nextFailed >= MAX_ATTEMPTS) {
         await prisma.user.update({
           where: { id: user.id },
@@ -190,29 +175,33 @@ module.exports.login = async (req, res) => {
             lockUntil: new Date(Date.now() + LOCK_WINDOW_MIN * 60 * 1000),
           },
         });
-        return res
-          .status(401)
-          .json({ message: `Too many failed attempts. Account locked for ${LOCK_WINDOW_MIN} minutes.` });
+
+        return res.status(401).json({
+          message: `Too many failed attempts. Account locked for ${LOCK_WINDOW_MIN} minutes.`,
+        });
       }
 
-      // Otherwise just increment failed count
       await prisma.user.update({
         where: { id: user.id },
-        data: { failedLogins: nextFailed, lockUntil: null },
+        data: {
+          failedLogins: nextFailed,
+          lockUntil: null,
+        },
       });
 
       return res.status(401).json({
-        message: `Invalid credentials. ${MAX_ATTEMPTS - nextFailed} attempt${MAX_ATTEMPTS - nextFailed === 1 ? "" : "s"} left.`,
+        message: `Invalid credentials. ${MAX_ATTEMPTS - nextFailed} attempts left.`,
       });
     }
 
-    // 6) Success — reset counters
-    if (user.failedLogins || user.lockUntil) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { failedLogins: 0, lockUntil: null },
-      });
-    }
+    // 6) Reset failed attempts
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLogins: 0,
+        lockUntil: null,
+      },
+    });
 
     // 7) Issue JWT
     const token = jwt.sign(
@@ -227,11 +216,12 @@ module.exports.login = async (req, res) => {
         id: user.id,
         email: user.email,
         username: user.username,
-        onboardingStage: user.onboardingStage,   // NEW
-        skipOnboarding: user.skipOnboarding      // NEW
+        onboardingStage: user.onboardingStage,
+        skipOnboarding: user.skipOnboarding,
       },
       token,
     });
+
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ message: "Internal server error." });
@@ -239,45 +229,50 @@ module.exports.login = async (req, res) => {
 };
 
 
-//////////////////////////////////////////////////////
-// GET SPECIFIC USER DETAILS
-//////////////////////////////////////////////////////
 
+
+// ---------------------------------------------------------
+// GET USER DETAILS
+// ---------------------------------------------------------
 module.exports.getUserDetails = async (req, res) => {
   try {
     const userId = req.user.id;
+
     const user = await userModel.getUserBasicInfo(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    return res.status(200).json({ user });
 
-    res.status(200).json({ user }); // { username, wallet }
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 };
 
+
+
+
+// ---------------------------------------------------------
+// FORGOT PASSWORD
+// ---------------------------------------------------------
 module.exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       return res.status(400).json({ message: "No account found with that email." });
     }
 
-    // 🚫 not verified yet
     if (!user.verified) {
       return res.status(403).json({
         message: "Please verify your account before resetting your password.",
-        canResend: true, // so frontend knows to show 'Resend verification email'
+        canResend: true,
       });
     }
 
-    // ✅ verified — generate code and email
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const resetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    const resetExpires = new Date(Date.now() + 15 * 60 * 1000);
 
     await prisma.user.update({
       where: { email },
@@ -285,23 +280,27 @@ module.exports.forgotPassword = async (req, res) => {
     });
 
     await sendPasswordResetCode(email, resetCode);
+
     return res.json({ message: "Reset code sent to your email." });
+
   } catch (err) {
     console.error("Forgot password error:", err);
-    res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error." });
   }
 };
 
 
-// ✅ Verify Reset Code (keeps code valid until reset)
+
+
+// ---------------------------------------------------------
+// VERIFY RESET CODE
+// ---------------------------------------------------------
 module.exports.verifyResetCode = async (req, res) => {
   const { email, code } = req.body;
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid email." });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid email." });
 
     if (user.resetCode !== code) {
       return res.status(400).json({ message: "Invalid or expired code." });
@@ -311,16 +310,20 @@ module.exports.verifyResetCode = async (req, res) => {
       return res.status(400).json({ message: "Code has expired." });
     }
 
-    // ✅ Do NOT clear code here — wait until password is reset
-    res.json({
-      message: "Code verified successfully.",
-    });
+    return res.json({ message: "Code verified successfully." });
+
   } catch (err) {
     console.error("Verify reset code error:", err);
-    res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error." });
   }
 };
 
+
+
+
+// ---------------------------------------------------------
+// RESET PASSWORD
+// ---------------------------------------------------------
 module.exports.resetPassword = async (req, res) => {
   const { email, code, newPassword } = req.body;
 
@@ -340,20 +343,25 @@ module.exports.resetPassword = async (req, res) => {
       where: { email },
       data: {
         password: hashedPassword,
-        resetCode: null,       // ✅ clear only now
+        resetCode: null,
         resetExpires: null,
       },
     });
 
-    res.json({ message: "Password reset successful." });
+    return res.json({ message: "Password reset successful." });
+
   } catch (err) {
     console.error("Reset password error:", err);
-    res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error." });
   }
 };
 
 
 
+
+// ---------------------------------------------------------
+// RESEND VERIFICATION EMAIL
+// ---------------------------------------------------------
 module.exports.resendVerification = async (req, res) => {
   const { email } = req.body;
 
@@ -365,24 +373,22 @@ module.exports.resendVerification = async (req, res) => {
     }
 
     if (user.verified) {
-      return res.status(400).json({ message: "Account is already verified." });
+      return res.status(400).json({ message: "Account already verified." });
     }
 
-    // create new verification token + expiry
     const verifyToken = crypto.randomBytes(32).toString("hex");
-    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000);
 
-    // update in DB
     await userModel.resendVerificationEmail(email, verifyToken, verifyExpires);
 
-    // send verification email
     await sendVerificationEmail(email, verifyToken);
 
     return res.status(200).json({
       message: "Verification email resent successfully.",
     });
+
   } catch (err) {
     console.error("Resend verification error:", err);
-    res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error." });
   }
 };

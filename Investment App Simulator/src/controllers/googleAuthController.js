@@ -134,7 +134,7 @@ exports.googleCallback = async (req, res) => {
 
     // Create referral profile for this new user
     const referralCodeUse = crypto.randomBytes(5).toString("hex");
-    const userReferralLink = `https://www.sealed-fi.com/referral/${username}-${referralCodeUse}`;
+    const userReferralLink = `https://theblacksealed.com/referral/${username}-${referralCodeUse}`;
 
     await prisma.referral.create({
       data: {
