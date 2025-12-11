@@ -769,3 +769,9 @@ margin-top: 20px;
         zoom: 0.85; /* 85% size */
     }
 }
+/* GLOBAL FONT RESET — Forces Outfit on every element */
+*,
+*::before,
+*::after {
+  font-family: 'Outfit', sans-serif !important;
+}
