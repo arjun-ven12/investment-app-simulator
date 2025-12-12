@@ -965,9 +965,11 @@ window.addEventListener('DOMContentLoaded', function () {
   // ------------------------------
   // WebSocket setup
   // ------------------------------
-  const socket = io('http://localhost:3000', {
-    query: { userId }
-  });
+  const socket = io("https://theblacksealed.com", {
+  auth: {
+    token: localStorage.getItem("token")
+  }
+});
 
   // ------------------------------
   // ===== PORTFOLIO DOM =====
