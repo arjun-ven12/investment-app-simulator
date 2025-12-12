@@ -863,28 +863,64 @@ async function renderMobileAllScenarios() {
 
 });
 
-function openScenarioPopup(s) {
+async function openScenarioPopup(s) {
+  const token = localStorage.getItem("token");
+
+  // --- UI fields ---
   document.getElementById("scenarioRegionTag").textContent = s.region || "GLOBAL";
-
-  const vol = (s.volatility || "MEDIUM").toUpperCase();
-  document.getElementById("scenarioVolTag").textContent = vol;
-
+  document.getElementById("scenarioVolTag").textContent = (s.volatility || "MEDIUM").toUpperCase();
   document.getElementById("scenarioTitle").textContent = s.title;
   document.getElementById("scenarioDesc").textContent = s.description;
-
   document.getElementById("scenarioStart").textContent =
     new Date(s.startDate).toLocaleDateString();
-
   document.getElementById("scenarioEnd").textContent =
     new Date(s.endDate).toLocaleDateString();
-
   document.getElementById("scenarioBalance").textContent =
     "$" + Number(s.startingBalance).toLocaleString();
 
-  document.getElementById("scenarioJoinBtn").onclick = () => joinScenario(s.id);
+  const joinBtn = document.getElementById("scenarioJoinBtn");
+
+  // --- Determine joined state ---
+  let joined = false;
+
+  if (token) {
+    try {
+      const myScenarios = await fetchMyScenarios();
+      joined = myScenarios.some(ms => ms.id === s.id);
+    } catch (e) {
+      console.warn("⚠️ Failed to check joined state", e);
+    }
+  }
+
+  // --- Button state logic ---
+  if (joined) {
+    joinBtn.textContent = "Joined";
+    joinBtn.disabled = true;
+    joinBtn.classList.add("joined");
+    joinBtn.onclick = null;
+  } else {
+    joinBtn.textContent = "Join Mission";
+    joinBtn.disabled = false;
+    joinBtn.classList.remove("joined");
+
+    joinBtn.onclick = async () => {
+      await joinScenario(s.id);
+
+      // Immediately update UI
+      joinBtn.textContent = "Joined";
+      joinBtn.disabled = true;
+      joinBtn.classList.add("joined");
+
+      // Keep rest of app in sync
+      if (window.forceScenarioRefresh) {
+        await window.forceScenarioRefresh();
+      }
+    };
+  }
 
   document.getElementById("scenarioOverlay").classList.add("show");
 }
+
 
 document.getElementById("scenarioOverlayClose").onclick =
 document.getElementById("scenarioCancelBtn").onclick =

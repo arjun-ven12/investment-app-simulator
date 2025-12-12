@@ -2648,3 +2648,9 @@ height: 100% !important;
 }
 
 
+.bs-btn-primary.joined {
+  background: linear-gradient(135deg, #3a3a3a, #1f1f1f);
+  color: #aaa;
+  cursor: not-allowed;
+  box-shadow: none;
+}
