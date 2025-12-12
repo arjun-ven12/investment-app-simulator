@@ -711,7 +711,7 @@ function startReplay() {
     }
 
     // Use popup confirmation instead of confirm()
-    showPopupConfirmation("Replay will start now. Are you ready?", async (confirmed) => {
+    showPopupConfirmation("The simulation will start now. Are you ready?", async (confirmed) => {
         if (!confirmed) return; // user clicked No
 
         pauseReplay();
