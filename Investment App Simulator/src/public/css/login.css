@@ -1623,5 +1623,6 @@ p.desc {
 @media(min-height: 800px) {
   .right-panel {
     justify-content: center;
+    align-items: center;
   }
 }
