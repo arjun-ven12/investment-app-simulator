@@ -149,7 +149,7 @@ window.addEventListener('DOMContentLoaded', function () {
     const query = searchInput.value.trim();
     if (!query) {
     showToast(`Please enter a company name or stock symbol.`, 'error');
-return;
+      return;
     }
 
     fetch(`/stocks/search-stocks?query=${encodeURIComponent(query)}`)

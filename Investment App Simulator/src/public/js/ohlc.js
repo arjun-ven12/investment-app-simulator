@@ -162,6 +162,7 @@ catch (err) {
 
   if (msg.includes("data.savedData.map is not a function")) {
     console.error("No Options data available for this symbol. Please choose another option contract.");
+    showToast(`No Options data available for this symbol. Please choose another option contract.`, 'error');
 
     document.body.insertAdjacentHTML(
       "beforeend",
@@ -180,7 +181,21 @@ catch (err) {
 
 
 
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
+  // Trigger animation
+  setTimeout(() => toast.classList.add('show'), 100);
+
+  // Remove toast after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
 
 
 ///////////////////////////////////////////////////////////////////
