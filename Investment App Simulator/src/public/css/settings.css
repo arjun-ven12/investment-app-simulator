@@ -2924,3 +2924,73 @@ canvas#portfolioPieChart {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+
+
+
+
+
+
+
+/* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
+#closed-positions-table, #open-positions-table {
+    width: 100%;
+    /* Use separate to enable border-radius and external border */
+    border-collapse: separate; 
+    border-spacing: 0;
+    margin-top: 10px;
+    
+    /* FROSTED GLASS CONTAINER STYLES */
+    border-radius: 10px;
+    overflow: hidden; 
+    position: relative;
+    font-weight: 300; 
+    color: #fff;
+    font-size: 1rem;
+    
+    /* Subtle Border and Translucent Dark Background (Matching select input) */
+    /* border: 1px solid rgba(83, 89, 107, 0.5);  */
+    background-color: rgba(18, 18, 26, 0.587); 
+    
+
+    
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); /* Reduced shadow strength */
+}
+
+/* Base cell styling */
+#closed-positions-table th, #open-positions-table  th, #closed-positions-table td, #open-positions-table  td {
+    padding: 10px; 
+    text-align: left; /* Better for data */
+    color: #fff;
+    font-weight: 300;
+}
+
+/* Header styling */
+#closed-positions-table th, #open-positions-table th {
+    /* Slightly darker and defined header background */
+    background-color: rgba(0, 0, 0, 0); 
+    /* Subtle internal border for header separation */
+    border-bottom: 1px solid rgba(83, 89, 107, 0.5);
+    text-transform: uppercase;
+    font-weight: 400; 
+    color: whitesmoke;
+}
+
+/* Row hover styling */
+#closed-positions-table tr:hover, #open-positions-table tr:hover {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0.103); 
+}
+/* Row hover styling */
+#closed-positions-table tr, #open-positions-table tr {
+    /* Subtle translucent hover effect (lighter than the base) */
+    background-color: rgba(72, 72, 72, 0); 
+    border-bottom:none ;
+}
+
+/* Internal Row Separator */
+#closed-positions-table tr:not(:last-child) td, #open-positions-table tr:not(:last-child) td {
+    /* Thin internal separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+

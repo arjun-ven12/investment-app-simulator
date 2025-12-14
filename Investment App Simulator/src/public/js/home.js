@@ -189,102 +189,108 @@ async function renderUserInfo() {
   async function fetchStocksPortfolio() {
     if (!userId) return;
     try {
-      const res = await fetch(`/stocks/portfolio/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch portfolio");
-      const portfolio = await res.json();
-      renderStocksPortfolio(portfolio);
+      const response = await fetch(`/stocks/portfolio/${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch portfolio');
+      const portfolio = await response.json();
+      renderPortfolio(portfolio);
     } catch (err) {
-      console.error("Error fetching portfolio:", err);
-      stocksContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
+      console.error('Error fetching portfolio:', err);
+      portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
     }
   }
-
-  function renderStocksPortfolio(portfolio) {
-    stocksContainer.innerHTML = "";
-
+  
+  function renderPortfolio(portfolio) {
     const { openPositions = [], closedPositions = [] } = portfolio;
-
-    if (openPositions.length === 0 && closedPositions.length === 0) {
-      stocksContainer.innerHTML = `<p>You don't own any stocks yet.</p>`;
-      return;
+  
+    const openTableBody = document.getElementById("open-positions-table-body");
+    const closedTableBody = document.getElementById("closed-positions-table-body");
+  
+    if (!openTableBody || !closedTableBody) return;
+  
+    // ---------------- Open Positions ----------------
+    if (openPositions.length === 0) {
+      openTableBody.innerHTML = `<tr><td colspan="8">You don't have any open positions.</td></tr>`;
+    } else {
+      let openHTML = '';
+      openPositions.forEach(stock => {
+        openHTML += `
+          <tr>
+            <td>${stock.symbol} (${stock.companyName})</td>
+            <td>${stock.quantity}</td>
+            <td>$${parseFloat(stock.avgBuyPrice).toFixed(2)}</td>
+            <td>$${parseFloat(stock.currentPrice).toFixed(2)}</td>
+            <td>$${parseFloat(stock.totalInvested).toFixed(2)}</td>
+            <td>$${parseFloat(stock.currentValue).toFixed(2)}</td>
+            <td>$${parseFloat(stock.unrealizedProfitLoss).toFixed(2)} (${stock.unrealizedProfitLossPercent})</td>
+            <td>$${parseFloat(stock.realizedProfitLoss).toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      openTableBody.innerHTML = openHTML;
     }
-
-    // Open Positions
-    const openColumns = openPositions.map(stock => `
-      <div class="stock-column">
-        <h3>${stock.symbol} (${stock.companyName})</h3>
-        <p><strong>Quantity:</strong> ${stock.quantity}</p>
-        <p><strong>Avg Buy Price:</strong> $${parseFloat(stock.avgBuyPrice).toFixed(2)}</p>
-        <p><strong>Current Price:</strong> $${parseFloat(stock.currentPrice).toFixed(2)}</p>
-        <p><strong>Total Invested:</strong> $${parseFloat(stock.totalInvested).toFixed(2)}</p>
-        <p><strong>Current Value:</strong> $${parseFloat(stock.currentValue).toFixed(2)}</p>
-        <p><strong>Unrealized P/L:</strong> $${parseFloat(stock.unrealizedProfitLoss).toFixed(2)} (${stock.unrealizedProfitLossPercent})</p>
-        <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
-      </div>
-    `).join("");
-
-    // Closed Positions
-    const closedColumns = closedPositions.map(stock => `
-      <div class="stock-column closed">
-        <h3>${stock.symbol} (${stock.companyName})</h3>
-        <p><strong>Total Bought Qty:</strong> ${stock.totalBoughtQty}</p>
-        <p><strong>Total Bought Value:</strong> $${parseFloat(stock.totalBoughtValue).toFixed(2)}</p>
-        <p><strong>Total Sold Value:</strong> $${parseFloat(stock.totalSoldValue).toFixed(2)}</p>
-        <p><strong>Realized P/L:</strong> $${parseFloat(stock.realizedProfitLoss).toFixed(2)}</p>
-      </div>
-    `).join("");
-
-    stocksContainer.innerHTML = `
-      <div class="portfolio-layout">
-        <div class="positions-section">
-          ${openPositions.length ? `<h2>Open Positions</h2><div class="stock-grid">${openColumns}</div>` : ""}
-          ${closedPositions.length ? `<h2>Closed Positions</h2><div class="stock-grid">${closedColumns}</div>` : ""}
-        </div>
-        ${openPositions.length ? `<div class="portfolio-chart-container"><canvas id="portfolioPieChart"></canvas></div>` : ""}
-      </div>
-    `;
-
-    // Pie chart
-    if (openPositions.length > 0) {
+  
+    // ---------------- Closed Positions ----------------
+    if (closedPositions.length === 0) {
+      closedTableBody.innerHTML = `<tr><td colspan="5">You don't have any closed positions.</td></tr>`;
+    } else {
+      let closedHTML = '';
+      closedPositions.forEach(stock => {
+        closedHTML += `
+          <tr>
+            <td>${stock.symbol} (${stock.companyName})</td>
+            <td>${stock.totalBoughtQty}</td>
+  
+            <td>${stock.totalSoldQty}</td>
+            <td>$${parseFloat(stock.totalBoughtValue).toFixed(2)}</td>
+            <td>$${parseFloat(stock.totalSoldValue).toFixed(2)}</td>
+            <td>$${parseFloat(stock.realizedProfitLoss).toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      closedTableBody.innerHTML = closedHTML;
+    }
+  
+    // ---------------- Pie Chart ----------------
+    const pieCanvas = document.getElementById('portfolioPieChart');
+    if (openPositions.length > 0 && pieCanvas) {
       if (portfolioChart) portfolioChart.destroy();
-
+  
       const labels = openPositions.map(stock => stock.symbol);
       const data = openPositions.map(stock => parseFloat(stock.totalInvested));
-      const ctx = document.getElementById("portfolioPieChart").getContext("2d");
-
-   portfolioChart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels,
-        datasets: [{
-          data,
-          backgroundColor:  [
-          '#8faefd9a', // Strong Buy
-          '#6d93fa61', // Buy
-          '#5277e541', // Hold
-          '#3c5dc9a8', // Sell
-          '#2a3d7399'  // Strong Sell
-        ],
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { color: '#fff' } },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((context.raw / total) * 100).toFixed(2);
-                return `${context.label}: $${context.raw} (${percentage}%)`;
+  
+      portfolioChart = new Chart(pieCanvas.getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: [
+              '#8faefd9a', // Strong Buy
+              '#6d93fa61', // Buy
+              '#5277e541', // Hold
+              '#3c5dc9a8', // Sell
+              '#2a3d7399'  // Strong Sell
+            ],
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { color: '#fff' } },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.raw / total) * 100).toFixed(2);
+                  return `${context.label}: $${context.raw} (${percentage}%)`;
+                }
               }
             }
           }
         }
-      }
-    });
+      });
     }
   }
 

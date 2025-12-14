@@ -107,7 +107,7 @@ async function refreshPortfolios() {
 // =======================
 // Cron: Every 15 minutes
 // =======================
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
   try {
     if (!isMarketOpen()) {
       console.log('⏸ Market closed. Skipping portfolio price update.');

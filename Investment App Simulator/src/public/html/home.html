@@ -66,8 +66,8 @@
 
     <!-- ================= AI ADVICE SECTION ================= -->
     <div class="sections" id="ai-advice-section">
-        <div class="chart-wrapper">
-          <div class="chart-container">
+        <div class="chart-wrapper trading-card">
+          <div class="chart-container ">
             <h1>AI Advice</h1>
             <div class="tab-container">
               <button id="tab-ai-stocks" class="tab-button active">Stocks</button>
@@ -99,14 +99,55 @@
           <br>
           <!-- Portfolio Content -->
           <div id="portfolio-stocks" class="tab-content active">
-            <div class="trading-card2"><!-- Stocks will render here --></div>
-          </div>
+            <div class="chart-wrapper">
+              <!-- <div class="chart-container"> -->
+            <div class="portfolioTables">
+                <!-- Open Positions Table -->
+                <h2>Open Positions</h2>
+                <table id="open-positions-table">
+                  <thead>
+                    <tr>
+                      <th>Stock</th>
+                      <th>Quantity</th>
+                      <th>Avg Buy Price</th>
+                      <th>Current Price</th>
+                      <th>Total Invested</th>
+                      <th>Current Value</th>
+                      <th>Unrealized P/L</th>
+                      <th>Realized P/L</th>
+                    </tr>
+                  </thead>
+                  <tbody id="open-positions-table-body"></tbody>
+                </table>
+            <br>
+                <!-- Closed Positions Table -->
+                <h2>Closed Positions</h2>
+                  <table id="closed-positions-table">
+                    <thead>
+                      <tr>
+                        <th>Stock</th>
+                        <th>Total Bought Quantity</th>
+                                    <th>Total Sold Quantity</th>
+            
+                        <th>Total Bought Value</th>
+                        <th>Total Sold Value</th>
+                        <th>Realized P/L</th>
+                      </tr>
+                    </thead>
+                    <tbody id="closed-positions-table-body"></tbody>
+                  </table>
+            
+                <!-- Additional content / chart -->
+                <!-- <div class="content trading-card2"></div> -->
+            <!-- <canvas id="portfolioPieChart" style="width:300px !important; height:300px !important;"></canvas> -->
+            </div>
+              </div>
+            </div>          </div>
           <div id="portfolio-options" class="tab-content">
             <div id="options-portfolio-card" ><!-- Options will render here --></div>
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Goals Section -->
 <div class="sections" id="leaderboard-section">
@@ -186,7 +227,7 @@
         <li><a href="/privacy" target="_blank">Privacy Policy</a></li>
     </ul>
 </div>
-
+</div>
 
         </div>
 
