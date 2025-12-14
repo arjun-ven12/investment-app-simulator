@@ -4,6 +4,7 @@
 
 const { OAuth2Client } = require("google-auth-library");
 const prisma = require("../../prisma/prismaClient");
+const referralModel = require("../models/referral"); // ✅ IMPORTANT
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
@@ -38,6 +39,7 @@ exports.googleLogin = (req, res) => {
   const scope = "openid email profile";
   const referral = req.query.ref;
 
+  // Store referral temporarily (OAuth-safe)
   if (referral) {
     res.cookie("oauth_ref", referral, {
       httpOnly: true,
@@ -66,16 +68,20 @@ exports.googleCallback = async (req, res) => {
     const code = req.query.code;
     if (!code) return res.status(400).json({ message: "Missing code" });
 
-    // Clear referral cookie immediately (one-time use)
+    // One-time use
     res.clearCookie("oauth_ref");
 
+    // ---------------------------------------------------------
     // 1) Exchange code for tokens
+    // ---------------------------------------------------------
     const { tokens } = await client.getToken({
       code,
       redirect_uri: GOOGLE_REDIRECT_URI,
     });
 
+    // ---------------------------------------------------------
     // 2) Verify ID token
+    // ---------------------------------------------------------
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
       audience: GOOGLE_CLIENT_ID,
@@ -84,12 +90,14 @@ exports.googleCallback = async (req, res) => {
     const payload = ticket.getPayload();
     const { email, name, sub: googleId } = payload;
 
+    // ---------------------------------------------------------
     // 3) Check for existing user
+    // ---------------------------------------------------------
     let user = await prisma.user.findUnique({ where: { email } });
 
-    // ============================================================
+    // =========================================================
     // CASE A — EXISTING USER (NO REFERRAL APPLIED)
-    // ============================================================
+    // =========================================================
     if (user) {
       if (!user.googleId && user.password) {
         user = await prisma.user.update({
@@ -115,9 +123,9 @@ exports.googleCallback = async (req, res) => {
       );
     }
 
-    // ============================================================
+    // =========================================================
     // CASE B — BRAND NEW USER (REFERRAL ELIGIBLE)
-    // ============================================================
+    // =========================================================
 
     // Ensure unique username
     let base = email.split("@")[0];
@@ -140,31 +148,21 @@ exports.googleCallback = async (req, res) => {
       },
     });
 
-    // ------------------------------------------------------------
-    // Apply referral ONLY if:
-    // - referral exists
-    // - referrer exists
-    // - not self-referral
-    // ------------------------------------------------------------
+    // ---------------------------------------------------------
+    // APPLY REFERRAL (SAME LOGIC AS NORMAL SIGNUP)
+    // ---------------------------------------------------------
     if (referralCode) {
-      const referrer = await prisma.referral.findFirst({
-        where: {
-          referralLink: { contains: referralCode },
-        },
-        include: { user: true },
-      });
-
-      if (referrer && referrer.user.email !== email) {
-        await prisma.referral.update({
-          where: { id: referrer.id },
-          data: {
-            referralSignups: { increment: 1 },
-          },
-        });
+      try {
+        await referralModel.useReferralLink(newUser.id, referralCode);
+      } catch (err) {
+        // Safe ignore — prevents breaking signup
+        console.warn("Google referral ignored:", err.message);
       }
     }
 
-    // Create referral profile for new user
+    // ---------------------------------------------------------
+    // Create referral profile for the NEW user
+    // ---------------------------------------------------------
     const referralCodeUse = crypto.randomBytes(5).toString("hex");
     const userReferralLink = `https://theblacksealed.com/r/${username}-${referralCodeUse}`;
 
