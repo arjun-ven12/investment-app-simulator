@@ -96,6 +96,8 @@ require('./middlewares/limitOrderCron');
 require('./middlewares/databasePriceCron');
 require('./middlewares/optionDatabaseCron');
 require('./middlewares/optionSettleCron');
+require('./middlewares/priceUpdateCron');
+
 // require('dotenv').config();
 // require('./middlewares/limitOrderCron');
 // require('./middlewares/databasePriceCron');
