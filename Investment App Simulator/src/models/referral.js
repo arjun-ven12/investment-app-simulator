@@ -67,21 +67,76 @@ module.exports.createReferral = async function createReferral(userId) {
 };
 
 //////////////////////////////////////////////////////
-// USE REFERRAL LINK
+// USE REFERRAL LINK (NORMALIZED + VERIFICATION SAFE)
 //////////////////////////////////////////////////////
-module.exports.useReferralLink = async function useReferralLink(userId, referralLink) {
-  if (!userId || isNaN(userId)) throw new Error('Invalid user ID');
+module.exports.useReferralLink = async function useReferralLink(userId, input) {
+  if (!userId || isNaN(userId)) {
+    throw new Error("Invalid user ID");
+  }
+  if (!input) {
+    throw new Error("Referral code missing");
+  }
 
-  const referral = await prisma.referral.findUnique({ where: { referralLink } });
-  if (!referral) throw new Error('Referral link not found');
-  if (referral.userId === userId) throw new Error('Cannot use your own referral link');
+  // -------------------------------------------------
+  // 1️⃣ NORMALIZE INPUT → extract the actual code
+  // -------------------------------------------------
+  let referralCode = input.trim();
+
+  // Full URL → extract last segment
+  try {
+    if (referralCode.startsWith("http")) {
+      const url = new URL(referralCode);
+      referralCode = url.pathname.split("/").pop();
+    }
+  } catch {
+    // ignore malformed URLs
+  }
+
+  // /r/xyz → xyz
+  if (referralCode.includes("/")) {
+    referralCode = referralCode.split("/").pop();
+  }
+
+  if (!referralCode) {
+    throw new Error("Invalid referral code");
+  }
+
+  // -------------------------------------------------
+  // 2️⃣ FIND REFERRAL BY *CODE*, NOT FULL URL
+  // -------------------------------------------------
+  const referral = await prisma.referral.findFirst({
+    where: {
+      referralLink: {
+        endsWith: referralCode, // ✅ THIS is the key
+      },
+    },
+  });
+
+  if (!referral) {
+    throw new Error("Referral code not found");
+  }
+
+  // -------------------------------------------------
+  // 3️⃣ PREVENT ABUSE
+  // -------------------------------------------------
+  if (referral.userId === userId) {
+    throw new Error("Cannot use your own referral code");
+  }
 
   const alreadyUsed = await prisma.referralUsage.findFirst({
-    where: { userId, referralId: referral.id },
+    where: {
+      userId,
+      referralId: referral.id,
+    },
   });
-  if (alreadyUsed) throw new Error('Referral already used by this user');
 
-  // Create pending referral usage
+  if (alreadyUsed) {
+    throw new Error("Referral already used by this user");
+  }
+
+  // -------------------------------------------------
+  // 4️⃣ CREATE *PENDING* REFERRAL (credits later)
+  // -------------------------------------------------
   await prisma.referralUsage.create({
     data: {
       userId,
@@ -90,7 +145,9 @@ module.exports.useReferralLink = async function useReferralLink(userId, referral
     },
   });
 
-  return { message: "Referral recorded. Reward released after email verification." };
+  return {
+    message: "Referral recorded. Reward will be released after verification.",
+  };
 };
 
 
