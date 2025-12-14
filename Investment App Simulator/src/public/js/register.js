@@ -2,7 +2,36 @@ document.addEventListener("DOMContentLoaded", function () {
   const registerForm = document.getElementById("registerForm");
   const warningCard = document.getElementById("warningCard");
   const warningText = document.getElementById("warningText");
+  (function handleReferralFromURL() {
+  const referralInput = document.getElementById("referralCode");
+  if (!referralInput) return;
 
+  let referral = null;
+  const pathParts = window.location.pathname.split("/");
+
+  // /r/:code
+  if (pathParts[1] === "r" && pathParts[2]) {
+    referral = pathParts[2];
+  }
+
+  // /referral/:code
+  if (!referral && pathParts[1] === "referral" && pathParts[2]) {
+    referral = pathParts[2];
+  }
+
+  // ?ref=code
+  const params = new URLSearchParams(window.location.search);
+  if (!referral && params.has("ref")) {
+    referral = params.get("ref");
+  }
+
+  if (referral) {
+    referralInput.value = referral;
+    referralInput.readOnly = true;
+    referralInput.classList.add("auto-filled");
+  sessionStorage.setItem("pendingReferral", referral);
+  }
+})();
   registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -67,7 +96,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- Google Sign-In ---
 document.getElementById("googleSignInBtn").addEventListener("click", () => {
-  window.location.href = `${window.location.origin}/auth/google`;
+  const ref = sessionStorage.getItem("pendingReferral");
+  const url = ref
+    ? `/auth/google?ref=${encodeURIComponent(ref)}`
+    : `/auth/google`;
+
+  window.location.href = url;
 });
 
 
@@ -155,3 +189,5 @@ function smoothToggle(input, type) {
 document.getElementById("microsoftSignInBtn").addEventListener("click", () => {
   window.location.href = `${window.location.origin}/auth/microsoft`;
 });
+
+

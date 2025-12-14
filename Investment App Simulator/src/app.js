@@ -1,6 +1,7 @@
 const express = require('express');
 const createError = require('http-errors');
 const path = require('path');
+const cookieParser = require("cookie-parser");
 
 // Routers
 const taskRouter = require('./routers/Task.router');
@@ -42,9 +43,20 @@ const aiAdviceRoutes = require("./routers/aiAdvice");
 const authRoutes = require("./routers/auth");
 const aiSettingsRouter = require('./routers/aiSettings');
 const app = express();
+app.use(cookieParser());
 
 // Middleware for parsing JSON requests
 app.use(express.json());
+// ============================================================
+// REFERRAL SHORT LINK: /r/:code  ->  /register?ref=...
+// MUST be ABOVE the 404 handler
+// ============================================================
+app.get("/r/:code", (req, res) => {
+  const referralCode = req.params.code;
+
+  // Redirect to register page with referral attached
+  return res.redirect(`/register?ref=${encodeURIComponent(referralCode)}`);
+});
 
 // Debug middleware to log incoming request body
 app.use((req, res, next) => {

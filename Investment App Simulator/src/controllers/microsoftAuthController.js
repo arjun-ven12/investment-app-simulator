@@ -74,7 +74,7 @@ exports.microsoftCallback = async (req, res) => {
 
       // 5️⃣ Auto-create referral record
       const referralCodeUse = crypto.randomBytes(5).toString("hex");
-      const userReferralLink = `https://theblacksealed.com/referral/${username}-${referralCodeUse}`;
+      const userReferralLink = `https://theblacksealed.com/r/${username}-${referralCodeUse}`;
 
       await prisma.referral.create({
         data: {

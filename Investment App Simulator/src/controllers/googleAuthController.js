@@ -14,18 +14,15 @@ const APP_URL = process.env.APP_URL;
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
-// ⚠️ Make sure your User model has:
-//   termsAccepted   Boolean @default(false)
-//   termsAcceptedAt DateTime?
-// in Prisma.
-
 const client = new OAuth2Client({
   clientId: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
   redirectUri: GOOGLE_REDIRECT_URI,
 });
 
-// Small helper to issue JWT
+// ============================================================
+// Helper — Issue JWT
+// ============================================================
 function issueJwt(user) {
   return jwt.sign(
     { id: user.id, email: user.email, username: user.username },
@@ -35,10 +32,19 @@ function issueJwt(user) {
 }
 
 // ============================================================
-// STEP 1 — Redirect user to Google
+// STEP 1 — Redirect user to Google (capture referral)
 // ============================================================
 exports.googleLogin = (req, res) => {
   const scope = "openid email profile";
+  const referral = req.query.ref;
+
+  if (referral) {
+    res.cookie("oauth_ref", referral, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 10 * 60 * 1000, // 10 minutes
+    });
+  }
 
   const authUrl =
     "https://accounts.google.com/o/oauth2/v2/auth?" +
@@ -54,9 +60,14 @@ exports.googleLogin = (req, res) => {
 // STEP 2 — Handle Google callback
 // ============================================================
 exports.googleCallback = async (req, res) => {
+  const referralCode = req.cookies?.oauth_ref || null;
+
   try {
     const code = req.query.code;
     if (!code) return res.status(400).json({ message: "Missing code" });
+
+    // Clear referral cookie immediately (one-time use)
+    res.clearCookie("oauth_ref");
 
     // 1) Exchange code for tokens
     const { tokens } = await client.getToken({
@@ -73,14 +84,13 @@ exports.googleCallback = async (req, res) => {
     const payload = ticket.getPayload();
     const { email, name, sub: googleId } = payload;
 
-    // 3) Look for existing user by email
+    // 3) Check for existing user
     let user = await prisma.user.findUnique({ where: { email } });
 
     // ============================================================
-    // CASE A — USER ALREADY EXISTS
+    // CASE A — EXISTING USER (NO REFERRAL APPLIED)
     // ============================================================
     if (user) {
-      // If they originally signed up with email/password, link Google
       if (!user.googleId && user.password) {
         user = await prisma.user.update({
           where: { email },
@@ -90,7 +100,6 @@ exports.googleCallback = async (req, res) => {
 
       const token = issueJwt(user);
 
-      // If user has NOT accepted terms → send to terms page with token
       if (!user.termsAccepted) {
         return res.redirect(
           `${APP_URL}/html/google-terms.html?email=${encodeURIComponent(
@@ -99,7 +108,6 @@ exports.googleCallback = async (req, res) => {
         );
       }
 
-      // Already accepted terms → go straight to callback (your existing flow)
       return res.redirect(
         `${APP_URL}/html/google-callback.html?token=${encodeURIComponent(
           token
@@ -108,8 +116,9 @@ exports.googleCallback = async (req, res) => {
     }
 
     // ============================================================
-    // CASE B — BRAND NEW GOOGLE USER
+    // CASE B — BRAND NEW USER (REFERRAL ELIGIBLE)
     // ============================================================
+
     // Ensure unique username
     let base = email.split("@")[0];
     let username = base;
@@ -119,7 +128,6 @@ exports.googleCallback = async (req, res) => {
       username = `${base}${count++}`;
     }
 
-    // Create user with termsAccepted = false
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -132,9 +140,33 @@ exports.googleCallback = async (req, res) => {
       },
     });
 
-    // Create referral profile for this new user
+    // ------------------------------------------------------------
+    // Apply referral ONLY if:
+    // - referral exists
+    // - referrer exists
+    // - not self-referral
+    // ------------------------------------------------------------
+    if (referralCode) {
+      const referrer = await prisma.referral.findFirst({
+        where: {
+          referralLink: { contains: referralCode },
+        },
+        include: { user: true },
+      });
+
+      if (referrer && referrer.user.email !== email) {
+        await prisma.referral.update({
+          where: { id: referrer.id },
+          data: {
+            referralSignups: { increment: 1 },
+          },
+        });
+      }
+    }
+
+    // Create referral profile for new user
     const referralCodeUse = crypto.randomBytes(5).toString("hex");
-    const userReferralLink = `https://theblacksealed.com/referral/${username}-${referralCodeUse}`;
+    const userReferralLink = `https://theblacksealed.com/r/${username}-${referralCodeUse}`;
 
     await prisma.referral.create({
       data: {
@@ -149,10 +181,8 @@ exports.googleCallback = async (req, res) => {
       },
     });
 
-    // Issue a token NOW so they don't need to login again after terms
     const token = issueJwt(newUser);
 
-    // Send them to terms page with email + token
     return res.redirect(
       `${APP_URL}/html/google-terms.html?email=${encodeURIComponent(
         email
@@ -165,15 +195,13 @@ exports.googleCallback = async (req, res) => {
 };
 
 // ============================================================
-// STEP 3 — Accept Terms (called from google-terms.html)
+// STEP 3 — Accept Google Terms
 // ============================================================
 exports.acceptGoogleTerms = async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
+    if (!email)
       return res.json({ success: false, message: "Email not provided" });
-    }
 
     await prisma.user.update({
       where: { email },
