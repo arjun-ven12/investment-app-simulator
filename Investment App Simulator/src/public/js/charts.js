@@ -751,7 +751,7 @@ intradayForm.addEventListener('submit', async function (e) {
     loadingDiv.innerText = "Loading chart...";
     loadingDiv.style.color = "#ffffffff";
     loadingDiv.style.padding = "10px 0";
-    const symbolValue = chartSymbolInput.value.trim();
+    const symbolValue = chartSymbolInput.value.trim().toUpperCase();
     const rangeValue = rangeSelect.value;
     const chartType = chartTypeSelect.value;
 
