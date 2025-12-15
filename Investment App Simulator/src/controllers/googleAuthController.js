@@ -201,7 +201,7 @@ exports.acceptGoogleTerms = async (req, res) => {
     if (!email)
       return res.json({ success: false, message: "Email not provided" });
 
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { email },
       data: {
         termsAccepted: true,
@@ -209,7 +209,11 @@ exports.acceptGoogleTerms = async (req, res) => {
       },
     });
 
+    // 🔥 FINALISE REFERRAL HERE
+    await referralModel.finalizeReferral(user.id);
+
     return res.json({ success: true });
+
   } catch (err) {
     console.error("❌ Error accepting Google terms:", err);
     return res.json({ success: false, message: "Server error" });
