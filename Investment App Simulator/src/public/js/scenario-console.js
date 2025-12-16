@@ -13,6 +13,80 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 400);
   }, 3000);
 }
+// Global chart instances (separate charts for main + end modal)
+window._portfolioCharts = window._portfolioCharts || new Map();
+
+window.updatePortfolioUI = function updatePortfolioUI(positions, ctx, container, chartKey = "main") {
+  if (!container) return;
+
+  // Empty state
+  if (!positions || positions.length === 0) {
+    container.innerHTML = '<p style="color:#888;">No stocks in portfolio.</p>';
+    // destroy chart if exists
+    const existing = window._portfolioCharts.get(chartKey);
+    if (existing) {
+      existing.destroy();
+      window._portfolioCharts.delete(chartKey);
+    }
+    return;
+  }
+
+  // ----- Cards -----
+  container.innerHTML = "";
+  positions.forEach(pos => {
+    const card = document.createElement("div");
+    card.className = "company-card-content stock-column animate-slideup";
+    card.dataset.symbol = pos.symbol;
+
+    const u = Number(pos.unrealizedPnL || 0);
+    const r = Number(pos.realizedPnL || 0);
+
+    card.innerHTML = `
+      <h2 style="margin-bottom:4px;">${pos.symbol}</h2>
+      <p><strong>Quantity:</strong> ${pos.quantity}</p>
+      <p><strong>Avg Buy Price:</strong> $${pos.avgBuyPrice}</p>
+      <p><strong>Current Price:</strong> $${pos.currentPrice}</p>
+      <p><strong>Total Invested:</strong> $${pos.totalInvested}</p>
+      <p><strong>Current Value:</strong> $${pos.currentValue}</p>
+      <p><strong>Unrealized P&L:</strong>
+        <span style="color:${u >= 0 ? "#0f0" : "#f00"};">$${pos.unrealizedPnL}</span>
+      </p>
+      <p><strong>Realized P&L:</strong>
+        <span style="color:${r >= 0 ? "#0f0" : "#f00"};">$${pos.realizedPnL}</span>
+      </p>
+    `;
+    container.appendChild(card);
+  });
+
+  // ----- Chart -----
+  if (!ctx) return; // cards still render if no chart canvas
+
+  const labels = positions.map(p => p.symbol);
+  const values = positions.map(p => parseFloat(p.currentValue || 0));
+
+  let chart = window._portfolioCharts.get(chartKey);
+  if (!chart) {
+    chart = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels,
+        datasets: [{ data: values, borderWidth: 1 }]
+      },
+      options: {
+        responsive: true,
+        animation: { duration: 500 },
+        plugins: {
+          legend: { position: "top", labels: { color: "#fff" } }
+        }
+      }
+    });
+    window._portfolioCharts.set(chartKey, chart);
+  } else {
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = values;
+    chart.update("active");
+  }
+};
 
 
 const limitPriceInput = document.getElementById("limitPrice");
@@ -1532,6 +1606,7 @@ async function showEndScreen() {
         <ul>${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
         <p style="font-size:12px;color:#aaa;">${ai.disclaimer}</p>
       `;
+      updatePortfolioUI(positions, ctx, stockCardsContainer, "end");
     }
 
   } catch (err) {
@@ -1658,6 +1733,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // Initial render
     refreshPortfolioData();
+    updatePortfolioUI(data.positions, ctx, stockCardsContainer, "main");
 
     // Expose refresh globally
     window.fetchPortfolio = refreshPortfolioData;
