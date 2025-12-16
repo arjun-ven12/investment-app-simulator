@@ -291,54 +291,76 @@
       </div>
 
       <div id="endScreenModal" class="modal">
-        <div class="modal-content endgame">
-          <header class="end-header">
-            <h1>Scenario Complete</h1>
-            <p class="end-sub">Your results are locked in, and our AI has analyzed your performance.</p>
-            <p class="end-sub soft">Review your insights below, then start a new attempt whenever you’re ready.
-              <em>Each new run resets your balance and positions so you can try different strategies.</em>
-            </p>
-          </header>
-          <!-- Quick summary row -->
-          <div class="end-summary">
-            <div class="card kpi">
-              <div class="kpi-label">Final Portfolio Value</div>
-              <div id="kpi-total" class="kpi-value">—</div>
-            </div>
-            <div class="card kpi">
-              <div class="kpi-label">Cash Remaining</div>
-              <div id="kpi-cash" class="kpi-value">—</div>
-            </div>
-            <div class="card kpi">
-              <div class="kpi-label">Return</div>
-              <div id="kpi-return" class="kpi-value">—</div>
-            </div>
-            <div class="card kpi pb-badge" id="pbBadge" style="display:none;">New Personal Best 🎉</div>
-          </div>
-          <!-- Portfolio recap -->
-          <div class="portfolio-layout">
-            <div class="portfolio-chart-container">
-              <canvas id="endPortfolioChart" class="fullscreen-chart"></canvas>
-            </div>
-            <div id="endStockCards" class="positions-section"></div>
-          </div>
-          <!-- AI insights -->
-          <div id="aiAdviceContainer" class="ai-block">
-            <p class="muted">Generating AI advice… <span class="loading-dots">…</span></p>
-          </div>
-          <!-- Actions -->
-          <div class="buttons end-actions">
-            <button id="closeEndScreen" class="btn ghost bs-btn" data-tooltip="Close this summary">
-              Close
-            </button>
+  <div class="modal-content endgame">
 
-            <button id="generateMoreInsights" class="btn secondary bs-btn"
-              data-tooltip="Ask AI for more detailed insights">
-              Generate More Insights
-            </button>
-          </div>
-        </div>
+    <!-- HEADER -->
+    <header class="end-header">
+      <h1 class="end-title">Scenario Complete</h1>
+      <p class="end-sub">Your strategy has been evaluated.</p>
+      <p class="end-sub soft">
+        Results are locked. Review your performance below.
+      </p>
+    </header>
+
+    <!-- KPI SUMMARY -->
+    <section class="end-summary">
+      <div class="card kpi">
+        <div class="kpi-label">Final Portfolio Value</div>
+        <div id="kpi-total" class="kpi-value">—</div>
       </div>
+
+      <div class="card kpi">
+        <div class="kpi-label">Cash Remaining</div>
+        <div id="kpi-cash" class="kpi-value">—</div>
+      </div>
+
+      <div class="card kpi">
+        <div class="kpi-label">Return</div>
+        <div id="kpi-return" class="kpi-value">—</div>
+      </div>
+
+      <div class="card kpi pb-badge" id="pbBadge" style="display:none;">
+        New Personal Best 🎉
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section>
+      <h2 class="section-title">Portfolio Breakdown</h2>
+      <div class="portfolio-layout">
+        <div class="portfolio-chart-container">
+          <canvas id="endPortfolioChart"></canvas>
+        </div>
+        <div id="endStockCards" class="positions-section"></div>
+      </div>
+    </section>
+
+    <!-- AI VERDICT -->
+    <section class="ai-block">
+      <h2 class="section-title">AI Verdict</h2>
+      <div id="aiAdviceContainer">
+        <p class="muted">Analyzing performance…</p>
+      </div>
+    </section>
+
+    <!-- ACTIONS -->
+    <div class="end-actions">
+      <button id="closeEndScreen" class="btn ghost">
+        Close Summary
+      </button>
+      <button id="generateMoreInsights" class="btn primary">
+        Deep Dive Analysis →
+      </button>
+    </div>
+
+    <!-- FOOTNOTE -->
+    <p class="end-footnote">
+      Every new attempt resets the market. The strategy is yours to refine.
+    </p>
+
+  </div>
+</div>
+
     </div>
     <!-- </div> -->
   <footer class="bs-footer">

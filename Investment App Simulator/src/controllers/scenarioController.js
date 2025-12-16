@@ -507,7 +507,6 @@ module.exports.getScenarioEndingSummary = async (req, res = null, internal = fal
     const summaryPayload = {
       wallet,
       trades,
-      intraday: intradayData,
       intradaySummary: summariseIntradayForAI(intradayData),
       totalPortfolioValue,
       summary: portfolio.summary,

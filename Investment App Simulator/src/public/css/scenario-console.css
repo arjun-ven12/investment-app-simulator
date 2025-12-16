@@ -1409,3 +1409,155 @@ select option {
   color: #fff !important;
   padding: 10px;
 }
+
+
+/* ===== END SCREEN POLISH ===== */
+
+.end-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.end-sub {
+  margin: 4px 0;
+  color: #ddd;
+}
+
+.end-sub.soft {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.section-title {
+  margin: 14px 0 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: #E0EBFF;
+  text-transform: uppercase;
+}
+
+.end-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.card.kpi {
+  background: #0e0e14;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 14px;
+  animation: kpiFadeUp 0.35s ease forwards;
+}
+
+@keyframes kpiFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: #aaa;
+  letter-spacing: 0.06em;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.kpi-value.positive {
+  color: #7CFC00;
+  text-shadow: 0 0 10px rgba(124,252,0,0.3);
+}
+
+.kpi-value.negative {
+  color: #FF6B6B;
+  text-shadow: 0 0 10px rgba(255,107,107,0.3);
+}
+
+.ai-block {
+  background: linear-gradient(
+    145deg,
+    rgba(20,20,30,0.95),
+    rgba(10,10,20,0.95)
+  );
+  border: 1px solid rgba(224,235,255,0.2);
+  border-radius: 16px;
+  padding: 16px;
+  animation: aiReveal 0.4s ease forwards;
+}
+
+@keyframes aiReveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.end-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.btn.primary {
+  background: #E0EBFF;
+  color: #000;
+  font-weight: 600;
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+}
+
+.end-footnote {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 14px;
+}.ai-verdict.hidden {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.ai-verdict {
+  transition: all 0.5s ease;
+}
+
+.ai-verdict.show-points .ai-reactive-points {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ai-reactive-points {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.4s ease;
+}
+
+.ai-suggestions {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.4s ease;
+}
+
+.ai-verdict.show-suggestions .ai-suggestions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ai-recap {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.ai-disclaimer {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 10px;
+}
+

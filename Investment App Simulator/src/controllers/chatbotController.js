@@ -332,12 +332,12 @@ USER PREFERENCES:
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
     const scenarioSummary = summaryData?.data || summaryData;
-    const intradaySummary = summaryData.intradaySummary; 
+    const intradaySummary = summaryData.intradaySummary;
     const portfolio = await scenarioController.getUserScenarioPortfolio(
       mockReq,
       mockRes
     );
-   const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
     // 🧠 Prepare prompt for AI
     const prompt = `
     ${prefBlock}
@@ -490,8 +490,16 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
     };
     const summaryData = await scenarioController.getScenarioEndingSummary(
       mockReq,
-      mockRes
+      null,
+      true // 🔥 THIS IS NON-OPTIONAL
     );
+    const {
+      intradaySummary,
+      trades,
+      totalPortfolioValue,
+      summary,
+      isPersonalBest
+    } = summaryData;
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
     const scenarioSummary = summaryData?.data || summaryData;
@@ -502,6 +510,29 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
     const wallet = await scenarioModel.getParticipantWallet;
 
     const prompt = `
+    ### INPUT DATA
+
+Scenario Details:
+${JSON.stringify({
+  title: scenarioDetails.title,
+  volatility: scenarioDetails.volatility,
+  startDate: scenarioDetails.startDate,
+  endDate: scenarioDetails.endDate
+}, null, 2)}
+
+Market Behaviour (Summarised):
+${JSON.stringify(intradaySummary, null, 2)}
+
+Portfolio Performance:
+${JSON.stringify({
+  trades,
+  totalPortfolioValue,
+  wallet,
+  realizedPnL: summary?.realizedPnL,
+  unrealizedPnL: summary?.unrealizedPnL,
+  isPersonalBest
+}, null, 2)}
+
 SYSTEM:
 You are a **financial coach** for paper traders in simulations. 
 Tone: ${getToneProfile(aiSettings.aiTone)}
@@ -552,18 +583,7 @@ Provide in **JSON**:
 - Tailor nextTimeTry based on volatility. 
 - Add in $ for all prices. 
 
-### INPUT DATA
-Scenario Details:
-${JSON.stringify(scenarioDetails, null, 2)}
 
-Scenario Summary:
-${JSON.stringify(scenarioSummary, null, 2)}
-
-Scenario Wallet:
-${JSON.stringify(wallet, null, 2)}
-
-Portfolio:
-${JSON.stringify(portfolio, null, 2)}
 
 `;
 
@@ -591,7 +611,7 @@ module.exports.getUserOptionAdvice = async (req, res) => {
   try {
     // A) Pull raw trades (counts, order types, holding days) + portfolio (authoritative P&L)
     const trades = await optionsModel.getUserOptionTrades(userId);
-const aiSettings = await loadUserAISettings(userId);
+    const aiSettings = await loadUserAISettings(userId);
 
     const portfolioRes = await optionsModel.getUserOptionPortfolio(parseInt(userId, 10));
     const portfolio = Array.isArray(portfolioRes?.portfolio) ? portfolioRes.portfolio : [];

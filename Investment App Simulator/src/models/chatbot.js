@@ -49,7 +49,7 @@ Risk Tolerance: ${settings.riskTolerance}
 const generateResponse = async (
   prompt,
   model = "gpt-4o-mini",
-  max_tokens = 150
+  max_tokens = 1500
 ) => {
   try {
     const completion = await openai.chat.completions.create({

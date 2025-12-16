@@ -1,5 +1,19 @@
 const scenarioId = new URLSearchParams(window.location.search).get("scenarioId");
 const userId = localStorage.getItem("userId");
+const CHART_THEME = {
+  primary: "#7AA2FF",
+  secondary: "#b3abffff",
+  muted: "#000000ff",
+  grid: "rgba(255,255,255,0.08)",
+  axis: "#000000ff",
+  pie: [
+"rgba(122,162,255,0.95)", // primary focus
+  "rgba(122,162,255,0.75)",
+  "rgba(122,162,255,0.55)",
+  "rgba(122,162,255,0.35)",
+  "rgba(122,162,255,0.25)"
+  ]
+};
 
 /* 🧠 Markdown Renderer for AI Advice */
 function renderAiAdviceMarkdown(aiTextString) {
@@ -93,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const pieCtx = portfolioPieChartEl.getContext("2d");
       const pieLabels = chartData.trades.map(t => t.symbol);
       const pieValues = chartData.trades.map(t => Number(t.currentValue));
-      const pieColors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
+      const pieColors = CHART_THEME.pie;
 
       new Chart(pieCtx, {
         type: "pie",
@@ -102,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           datasets: [{
             data: pieValues,
             backgroundColor: pieColors,
-            borderColor: "#53596B",
+            borderColor: "#000000ff",
             borderWidth: 2,
           }],
         },
@@ -152,15 +166,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (intradayChartEl && chartData.intraday && Object.keys(chartData.intraday).length) {
       const ctx = intradayChartEl.getContext("2d");
       const datasets = Object.entries(chartData.intraday).map(([symbol, stock], idx) => {
-        const colors = ["#E0EBFF", "#ff6b81", "#1e90ff", "#2ed573", "#ffa502"];
+        const colors = [
+  CHART_THEME.primary,
+  CHART_THEME.secondary,
+  "#6C8CFF",
+  "#8F7CFF",
+  "#5A78E0"
+];
+
         return {
-          label: symbol,
-          data: (stock.intraday || []).map(d => ({ x: new Date(d.date), y: d.closePrice })),
-          borderColor: colors[idx % colors.length],
-          borderWidth: 2,
-          fill: false,
-          tension: 0.25,
-        };
+  label: symbol,
+  data: stock.intraday.map(d => ({ x: new Date(d.date), y: d.closePrice })),
+  borderColor: colors[idx % colors.length],
+  backgroundColor: colors[idx % colors.length],
+  borderWidth: 2.2,
+  tension: 0.35,
+  pointRadius: 0,              // 🔥 smoother
+  pointHoverRadius: 4,
+};
+
       });
 
       const intradayChart = new Chart(ctx, {
@@ -181,7 +205,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               time: { unit: "hour" },
               title: { display: true, text: "Time", color: "#E0EBFF" },
               ticks: { color: "#E0EBFF" },
-              grid: { color: "#53596B" },
+              grid: {
+  color: CHART_THEME.grid,
+  drawBorder: false
+},
             },
             y: {
               title: { display: true, text: "Price ($)", color: "#E0EBFF" },

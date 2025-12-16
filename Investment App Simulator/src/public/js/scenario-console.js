@@ -1593,19 +1593,29 @@ async function showEndScreen() {
       const ai = JSON.parse(cleaned);
 
       aiAdviceContainer.innerHTML = `
-        <hr style="border-color:#555;margin:12px 0;">
-        <h2>AI Advice</h2>
-        <p><strong>${ai.recap}</strong></p>
-        <ul>
-          <li><b>Top Gainers:</b> ${ai.portfolioHighlights?.topGainers?.join(", ") || "-"}</li>
-          <li><b>Top Losers:</b> ${ai.portfolioHighlights?.topLosers?.join(", ") || "-"}</li>
-          <li><b>Total Unrealized P/L:</b> ${ai.portfolioHighlights?.totalUnrealizedPL || "-"}</li>
-          <li><b>Cash Remaining:</b> ${ai.portfolioHighlights?.cashRemaining || wallet.toFixed(2)}</li>
-        </ul>
-        <h3>Next Time, Try:</h3>
-        <ul>${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}</ul>
-        <p style="font-size:12px;color:#aaa;">${ai.disclaimer}</p>
-      `;
+  <div class="ai-verdict hidden">
+    <p class="ai-recap"><strong>${ai.recap}</strong></p>
+
+    <div class="ai-reactive-points">
+      <p><b>Top Gainers:</b> ${ai.portfolioHighlights?.topGainers?.join(", ") || "-"}</p>
+      <p><b>Top Losers:</b> ${ai.portfolioHighlights?.topLosers?.join(", ") || "-"}</p>
+      <p><b>Cash Remaining:</b> ${ai.portfolioHighlights?.cashRemaining || wallet.toFixed(2)}</p>
+    </div>
+
+    <h4 class="ai-next">Next time, consider:</h4>
+    <ul class="ai-suggestions">
+      ${(ai.nextTimeTry || []).map(t => `<li>${t}</li>`).join("")}
+    </ul>
+
+    <p class="ai-disclaimer">${ai.disclaimer}</p>
+  </div>
+`;
+const verdict = aiAdviceContainer.querySelector(".ai-verdict");
+
+setTimeout(() => verdict.classList.remove("hidden"), 300);
+setTimeout(() => verdict.classList.add("show-points"), 700);
+setTimeout(() => verdict.classList.add("show-suggestions"), 1100);
+
       updatePortfolioUI(positions, ctx, stockCardsContainer, "end");
     }
 
