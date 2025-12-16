@@ -53,7 +53,8 @@ function renderAiAdviceMarkdown(aiTextString) {
   if (html.includes("<table") && !html.includes("</table>")) html += "</tbody></table>";
 
   // ✅ Wrap in styled container
-  return `<div class="ai-advice-content" style="color:#E0EBFF; padding-left:1rem;">${html}</div>`;
+return `<div class="ai-advice-content">${html}</div>`;
+
 }
 
 /* 🧩 Main Logic */
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
       });
 
-      new Chart(ctx, {
+      const intradayChart = new Chart(ctx, {
         type: "line",
         data: { datasets },
         options: {
@@ -190,6 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         },
       });
+      window.intradayChart = intradayChart;
     } else {
       // 🧠 No intraday data → user didn’t rerun or finish scenario
       if (intradayChartEl) {
@@ -289,4 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/scenarios";
     }
   });
+});
+document.getElementById("reset-zoom-btn")?.addEventListener("click", () => {
+  window.intradayChart?.resetZoom();
 });

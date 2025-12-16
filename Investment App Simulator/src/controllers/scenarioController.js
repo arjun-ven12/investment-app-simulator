@@ -508,6 +508,7 @@ module.exports.getScenarioEndingSummary = async (req, res = null, internal = fal
       wallet,
       trades,
       intraday: intradayData,
+      intradaySummary: summariseIntradayForAI(intradayData),
       totalPortfolioValue,
       summary: portfolio.summary,
       isPersonalBest: pbResult.isNewPB,
@@ -830,3 +831,39 @@ exports.leaveScenario = async (req, res) => {
     });
   }
 };
+
+
+function summariseIntradayForAI(intradayData) {
+  if (!intradayData || typeof intradayData !== "object") return [];
+
+  return Object.entries(intradayData)
+    .map(([symbol, candles]) => {
+      if (!Array.isArray(candles) || candles.length < 2) return null;
+
+      const prices = candles
+        .map(c => Number(c.close ?? c.c))
+        .filter(n => !isNaN(n));
+
+      if (prices.length < 2) return null;
+
+      const high = Math.max(...prices);
+      const low = Math.min(...prices);
+      const last = prices[prices.length - 1];
+      const rangePct = (high - low) / low;
+
+      return {
+        symbol,
+        lastPrice: Number(last.toFixed(2)),
+        high: Number(high.toFixed(2)),
+        low: Number(low.toFixed(2)),
+        rangePct: Number(rangePct.toFixed(4)),
+        volatilityBucket:
+          rangePct > 0.15 ? "very_high" :
+          rangePct > 0.08 ? "high" :
+          rangePct > 0.04 ? "moderate" :
+          "low"
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.rangePct - a.rangePct);
+}

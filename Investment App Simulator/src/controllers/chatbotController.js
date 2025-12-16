@@ -332,6 +332,7 @@ USER PREFERENCES:
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
     const scenarioSummary = summaryData?.data || summaryData;
+    const intradaySummary = summaryData.intradaySummary; 
     const portfolio = await scenarioController.getUserScenarioPortfolio(
       mockReq,
       mockRes
@@ -451,9 +452,8 @@ ${JSON.stringify(wallet, null, 2)}
 Portfolio:
 ${JSON.stringify(portfolio, null, 2)}
 
-Intraday Data:
-${JSON.stringify(intradayData, null, 2)}
-
+Intraday Volatility Summary:
+${JSON.stringify(intradaySummary, null, 2)}
 `;
 
     const aiAdvice = await chatbotModel.generateScenarioAIAdviceDetailed(
