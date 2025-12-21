@@ -3,7 +3,33 @@
 // ============================================================
 
 // -------------------- API Fetch Functions --------------------
+function showDeletePopup(message) {
+  return new Promise((resolve) => {
+    const popup = document.getElementById("delete-popup");
+    const text = document.getElementById("delete-popup-text");
+    const yesBtn = document.getElementById("confirm-yes");
+    const noBtn = document.getElementById("confirm-no");
 
+    text.textContent = message;
+    popup.classList.remove("hidden");
+
+    const cleanup = () => {
+      popup.classList.add("hidden");
+      yesBtn.onclick = null;
+      noBtn.onclick = null;
+    };
+
+    yesBtn.onclick = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    noBtn.onclick = () => {
+      cleanup();
+      resolve(false);
+    };
+  });
+}
 // Fetch all scenarios (All users)
 async function fetchAllScenarios() {
   const token = localStorage.getItem("token");
@@ -243,41 +269,44 @@ async function renderMyScenarios(filter = "all") {
     removeBtn.className = "my-scenario-btn remove-btn";
     removeBtn.innerHTML = `<i class="fas fa-trash"></i>`;
     removeBtn.addEventListener("click", async () => {
-      const confirmDelete = confirm(`Remove "${s.title}" from your scenarios?`);
-      if (!confirmDelete) return;
 
+      const confirmDelete = await showDeletePopup(
+        `Remove "${s.title}" from your scenarios?`
+      );
+      if (!confirmDelete) return;
+    
       const token = localStorage.getItem("token");
       if (!token) return alert("Login required");
-
+    
       try {
         const res = await fetch(`/scenarios/delete/${s.id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
+    
         const data = await res.json();
+    
         if (data.success) {
           card.style.transition = "all 0.3s ease";
           card.style.opacity = "0";
-
+    
           setTimeout(async () => {
             card.remove();
-
+    
             if (window.forceScenarioRefresh) {
               await window.forceScenarioRefresh();
             }
             if (window.refreshTimelineState) {
               window.refreshTimelineState();
             }
-
+    
             const scenarioList = document.getElementById("scenario-list");
             if (scenarioList && scenarioList.closest(".show")) {
               const allScenarios = await fetchAllScenarios();
               renderScenarios(allScenarios);
             }
-
           }, 250);
         }
-
       } catch (err) {
         console.error("❌ Error removing scenario:", err);
       }

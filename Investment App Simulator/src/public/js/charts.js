@@ -1077,100 +1077,161 @@ async function fetchPortfolio() {
     portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
   }
 }
-
 function renderPortfolio(portfolio) {
-  const { openPositions = [], closedPositions = [] } = portfolio;
+  const { openPositions = [], closedPositions = [] } = portfolio || {};
 
   const openTableBody = document.getElementById("open-positions-table-body");
   const closedTableBody = document.getElementById("closed-positions-table-body");
 
+  const realizedEl = document.getElementById("total-realized-pnl");
+  const unrealizedEl = document.getElementById("total-unrealized-pnl");
+  const totalEl = document.getElementById("total-pnl");
+
   if (!openTableBody || !closedTableBody) return;
 
-  // ---------------- Open Positions ----------------
+  // ================== PnL AGGREGATION ==================
+  const totalUnrealizedPnL = openPositions.reduce(
+    (sum, s) => sum + Number(s.unrealizedProfitLoss || 0),
+    0
+  );
+
+  const realizedFromOpen = openPositions.reduce(
+    (sum, s) => sum + Number(s.realizedProfitLoss || 0),
+    0
+  );
+
+  const realizedFromClosed = closedPositions.reduce(
+    (sum, s) => sum + Number(s.realizedProfitLoss || 0),
+    0
+  );
+
+  const totalRealizedPnL = realizedFromOpen + realizedFromClosed;
+  const totalPnL = totalRealizedPnL + totalUnrealizedPnL;
+
+  // ================== FORMATTERS ==================
+  const formatPnL = (val) =>
+    `${val >= 0 ? "+" : "-"}$${Math.abs(val).toFixed(2)}`;
+
+  const applyColor = (el, val) => {
+    if (!el) return;
+    el.textContent = formatPnL(val);
+    el.style.color =
+      val > 0 ? "#4caf50" :
+      val < 0 ? "#ff5252" :
+      "#aaa";
+  };
+
+  // ================== RENDER SUMMARY ==================
+  applyColor(realizedEl, totalRealizedPnL);
+  applyColor(unrealizedEl, totalUnrealizedPnL);
+  applyColor(totalEl, totalPnL);
+
+  // ================== OPEN POSITIONS ==================
   if (openPositions.length === 0) {
-    openTableBody.innerHTML = `<tr><td colspan="8">You don't have any open positions.</td></tr>`;
+    openTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">You don't have any open positions.</td>
+      </tr>
+    `;
   } else {
-    let openHTML = '';
-    openPositions.forEach(stock => {
-      openHTML += `
+    openTableBody.innerHTML = openPositions.map(stock => {
+      const invested = Number(stock.totalInvested || 0);
+      const unrealized = Number(stock.unrealizedProfitLoss || 0);
+      const unrealizedPct =
+        invested > 0 ? ((unrealized / invested) * 100).toFixed(2) : "0.00";
+
+      return `
         <tr>
           <td>${stock.symbol} (${stock.companyName})</td>
-          <td>${stock.quantity}</td>
-          <td>$${parseFloat(stock.avgBuyPrice).toFixed(2)}</td>
-          <td>$${parseFloat(stock.currentPrice).toFixed(2)}</td>
-          <td>$${parseFloat(stock.totalInvested).toFixed(2)}</td>
-          <td>$${parseFloat(stock.currentValue).toFixed(2)}</td>
-          <td>$${parseFloat(stock.unrealizedProfitLoss).toFixed(2)} (${stock.unrealizedProfitLossPercent})</td>
-          <td>$${parseFloat(stock.realizedProfitLoss).toFixed(2)}</td>
+          <td>${Number(stock.quantity)}</td>
+          <td>$${Number(stock.avgBuyPrice).toFixed(2)}</td>
+          <td>$${Number(stock.currentPrice).toFixed(2)}</td>
+          <td>$${Number(stock.totalInvested).toFixed(2)}</td>
+          <td>$${Number(stock.currentValue).toFixed(2)}</td>
+          <td>
+            $${unrealized.toFixed(2)} (${unrealizedPct}%)
+          </td>
+          <td>$${Number(stock.realizedProfitLoss || 0).toFixed(2)}</td>
         </tr>
       `;
-    });
-    openTableBody.innerHTML = openHTML;
+    }).join("");
   }
 
-  // ---------------- Closed Positions ----------------
+  // ================== CLOSED POSITIONS ==================
   if (closedPositions.length === 0) {
-    closedTableBody.innerHTML = `<tr><td colspan="5">You don't have any closed positions.</td></tr>`;
+    closedTableBody.innerHTML = `
+      <tr>
+        <td colspan="6">You don't have any closed positions.</td>
+      </tr>
+    `;
   } else {
-    let closedHTML = '';
-    closedPositions.forEach(stock => {
-      closedHTML += `
-        <tr>
-          <td>${stock.symbol} (${stock.companyName})</td>
-          <td>${stock.totalBoughtQty}</td>
-
-          <td>${stock.totalSoldQty}</td>
-          <td>$${parseFloat(stock.totalBoughtValue).toFixed(2)}</td>
-          <td>$${parseFloat(stock.totalSoldValue).toFixed(2)}</td>
-          <td>$${parseFloat(stock.realizedProfitLoss).toFixed(2)}</td>
-        </tr>
-      `;
-    });
-    closedTableBody.innerHTML = closedHTML;
+    closedTableBody.innerHTML = closedPositions.map(stock => `
+      <tr>
+        <td>${stock.symbol} (${stock.companyName})</td>
+        <td>${Number(stock.totalBoughtQty)}</td>
+        <td>${Number(stock.totalSoldQty)}</td>
+        <td>$${Number(stock.totalBoughtValue).toFixed(2)}</td>
+        <td>$${Number(stock.totalSoldValue).toFixed(2)}</td>
+        <td>$${Number(stock.realizedProfitLoss).toFixed(2)}</td>
+      </tr>
+    `).join("");
   }
 
-  // ---------------- Pie Chart ----------------
-  const pieCanvas = document.getElementById('portfolioPieChart');
-  if (openPositions.length > 0 && pieCanvas) {
-    if (portfolioChart) portfolioChart.destroy();
+  // ================== PIE CHART ==================
+  const pieCanvas = document.getElementById("portfolioPieChart");
+  if (!pieCanvas || openPositions.length === 0) return;
 
-    const labels = openPositions.map(stock => stock.symbol);
-    const data = openPositions.map(stock => parseFloat(stock.totalInvested));
+  const labels = openPositions.map(s => s.symbol);
+  const data = openPositions.map(s => Number(s.totalInvested || 0));
 
-    portfolioChart = new Chart(pieCanvas.getContext('2d'), {
-      type: 'pie',
-      data: {
-        labels,
-        datasets: [{
+  // Guard against all-zero charts
+  if (data.every(v => v === 0)) return;
+
+  if (portfolioChart) {
+    portfolioChart.destroy();
+    portfolioChart = null;
+  }
+
+  portfolioChart = new Chart(pieCanvas.getContext("2d"), {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [
+        {
           data,
           backgroundColor: [
-            '#8faefd9a', // Strong Buy
-            '#6d93fa61', // Buy
-            '#5277e541', // Hold
-            '#3c5dc9a8', // Sell
-            '#2a3d7399'  // Strong Sell
+            "#8faefd9a",
+            "#6d93fa61",
+            "#5277e541",
+            "#3c5dc9a8",
+            "#2a3d7399"
           ],
           hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { color: '#fff' } },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((context.raw / total) * 100).toFixed(2);
-                return `${context.label}: $${context.raw} (${percentage}%)`;
-              }
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top",
+          labels: { color: "#fff" }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = total
+                ? ((context.raw / total) * 100).toFixed(2)
+                : "0.00";
+              return `${context.label}: $${context.raw.toFixed(2)} (${percentage}%)`;
             }
           }
         }
       }
-    });
-  }
+    }
+  });
 }
 
 // Initial fetch

@@ -317,50 +317,69 @@
 
       <!-- Toast Notification -->
       <div id="toast" class="toast hidden"></div>
-<div class="chart-wrapper">
-  <div class="chart-container">
-<div class="portfolioTables">
-    <!-- Open Positions Table -->
-    <h2>Open Positions</h2>
-    <table id="open-positions-table">
-      <thead>
-        <tr>
-          <th>Stock</th>
-          <th>Quantity</th>
-          <th>Avg Buy Price</th>
-          <th>Current Price</th>
-          <th>Total Invested</th>
-          <th>Current Value</th>
-          <th>Unrealized P/L</th>
-          <th>Realized P/L</th>
-        </tr>
-      </thead>
-      <tbody id="open-positions-table-body"></tbody>
-    </table>
-
-    <!-- Closed Positions Table -->
-    <h2>Closed Positions</h2>
-      <table id="closed-positions-table">
-        <thead>
-          <tr>
-            <th>Stock</th>
-            <th>Total Bought Quantity</th>
-                        <th>Total Sold Quantity</th>
-
-            <th>Total Bought Value</th>
-            <th>Total Sold Value</th>
-            <th>Realized P/L</th>
-          </tr>
-        </thead>
-        <tbody id="closed-positions-table-body"></tbody>
-      </table>
-
-    <!-- Additional content / chart -->
-    <div class="content trading-card2"></div>
-<!-- <canvas id="portfolioPieChart" style="width:300px !important; height:300px !important;"></canvas> -->
-</div>
-  </div>
-</div>
+      <div class="chart-wrapper">
+        <div class="chart-container">
+      
+          <h2>Your Portfolio</h2>
+      <div class="portfolioTables">
+        <div class="pnl-summary">
+        <div class="pnl-card trading-card">
+          <span>Unrealized P/L</span>
+          <strong id="total-unrealized-pnl">$0.00</strong>
+        </div>
+      
+        <div class="pnl-card trading-card">
+          <span>Realized P/L</span>
+          <strong id="total-realized-pnl">$0.00</strong>
+        </div>
+      
+        <div class="pnl-card trading-card total">
+          <span>Total P/L</span>
+          <strong id="total-pnl">$0.00</strong>
+        </div>
+      </div>
+      
+          <!-- Open Positions Table -->
+          <h2>Open Positions</h2>
+          <table id="open-positions-table">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Quantity</th>
+                <th>Avg Buy Price</th>
+                <th>Current Price</th>
+                <th>Total Invested</th>
+                <th>Current Value</th>
+                <th>Unrealized P/L</th>
+                <th>Realized P/L</th>
+              </tr>
+            </thead>
+            <tbody id="open-positions-table-body"></tbody>
+          </table>
+      
+          <!-- Closed Positions Table -->
+          <h2>Closed Positions</h2>
+            <table id="closed-positions-table">
+              <thead>
+                <tr>
+                  <th>Stock</th>
+                  <th>Total Bought Quantity</th>
+                              <th>Total Sold Quantity</th>
+      
+                  <th>Total Bought Value</th>
+                  <th>Total Sold Value</th>
+                  <th>Realized P/L</th>
+                </tr>
+              </thead>
+              <tbody id="closed-positions-table-body"></tbody>
+            </table>
+      
+          <!-- Additional content / chart -->
+          <div class="content trading-card2"></div>
+      <!-- <canvas id="portfolioPieChart" style="width:300px !important; height:300px !important;"></canvas> -->
+      </div>
+        </div>
+      </div>
 
     </div>
 

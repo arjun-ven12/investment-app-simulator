@@ -964,17 +964,34 @@ module.exports.settleExpiredBuyCallTrades = async function () {
       });
 
       // Add shares to holdings
-      await prisma.stockHolding.upsert({
-        where: {
-          userId_stockId: { userId: user.id, stockId: stock.stock_id }
-        },
-        update: { quantity: { increment: quantity * contractSize } },
-        create: {
-          userId: user.id,
-          stockId: stock.stock_id,
-          quantity: quantity * contractSize
-        }
-      });
+// Fetch stock symbol once
+const stockWithSymbol = await prisma.stock.findUnique({
+  where: { stock_id: stock.stock_id },
+  select: { symbol: true }
+});
+if (!stockWithSymbol) continue;
+
+// Add shares to holdings
+await prisma.stockHolding.upsert({
+  where: {
+    userId_stockId: {
+      userId: user.id,
+      stockId: stock.stock_id
+    }
+  },
+  update: {
+    currentQuantity: {
+      increment: quantity * contractSize
+    }
+  },
+  create: {
+    userId: user.id,
+    stockId: stock.stock_id,
+    symbol: stockWithSymbol.symbol,
+    currentQuantity: quantity * contractSize
+  }
+});
+
 
       console.log(
         `🏆 BUY CALL exercised for trade ${trade.id} → delivered ${quantity *
