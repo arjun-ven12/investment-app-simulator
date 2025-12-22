@@ -37,6 +37,32 @@ function initNavbarToggle() {
   });
 }
 
+function enforceAuth() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.log("🚨 No token — forcing logout");
+    forceLogout();
+    return false;
+  }
+
+  const payload = decodeToken(token);
+  if (!payload?.exp) {
+    console.log("🚨 Invalid token — forcing logout");
+    forceLogout();
+    return false;
+  }
+
+  const now = Date.now() / 1000;
+  if (payload.exp < now) {
+    console.log("🚨 Token expired — forcing logout");
+    forceLogout();
+    return false;
+  }
+
+  return true;
+}
+
 /* -----------------------------
    SHOW/HIDE BUTTONS BASED ON LOGIN STATUS
 --------------------------------*/

@@ -2433,3 +2433,18 @@ display: flex !important;
     margin-top: 6px;
     font-size: 1.3rem;
   }
+
+  .form-group label {
+  color: #e5e7eb;
+}
+
+.form-group select {
+  background-color: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+}
+
+.form-group select option {
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
