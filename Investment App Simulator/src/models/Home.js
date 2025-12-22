@@ -1,4 +1,3 @@
-
 const { parse } = require('path');
 const prisma = require('./prismaClient');
 
@@ -6,50 +5,80 @@ const fetch = require("node-fetch");
 const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
  const cron = require('node-cron');
 
-
-const STARTING_WALLET = 100000; // adjust if your starting wallet differs
+const STARTING_WALLET = 100000;
 
 exports.getLeaderboard = async function getLeaderboard(limit = 10) {
   try {
-    // Fetch all users with their most recent trade
     const users = await prisma.user.findMany({
       include: {
         trading: {
-          orderBy: { tradeDate: 'desc' }, // get last trade first
+          orderBy: { tradeDate: "desc" },
           take: 1,
-          include: { stock: true } // include related stock
+          include: { stock: true }
+        },
+        stockHoldings: {
+          include: {
+            stock: {
+              include: {
+                intradayPrice3: {
+                  orderBy: { date: "desc" },
+                  take: 1
+                }
+              }
+            }
+          }
         }
       }
     });
 
-    // Map users to leaderboard entries
     const leaderboardData = users.map(user => {
-      const profitLossPercent = ((parseFloat(user.wallet) - STARTING_WALLET) / STARTING_WALLET) * 100;
+      // ================== OPEN POSITIONS VALUE ==================
+      const openPositionsValue = user.stockHoldings.reduce((sum, holding) => {
+        const latestPrice =
+          holding.stock?.intradayPrice3?.[0]?.closePrice;
 
+        if (!latestPrice) return sum;
+
+        return (
+          sum +
+          Number(latestPrice) * Number(holding.currentQuantity)
+        );
+      }, 0);
+
+      // ================== TOTAL EQUITY ==================
+      const wallet = Number(user.wallet);
+      const totalEquity = wallet + openPositionsValue;
+
+      const profitLossPercent =
+        ((totalEquity - STARTING_WALLET) / STARTING_WALLET) * 100;
+
+      // ================== LAST TRADE ==================
       const lastTrade = user.trading[0]
-        ? `${user.trading[0].tradeType.toUpperCase()} ${user.trading[0].stock?.symbol || 'N/A'}`
-        : 'N/A';
+        ? `${user.trading[0].tradeType.toUpperCase()} ${
+            user.trading[0].stock?.symbol || "N/A"
+          }`
+        : "N/A";
 
       return {
         userId: user.id,
         username: user.username,
-        profitLossPercent: parseFloat(profitLossPercent.toFixed(2)),
+        totalEquity: Number(totalEquity.toFixed(2)),
+        profitLossPercent: Number(profitLossPercent.toFixed(2)),
         lastTrade
       };
     });
 
-    // Sort descending by P&L %
-    leaderboardData.sort((a, b) => b.profitLossPercent - a.profitLossPercent);
+    // ================== SORT & RANK ==================
+    leaderboardData.sort(
+      (a, b) => b.profitLossPercent - a.profitLossPercent
+    );
 
-    // Assign ranking and limit results
-    const rankedLeaderboard = leaderboardData.slice(0, limit).map((entry, index) => ({
+    return leaderboardData.slice(0, limit).map((entry, index) => ({
       rank: index + 1,
       ...entry
     }));
-
-    return rankedLeaderboard;
   } catch (err) {
-    console.error('Error fetching leaderboard:', err);
-    throw new Error('Failed to fetch leaderboard');
+    console.error("Error fetching leaderboard:", err);
+    throw new Error("Failed to fetch leaderboard");
   }
 };
