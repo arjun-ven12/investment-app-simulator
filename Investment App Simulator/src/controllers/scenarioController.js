@@ -675,79 +675,89 @@ module.exports.startAttempt = async (req, res) => {
 };
 
 
-// FINISH attempt (idempotent; refuse if already finished)
+// FINISH attempt (idempotent)
 module.exports.finishAttempt = async (req, res) => {
   try {
     const userId = req.user.id;
     const scenarioId = Number(req.params.scenarioId);
 
-    // atomically flip ended=false -> ended=true; if already true, refuse
-    const flipped = await scenarioModel.finishAttemptOnce(userId, scenarioId);
-    if (!flipped) {
-      return res
-        .status(409)
-        .json({ success: false, message: 'Attempt already finished. Start a new attempt to finish again.' });
-    }
-
-    // compute end summary after we successfully finished
-    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
-    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
-
-    const trades = (portfolio.positions || []).map(p => ({
-      symbol: p.symbol,
-      netQty: Number(p.quantity),
-      totalBought: Number(p.totalInvested),
-      realizedPnL: Number(p.realizedPnL),
-      currentValue: Number(p.currentValue),
-      unrealizedPnL: Number(p.unrealizedPnL),
-      avgBuyPrice: Number(p.avgBuyPrice),
-      currentPrice: Number(p.currentPrice),
-    }));
-
-    const totalPortfolioValue =
-      Number(wallet || 0) + trades.reduce((acc, t) => acc + Number(t.currentValue || 0), 0);
-
-    // attempt number = last + 1 (this run)
-    const attempts = await scenarioModel.listAttempts(userId, scenarioId);
-    const attemptNumber = (attempts?.[0]?.attemptNumber ?? 0) + 1;
-
-    // snapshot analytics
-    if (typeof scenarioModel.saveAttemptAnalytics === 'function') {
-      await scenarioModel.saveAttemptAnalytics({
-        userId,
-        scenarioId,
-        attemptNumber,
-        summary: portfolio.summary,
-        positions: portfolio.positions,
+    // 1️⃣ Get active attempt FIRST
+    const activeAttempt = await scenarioModel.getActiveAttempt(userId, scenarioId);
+    if (!activeAttempt) {
+      return res.status(409).json({
+        success: false,
+        message: "No active attempt to finish."
       });
     }
 
-    // PB upsert
+    const attemptNumber = activeAttempt.attemptNumber;
+
+    // 2️⃣ Compute portfolio BEFORE cleanup
+    const portfolio = await scenarioModel.getUserScenarioPortfolio(userId, scenarioId);
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
+
+    const totalPortfolioValue =
+      Number(wallet) +
+      Number(portfolio.summary.totalInvested) +
+      Number(portfolio.summary.unrealizedPnL) +
+      Number(portfolio.summary.realizedPnL);
+
+    const startBalance = await scenarioModel.getScenarioStartBalance(scenarioId);
+    const returnPct =
+      startBalance > 0
+        ? (totalPortfolioValue - startBalance) / startBalance
+        : 0;
+
+    // 3️⃣ UPDATE ScenarioAttempt (THIS FIXES YOUR NULLS)
+    await scenarioModel.completeAttempt({
+      userId,
+      scenarioId,
+      attemptNumber,
+      totalValue: totalPortfolioValue,
+      realizedPnL: Number(portfolio.summary.realizedPnL),
+      unrealizedPnL: Number(portfolio.summary.unrealizedPnL),
+      returnPct
+    });
+
+    // 4️⃣ SNAPSHOT analytics (historical)
+    await scenarioModel.saveAttemptAnalytics({
+      userId,
+      scenarioId,
+      attemptNumber,
+      summary: portfolio.summary,
+      positions: portfolio.positions
+    });
+
+    // 5️⃣ Personal best
     const pb = await scenarioModel.upsertPersonalBest({
       userId,
       scenarioId,
       attemptNumber,
       totalPortfolioValue,
-      realizedPnL: Number(portfolio.summary?.realizedPnL || 0),
-      unrealizedPnL: Number(portfolio.summary?.unrealizedPnL || 0),
+      realizedPnL: Number(portfolio.summary.realizedPnL),
+      unrealizedPnL: Number(portfolio.summary.unrealizedPnL),
     });
+
+    // 6️⃣ Cleanup AFTER saving analytics
+    await scenarioModel.finishAttemptOnce(userId, scenarioId);
 
     return res.status(200).json({
       success: true,
-      message: 'Attempt finished.',
       attemptNumber,
       totalPortfolioValue,
+      returnPct,
       wallet,
       summary: portfolio.summary,
-      trades,
       isPersonalBest: pb.isNewPB,
-      personalBest: pb.record,
+      personalBest: pb.record
     });
+
   } catch (e) {
-    const status = e.status || 500;
-    return res.status(status).json({ success: false, message: e.message });
+    console.error("❌ finishAttempt error:", e);
+    return res.status(500).json({ success: false, message: e.message });
   }
 };
+
 
 /** GET /scenarios/:scenarioId/attempts */
 module.exports.listAttempts = async (req, res) => {

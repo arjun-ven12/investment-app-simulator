@@ -1970,3 +1970,57 @@ module.exports.removeUserScenario = async function removeUserScenario(userId, sc
     return { success: false, message: "Error removing scenario participation." };
   }
 };
+module.exports.getActiveAttempt = async (userId, scenarioId) => {
+  return prisma.scenarioAttempt.findFirst({
+    where: {
+      userId,
+      scenarioId,
+      status: "IN_PROGRESS"
+    },
+    orderBy: { attemptNumber: "desc" }
+  });
+};
+module.exports.completeAttempt = async ({
+  userId,
+  scenarioId,
+  attemptNumber,
+  totalValue,
+  realizedPnL,
+  unrealizedPnL,
+  returnPct
+}) => {
+  return prisma.scenarioAttempt.update({
+    where: {
+      scenarioId_userId_attemptNumber: {
+        scenarioId,
+        userId,
+        attemptNumber
+      }
+    },
+    data: {
+      totalValue,
+      realizedPnL,
+      unrealizedPnL,
+      returnPct,
+      status: "COMPLETED",
+      endedAt: new Date()
+    }
+  });
+};
+module.exports.saveAttemptAnalytics = async ({
+  userId,
+  scenarioId,
+  attemptNumber,
+  summary,
+  positions
+}) => {
+  return prisma.scenarioAttemptAnalytics.create({
+    data: {
+      userId,
+      scenarioId,
+      attemptNumber,
+      summary,
+      positions
+    }
+  });
+};
