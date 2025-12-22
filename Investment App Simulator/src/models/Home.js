@@ -2,7 +2,6 @@ const { parse } = require('path');
 const prisma = require('./prismaClient');
 
 const fetch = require("node-fetch");
-const FINNHUB_API_KEY = "cua8sqhr01qkpes4fvrgcua8sqhr01qkpes4fvs0"; 
  const cron = require('node-cron');
 
 const STARTING_WALLET = 100000;
