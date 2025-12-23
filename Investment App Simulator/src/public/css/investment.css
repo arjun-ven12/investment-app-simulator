@@ -2448,3 +2448,26 @@ display: flex !important;
   background-color: #0f172a;
   color: #e5e7eb;
 }
+.pie-charts-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+
+  width: 100%;
+  max-width: 900px;  
+  margin: 0 auto;
+}
+
+.portfolioWrap {
+  min-width: 280px;       
+  min-height: 280px;
+  max-width: 500px;
+  max-height: 500px;
+  position: relative; 
+}
+
+.portfolioWrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

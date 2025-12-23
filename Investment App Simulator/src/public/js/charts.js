@@ -1077,6 +1077,7 @@ async function fetchPortfolio() {
     portfolioContainer.innerHTML = `<p>Error fetching portfolio: ${err.message}</p>`;
   }
 }
+
 function renderPortfolio(portfolio) {
   const { openPositions = [], closedPositions = [] } = portfolio || {};
 
@@ -1151,7 +1152,6 @@ function renderPortfolio(portfolio) {
           <td>
             $${unrealized.toFixed(2)} (${unrealizedPct}%)
           </td>
-          <td>$${Number(stock.realizedProfitLoss || 0).toFixed(2)}</td>
         </tr>
       `;
     }).join("");
@@ -1176,44 +1176,57 @@ function renderPortfolio(portfolio) {
       </tr>
     `).join("");
   }
-
-  // ================== PIE CHART ==================
-  const pieCanvas = document.getElementById("portfolioPieChart");
-  if (!pieCanvas || openPositions.length === 0) return;
+ if (!openPositions || openPositions.length === 0) return;
 
   const labels = openPositions.map(s => s.symbol);
-  const data = openPositions.map(s => Number(s.totalInvested || 0));
 
-  // Guard against all-zero charts
-  if (data.every(v => v === 0)) return;
+  const quantityData = openPositions.map(s => Number(s.quantity || 0));
+  const valueData = openPositions.map(s => Number(s.currentValue || 0));
 
+  // Guard against empty charts
+  if (quantityData.every(v => v <= 0) && valueData.every(v => v <= 0)) return;
+
+  // Generate colors
+const generateColors = (count, alpha = 0.85) =>
+  Array.from({ length: count }, (_, i) => {
+    const hue = Math.round((360 / count) * i);
+    return `hsla(${hue}, 30%, 68%, ${alpha})`;
+  });
+
+
+  // Destroy old charts if they exist
   if (portfolioChart) {
-    portfolioChart.destroy();
-    portfolioChart = null;
+    portfolioChart.forEach(chart => chart.destroy());
+    portfolioChart = [];
   }
+  portfolioChart = [];
 
-  portfolioChart = new Chart(pieCanvas.getContext("2d"), {
+  // ---------- PIE CHART 1: Quantity ----------
+  const ctx1 = document.getElementById("portfolioPieChart").getContext("2d");
+  const pie1 = new Chart(ctx1, {
     type: "pie",
     data: {
       labels,
       datasets: [
         {
-          data,
-          backgroundColor: [
-            "#8faefd9a",
-            "#6d93fa61",
-            "#5277e541",
-            "#3c5dc9a8",
-            "#2a3d7399"
-          ],
-          hoverOffset: 6
+          label: "Quantity",
+          data: quantityData,
+          backgroundColor: generateColors(quantityData.length),
+          hoverOffset: 8
         }
       ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
+      aspectRatio: 1,
       plugins: {
+        title: {
+          display: true,
+          text: "Stock Quantity",
+          color: "#fff",
+          font: { size: 16, weight: "bold" }
+        },
         legend: {
           position: "top",
           labels: { color: "#fff" }
@@ -1222,16 +1235,62 @@ function renderPortfolio(portfolio) {
           callbacks: {
             label: (context) => {
               const total = context.dataset.data.reduce((a, b) => a + b, 0);
-              const percentage = total
-                ? ((context.raw / total) * 100).toFixed(2)
-                : "0.00";
-              return `${context.label}: $${context.raw.toFixed(2)} (${percentage}%)`;
+              const raw = Number(context.raw || 0);
+              const pct = total ? ((raw / total) * 100).toFixed(2) : "0.00";
+              return `${context.label}: ${raw} shares (${pct}%)`;
             }
           }
         }
       }
     }
   });
+  portfolioChart.push(pie1);
+
+  // ---------- PIE CHART 2: Current Value ----------
+  const ctx2 = document.getElementById("portfolioPieChart2").getContext("2d");
+  const pie2 = new Chart(ctx2, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Current Value",
+          data: valueData,
+          backgroundColor: generateColors(valueData.length),
+          hoverOffset: 8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1,
+      plugins: {
+        title: {
+          display: true,
+          text: "Stock Current Value ($)",
+          color: "#fff",
+          font: { size: 16, weight: "bold" }
+        },
+        legend: {
+          position: "top",
+          labels: { color: "#fff" }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const raw = Number(context.raw || 0);
+              const pct = total ? ((raw / total) * 100).toFixed(2) : "0.00";
+              return `${context.label}: $${raw.toFixed(2)} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+  portfolioChart.push(pie2);
+
 }
 
 // Initial fetch
