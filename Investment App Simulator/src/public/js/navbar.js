@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const container = document.getElementById("navbar-container");
-
+function unlockApp() {
+  document.body.classList.remove("preload");
+}
   // Load navbar HTML
   fetch("/html/navbar.html")
     .then(res => res.text())
@@ -21,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
       initLogout();
       checkTokenExpiry();       // 🔥 auto logout if expired
       scheduleTokenExpiry();    // 🔥 auto logout when expiry time arrives
+      unlockApp();
     })
     .catch(err => console.error("Failed to load navbar:", err));
 });
