@@ -448,13 +448,13 @@ model Company {
 
 model OptionContract {
   id               Int       @id @default(autoincrement())
-  stockId          Int? // optional if contract might not match an existing stock yet
+  stockId          Int?
   symbol           String    @unique
   name             String
   underlyingSymbol String
   rootSymbol       String
-  type             String // "call" or "put"
-  style            String? // e.g., "american"
+  type             String
+  style            String?
   strikePrice      Float
   expirationDate   DateTime
   size             Int?
@@ -462,6 +462,15 @@ model OptionContract {
   openInterestDate DateTime?
   closePrice       Float?
   closePriceDate   DateTime?
+  breakEvenPrice      Float?
+  impliedVolatility   Float?
+  delta               Float?
+  gamma               Float?
+  theta               Float?
+  vega                Float?
+  fmv                 Float?
+  fmvLastUpdated      DateTime?
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime? @updatedAt
 
@@ -469,7 +478,6 @@ model OptionContract {
   optionTrades OptionTrade[]
   histPrices   OptionHistPrice[]
 }
-
 model OptionTrade {
   id          Int      @id @default(autoincrement())
   userId      Int
