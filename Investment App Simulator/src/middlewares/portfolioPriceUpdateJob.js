@@ -7,7 +7,7 @@ const chartsModel = require('../models/Charts');
 // // =======================
 // const MARKET_OPEN = 9.5;
 // const MARKET_CLOSE = 16;
-
+ 
 // function isMarketOpen() {
 //   const now = new Date();
 
