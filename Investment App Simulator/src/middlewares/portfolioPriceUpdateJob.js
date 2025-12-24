@@ -2,32 +2,32 @@
 const prisma = require('../../prisma/prismaClient');
 const chartsModel = require('../models/Charts');
 
-// =======================
-// Market time helpers
-// =======================
-const MARKET_OPEN = 9.5;
-const MARKET_CLOSE = 16;
+// // =======================
+// // Market time helpers
+// // =======================
+// const MARKET_OPEN = 9.5;
+// const MARKET_CLOSE = 16;
 
-function isMarketOpen() {
-  const now = new Date();
+// function isMarketOpen() {
+//   const now = new Date();
 
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
-    weekday: 'short',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: false,
-  }).formatToParts(now);
+//   const parts = new Intl.DateTimeFormat('en-US', {
+//     timeZone: 'America/New_York',
+//     weekday: 'short',
+//     hour: 'numeric',
+//     minute: 'numeric',
+//     hour12: false,
+//   }).formatToParts(now);
 
-  const day = parts.find(p => p.type === 'weekday').value;
-  const hour = Number(parts.find(p => p.type === 'hour').value);
-  const minute = Number(parts.find(p => p.type === 'minute').value);
-  const time = hour + minute / 60;
+//   const day = parts.find(p => p.type === 'weekday').value;
+//   const hour = Number(parts.find(p => p.type === 'hour').value);
+//   const minute = Number(parts.find(p => p.type === 'minute').value);
+//   const time = hour + minute / 60;
 
-  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(day)
-    && time >= MARKET_OPEN
-    && time <= MARKET_CLOSE;
-}
+//   return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(day)
+//     && time >= MARKET_OPEN
+//     && time <= MARKET_CLOSE;
+// }
 
 // =======================
 // Get all symbols used in portfolios
