@@ -820,7 +820,9 @@ model AISetting {
   includeRiskWarnings Boolean  @default(true)
   stepByStep          Boolean  @default(false)
   updatedAt           DateTime @updatedAt
-
+  investmentHorizon   String   @default("long")        
+  behavioralFocus     Boolean  @default(true)          
+  objective            String   @default("growth")      
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
