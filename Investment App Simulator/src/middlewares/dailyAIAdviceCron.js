@@ -78,11 +78,12 @@ async function generateDailyAdvice() {
 }
 
 cron.schedule(
-  "55 08 * * *",
+  "0 9,21 * * *",
   async () => {
     await generateDailyAdvice();
   },
   { timezone: "Asia/Singapore" }
 );
+
 
 module.exports = { generateDailyAdvice };

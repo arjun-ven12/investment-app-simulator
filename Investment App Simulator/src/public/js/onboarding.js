@@ -293,7 +293,7 @@ async function resetOnboardingState() {
         title: "Daily AI Advice",
         body: `
           Nyra AI reviews your portfolio, recent trades, risk exposure, and behaviour
-          to generate a daily set of insights. Advice refreshes every day at 9:00 AM (SGT).
+          to generate a daily set of insights. Advice refreshes every day at 9:00 AM and 9:00 PM (SGT).
         `,
         buttons: ["back", "next"]
       },

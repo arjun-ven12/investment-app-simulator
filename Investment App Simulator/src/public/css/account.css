@@ -429,3 +429,222 @@ background-color: #E0EBFF;
   );
 }
 
+/* ================================
+   ADVANCED AI CONTROLS (SETTINGS)
+================================ */
+
+/* Toggle button */
+.advanced-toggle {
+  margin-top: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.advanced-toggle:hover {
+  border-color: #000000;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 0 14px rgba(120, 161, 255, 0.195);
+}
+
+/* Advanced section container */
+.advanced-section {
+  margin-top: 16px;
+  padding: 18px 18px 10px;
+  border-radius: 12px;
+  background: linear-gradient(
+    145deg,
+    rgba(15, 15, 35, 0.75),
+    rgba(5, 5, 15, 0.85)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6);
+  animation: advancedFadeIn 0.35s ease forwards;
+}
+
+/* Hide state */
+.advanced-section.hidden {
+  display: none;
+}
+
+/* Animation */
+@keyframes advancedFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Explanation depth slider */
+#explanationDepth {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    #6aa9ff,
+    #a855f7
+  );
+  outline: none;
+  margin: 10px 0 6px;
+  cursor: pointer;
+}
+
+/* Slider thumb */
+#explanationDepth::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(160, 200, 255, 0.9);
+  border: none;
+}
+
+#explanationDepth::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(160, 200, 255, 0.9);
+  border: none;
+}
+
+/* Slider labels */
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.65;
+  margin-bottom: 12px;
+}
+
+/* Toggle rows inside advanced */
+.advanced-section .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+/* Checkbox styling */
+.advanced-section input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #7bb7ff;
+  cursor: pointer;
+}
+/* ================================
+   EXPLANATION DEPTH — PREMIUM SLIDER
+================================ */
+
+.slider-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Percentage pill */
+.percent-pill {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(120, 160, 255, 0.15);
+  color: #c7d7ff;
+  border: 1px solid rgba(120, 160, 255, 0.25);
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Slider base */
+#explanationDepth {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #6aa9ff 50%,
+    rgba(255, 255, 255, 0.15) 50%
+  );
+  outline: none;
+  margin: 12px 0 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+/* Slider thumb */
+#explanationDepth::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(160, 200, 255, 0.8);
+  border: none;
+}
+
+#explanationDepth::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(160, 200, 255, 0.8);
+  border: none;
+}
+
+#explanationDepth {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+#explanationDepth {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* Chrome / Edge / Safari */
+#explanationDepth::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(160, 140, 255, 0.7);
+  cursor: pointer;
+  position: relative;
+  z-index: 20;
+}
+
+/* Firefox */
+#explanationDepth::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(160, 140, 255, 0.7);
+  cursor: pointer;
+}
+.settings-card::after,
+.chart-wrapper::before,
+.podium-wrapper::before {
+  pointer-events: none;
+}

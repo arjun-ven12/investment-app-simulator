@@ -2,8 +2,9 @@ const chatbotModel = require("../models/chatbot");
 const scenarioModel = require("../models/scenario");
 const scenarioController = require("./scenarioController");
 const prisma = require("../../prisma/prismaClient");
-const optionsModel = require('../models/options');
-const optionsController = require('../controllers/optionsController');
+const optionsModel = require("../models/options");
+const optionsController = require("../controllers/optionsController");
+const { enforceAIResponse } = require("../middlewares/aiResponseEnforcer.js");
 const { broadcastChatbotMessage } = require("../socketBroadcast");
 function getToneProfile(tone) {
   switch (tone) {
@@ -19,6 +20,233 @@ function getToneProfile(tone) {
       return "Neutral, balanced, helpful.";
   }
 }
+function getAllowedActions(settings) {
+  const { investmentHorizon } = settings;
+
+  if (investmentHorizon === "short") {
+    return `
+ALLOWED ACTIONS:
+- Buy / Sell / Hold
+- Stay in cash
+- Stop-loss & limit guidance
+- Event-driven setups
+
+DISALLOWED:
+- Rebalancing
+- Diversification
+- Sector rotation
+`;
+  }
+
+  if (investmentHorizon === "swing") {
+    return `
+ALLOWED ACTIONS:
+- Partial trims
+- Adds on confirmation
+- Risk reduction
+`;
+  }
+
+  return `
+ALLOWED ACTIONS:
+- Allocation by %
+- Concentration discussion
+- Sector exposure
+- Long-term thesis
+`;
+}
+
+function getTaskBlock(settings) {
+  const { investmentHorizon, objective } = settings;
+
+  // SHORT
+  if (investmentHorizon === "short") {
+    return `
+TASK:
+Act as a short-term trading decision engine.
+
+Your job is to decide:
+- Trade now, or stay in cash
+- Explain the decision clearly
+- Focus on volatility, catalysts, and risk/reward
+
+Forbidden:
+- Portfolio rebalancing
+- Long-term fundamentals
+- Diversification talk (unless explicitly NOT actionable)
+`;
+  }
+
+  // SWING
+  if (investmentHorizon === "swing") {
+    return `
+TASK:
+Act as a swing-trade position manager.
+
+Your job is to:
+- Evaluate hold / trim / add decisions
+- Focus on multi-day momentum and earnings windows
+- Manage risk across days to weeks
+`;
+  }
+
+  // LONG
+  return `
+TASK:
+Act as a long-term portfolio architect.
+
+Your job is to:
+- Evaluate allocation, concentration, and durability
+- Focus on compounding and downside protection
+- Avoid short-term price action commentary
+`;
+}
+
+function getRoleProfile(settings) {
+  const h = settings.investmentHorizon;
+  const r = settings.riskTolerance;
+
+  // SHORT-TERM ROLES
+  if (h === "short" && r === "high") {
+    return `
+ROLE:
+You are a short-term tactical trading coach.
+
+BEHAVIOR:
+- Think in days, not weeks.
+- Do NOT force trades.
+- If no valid setups exist, explain why in detail.
+- Break down market structure, volatility, and missing catalysts.
+- Provide watch conditions that would justify action.
+- Staying in cash is a valid outcome and must be justified clearly.
+`;
+  }
+
+  if (h === "short") {
+    return `
+ROLE:
+You are a conservative short-term risk manager.
+
+BEHAVIOR:
+- Prioritize capital protection.
+- Emphasize selectivity and patience.
+- Explain why risk/reward is unfavorable.
+- Focus on avoiding bad trades rather than finding trades.
+`;
+  }
+
+  // LONG-TERM ROLES
+  if (h === "long" && r === "high") {
+    return `
+ROLE:
+You are a long-term conviction-based growth strategist.
+
+BEHAVIOR:
+- Ignore short-term noise.
+- Focus on fundamentals, durability, and compounding.
+- Encourage concentration only with strong justification.
+- Discuss long-term upside and risk asymmetry.
+`;
+  }
+
+  return `
+ROLE:
+You are a long-term stability-focused portfolio coach.
+
+BEHAVIOR:
+- Emphasize diversification and drawdown control.
+- Avoid tactical trading language.
+- Teach patience, balance, and risk-adjusted returns.
+`;
+}
+
+function getObjectiveProfile(objective) {
+  switch (objective) {
+    case "learning":
+      return `
+OBJECTIVE MODE: LEARNING
+
+COACHING STYLE:
+- Prioritize explanation over action.
+- Emphasize process, mistakes, and lessons.
+- Highlight what could be improved next time.
+- Encourage controlled experimentation.
+- Use phrases like "lesson", "pattern", "review", "next time".
+`;
+
+    case "risk_control":
+      return `
+OBJECTIVE MODE: RISK CONTROL
+
+COACHING STYLE:
+- Prioritize downside protection.
+- Highlight drawdowns, volatility, and concentration risk.
+- Emphasize cash buffers and position sizing.
+- Be conservative with trade frequency.
+`;
+
+    case "growth":
+    default:
+      return `
+OBJECTIVE MODE: GROWTH
+
+COACHING STYLE:
+- Focus on return optimization within allowed risk.
+- Highlight asymmetric opportunities.
+- Encourage efficient capital allocation.
+- Balance upside with controlled risk.
+`;
+  }
+}
+
+
+function AIPrefBlock(settings) {
+  return `
+MODE: ${settings.investmentHorizon.toUpperCase()}_${settings.riskTolerance.toUpperCase()}
+These preferences should guide all reasoning and recommendations.
+
+ROLE & BEHAVIOR
+${getRoleProfile(settings)}
+${getObjectiveProfile(settings.objective)}
+
+CORE PREFERENCES
+- Risk tolerance: ${settings.riskTolerance.toUpperCase()}
+- Investment horizon: ${settings.investmentHorizon.toUpperCase()}
+- Objective: ${settings.objective.toUpperCase()}
+- Tone: ${getToneProfile(settings.aiTone)}
+
+DEFINITIONS
+- Portfolio value = invested assets only.
+- Wallet = uninvested cash.
+
+DECISION CONSTRAINTS
+- Recommendations must strictly match the investment horizon.
+- SHORT-TERM means:
+  • Timeframe: days to weeks only
+  • Catalysts must be event-driven or volatility-driven
+  • Macro or sector narratives are NOT sufficient justification
+- LONG-TERM means:
+  • Ignore short-term price movement
+  • Focus on durability, fundamentals, and compounding
+- Avoid making recommendations that do not clearly fit the stated horizon.
+
+If no trade is recommended, explain:
+- Explain which conditions are missing
+- List 2–3 concrete triggers that would change the decision
+- State whether inaction is due to:
+  (a) lack of volatility
+  (b) poor risk/reward
+  (c) insufficient catalyst
+
+STYLE RULES
+- Use ## or ### headings only
+- No numeric prefixes in headings
+`.trim();
+}
+
+
+
+
 
 //////////////////////////////////////////////////////
 // GENERATE AI RESPONSE
@@ -28,27 +256,41 @@ async function loadUserAISettings(userId) {
     where: { userId: Number(userId) },
   });
 
-  return settings || {
-    riskTolerance: "moderate",
-    aiTone: "professional",
-  };
+  return settings
+    ? {
+        ...settings,
+        riskTolerance: settings.riskTolerance?.toLowerCase(),
+        investmentHorizon: settings.investmentHorizon?.toLowerCase(),
+        aiTone: settings.aiTone?.toLowerCase(),
+        objective: settings.objective?.toLowerCase(),
+      }
+    : {
+        riskTolerance: "moderate",
+        aiTone: "professional",
+        investmentHorizon: "long",
+        objective: "growth"
+      };
 }
 
 
 module.exports.generateResponse = async (req, res) => {
   const { prompt, model = "gpt-3.5", max_tokens = 4000, userId } = req.body;
-
   if (!prompt) return res.status(400).json({ error: "Prompt is required." });
-  let fullPrompt = prompt;
-  try {
-    if (userId) {
-      const settings = await loadUserAISettings(userId);
 
-      fullPrompt =
-        `User AI Settings:\n` +
-        `- Risk Tolerance: ${settings.riskTolerance}\n` +
-        `- Tone: ${settings.aiTone}\n\n` +
-        fullPrompt;
+  try {
+    let fullPrompt = prompt;
+    let settings = null;
+
+    if (userId) {
+      settings = await loadUserAISettings(userId);
+
+      fullPrompt = `
+SYSTEM:
+You are Nyra, an AI trading coach.
+${AIPrefBlock(settings)}
+
+${fullPrompt}
+`;
 
       const portfolio = await chatbotModel.getUserPortfolio(Number(userId));
       const summary = chatbotModel.buildPortfolioSummary(portfolio);
@@ -61,15 +303,14 @@ module.exports.generateResponse = async (req, res) => {
       model,
       max_tokens
     );
-    console.log("AI Response:", aiText);
+
     return res.status(200).json({ response: aiText });
   } catch (error) {
     console.error("Controller.generateResponse error:", error);
-    return res
-      .status(500)
-      .json({ error: error.message || "Failed to generate response." });
+    return res.status(500).json({ error: error.message || "Failed to generate response." });
   }
 };
+
 
 module.exports.generateResponseForChatbot = async (req, res) => {
   const { prompt, model = "gpt-4", max_tokens = 4000 } = req.body;
@@ -118,19 +359,89 @@ module.exports.getUserPortfolio = async function (req, res) {
  * GET /api/chatbot/portfolio-advice/:userId
  * Dedicated portfolio-advice endpoint. Fetches portfolio, builds an advisor prompt, calls model and returns advice.
  */
+
+function getStockTask(settings) {
+  const h = settings.investmentHorizon;
+
+  if (h === "short") {
+    return `
+TASK:
+Make short-term stock trade decisions.
+
+FOCUS:
+- Days to weeks only
+- Catalysts, volatility, earnings
+- Risk/reward and invalidation
+
+ALLOWED:
+- Buy / Sell / Hold
+- Stay in cash
+
+FORBIDDEN:
+- Rebalancing
+- Diversification
+- Long-term fundamentals
+`;
+  }
+
+  if (h === "swing") {
+    return `
+TASK:
+Manage swing positions.
+
+FOCUS:
+- Multi-day momentum
+- Earnings windows
+- Trim / add / hold decisions
+`;
+  }
+
+  return `
+TASK:
+Evaluate long-term stock allocation quality.
+
+FOCUS:
+- Concentration
+- Business durability
+- Long-term upside vs risk
+
+FORBIDDEN:
+- Stop-losses
+- Short-term catalysts
+`;
+}
+function getStockRiskStyle(settings) {
+  if (settings.riskTolerance === "high") {
+    return `
+RISK STYLE:
+- Aggressive but rational
+- Higher volatility acceptable
+- Concentration allowed if justified
+`;
+  }
+
+  if (settings.riskTolerance === "low") {
+    return `
+RISK STYLE:
+- Capital preservation first
+- Conservative sizing
+- Avoid concentration
+`;
+  }
+
+  return `
+RISK STYLE:
+- Balanced risk-taking
+- Controlled position sizing
+`;
+}
+
 module.exports.getPortfolioAdvice = async (req, res) => {
   const userId = Number(req.params.userId);
   if (!Number.isInteger(userId))
     return res.status(400).json({ error: "Invalid user ID." });
 
   const settings = await loadUserAISettings(userId);
-
-  const aiPrefBlock = `
-USER PREFERENCES:
-- Risk Tolerance: ${settings.riskTolerance}
-- Tone: ${settings.aiTone}
-`;
-
 
   try {
     // 1️⃣ Fetch portfolio & summary
@@ -196,106 +507,91 @@ USER PREFERENCES:
     // 3️⃣ Precomputed metrics for advice
     const precomputed = chatbotModel.buildPrecomputed(summary);
     console.log(wallet);
-    const settings = await loadUserAISettings(userId);
-    const riskProfile = settings.riskTolerance;
+    const aiSettings = settings;
+    const riskProfile = aiSettings.riskTolerance;
+    const horizon = settings.investmentHorizon?.toUpperCase() || "LONG";
+const riskTol = settings.riskTolerance?.toUpperCase() || "MODERATE";
+
     // 4️⃣ Construct LLM prompt
-    const prompt = `
-    ${aiPrefBlock}
+const prompt = `
 SYSTEM:
-SYSTEM:
-You are a financial coach for paper traders.
-Tone Style: ${getToneProfile(settings.aiTone)}
-Risk Style: ${settings.riskTolerance}
-Do NOT give legal or tax advice. Always include: "This advice is for educational purposes only and is not financial advice."
-RULE: Recommend only individual stocks that exist in the portfolio or are commonly traded US stocks (no ETFs, crypto, or bonds).
+You are Nyra, an AI stock trading coach.
 
-CONTEXT:
-You have access to the following data for the user:
+${AIPrefBlock(settings)}
+${getStockTask(settings)}
+${getStockRiskStyle(settings)}
 
-1️⃣ Portfolio summary (top holdings, sector allocation, current value, weight percentages):
-${JSON.stringify(summary)}
+TONE:
+${getToneProfile(settings.aiTone)}
 
-2️⃣ Precomputed metrics including:
-- Risk score (0-100)
-- Scenario simulations (portfolio-level and individual stock-level changes)
-- Suggested stop-loss & limit-buy prices
-- Volatility, beta, Sharpe ratio, probability of drawdowns
-${JSON.stringify(precomputed)}
+DATA:
+Portfolio summary:
+${JSON.stringify(summary, null, 2)}
 
-3️⃣ Last 5 trades (symbol, quantity, USD impact, trade type, trade date):
-${JSON.stringify(recentTrades)}
+Recent trades:
+${JSON.stringify(recentTrades, null, 2)}
 
-User risk profile: ${riskProfile}
-️⃣ User wallet (cash available to invest): $${wallet}
-TASK:
-Provide a detailed, **personalized portfolio critique** and actionable advice based on the user’s holdings, wallet (how much money they can invest), precomputed metrics, and recent trades. Tie recommendations to recent trades (e.g., how AAPL purchase affects tech exposure) and portfolio history.
- - Strengths
-   - Weaknesses (concentration, ROE, sector allocation, cash level)
-   - Scenario analysis (positive/neutral/negative outcomes in a table format)
-Use the GOALS and RULES below to guide your response.
-- Provide 3 specific stock recommendations for diversification. 
-- Each recommendation must include: sector, rationale, expected risk/return, and fit with the user’s risk profile. 
-- Do not recommend ETFs, bonds, or crypto.
-- **Important**: For recommended stocks, do NOT include exact stock prices. Use approximate shares or percentages instead, e.g., "~10 shares at current market price" or "invest 5% of portfolio".
-- Existing holdings, scenario analysis, and stop-loss/limit-buy guidance can remain exact numbers.
-- Provide stop-loss / limit-buy guidance for recommended stocks as a % buffer (e.g., 5-10% below/above current price).
-- Show numeric-backed reallocation recommendations (USD totals, % portfolio allocation).
-- Highlight concentration risks (>40%), sector diversification, and cash allocation.
+Risk metrics:
+${JSON.stringify(precomputed, null, 2)}
 
+Wallet:
+$${wallet}
 
-GOALS:
-- Critique strengths and weaknesses using exact weights, USD values, and risk metrics.
-- Provide **balanced scenario analysis**: show potential upside, downside, and neutral outcomes.
-- Include **numeric-backed, actionable recommendations**:
-    * Suggest reallocation by sector and by exact USD/percentage.
-    * Highlight over-concentrated holdings (>40%).
-    * Include stop-loss/limit-buy prices with rationale and USD impact.
-    
-- For each recommended stock, provide:
-    * Short-term vs long-term suggested action
-    * Expected return
-    * Risk score (0-100)
-    * Fit with user risk profile
-- Make diversification actionable: which sectors to increase/decrease, effect on portfolio stability, expected return.
-- Include behavioral finance notes (e.g., concentration risk, emotional biases).
-- For each recommended stock, explain why it fits current market conditions or macro trends (e.g., oil prices, consumer spending, interest rates, global demand) in a concise 1-2 sentence rationale.
-- Include both sector rationale and macro trend narrative for recommended stocks.
-- Example format: "XOM: Energy sector exposure; benefits from rising oil prices and global demand.
-- Show cash allocation concretely: how much remains after reallocations.
-- Maintain short, clear, mentor-style sentences.
+RESPONSE FORMAT (MANDATORY):
+---
+Based on your ${horizon} horizon and ${riskTol} risk tolerance
 
-
-  
-- Give actionable tips:
-    * Stop-loss / limit-buy prices with rationale and USD impact
-    * Rebalancing suggestions with expected effect on return & volatility
-    * Sector diversification recommendations
-    * Cash allocation advice for diversification
-  
+## Strengths
+## Weaknesses
+## Scenario Analysis
+## Actionable Decisions
+## Watchlist & Triggers (Optional)
+## Risk Controls
+## Cash Position
+## Settings Alignment Check
+---
 
 RULES:
-- Reference recent trades explicitly and their effect on concentration or risk.
-- Only recommend traded US stocks (no ETFs, crypto, or bonds).
-- Provide multiple actionable recommendations with numeric justification.
-- Do NOT invent exact numbers; only use values derivable from portfolio summary, trade history, and precomputed metrics.
-- Prefer cross-sector diversification (e.g., if Pharma is heavy, consider Energy, Industrials, Financials, Consumer Discretionary).
-- Use "~X shares at current market price" for stock recommendations.
-- STRICT RULE: Do NOT recommend any stock in a sector that already represents more than 40% of the portfolio (e.g., Pharmaceuticals, Technology). Only pick stocks from underrepresented sectors: Energy, Industrials, Financials, Consumer Discretionary, or Utilities. Ensure the sector allocation improves diversification.
-- Add in a disclaimer that this is only for educational purposes and not financial advice.
-- Separate each major section with '---' so that front-end markdown rendering creates clear spacing.
-END
+- If no good trade exists, say so clearly and explain why
+- If SHORT horizon, do NOT rebalance or diversify
+- If LONG horizon, do NOT give stop-losses
+- Use only data provided
+- End with educational disclaimer
+- If no trade is recommended:
+  • You MUST include a "Watchlist & Triggers" section
+  • Include 2–4 U.S. stocks relevant to the user's horizon
+  • These are NOT trade recommendations
+  • Use conditional language only
+- Each trigger must include at least one numeric condition
+  (%, range, volume vs average, or timeframe)
+
+- Watchlist stocks must NOT include buy/sell language
+- Each watchlist item must include:
+  • Why the stock is relevant now
+  • Why no trade is justified yet
+  • 2–3 concrete triggers that would change the decision
+
+- Any claim about volatility, risk, or stop levels must include a numeric reference
+(e.g. %, recent high/low, or range).
+- Confidence level: Medium — decision driven by absence of volatility rather than negative outlook.
+- Avoid exact price levels unless justified by recent price action or volatility
+
 `;
 
-    // 5️⃣ Call LLM
-    const advice = await chatbotModel.generateResponse(
-      prompt,
-      "gpt-4o-mini",
-      1500
-    );
 
-    return res
-      .status(200)
-      .json({ advice, portfolio: summary, recentTrades, riskProfile });
+    const rawAdvice = await chatbotModel.generateResponse(
+  prompt,
+  "gpt-4o-mini",
+  1500
+);
+
+return res.status(200).json({
+  advice: rawAdvice,
+  portfolio: summary,
+  recentTrades,
+  riskProfile
+});
+
   } catch (error) {
     console.error("Controller.getPortfolioAdvice error:", error);
     return res
@@ -320,13 +616,13 @@ module.exports.getScenarioAnalysis = async (req, res) => {
         json: (data) => data,
       }),
     };
-    const summaryData = await scenarioController.getScenarioEndingSummary(req, null, true);
+    const summaryData = await scenarioController.getScenarioEndingSummary(
+      req,
+      null,
+      true
+    );
     const aiSettings = await loadUserAISettings(userId);
-    const prefBlock = `
-USER PREFERENCES:
-- Risk Tolerance: ${aiSettings.riskTolerance}
-- Tone: ${aiSettings.aiTone}
-`;
+    const prefBlock = AIPrefBlock(aiSettings);
     // Then extract intraday separately
     const intradayData = summaryData.intraday;
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
@@ -397,7 +693,7 @@ Provide a **detailed, personalized scenario-based critique** and **portfolio imp
 - Analyze **realized/unrealized P&L**, cash usage, and exposure relative to intraday scenario prices.  
 - Highlight strengths (disciplined entries, cash buffer usage) and weaknesses (missed high-volatility trades, overconcentration).
 
-3. **Quantitative & Behavioral Insights**  
+3. Quantitative Risk & Execution Insights
 - Include computed volatility per stock, risk exposure, and potential emotional biases triggered by rapid swings.  
 - Relate metrics to user behavior during the scenario.
 
@@ -405,8 +701,8 @@ Provide a **detailed, personalized scenario-based critique** and **portfolio imp
 - Rank **3–5 stocks by volatility** based on scenario intraday data.  
 - For each, include:  
   - Rationale based on volatility  
-  - Short-term vs long-term expected movement  
-  - Risk score (0–100)  
+  - Expected movement aligned with the user's investment horizon
+  - Relative risk level (low / medium / high) 
   - Suggested position size **based on wallet and portfolio**  
   - Market Order & Limit Order guidance **computed from intraday data**  
   - Notes on scenario events driving volatility
@@ -506,7 +802,7 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
       trades,
       totalPortfolioValue,
       summary,
-      isPersonalBest
+      isPersonalBest,
     } = summaryData;
     const scenarioDetails = await scenarioModel.getScenarioById(scenarioId);
     // If your controller returns through res.status().json(), extract the data
@@ -515,31 +811,39 @@ module.exports.getScenarioAnalysisSummarised = async (req, res) => {
       mockReq,
       mockRes
     );
-    const wallet = await scenarioModel.getParticipantWallet;
+    const wallet = await scenarioModel.getParticipantWallet(userId, scenarioId);
 
     const prompt = `
     ### INPUT DATA
 
 Scenario Details:
-${JSON.stringify({
-  title: scenarioDetails.title,
-  volatility: scenarioDetails.volatility,
-  startDate: scenarioDetails.startDate,
-  endDate: scenarioDetails.endDate
-}, null, 2)}
+${JSON.stringify(
+  {
+    title: scenarioDetails.title,
+    volatility: scenarioDetails.volatility,
+    startDate: scenarioDetails.startDate,
+    endDate: scenarioDetails.endDate,
+  },
+  null,
+  2
+)}
 
 Market Behaviour (Summarised):
 ${JSON.stringify(intradaySummary, null, 2)}
 
 Portfolio Performance:
-${JSON.stringify({
-  trades,
-  totalPortfolioValue,
-  wallet,
-  realizedPnL: summary?.realizedPnL,
-  unrealizedPnL: summary?.unrealizedPnL,
-  isPersonalBest
-}, null, 2)}
+${JSON.stringify(
+  {
+    trades,
+    totalPortfolioValue,
+    wallet,
+    realizedPnL: summary?.realizedPnL,
+    unrealizedPnL: summary?.unrealizedPnL,
+    isPersonalBest,
+  },
+  null,
+  2
+)}
 
 SYSTEM:
 You are a **financial coach** for paper traders in simulations. 
@@ -610,6 +914,7 @@ Provide in **JSON**:
 
 
 
+
 module.exports.getUserOptionAdvice = async (req, res) => {
   const userId = req.user?.id;
   if (!userId || isNaN(userId)) {
@@ -621,8 +926,12 @@ module.exports.getUserOptionAdvice = async (req, res) => {
     const trades = await optionsModel.getUserOptionTrades(userId);
     const aiSettings = await loadUserAISettings(userId);
 
-    const portfolioRes = await optionsModel.getUserOptionPortfolio(parseInt(userId, 10));
-    const portfolio = Array.isArray(portfolioRes?.portfolio) ? portfolioRes.portfolio : [];
+    const portfolioRes = await optionsModel.getUserOptionPortfolio(
+      parseInt(userId, 10)
+    );
+    const portfolio = Array.isArray(portfolioRes?.portfolio)
+      ? portfolioRes.portfolio
+      : [];
 
     // ---------- helpers ----------
     const round2 = (n) => Number(n || 0).toFixed(2);
@@ -652,7 +961,8 @@ module.exports.getUserOptionAdvice = async (req, res) => {
       const sym = p.underlyingSymbol || "UNKNOWN";
       const totalPnLNum =
         Number(strip$(p.realizedPnL)) + Number(strip$(p.unrealizedPnL));
-      if (!symbols[sym]) symbols[sym] = { trades: 0, totalPnL: dollar(totalPnLNum) };
+      if (!symbols[sym])
+        symbols[sym] = { trades: 0, totalPnL: dollar(totalPnLNum) };
       else symbols[sym].totalPnL = dollar(totalPnLNum);
     }
 
@@ -696,18 +1006,20 @@ module.exports.getUserOptionAdvice = async (req, res) => {
     const symbolEntries = Object.entries(symbols);
     const bestSymbol = symbolEntries.length
       ? symbolEntries.reduce((best, [sym, data]) => {
-        const val = Number(strip$(data.totalPnL));
-        const bestVal = best ? Number(strip$(best.data.totalPnL)) : -Infinity;
-        return val > bestVal ? { sym, data } : best;
-      }, null)
+          const val = Number(strip$(data.totalPnL));
+          const bestVal = best ? Number(strip$(best.data.totalPnL)) : -Infinity;
+          return val > bestVal ? { sym, data } : best;
+        }, null)
       : null;
 
     const worstSymbol = symbolEntries.length
       ? symbolEntries.reduce((worst, [sym, data]) => {
-        const val = Number(strip$(data.totalPnL));
-        const worstVal = worst ? Number(strip$(worst.data.totalPnL)) : Infinity;
-        return val < worstVal ? { sym, data } : worst;
-      }, null)
+          const val = Number(strip$(data.totalPnL));
+          const worstVal = worst
+            ? Number(strip$(worst.data.totalPnL))
+            : Infinity;
+          return val < worstVal ? { sym, data } : worst;
+        }, null)
       : null;
 
     // ---------- summary ----------
@@ -743,6 +1055,14 @@ Do not discuss changing expirations (user trades 0–7 days). Do not introduce s
 RULES:
 - Separate each major section with '---' so that front-end markdown rendering creates clear spacing.
 
+FORBIDDEN ACTIONS (STRICT):
+- Do NOT mention or suggest trailing stops.
+- Do NOT mention or suggest stop-limit, stop-market, or conditional orders.
+- Do NOT suggest adjusting expirations or rolling contracts.
+- Do NOT recommend strategies beyond single-leg CALL or PUT.
+- Do NOT imply automation or dynamic risk management.
+If any forbidden action is mentioned, the response is invalid.
+
 USER SUMMARY (JSON):
 ${JSON.stringify(summary, null, 2)}
 
@@ -752,6 +1072,12 @@ REQUIREMENTS:
 - Always show monetary values with a "$" prefix.
 - Base all commentary strictly on provided metrics.
 - Focus on concrete next steps (entries, exits, sizing, order-type usage, symbol allocation).
+- Do NOT recommend opening new positions if realized P&L is negative and consistency score < 5/10
+If new positions are disallowed:
+- You MUST state: "No new option positions are recommended at this time."
+- You MUST focus on execution quality, risk controls, and behavior only.
+- You MAY NOT include hypothetical entry examples.
+
 
 STRUCTURE:
 
@@ -760,6 +1086,8 @@ Scorecard
 - Risk: _/10
 - Timing: _/10
 - Consistency: _/10
+Scoring Basis:
+Scores reflect realized P&L stability, drawdown control, order-type discipline, and holding-period consistency.
 
 A. Performance Analysis
 - Summarize realized/unrealized P&L and average holding days.
@@ -787,41 +1115,48 @@ E. Behavioral Notes
 F. Priority Checklist (Next 7 Trading Days)
 - Provide a short, ordered checklist of immediate actions.
 
-G. Option Selection Guidance (Near-the-Money)
-- Recommend choosing near-the-money options (strike within ~0–2% of the underlying price) to balance probability and premium.
-- Keep examples strictly to the symbols listed in summary.symbols.
-- For each symbol, give one generic example setup, e.g.:
-  "Buy a near-ATM call at the strike closest above spot if price is above VWAP."
-- Always prefix any numeric or monetary value with "$".
+G. Option Eligibility & Trade Filters
+
+For each symbol listed in summary.symbols:
+
+- State whether the symbol is currently TRADE-ELIGIBLE or NOT ELIGIBLE.
+- Eligibility must be justified using:
+  • Liquidity (frequency of trades on this symbol)
+  • Consistency of P&L on this symbol
+  • Average holding period alignment with 0–7 day window
+
+If NOT ELIGIBLE:
+- Explicitly say "No trade recommended on this symbol."
+- Provide 1–2 conditions that would make it eligible again.
+
+If ELIGIBLE:
+- Specify CALL or PUT bias only (no strike prices).
+- Specify MARKET or LIMIT preference only.
+- Include one invalidation condition that cancels the idea.
+
+Do NOT include price targets.
+Do NOT include strike prices.
+Do NOT include expiration commentary.
+
 
 End with:
 "This assessment is for educational purposes only and is not financial advice."
 `.trim();
+const rawAdvice = await chatbotModel.generateResponse(
+  prompt,
+  "gpt-4o-mini",
+  1500
+);
 
-    const aiAdvice = await chatbotModel.generateResponse(
-      prompt,
-      "gpt-4o-mini",
-      1500
-    );
-    // 🔹 Save AI insights into DB
+return res.status(200).json({ summary, aiAdvice: rawAdvice });
 
-    return res.status(200).json({ summary, aiAdvice });
+
+    
   } catch (error) {
     console.error("Error generating option advice:", error);
     return res.status(500).json({ error: error.message });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
 
 async function upsertAIAdvice(userId, scenarioId, aiAdvice) {
   try {
@@ -832,7 +1167,9 @@ async function upsertAIAdvice(userId, scenarioId, aiAdvice) {
     });
 
     if (!userId || !scenarioId || isNaN(scenarioId)) {
-      throw new Error(`Invalid userId (${userId}) or scenarioId (${scenarioId})`);
+      throw new Error(
+        `Invalid userId (${userId}) or scenarioId (${scenarioId})`
+      );
     }
 
     // ✅ Step 1: find the latest attempt
@@ -872,11 +1209,14 @@ async function upsertAIAdvice(userId, scenarioId, aiAdvice) {
   }
 }
 
-
 //////////////////////////////////////////////////////
 // CHAT CONTROLLER — Persistent Across Pages
 //////////////////////////////////////////////////////
-const { startChatSession, saveMessage, getChatHistory } = require("../models/chatbot");
+const {
+  startChatSession,
+  saveMessage,
+  getChatHistory,
+} = require("../models/chatbot");
 
 // 🧠 Create or Resume Session
 module.exports.startChatSession = async (req, res) => {
@@ -910,19 +1250,33 @@ module.exports.sendChatMessage = async (req, res) => {
   try {
     const { userId, sessionId, prompt } = req.body;
     if (!userId || !sessionId || !prompt)
-      return res.status(400).json({ error: "Missing userId, sessionId, or prompt" });
+      return res
+        .status(400)
+        .json({ error: "Missing userId, sessionId, or prompt" });
 
     // 1️⃣ Save user message
     await saveMessage(parseInt(userId), sessionId, "user", prompt);
 
     // 2️⃣ Generate AI reply
-    const aiResponse = await chatbotModel.generateResponseForNyra(
-      prompt,       // ✅ first
-      userId,       // ✅ second
-      sessionId,    // ✅ third
-      "gpt-4o-mini",
-      400
-    );
+    const settings = await loadUserAISettings(userId);
+
+    const enforcedPrompt = `
+SYSTEM:
+You are Nyra, an AI trading coach.
+${AIPrefBlock(settings)}
+USER MESSAGE:
+${prompt}
+`;
+
+    const rawResponse = await chatbotModel.generateResponseForNyra(
+  enforcedPrompt,
+  userId,
+  sessionId,
+  "gpt-4o-mini",
+  400
+);
+
+const aiResponse = rawResponse;
 
     // 3️⃣ Save AI message
     await saveMessage(parseInt(userId), sessionId, "assistant", aiResponse);

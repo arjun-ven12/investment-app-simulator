@@ -816,12 +816,8 @@ model AISetting {
   userId              Int      @unique
   riskTolerance       String   @default("moderate")
   aiTone              String   @default("professional")
-  explanationDepth    Int      @default(50) // slider 0–100
-  includeRiskWarnings Boolean  @default(true)
-  stepByStep          Boolean  @default(false)
   updatedAt           DateTime @updatedAt
-  investmentHorizon   String   @default("long")        
-  behavioralFocus     Boolean  @default(true)          
+  investmentHorizon   String   @default("long")         
   objective            String   @default("growth")      
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

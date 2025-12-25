@@ -399,31 +399,30 @@ async function buildPrecomputedExtended(summary, benchmarkId = 0) {
   }
   return { ...base, extendedMetrics };
 }
-
 async function getUserPortfolio(userId) {
   if (!userId || typeof userId !== "number") {
     throw new Error(`Invalid user ID: ${userId}`);
   }
 
+  // wallet
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      wallet: true,
-    },
+    select: { wallet: true },
   });
-  console.log(user)
-  console.log(user.wallet)
-  const wallet = user.wallet
+  const wallet = user?.wallet ?? 0;
 
   // Fetch all trades for the user
+  // IMPORTANT: use tradeType to interpret direction, not quantity sign
   const userTrades = await prisma.trade.findMany({
     where: { userId },
     orderBy: { tradeDate: "asc" },
     select: {
       stockId: true,
-      quantity: true, // + for buy, - for sell
-      totalAmount: true, // total value of trade
-      tradeType: true,
+      quantity: true,
+      price: true,
+      totalAmount: true,
+      tradeType: true, // BUY / SELL
+      tradeDate: true,
     },
   });
 
@@ -433,9 +432,12 @@ async function getUserPortfolio(userId) {
 
   const stockMap = new Map();
 
-  // Process trades
   for (const trade of userTrades) {
-    const { stockId, quantity, totalAmount } = trade;
+    const stockId = trade.stockId;
+    const qtyAbs = Math.abs(Number(trade.quantity || 0));
+    const tradeType = String(trade.tradeType || "").toUpperCase();
+
+    if (!qtyAbs) continue;
 
     if (!stockMap.has(stockId)) {
       stockMap.set(stockId, {
@@ -450,47 +452,90 @@ async function getUserPortfolio(userId) {
 
     const group = stockMap.get(stockId);
 
-    if (quantity > 0) {
+    const pricePerShare = Number(trade.price ?? 0);
+    const grossValue = Number(trade.totalAmount ?? pricePerShare * qtyAbs);
+
+    if (tradeType === "BUY") {
       // BUY
       group.buyQueue.push({
-        quantity,
-        pricePerShare: Number(totalAmount) / quantity,
+        quantity: qtyAbs,
+        pricePerShare: pricePerShare || (qtyAbs ? grossValue / qtyAbs : 0),
       });
-      group.netQuantity += quantity;
-      group.totalBoughtQty += quantity;
-      group.totalBoughtValue += Number(totalAmount);
-    } else if (quantity < 0) {
+
+      group.netQuantity += qtyAbs;
+      group.totalBoughtQty += qtyAbs;
+      group.totalBoughtValue += grossValue;
+    } else if (tradeType === "SELL") {
       // SELL
-      let sellQty = -quantity; // positive
-      const sellProceeds = Number(totalAmount);
+      const sellQtyOriginal = qtyAbs;
+      let sellQtyRemaining = qtyAbs;
+      const sellProceeds = grossValue;
+
       group.totalSoldValue += sellProceeds;
 
-      // Allocate proceeds using FIFO
-      while (sellQty > 0 && group.buyQueue.length > 0) {
+      // FIFO realized P/L allocation
+      while (sellQtyRemaining > 0 && group.buyQueue.length > 0) {
         const buy = group.buyQueue[0];
-        if (buy.quantity <= sellQty) {
-          const proceedsPortion = (buy.quantity / -quantity) * sellProceeds;
-          group.realizedProfitLoss +=
-            proceedsPortion - buy.pricePerShare * buy.quantity;
-          sellQty -= buy.quantity;
-          group.buyQueue.shift();
-        } else {
-          const proceedsPortion = (sellQty / -quantity) * sellProceeds;
-          group.realizedProfitLoss +=
-            proceedsPortion - buy.pricePerShare * sellQty;
-          buy.quantity -= sellQty;
-          sellQty = 0;
-        }
+
+        const qtyMatched = Math.min(buy.quantity, sellQtyRemaining);
+
+        // Allocate proceeds proportionally to matched shares
+        const proceedsPortion =
+          (qtyMatched / sellQtyOriginal) * sellProceeds;
+
+        const costPortion = buy.pricePerShare * qtyMatched;
+
+        group.realizedProfitLoss += proceedsPortion - costPortion;
+
+        buy.quantity -= qtyMatched;
+        sellQtyRemaining -= qtyMatched;
+
+        if (buy.quantity <= 0) group.buyQueue.shift();
       }
 
-      group.netQuantity += quantity; // negative
+      // If user sold more than owned, you currently don’t support shorting.
+      // We still reduce netQuantity to reflect the sell, but we can't compute FIFO cost beyond buys.
+      // This keeps "current holdings" correct even if data is inconsistent.
+      group.netQuantity -= sellQtyOriginal;
+    } else {
+      // Unknown tradeType -> fallback to old behavior based on sign (optional safety)
+      const signedQty = Number(trade.quantity || 0);
+      if (signedQty > 0) {
+        group.buyQueue.push({
+          quantity: signedQty,
+          pricePerShare: pricePerShare || (signedQty ? grossValue / signedQty : 0),
+        });
+        group.netQuantity += signedQty;
+        group.totalBoughtQty += signedQty;
+        group.totalBoughtValue += grossValue;
+      } else if (signedQty < 0) {
+        const sellQtyOriginal = Math.abs(signedQty);
+        let sellQtyRemaining = sellQtyOriginal;
+        const sellProceeds = grossValue;
+        group.totalSoldValue += sellProceeds;
+
+        while (sellQtyRemaining > 0 && group.buyQueue.length > 0) {
+          const buy = group.buyQueue[0];
+          const qtyMatched = Math.min(buy.quantity, sellQtyRemaining);
+          const proceedsPortion =
+            (qtyMatched / sellQtyOriginal) * sellProceeds;
+          const costPortion = buy.pricePerShare * qtyMatched;
+          group.realizedProfitLoss += proceedsPortion - costPortion;
+
+          buy.quantity -= qtyMatched;
+          sellQtyRemaining -= qtyMatched;
+
+          if (buy.quantity <= 0) group.buyQueue.shift();
+        }
+
+        group.netQuantity -= sellQtyOriginal;
+      }
     }
   }
 
   const openPositions = [];
   const closedPositions = [];
 
-  // Build positions
   for (const [stockId, group] of stockMap.entries()) {
     const {
       buyQueue,
@@ -530,23 +575,24 @@ async function getUserPortfolio(userId) {
     });
     const latestPrice = Number(latestPriceRecord?.closePrice ?? 0);
 
-    // Open position (remaining shares)
+    // ✅ Open position if netQuantity > 0
     if (netQuantity > 0) {
       const totalInvested = buyQueue.reduce(
         (sum, b) => sum + b.quantity * b.pricePerShare,
         0
       );
-      const avgBuyPrice = totalInvested / netQuantity;
+
+      const avgBuyPrice = netQuantity > 0 ? totalInvested / netQuantity : 0;
       const currentValue = latestPrice * netQuantity;
       const unrealizedProfitLoss = currentValue - totalInvested;
       const unrealizedProfitLossPercent =
         totalInvested > 0 ? (unrealizedProfitLoss / totalInvested) * 100 : 0;
 
       openPositions.push({
+        stockId, // ✅ add this so your extended metrics can use it later
         symbol: stockDetails?.symbol ?? "UNKNOWN",
         companyName: stockDetails?.company?.name ?? "UNKNOWN",
-        sector:
-          stockDetails?.sector || stockDetails?.company?.industry || "UNKNOWN",
+        sector: stockDetails?.sector || stockDetails?.company?.industry || "UNKNOWN",
         industry: stockDetails?.company?.industry ?? "UNKNOWN",
         country: stockDetails?.company?.country ?? "UNKNOWN",
         currency: stockDetails?.company?.currency ?? "USD",
@@ -555,31 +601,33 @@ async function getUserPortfolio(userId) {
         website: stockDetails?.company?.website ?? "",
         logo: stockDetails?.company?.logo ?? "",
         quantity: netQuantity,
-        avgBuyPrice: avgBuyPrice,
+        avgBuyPrice,
         currentPrice: latestPrice,
-        totalInvested: totalInvested,
-        currentValue: currentValue,
-        unrealizedProfitLoss: unrealizedProfitLoss,
-        unrealizedProfitLossPercent: unrealizedProfitLossPercent,
-        realizedProfitLoss: realizedProfitLoss,
+        totalInvested,
+        currentValue,
+        unrealizedProfitLoss,
+        unrealizedProfitLossPercent,
+        realizedProfitLoss,
       });
     }
 
     // Closed / realized portion
     if (realizedProfitLoss !== 0 || totalSoldValue > 0) {
       closedPositions.push({
+        stockId,
         symbol: stockDetails?.symbol ?? "UNKNOWN",
         companyName: stockDetails?.company?.name ?? "UNKNOWN",
         totalBoughtQty,
-        totalBoughtValue: totalBoughtValue.toFixed(2),
-        totalSoldValue: totalSoldValue.toFixed(2),
-        realizedProfitLoss: realizedProfitLoss.toFixed(2),
+        totalBoughtValue: Number(totalBoughtValue).toFixed(2),
+        totalSoldValue: Number(totalSoldValue).toFixed(2),
+        realizedProfitLoss: Number(realizedProfitLoss).toFixed(2),
       });
     }
   }
 
-  return { openPositions, closedPositions, wallet }
+  return { openPositions, closedPositions, wallet };
 }
+
 
 
 
