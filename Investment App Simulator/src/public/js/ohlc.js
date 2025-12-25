@@ -33,105 +33,137 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!ohlcData.length) throw new Error("No OHLC data available.");
 
     // ---------------- Prepare datasets ----------------
-    const lineData = ohlcData.map(d => ({ x: new Date(d.date), y: d.closePrice }));
-    const candleData = ohlcData.map(d => ({
-      x: new Date(d.date),
-      o: d.openPrice,
-      h: d.highPrice,
-      l: d.lowPrice,
-      c: d.closePrice
-    }));
+// ----------------------
+// NORMALIZE DATA (CRITICAL)
+// ----------------------
+const candleData = ohlcData
+  .map(d => {
+    const ts = Date.parse(d.date); // MUST include time for intraday
+    return {
+      x: ts,
+      o: Number(d.openPrice),
+      h: Number(d.highPrice),
+      l: Number(d.lowPrice),
+      c: Number(d.closePrice)
+    };
+  })
+  .filter(d => !Number.isNaN(d.x))
+  .sort((a, b) => a.x - b.x);
 
-    // ---------------- Chart rendering ----------------
-    const ctx = document.getElementById('ohlc-chart').getContext('2d');
-    let chart; // Chart.js instance
-    const chartTypeSelect = document.getElementById('chart-type-select');
+const lineData = candleData.map(d => ({
+  x: d.x,
+  y: d.c
+}));
 
-    function renderChart(type) {
-      if (chart) chart.destroy();
+// Debug once — REMOVE after verification
+console.log('CANDLE DATA SAMPLE:', candleData.slice(0, 5));
 
-      if (type === 'line') {
-        chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            datasets: [{
-              label: `${symbol} Close Price`,
-              data: lineData,
-              borderColor: '#E0EBFF',
-              fill: true,
-              tension: 0.1,
-              backgroundColor: function(context) {
-                const chart = context.chart;
-                const { ctx, chartArea } = chart;
-                if (!chartArea) return null;
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
-                gradient.addColorStop(1, 'rgba(143,173,253,0)');
-                return gradient;
+// ----------------------
+// CHART SETUP
+// ----------------------
+const ctx = document.getElementById('ohlc-chart').getContext('2d');
+let chart;
+const chartTypeSelect = document.getElementById('chart-type-select');
+
+// ----------------------
+// RENDER FUNCTION
+// ----------------------
+function renderChart(type) {
+  if (chart) chart.destroy();
+
+  if (type === 'line') {
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: `${symbol} Close`,
+          data: lineData,
+          borderColor: '#8FADFD',
+          backgroundColor: 'rgba(143,173,253,0.3)',
+          fill: true,
+          tension: 0.2
+        }]
+      },
+      options: baseOptions()
+    });
+  }
+
+  if (type === 'candlestick') {
+    chart = new Chart(ctx, {
+      type: 'candlestick',
+      data: {
+        datasets: [{
+          label: `${symbol} OHLC`,
+          data: candleData,
+          borderColor: {
+            up: '#4caf50',
+            down: '#f44336',
+            unchanged: '#999'
+          }
+        }]
+      },
+      options: {
+        ...baseOptions(),
+        parsing: false, // 🔥 REQUIRED FOR FINANCIAL CHARTS
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const d = ctx.raw;
+                return `O:${d.o} H:${d.h} L:${d.l} C:${d.c}`;
               }
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { labels: { color: 'white' } },
-              tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-              x: { type: 'time', time: { unit: 'day' }, ticks: { color: 'white' } },
-              y: { ticks: { color: 'white' } }
             }
           }
-        });
-      } else if (type === 'candlestick') {
-  chart = new Chart(ctx, {
-    type: 'candlestick',
-    data: {
-      datasets: [{
-        label: `${symbol} OHLC`,
-        data: candleData,
-        color: {
-          up: '#4caf50',   // green for bullish
-          down: '#f44336', // red for bearish
-          unchanged: '#999'
         }
-      }]
+      }
+    });
+  }
+}
+
+// ----------------------
+// SHARED OPTIONS (IMPORTANT)
+// ----------------------
+function baseOptions() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'nearest',
+      intersect: false
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: 'white' } },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: function(ctx) {
-              const d = ctx.raw;
-              return `O: ${d.o} H: ${d.h} L: ${d.l} C: ${d.c}`;
-            }
-          }
+    plugins: {
+      legend: {
+        labels: { color: 'white' }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        adapters: { date: {} }, // force adapter
+        time: {
+          unit: 'day',
+          tooltipFormat: 'MMM dd, yyyy HH:mm'
+        },
+        ticks: {
+          color: 'white',
+          source: 'data',
+          autoSkip: true,
+          maxRotation: 0
+        },
+        grid: {
+          color: 'rgba(255,255,255,0.1)'
         }
       },
-      scales: {
-        x: {
-          type: 'time',
-          time: { unit: 'day', tooltipFormat: 'MMM dd, yyyy' },
-          ticks: { color: 'white' },
-          grid: { color: 'rgba(255,255,255,0.1)' }
-        },
-        y: {
-          ticks: { color: 'white' },
-          grid: { color: 'rgba(255,255,255,0.1)' }
+      y: {
+        position: 'left',
+        ticks: { color: 'white' },
+        grid: {
+          color: 'rgba(255,255,255,0.1)'
         }
       }
     }
-  });
+  };
 }
-
-
-    }
 
     // Initial chart render
     renderChart(chartTypeSelect.value);
