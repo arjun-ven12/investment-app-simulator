@@ -307,12 +307,12 @@ function initAISettings() {
     e.preventDefault();
 
     const payload = {
-      riskTolerance: document.getElementById("riskTolerance").value,
-      investmentHorizon: document.getElementById("investmentHorizon").value,
-      objective: document.getElementById("objective").value,
-      behavioralFocus: document.getElementById("behavioralFocus").checked,
-      aiTone: document.getElementById("aiTone").value,
-    };
+  riskTolerance: document.getElementById("riskTolerance").value,
+  investmentHorizon: document.getElementById("investmentHorizon").value,
+  objective: document.getElementById("objective").value,
+  aiTone: document.getElementById("aiTone").value,
+};
+
 
     try {
       const res = await fetch("/ai-settings", {
@@ -361,14 +361,7 @@ async function loadAISettings() {
 
     document.getElementById("objective").value = data.objective || "growth";
 
-    document.getElementById("behavioralFocus").checked =
-      data.behavioralFocus !== false;
-
     document.getElementById("aiTone").value = data.aiTone || "professional";
-
-
-    document.getElementById("includeRiskWarnings").checked =
-      data.includeRiskWarnings !== false;
   } catch (err) {
     console.error("Failed to load AI settings:", err);
   }
