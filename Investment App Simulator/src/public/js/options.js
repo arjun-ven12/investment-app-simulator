@@ -580,7 +580,6 @@ scrollWrapper.className = 'week-scroll-wrapper';
         <th>Symbol</th>
         <th>Name</th>
         <th>Type</th>
-        <th>Style</th>
         <th>Strike</th>
         <th>Expiration</th>
         <th>Size</th>
@@ -610,7 +609,10 @@ scrollWrapper.className = 'week-scroll-wrapper';
   wrapper.appendChild(paginationContainer);
 
   contracts.sort((a, b) => (a.strikePrice ?? 0) - (b.strikePrice ?? 0));
-
+  function normalizeOptionSymbol(symbol) {
+    return (symbol ?? '').replace(/^O:/, '');
+  }
+  
   let currentPage = 1;
   const totalPages = Math.ceil(contracts.length / rowsPerPage);
 
@@ -624,10 +626,9 @@ scrollWrapper.className = 'week-scroll-wrapper';
       const tr = document.createElement('tr');
       tr.style.cursor = 'pointer';
       tr.innerHTML = `
-        <td>${c.symbol ?? ''}</td>
-        <td>${c.underlyingSymbol ?? ''}</td>
+      <td>${normalizeOptionSymbol(c.symbol)}</td>
+      <td>${c.underlyingSymbol ?? ''}</td>
         <td>${c.type.toUpperCase() ?? ''}</td>
-        <td>${c.style.toUpperCase() ?? ''}</td>
         <td>${c.strikePrice ?? 'N/A'}</td>
         <td>${c.expirationDate ? new Date(c.expirationDate).toLocaleDateString() : 'N/A'}</td>
         <td>${c.size ?? 'N/A'}</td>
@@ -801,9 +802,10 @@ function renderOptionContracts(grouped) {
         const puts = contracts.filter(c => (c.type ?? '').toLowerCase() === 'put');
 
         const tablesRow = document.createElement('div');
-        tablesRow.style.display = 'grid';
-        tablesRow.style.gridTemplateColumns = '1fr 1fr';
+        tablesRow.style.display = 'flex';
+        tablesRow.style.flexDirection= 'column';
         tablesRow.style.gap = '12px';
+        tablesRow.className='bigTable'
 
         if (calls.length > 0) tablesRow.appendChild(buildTable('Calls', calls));
         else {
