@@ -106,10 +106,10 @@ async function refreshPortfolios() {
 async function run() {
   console.log('🚀 Portfolio price updater started');
 
-  if (!isMarketOpen()) {
-    console.log('⏸ Market closed — exiting');
-    return;
-  }
+  // if (!isMarketOpen()) {
+  //   console.log('⏸ Market closed — exiting');
+  //   return;
+  // }
 
   const symbols = await getAllActiveSymbols();
 
