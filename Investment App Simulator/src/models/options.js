@@ -27,6 +27,7 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 /////////////////////////////////////////////////
 
 
+
 // module.exports.getContractsBySymbol = async function getContractsBySymbol(symbol) {
 //   if (!symbol || typeof symbol !== 'string') {
 //     throw new Error(`Invalid stock symbol: ${symbol}`);
@@ -35,7 +36,7 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 //   const upperSymbol = symbol.toUpperCase();
 
 //   try {
-//     // ✅ Ensure stock exists (upsert)
+//     // Ensure stock exists (upsert)
 //     const stock = await prisma.stock.upsert({
 //       where: { symbol: upperSymbol },
 //       update: {},
@@ -43,9 +44,15 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 //     });
 //     const stockId = stock.stock_id;
 
-//     // Fetch contracts from Alpaca
-//     const url = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}`;
-//     const response = await fetch(url, {
+//     // Calculate date 3 months from today
+//     const today = new Date();
+//     const threeMonthsLater = new Date(today);
+//     threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+//     const expirationLte = threeMonthsLater.toISOString().split('T')[0];
+
+//     // Fetch first page
+//     const firstUrl = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}`;
+//     const firstResponse = await fetch(firstUrl, {
 //       method: 'GET',
 //       headers: {
 //         accept: 'application/json',
@@ -54,18 +61,63 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 //       },
 //     });
 
-//     if (!response.ok) {
-//       throw new Error(`Alpaca API error: ${response.status}`);
+//     if (!firstResponse.ok) throw new Error(`Alpaca API error: ${firstResponse.status}`);
+//     const firstData = await firstResponse.json();
+//     if (!firstData || !firstData.option_contracts) return { error: "No option contracts found." };
+
+//     let allContracts = firstData.option_contracts;
+//     let nextPageToken = firstData.next_page_token || null;
+
+//     // Parallel fetch loop
+//     const pagePromises = [];
+//     while (nextPageToken) {
+//       const url = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}&page_token=${nextPageToken}`;
+//       pagePromises.push(fetch(url, {
+//         method: 'GET',
+//         headers: {
+//           accept: 'application/json',
+//           'APCA-API-KEY-ID': API_KEY,
+//           'APCA-API-SECRET-KEY': API_SECRET,
+//         },
+//       }).then(res => res.json()));
+
+//       // Temporarily break to avoid infinite loop; next tokens will be resolved in Promise.all
+//       nextPageToken = null;
 //     }
 
-//     const data = await response.json();
-//     if (!data || !data.option_contracts) {
-//       throw new Error(`No option contracts found for symbol "${upperSymbol}"`);
+//     if (pagePromises.length > 0) {
+//       const pagesData = await Promise.all(pagePromises);
+//       for (const page of pagesData) {
+//         if (page.option_contracts) allContracts = allContracts.concat(page.option_contracts);
+//         if (page.next_page_token) {
+//           // Recursively fetch additional pages if Alpaca returns a new next_page_token
+//           let token = page.next_page_token;
+//           while (token) {
+//             const res = await fetch(
+//               `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}&page_token=${token}`,
+//               {
+//                 method: 'GET',
+//                 headers: {
+//                   accept: 'application/json',
+//                   'APCA-API-KEY-ID': API_KEY,
+//                   'APCA-API-SECRET-KEY': API_SECRET,
+//                 },
+//               }
+//             );
+//             const data = await res.json();
+//             if (data.option_contracts) allContracts = allContracts.concat(data.option_contracts);
+//             token = data.next_page_token || null;
+//           }
+//         }
+//       }
 //     }
 
-//     // Filter out contracts with null closePrice
-//     const validContracts = data.option_contracts.filter(c => c.close_price !== null && parseInt(c.open_interest) >= 50);
+//     // Filter valid contracts
+//     const validContracts = allContracts.filter(
+//       c => c.close_price !== null && parseInt(c.open_interest) >= 50
+//     );
 
+//     // Upsert into DB
 //     const upsertPromises = validContracts.map(contract => {
 //       const strikePrice = parseFloat(contract.strike_price);
 //       const expirationDate = new Date(contract.expiration_date);
@@ -113,7 +165,7 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 
 //     const savedContracts = await Promise.all(upsertPromises);
 
-//     // Group saved contracts by week for return
+//     // Group by expiration week
 //     const groupedByWeek = savedContracts.reduce((acc, contract) => {
 //       const week = getWeekStart(contract.expirationDate);
 //       if (!acc[week]) acc[week] = [];
@@ -141,300 +193,128 @@ const optionLedger = new ethers.Contract(process.env.OPTIONS_LEDGER_ADDRESS,
 
 
 
-
-
-
-
-
-
-// module.exports.getContractsBySymbol = async function getContractsBySymbol(symbol) {
-//   if (!symbol || typeof symbol !== 'string') {
-//     throw new Error(`Invalid stock symbol: ${symbol}`);
-//   }
-
-//   const upperSymbol = symbol.toUpperCase();
-
-//   try {
-//     // ✅ Ensure stock exists (upsert)
-//     const stock = await prisma.stock.upsert({
-//       where: { symbol: upperSymbol },
-//       update: {},
-//       create: { symbol: upperSymbol }
-//     });
-//     const stockId = stock.stock_id;
-
-//     // Calculate date 3 months from today
-//     const today = new Date();
-//     const threeMonthsLater = new Date(today);
-//     threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
-//     const expirationLte = threeMonthsLater.toISOString().split('T')[0]; // yyyy-mm-dd
-
-//     // Fetch contracts from Alpaca
-//     const url = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}`;
-//     const response = await fetch(url, {
-//       method: 'GET',
-//       headers: {
-//         accept: 'application/json',
-//         'APCA-API-KEY-ID': API_KEY,
-//         'APCA-API-SECRET-KEY': API_SECRET,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Alpaca API error: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-//     if (!data || !data.option_contracts) {
-//       throw new Error(`No option contracts found for symbol "${upperSymbol}"`);
-//     }
-
-//     // Filter out contracts with null closePrice and low open interest
-//     const validContracts = data.option_contracts.filter(
-//       c => c.close_price !== null && parseInt(c.open_interest) >= 50
-//     );
-
-//     // Upsert contracts in DB
-//     const upsertPromises = validContracts.map(contract => {
-//       const strikePrice = parseFloat(contract.strike_price);
-//       const expirationDate = new Date(contract.expiration_date);
-//       const size = contract.size ? parseInt(contract.size) : null;
-//       const openInterest = contract.open_interest ? parseInt(contract.open_interest) : null;
-//       const openInterestDate = contract.open_interest_date ? new Date(contract.open_interest_date) : null;
-//       const closePrice = parseFloat(contract.close_price);
-//       const closePriceDate = contract.close_price_date ? new Date(contract.close_price_date) : null;
-
-//       return prisma.optionContract.upsert({
-//         where: { symbol: contract.symbol },
-//         update: {
-//           stockId,
-//           name: contract.name,
-//           underlyingSymbol: contract.underlying_symbol,
-//           rootSymbol: contract.root_symbol,
-//           type: contract.type ? contract.type.toUpperCase() : null,
-//           style: contract.style || null,
-//           strikePrice,
-//           expirationDate,
-//           size,
-//           openInterest,
-//           openInterestDate,
-//           closePrice,
-//           closePriceDate,
-//         },
-//         create: {
-//           stockId,
-//           symbol: contract.symbol,
-//           name: contract.name,
-//           underlyingSymbol: contract.underlying_symbol,
-//           rootSymbol: contract.root_symbol,
-//           type: contract.type ? contract.type.toUpperCase() : null,
-//           style: contract.style || null,
-//           strikePrice,
-//           expirationDate,
-//           size,
-//           openInterest,
-//           openInterestDate,
-//           closePrice,
-//           closePriceDate,
-//         },
-//       });
-//     });
-
-//     const savedContracts = await Promise.all(upsertPromises);
-
-//     // Group saved contracts by **expiration week**
-//     const groupedByWeek = savedContracts.reduce((acc, contract) => {
-//       const week = getWeekStart(contract.expirationDate);
-//       if (!acc[week]) acc[week] = [];
-//       acc[week].push(contract);
-//       return acc;
-//     }, {});
-
-//     return groupedByWeek;
-
-//   } catch (error) {
-//     console.error('Error fetching or saving option contracts:', error);
-//     return { error: error.message };
-//   }
-// };
-
-// // Helper → get start of week (Monday)
-// function getWeekStart(date) {
-//   const d = new Date(date);
-//   const day = d.getDay();
-//   const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
-//   const weekStart = new Date(d.setDate(diff));
-//   return weekStart.toISOString().split('T')[0];
-// }
-
 module.exports.getContractsBySymbol = async function getContractsBySymbol(symbol) {
-  if (!symbol || typeof symbol !== 'string') {
+  if (!symbol || typeof symbol !== "string") {
     throw new Error(`Invalid stock symbol: ${symbol}`);
   }
 
-  const upperSymbol = symbol.toUpperCase();
+  const underlying = symbol.toUpperCase();
 
   try {
-    // Ensure stock exists (upsert)
+    // 1️⃣ Ensure stock exists
     const stock = await prisma.stock.upsert({
-      where: { symbol: upperSymbol },
+      where: { symbol: underlying },
       update: {},
-      create: { symbol: upperSymbol }
+      create: { symbol: underlying },
     });
+
     const stockId = stock.stock_id;
 
-    // Calculate date 3 months from today
+    // 2️⃣ Fetch options snapshot from Massive API
+    const url = `https://api.massive.com/v3/snapshot/options/${underlying}?order=asc&limit=250&sort=ticker&apiKey=${POLYGON_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Massive API error: ${res.status}`);
+
+    const data = await res.json();
+    const allContracts = data.results || [];
+
+    if (allContracts.length === 0) {
+      return { error: "No option contracts found." };
+    }
+
+    // 3️⃣ Batch upsert into database
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < allContracts.length; i += BATCH_SIZE) {
+      const batch = allContracts.slice(i, i + BATCH_SIZE);
+
+      await prisma.$transaction(
+        batch.map((contract) => {
+          const d = contract.details || {};
+          return prisma.optionContract.upsert({
+            where: { symbol: d.ticker },
+            update: {
+              stockId,
+              underlyingSymbol: underlying,
+              rootSymbol: underlying,
+              type: d.contract_type?.toUpperCase() || null,
+              style: d.exercise_style || null,
+              strikePrice: d.strike_price,
+              expirationDate: new Date(d.expiration_date),
+              size: d.shares_per_contract || 100,
+              breakEvenPrice: contract.break_even_price || null,
+              impliedVolatility: contract.implied_volatility || null,
+              delta: contract.greeks?.delta || null,
+              gamma: contract.greeks?.gamma || null,
+              theta: contract.greeks?.theta || null,
+              vega: contract.greeks?.vega || null,
+              fmv: contract.fmv || null,
+              openInterest: contract.open_interest || null,
+            },
+            create: {
+              stockId,
+              symbol: d.ticker,
+              name: d.ticker,
+              underlyingSymbol: underlying,
+              rootSymbol: underlying,
+              type: d.contract_type?.toUpperCase() || null,
+              style: d.exercise_style || null,
+              strikePrice: d.strike_price,
+              expirationDate: new Date(d.expiration_date),
+              size: d.shares_per_contract || 100,
+              breakEvenPrice: contract.break_even_price || null,
+              impliedVolatility: contract.implied_volatility || null,
+              delta: contract.greeks?.delta || null,
+              gamma: contract.greeks?.gamma || null,
+              theta: contract.greeks?.theta || null,
+              vega: contract.greeks?.vega || null,
+              fmv: contract.fmv || null,
+              openInterest: contract.open_interest || null,
+            },
+          });
+        })
+      );
+    }
+
+    // 4️⃣ Filter only active contracts with openInterest > 100
     const today = new Date();
-    const threeMonthsLater = new Date(today);
-    threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
-    const expirationLte = threeMonthsLater.toISOString().split('T')[0];
+    const activeContracts = allContracts
+      .filter(c => c.details && c.open_interest > 100 && new Date(c.details.expiration_date) >= today)
+      .map(c => ({
+        symbol: c.details.ticker,
+        underlyingSymbol: underlying,
+        rootSymbol: underlying,
+        type: c.details.contract_type,
+        style: c.details.exercise_style,
+        strikePrice: c.details.strike_price,
+        expirationDate: c.details.expiration_date,
+        size: c.details.shares_per_contract || 100,
+        impliedVolatility: c.implied_volatility || null,
+        delta: c.greeks?.delta || null,
+        gamma: c.greeks?.gamma || null,
+        theta: c.greeks?.theta || null,
+        vega: c.greeks?.vega || null,
+        openInterest: c.open_interest || null,
 
-    // Fetch first page
-    const firstUrl = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}`;
-    const firstResponse = await fetch(firstUrl, {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        'APCA-API-KEY-ID': API_KEY,
-        'APCA-API-SECRET-KEY': API_SECRET,
-      },
-    });
+        day: c.day || null,
+        underlyingAsset: c.underlying_asset || null
+      }));
 
-    if (!firstResponse.ok) throw new Error(`Alpaca API error: ${firstResponse.status}`);
-    const firstData = await firstResponse.json();
-    if (!firstData || !firstData.option_contracts) return { error: "No option contracts found." };
-
-    let allContracts = firstData.option_contracts;
-    let nextPageToken = firstData.next_page_token || null;
-
-    // Parallel fetch loop
-    const pagePromises = [];
-    while (nextPageToken) {
-      const url = `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}&page_token=${nextPageToken}`;
-      pagePromises.push(fetch(url, {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          'APCA-API-KEY-ID': API_KEY,
-          'APCA-API-SECRET-KEY': API_SECRET,
-        },
-      }).then(res => res.json()));
-
-      // Temporarily break to avoid infinite loop; next tokens will be resolved in Promise.all
-      nextPageToken = null;
-    }
-
-    if (pagePromises.length > 0) {
-      const pagesData = await Promise.all(pagePromises);
-      for (const page of pagesData) {
-        if (page.option_contracts) allContracts = allContracts.concat(page.option_contracts);
-        if (page.next_page_token) {
-          // Recursively fetch additional pages if Alpaca returns a new next_page_token
-          let token = page.next_page_token;
-          while (token) {
-            const res = await fetch(
-              `https://paper-api.alpaca.markets/v2/options/contracts?underlying_symbols=${upperSymbol}&expiration_date_lte=${expirationLte}&page_token=${token}`,
-              {
-                method: 'GET',
-                headers: {
-                  accept: 'application/json',
-                  'APCA-API-KEY-ID': API_KEY,
-                  'APCA-API-SECRET-KEY': API_SECRET,
-                },
-              }
-            );
-            const data = await res.json();
-            if (data.option_contracts) allContracts = allContracts.concat(data.option_contracts);
-            token = data.next_page_token || null;
-          }
-        }
-      }
-    }
-
-    // Filter valid contracts
-    const validContracts = allContracts.filter(
-      c => c.close_price !== null && parseInt(c.open_interest) >= 50
-    );
-
-    // Upsert into DB
-    const upsertPromises = validContracts.map(contract => {
-      const strikePrice = parseFloat(contract.strike_price);
-      const expirationDate = new Date(contract.expiration_date);
-      const size = contract.size ? parseInt(contract.size) : null;
-      const openInterest = contract.open_interest ? parseInt(contract.open_interest) : null;
-      const openInterestDate = contract.open_interest_date ? new Date(contract.open_interest_date) : null;
-      const closePrice = parseFloat(contract.close_price);
-      const closePriceDate = contract.close_price_date ? new Date(contract.close_price_date) : null;
-
-      return prisma.optionContract.upsert({
-        where: { symbol: contract.symbol },
-        update: {
-          stockId,
-          name: contract.name,
-          underlyingSymbol: contract.underlying_symbol,
-          rootSymbol: contract.root_symbol,
-          type: contract.type ? contract.type.toUpperCase() : null,
-          style: contract.style || null,
-          strikePrice,
-          expirationDate,
-          size,
-          openInterest,
-          openInterestDate,
-          closePrice,
-          closePriceDate,
-        },
-        create: {
-          stockId,
-          symbol: contract.symbol,
-          name: contract.name,
-          underlyingSymbol: contract.underlying_symbol,
-          rootSymbol: contract.root_symbol,
-          type: contract.type ? contract.type.toUpperCase() : null,
-          style: contract.style || null,
-          strikePrice,
-          expirationDate,
-          size,
-          openInterest,
-          openInterestDate,
-          closePrice,
-          closePriceDate,
-        },
-      });
-    });
-
-    const savedContracts = await Promise.all(upsertPromises);
-
-    // Group by expiration week
-    const groupedByWeek = savedContracts.reduce((acc, contract) => {
-      const week = getWeekStart(contract.expirationDate);
-      if (!acc[week]) acc[week] = [];
-      acc[week].push(contract);
-      return acc;
-    }, {});
-
-    return groupedByWeek;
+    return activeContracts;
 
   } catch (error) {
-    console.error('Error fetching or saving option contracts:', error);
+    console.error("Error fetching Massive option contracts:", error);
     return { error: error.message };
   }
 };
 
-// Helper → get start of week (Monday)
+// 📅 Helper: start of week (optional, not used here)
 function getWeekStart(date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   const weekStart = new Date(d.setDate(diff));
-  return weekStart.toISOString().split('T')[0];
+  return weekStart.toISOString().split("T")[0];
 }
-
-
-
-
-
-
-
 
 
 
@@ -447,75 +327,26 @@ function getWeekStart(date) {
 
 
 
-
-// function formatDate(date) {
-//   return date.toISOString().slice(0, 10); // YYYY-MM-DD
-// }
-
-// module.exports.getOptionOHLCBySymbol = async function getOptionOHLCBySymbol(symbol) {
-//   if (!symbol || typeof symbol !== 'string') {
-//     throw new Error(`Invalid options symbol: ${symbol}`);
-//   }
-
-//   const upperSymbol = symbol.toUpperCase();
-
-//   // Calculate past 5 days
-//   const toDate = new Date();
-//   const fromDate = new Date();
-//   fromDate.setDate(toDate.getDate() - 100);
-//   const url = `https://api.polygon.io/v2/aggs/ticker/O:${upperSymbol}/range/1/day/${formatDate(fromDate)}/${formatDate(toDate)}?adjusted=true&sort=asc&limit=120&apiKey=${POLYGON_API_KEY}`;
-
-//   try {
-//     const response = await fetch(url);
-//     if (!response.ok) {
-//       throw new Error(`Polygon API error: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-
-//     if (!data.results || !Array.isArray(data.results)) {
-//       throw new Error(`No OHLC data found for symbol "${upperSymbol}"`);
-//     }
-
-//     // Transform results into a cleaner format
-//     const ohlc = data.results.map(item => ({
-//       date: new Date(item.t).toISOString().slice(0, 10),
-//       open: item.o,
-//       high: item.h,
-//       low: item.l,
-//       close: item.c,
-//       volume: item.v,
-//       transactions: item.n || null,
-//       vwap: item.vw || null,
-//     }));
-
-//     return ohlc;
-//   } catch (error) {
-//     console.error('Error fetching option OHLC:', error);
-//     return { error: error.message };
-//   }
-// };
-
-
 function formatDate(date) {
   return date.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-// Fetch contract by symbol from OptionContract table
+// Fetch contract by symbol
 async function getContractBySymbol(symbol) {
   return prisma.optionContract.findFirst({
-    where: { symbol: symbol.toUpperCase() }
+    where: { symbol: symbol.toUpperCase() },
   });
 }
 
 module.exports.getOptionOHLCBySymbol = async function (symbol) {
-  if (!symbol || typeof symbol !== 'string') {
+  if (!symbol || typeof symbol !== "string") {
     throw new Error(`Invalid options symbol: ${symbol}`);
   }
 
   const upperSymbol = symbol.toUpperCase();
+  const polygonTicker = `${upperSymbol}`;
 
-  // Find contractId in database
+  // 1️⃣ Validate contract exists in DB
   const contract = await getContractBySymbol(upperSymbol);
   if (!contract) {
     throw new Error(`Option contract not found in DB for symbol "${upperSymbol}"`);
@@ -523,28 +354,43 @@ module.exports.getOptionOHLCBySymbol = async function (symbol) {
 
   const contractId = contract.id;
 
-  // Past 5 days
+  // 2️⃣ Date range (last 30 calendar days)
   const toDate = new Date();
   const fromDate = new Date();
-  fromDate.setDate(toDate.getDate() - 5);
+  fromDate.setDate(toDate.getDate() - 30);
 
-  const url = `https://api.polygon.io/v2/aggs/ticker/O:${upperSymbol}/range/1/day/${formatDate(fromDate)}/${formatDate(toDate)}?adjusted=true&sort=asc&limit=120&apiKey=${POLYGON_API_KEY}`;
+  const from = formatDate(fromDate);
+  const to = formatDate(toDate);
+
+  const url = `https://api.massive.com/v2/aggs/ticker/${polygonTicker}/range/1/day/${from}/${to}?adjusted=true&sort=asc&limit=120&apiKey=${POLYGON_API_KEY}`;
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Polygon API error: ${response.status}`);
-    }
+const response = await fetch(url);
 
-    const data = await response.json();
-    if (!data.results || !Array.isArray(data.results)) {
-      throw new Error(`No OHLC data found for symbol "${upperSymbol}"`);
-    }
+if (!response.ok) {
+  console.error(`❌ Polygon HTTP error ${response.status} for ${polygonTicker} ${url}`);
+  return [];
+}
 
-    // Upsert into OptionHistPrice
-    const upsertPromises = data.results.map(item => {
-      const date = new Date(item.t);
-      return prisma.optionHistPrice.upsert({
+const data = await response.json();
+
+if (!Array.isArray(data.results)) {
+  console.warn(`⚠️ Polygon returned no results array for ${polygonTicker}`);
+  return [];
+}
+
+if (data.results.length === 0) {
+  console.log(`ℹ️ No trades yet for ${polygonTicker} in this date range`);
+  return [];
+}
+
+    // 3️⃣ Upsert only days that traded
+    const records = [];
+
+    for (const bar of data.results) {
+      const date = new Date(bar.t);
+
+      const record = await prisma.optionHistPrice.upsert({
         where: {
           contractId_date: {
             contractId,
@@ -552,44 +398,37 @@ module.exports.getOptionOHLCBySymbol = async function (symbol) {
           },
         },
         update: {
-          openPrice: item.o,
-          highPrice: item.h,
-          lowPrice: item.l,
-          closePrice: item.c,
-          volume: item.v || null,
-          numberOfTrades: item.n || null,
-          vwap: item.vw || null,
+          openPrice: bar.o,
+          highPrice: bar.h,
+          lowPrice: bar.l,
+          closePrice: bar.c,
+          volume: bar.v || null,
+          numberOfTrades: bar.n || null,
+          vwap: bar.vw || null,
         },
         create: {
           contractId,
           date,
-          openPrice: item.o,
-          highPrice: item.h,
-          lowPrice: item.l,
-          closePrice: item.c,
-          volume: item.v || null,
-          numberOfTrades: item.n || null,
-          vwap: item.vw || null,
+          openPrice: bar.o,
+          highPrice: bar.h,
+          lowPrice: bar.l,
+          closePrice: bar.c,
+          volume: bar.v || null,
+          numberOfTrades: bar.n || null,
+          vwap: bar.vw || null,
         },
       });
-    });
 
-    const savedRecords = await Promise.all(upsertPromises);
-    return savedRecords;
+      records.push(record);
+    }
 
-  } catch (error) {
-    console.error('Error fetching or saving OHLC data:', error);
-    return { error: error.message };
+    return records;
+
+  } catch (err) {
+    console.error("Error fetching option aggregates:", err);
+    return [];
   }
 };
-
-
-
-
-
-
-
-
 
 
 

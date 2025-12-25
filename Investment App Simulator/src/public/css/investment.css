@@ -1634,9 +1634,18 @@ body {
     margin: 10px 0px;
     /* Add transition for smooth hover effects */
     transition: all 0.2s ease-in-out; 
+    display: flex !important;
+    flex-direction: column;
+    overflow-x: auto;      /* Adds horizontal scrollbar when content overflows */
+  -webkit-overflow-scrolling: touch;
 
 }
-
+.week-scroll-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  width: 100%;
+}
 
 .ohlc-body {
     padding: 15px /* Increased padding from 12px */

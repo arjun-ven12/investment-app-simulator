@@ -544,124 +544,214 @@ window.addEventListener('DOMContentLoaded', () => {
   // ----------------------------
   // Table builder with pagination
   // ----------------------------
-  function buildTable(title, contracts, rowsPerPage = 10) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'week-table-wrapper';
+// ----------------------------
+// Table builder with pagination (updated to show all fields)
+// ----------------------------
+// ----------------------------
+// Table builder (scrollable horizontally)
+// ----------------------------
+function buildTable(title, contracts, rowsPerPage = 10) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'week-table-wrapper';
+  wrapper.style.marginBottom = '20px';
+    wrapper.style.display = 'flex !important';
+  wrapper.style.flexDirection = 'column !important';
 
-    const heading = document.createElement('h4');
-    heading.textContent = `${title} (${contracts.length})`;
-    wrapper.appendChild(heading);
+  const heading = document.createElement('h4');
+  heading.textContent = `${title} (${contracts.length})`;
+  wrapper.appendChild(heading);
 
-    const table = document.createElement('table');
-    table.className = 'options-table ';
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>Name</th>
-          <th>Strike</th>
-          <th>Expiration</th>
-          <th>Open Interest</th>
-          <th>Close Price</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-    const tbody = table.querySelector('tbody');
-    wrapper.appendChild(table);
+  // Scrollable container
+  const scrollWrapper = document.createElement('div');
+  scrollWrapper.style.overflowX = 'auto';
+  scrollWrapper.style.width = '100%';
+  // scrollWrapper.style.display = 'flex !important';
+  // scrollWrapper.style.flexDirection = 'column !important';
+scrollWrapper.className = 'week-scroll-wrapper';
 
-    const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'table-pagination';
-    paginationContainer.style.marginTop = '10px';
-    paginationContainer.style.display = 'flex';
-    paginationContainer.style.flexWrap = 'wrap';      // Wrap if too many buttons
-    paginationContainer.style.justifyContent = 'flex-start'; // Left-aligned
-    paginationContainer.style.gap = '8px';
-    wrapper.appendChild(paginationContainer);
+  wrapper.appendChild(scrollWrapper);
 
-    contracts.sort((a, b) => (a.strikePrice ?? a.strike_price ?? 0) - (b.strikePrice ?? b.strike_price ?? 0));
+  const table = document.createElement('table');
+  table.className = 'options-table';
+  table.style.width = '100%';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Style</th>
+        <th>Strike</th>
+        <th>Expiration</th>
+        <th>Size</th>
+        <th>Open Interest</th>
+        <th>Implied Volatility</th>
+        <th>Delta</th>
+        <th>Gamma</th>
+        <th>Theta</th>
+        <th>Vega</th>
+        <th>Close Price</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+  scrollWrapper.appendChild(table);
 
-    let currentPage = 1;
-    const totalPages = Math.ceil(contracts.length / rowsPerPage);
+  const tbody = table.querySelector('tbody');
 
-    const renderPage = (page) => {
-      tbody.innerHTML = '';
-      const start = (page - 1) * rowsPerPage;
-      const end = start + rowsPerPage;
-      const pageContracts = contracts.slice(start, end);
+  // Pagination container
+  const paginationContainer = document.createElement('div');
+  paginationContainer.className = 'table-pagination';
+  paginationContainer.style.marginTop = '10px';
+  paginationContainer.style.display = 'flex';
+  paginationContainer.style.flexWrap = 'wrap';
+  paginationContainer.style.justifyContent = 'flex-start';
+  paginationContainer.style.gap = '8px';
+  wrapper.appendChild(paginationContainer);
 
-      pageContracts.forEach(c => {
-        const strike = c.strikePrice ?? c.strike_price ?? 'N/A';
-        const exp = c.expirationDate ?? c.expiration_date ?? c.expiration ?? '';
-        const oi = c.openInterest ?? c.open_interest ?? 'N/A';
-        const close = c.closePrice ?? c.close_price ?? 'N/A';
-        const name = c.name ?? c.title ?? '';
+  contracts.sort((a, b) => (a.strikePrice ?? 0) - (b.strikePrice ?? 0));
 
-        const tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        tr.innerHTML = `
-          <td class="contract-symbol">${c.symbol ?? ''}</td>
-          <td class="contract-name">${name}</td>
-          <td class="contract-strike">${strike}</td>
-          <td class="contract-exp">${exp ? new Date(exp).toLocaleDateString() : 'N/A'}</td>
-          <td class="contract-oi">${oi}</td>
-          <td class="contract-close">${close}</td>
-        `;
-        tr.addEventListener('click', () => {
-          const symbol = c.symbol ?? '';
-          if (symbol) window.location.href = `/ohlc?symbol=${encodeURIComponent(symbol)}`;;
-        });
-        tbody.appendChild(tr);
+  let currentPage = 1;
+  const totalPages = Math.ceil(contracts.length / rowsPerPage);
+
+  const renderPage = (page) => {
+    tbody.innerHTML = '';
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageContracts = contracts.slice(start, end);
+
+    pageContracts.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.innerHTML = `
+        <td>${c.symbol ?? ''}</td>
+        <td>${c.underlyingSymbol ?? ''}</td>
+        <td>${c.type.toUpperCase() ?? ''}</td>
+        <td>${c.style.toUpperCase() ?? ''}</td>
+        <td>${c.strikePrice ?? 'N/A'}</td>
+        <td>${c.expirationDate ? new Date(c.expirationDate).toLocaleDateString() : 'N/A'}</td>
+        <td>${c.size ?? 'N/A'}</td>
+        <td>${c.openInterest ?? 'N/A'}</td>
+        <td>${c.impliedVolatility.toFixed(3) ?? 'N/A'}</td>
+        <td>${c.delta.toFixed(3) ?? 'N/A'}</td>
+        <td>${c.gamma.toFixed(3) ?? 'N/A'}</td>
+        <td>${c.theta.toFixed(3) ?? 'N/A'}</td>
+        <td>${c.vega.toFixed(3) ?? 'N/A'}</td>
+        <td>${c.day?.close ?? 'N/A'}</td>
+      `;
+      tr.addEventListener('click', () => {
+        const symbol = c.symbol ?? '';
+        if (symbol) window.location.href = `/ohlc?symbol=${encodeURIComponent(symbol)}`;
       });
+      tbody.appendChild(tr);
+    });
 
-      // ----------------------------
-      // Pagination buttons
-      // ----------------------------
-      paginationContainer.innerHTML = '';
+    // Pagination buttons
+    paginationContainer.innerHTML = '';
+    if (currentPage > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.textContent = 'Previous';
+      prevBtn.addEventListener('click', () => {
+        currentPage--;
+        renderPage(currentPage);
+      });
+      paginationContainer.appendChild(prevBtn);
+    }
 
-      // Previous
-      if (currentPage > 1) {
-        const prevBtn = document.createElement('button');
-        prevBtn.textContent = 'Previous';
-        prevBtn.addEventListener('click', () => {
-          currentPage--;
-          renderPage(currentPage);
-        });
-        paginationContainer.appendChild(prevBtn);
-      }
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.textContent = i;
+      pageBtn.style.padding = '5px 10px';
+      pageBtn.style.borderRadius = '5px';
+      pageBtn.style.border = '2px solid #E0EBFF';
+      pageBtn.style.backgroundColor = i === currentPage ? '#E0EBFF' : '#000000ff';
+      pageBtn.style.color = i === currentPage ? '#000000ff' : '#E0EBFF';
+      pageBtn.style.cursor = 'pointer';
+      pageBtn.addEventListener('click', () => {
+        currentPage = i;
+        renderPage(currentPage);
+      });
+      paginationContainer.appendChild(pageBtn);
+    }
 
-      // Page numbers
-      for (let i = 1; i <= totalPages; i++) {
-        const pageBtn = document.createElement('button');
-        pageBtn.textContent = i;
-        pageBtn.style.padding = '5px 10px';
-        pageBtn.style.borderRadius = '5px';
-        pageBtn.style.border = '2px solid #E0EBFF';
-        pageBtn.style.backgroundColor = i === currentPage ? '#E0EBFF' : '#000000ff';
-        pageBtn.style.color = i === currentPage ? '#000000ff' : '#E0EBFF';
-        pageBtn.style.cursor = 'pointer';
-        pageBtn.addEventListener('click', () => {
-          currentPage = i;
-          renderPage(currentPage);
-        });
-        paginationContainer.appendChild(pageBtn);
-      }
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = 'Next';
+      nextBtn.addEventListener('click', () => {
+        currentPage++;
+        renderPage(currentPage);
+      });
+      paginationContainer.appendChild(nextBtn);
+    }
+  };
 
-      // Next
-      if (currentPage < totalPages) {
-        const nextBtn = document.createElement('button');
-        nextBtn.textContent = 'Next';
-        nextBtn.addEventListener('click', () => {
-          currentPage++;
-          renderPage(currentPage);
-        });
-        paginationContainer.appendChild(nextBtn);
-      }
-    };
+  renderPage(currentPage);
+  return wrapper;
+}
 
-    renderPage(currentPage);
-    return wrapper;
-  }
+// ----------------------------
+// Render grouped option contracts vertically
+// ----------------------------
+function renderOptionContracts(grouped) {
+  const allWeeks = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+  const earliestWeek = allWeeks[0];
+
+  const weekFilterWrapper = document.createElement('div');
+  weekFilterWrapper.style.marginBottom = '12px';
+  const weekLabel = document.createElement('label');
+  weekLabel.textContent = 'Filter by week: ';
+  const weekSelect = document.createElement('select');
+  weekSelect.style.marginLeft = '8px';
+
+  allWeeks.forEach(week => {
+    const opt = document.createElement('option');
+    opt.value = week;
+    opt.textContent = week;
+    if (week === earliestWeek) opt.selected = true;
+    weekSelect.appendChild(opt);
+  });
+
+  weekFilterWrapper.appendChild(weekLabel);
+  weekFilterWrapper.appendChild(weekSelect);
+  optionsContainer.innerHTML = '';
+  optionsContainer.appendChild(weekFilterWrapper);
+
+  const renderTables = (filterWeek = earliestWeek) => {
+    optionsContainer.querySelectorAll('.week-section').forEach(s => s.remove());
+    const weeksToRender = filterWeek ? [filterWeek] : allWeeks;
+
+    weeksToRender.forEach(weekISO => {
+      const contracts = grouped[weekISO] ?? [];
+      if (!contracts.length) return;
+
+      const section = document.createElement('section');
+      section.className = 'week-section';
+      section.style.marginBottom = '20px';
+
+      const header = document.createElement('h3');
+      header.textContent = `Week of ${weekISO}`;
+      header.style.marginBottom = '8px';
+      section.appendChild(header);
+
+      const calls = contracts.filter(c => (c.type ?? '').toLowerCase() === 'call');
+      const puts = contracts.filter(c => (c.type ?? '').toLowerCase() === 'put');
+
+      // Render Calls first
+      if (calls.length > 0) section.appendChild(buildTable('Calls', calls));
+      else section.appendChild(document.createElement('div')).innerHTML = `<h4>Calls (0)</h4><p>No call contracts this week.</p>`;
+
+      // Render Puts below
+      if (puts.length > 0) section.appendChild(buildTable('Puts', puts));
+      else section.appendChild(document.createElement('div')).innerHTML = `<h4>Puts (0)</h4><p>No put contracts this week.</p>`;
+
+      optionsContainer.appendChild(section);
+    });
+  };
+
+  renderTables();
+  weekSelect.addEventListener('change', () => renderTables(weekSelect.value));
+}
+
 
   // ----------------------------
   // Render grouped option contracts

@@ -22,6 +22,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<!-- Add Chart.js and financial plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+
 
   <!-- Scripts -->
   <script src="../js/options.js" defer></script>
@@ -47,19 +52,25 @@
         MAIN LAYOUT
   ============================ -->
   <div class="container2">
-    <div class="chart-container">
+<div class="chart-container">
+  <h2 id="symbol-heading">Option OHLC</h2>
 
-      <h2 id="symbol-heading">Option OHLC</h2>
+  <!-- Chart form -->
+  <form id="chart-form-ohlc" class="chart-form">
+    <button type="button" onclick="window.location.reload()">Refresh</button>
+    <label for="chart-type-select">Chart type:</label>
+    <select id="chart-type-select">
+      <option value="line">Line</option>
+      <option value="candlestick">Candlestick</option>
+    </select>
+  </form>
 
-      <!-- Chart form -->
-      <form id="chart-form-ohlc" class="chart-form">
-        <button type="button" onclick="window.location.reload()">Refresh</button>
-      </form>
+  <div class="chart-wrapper">
+    <canvas id="ohlc-chart"></canvas>
+  </div>
+</div>
 
-      <div class="chart-wrapper">
-        <canvas id="ohlc-chart"></canvas>
-      </div>
-    </div>
+
 
     <!-- Trading Card -->
     <div class="trading-card">

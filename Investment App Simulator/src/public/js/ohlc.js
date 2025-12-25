@@ -1,4 +1,3 @@
-
 window.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById('back-button');
   backButton.addEventListener('click', (e) => {
@@ -14,126 +13,160 @@ window.addEventListener('DOMContentLoaded', () => {
 //////////////////////////////////////////////////////
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Parse symbol from query parameter
   const params = new URLSearchParams(window.location.search);
-  const symbol = params.get('symbol');
+  let symbol = params.get("symbol");
+
   if (!symbol) return;
+
+  symbol = decodeURIComponent(symbol);
+  if (symbol.startsWith("O:")) symbol = symbol.slice(2);
 
   document.getElementById('symbol-heading').textContent = `Option OHLC: ${symbol}`;
 
   try {
-    const res = await fetch(`/options/ohlc/${encodeURIComponent(symbol)}`);
+    // ---------------- Fetch OHLC data ----------------
+    const res = await fetch(`/options/ohlc/O:${encodeURIComponent(symbol)}`);
     if (!res.ok) throw new Error(`Failed to fetch OHLC data: ${res.status}`);
     const data = await res.json();
+    const ohlcData = data.savedData || [];
 
-            const lineData = data.savedData.map(d => ({
-            x: new Date(d.date),
-            y: d.closePrice  // changed from d.close
-            }));
+    if (!ohlcData.length) throw new Error("No OHLC data available.");
 
-            // Chart
-           const ctx = document.getElementById('ohlc-chart').getContext('2d');
+    // ---------------- Prepare datasets ----------------
+    const lineData = ohlcData.map(d => ({ x: new Date(d.date), y: d.closePrice }));
+    const candleData = ohlcData.map(d => ({
+      x: new Date(d.date),
+      o: d.openPrice,
+      h: d.highPrice,
+      l: d.lowPrice,
+      c: d.closePrice
+    }));
 
-new Chart(ctx, {
-  type: 'line',
-  data: {
-    datasets: [{
-      label: `${symbol} Close Price`,
-      data: lineData,
-      borderColor: '#E0EBFF', // match theme line color
-      fill: true,
-      tension: 0.1,
-      backgroundColor: function(context) {
-        const chart = context.chart;
-        const { ctx, chartArea } = chart;
+    // ---------------- Chart rendering ----------------
+    const ctx = document.getElementById('ohlc-chart').getContext('2d');
+    let chart; // Chart.js instance
+    const chartTypeSelect = document.getElementById('chart-type-select');
 
-        if (!chartArea) return null; // Chart not fully initialized
+    function renderChart(type) {
+      if (chart) chart.destroy();
 
-        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        gradient.addColorStop(0, 'rgba(143,173,253,0.4)'); // top translucent blue
-        gradient.addColorStop(1, 'rgba(143,173,253,0)');   // bottom transparent
-        return gradient;
-      }
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { labels: { color: 'white' } },
-      tooltip: { mode: 'index', intersect: false }
+      if (type === 'line') {
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            datasets: [{
+              label: `${symbol} Close Price`,
+              data: lineData,
+              borderColor: '#E0EBFF',
+              fill: true,
+              tension: 0.1,
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return null;
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
+                gradient.addColorStop(1, 'rgba(143,173,253,0)');
+                return gradient;
+              }
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: 'white' } },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: { type: 'time', time: { unit: 'day' }, ticks: { color: 'white' } },
+              y: { ticks: { color: 'white' } }
+            }
+          }
+        });
+      } else if (type === 'candlestick') {
+  chart = new Chart(ctx, {
+    type: 'candlestick',
+    data: {
+      datasets: [{
+        label: `${symbol} OHLC`,
+        data: candleData,
+        color: {
+          up: '#4caf50',   // green for bullish
+          down: '#f44336', // red for bearish
+          unchanged: '#999'
+        }
+      }]
     },
-    scales: {
-      x: {
-        type: 'time',
-        time: { unit: 'day', tooltipFormat: 'MMM dd, yyyy HH:mm' },
-        ticks: { color: 'white' },
-        grid: {
-          drawOnChartArea: true,
-          color: (context) => {
-            const chart = context.chart;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) return 'rgba(255,255,255,0.1)';
-            const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-            gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
-            gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-            gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
-            return gradient;
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: 'white' } },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(ctx) {
+              const d = ctx.raw;
+              return `O: ${d.o} H: ${d.h} L: ${d.l} C: ${d.c}`;
+            }
           }
-        },
-        title: { display: true, text: 'Date', color: 'white' }
+        }
       },
-      y: {
-        beginAtZero: false,
-        ticks: { color: 'white' },
-        grid: {
-          drawOnChartArea: true,
-          color: (context) => {
-            const chart = context.chart;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) return 'rgba(255,255,255,0.1)';
-            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(255,255,255,0.05)');
-            gradient.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-            gradient.addColorStop(1, 'rgba(255,255,255,0.05)');
-            return gradient;
-          }
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'day', tooltipFormat: 'MMM dd, yyyy' },
+          ticks: { color: 'white' },
+          grid: { color: 'rgba(255,255,255,0.1)' }
         },
-        title: { display: true, text: 'Close Price', color: 'white' }
+        y: {
+          ticks: { color: 'white' },
+          grid: { color: 'rgba(255,255,255,0.1)' }
+        }
       }
     }
-  }
-});
+  });
+}
 
-            // Autofill latest price
-            const latestPrice = lineData[lineData.length - 1]?.y ?? 0;
 
-            const marketPriceInput = document.getElementById('market-price');
-            const limitPriceInput = document.getElementById('limit-price');
+    }
 
-            if (marketPriceInput) marketPriceInput.value = latestPrice.toFixed(2);
-            if (limitPriceInput) limitPriceInput.value = latestPrice.toFixed(2);
+    // Initial chart render
+    renderChart(chartTypeSelect.value);
 
+    // Update chart when user changes type
+    chartTypeSelect.addEventListener('change', () => renderChart(chartTypeSelect.value));
+
+    // ---------------- Autofill latest price ----------------
+    const latestPrice = lineData[lineData.length - 1]?.y ?? 0;
+    const marketPriceInput = document.getElementById('market-price');
+    const limitPriceInput = document.getElementById('limit-price');
+    if (marketPriceInput) marketPriceInput.value = latestPrice.toFixed(2);
+    if (limitPriceInput) limitPriceInput.value = latestPrice.toFixed(2);
+
+    // ---------------- Order type toggle ----------------
+    const orderTypeSelect = document.getElementById('order-type-select');
+    const marketFields = document.getElementById('market-fields');
+    const limitFields = document.getElementById('limit-fields');
 
     function updateFields() {
       if (orderTypeSelect.value === 'market') {
         marketFields.classList.remove('hidden');
         limitFields.classList.add('hidden');
-        marketPriceInput.readOnly = true;
+        if (marketPriceInput) marketPriceInput.readOnly = true;
       } else if (orderTypeSelect.value === 'limit') {
         marketFields.classList.add('hidden');
         limitFields.classList.remove('hidden');
-        limitPriceInput.readOnly = false;
+        if (limitPriceInput) limitPriceInput.readOnly = false;
       }
     }
 
-    // Initial toggle
     updateFields();
-
-    // Toggle fields on change
     orderTypeSelect.addEventListener('change', updateFields);
 
-    // Optionally, you can add amount calculations here
+    // ---------------- Amount calculations ----------------
     const marketQuantityInput = document.getElementById('market-quantity');
     const marketAmountInput = document.getElementById('market-amount');
     const limitQuantityInput = document.getElementById('limit-quantity');
@@ -141,7 +174,7 @@ new Chart(ctx, {
 
     function updateMarketAmount() {
       const qty = Number(marketQuantityInput.value || 0);
-      const amt = qty * latestPrice * 100; // 1 contract = 100 shares
+      const amt = qty * latestPrice * 100;
       marketAmountInput.value = amt.toFixed(2);
     }
 
@@ -156,28 +189,16 @@ new Chart(ctx, {
     limitQuantityInput.addEventListener('input', updateLimitAmount);
     limitPriceInput.addEventListener('input', updateLimitAmount);
 
-  } 
-catch (err) {
-  const msg = err?.message || err?.toString();
-
-  if (msg.includes("data.savedData.map is not a function")) {
-    console.error("No Options data available for this symbol. Please choose another option contract.");
-    showToast(`No Options data available for this symbol. Please choose another option contract.`, 'error');
-
-    document.body.insertAdjacentHTML(
-      "beforeend",
-      `<p style="color:red; font-size: 14px">Error loading chart: No Options data available for this symbol. Please choose another option contract.</p>`
-    );
-  } else {
+  } catch (err) {
+    const msg = err?.message || err?.toString();
     console.error(err);
     document.body.insertAdjacentHTML(
       "beforeend",
       `<p style="color:red;">Error loading chart: ${msg}</p>`
     );
   }
-}
-
 });
+
 
 
 
@@ -196,7 +217,6 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 400);
   }, 3000);
 }
-
 
 ///////////////////////////////////////////////////////////////////
 // PLACE BUY/SELL CALL/PUT MARKET/LIMIT ORDER
