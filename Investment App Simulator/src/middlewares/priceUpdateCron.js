@@ -110,10 +110,10 @@ async function refreshPortfolios() {
 // =======================
 cron.schedule('*/30 * * * *', async () => {
   try {
-    if (!isMarketOpen()) {
-      console.log('⏸ Market closed. Skipping portfolio price update.');
-      return;
-    }
+    // if (!isMarketOpen()) {
+    //   console.log('⏸ Market closed. Skipping portfolio price update.');
+    //   return;
+    // }
 
     console.log('🚀 Portfolio price updater started');
 
