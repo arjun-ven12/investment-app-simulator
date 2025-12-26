@@ -24,19 +24,19 @@
      ============================ -->
 
 
-<div id="bs-loading-screen">
-  <div class="bs-loader-center">
+  <div id="bs-loading-screen">
+    <div class="bs-loader-center">
       <pre id="bs-terminal-text"></pre>
 
       <div class="bs-loader-bar">
-          <div class="bs-loader-fill"></div>
+        <div class="bs-loader-fill"></div>
       </div>
 
       <div class="bs-loader-sub">
-          BLACKSEALED INTELLIGENCE SYSTEM · MODULE NYRA.AI
+        BLACKSEALED INTELLIGENCE SYSTEM · MODULE NYRA.AI
       </div>
+    </div>
   </div>
-</div>
 
 
   <!-- Aurora background -->
@@ -253,112 +253,112 @@
         <div class="split-visual nyra-container">
           <div class="nyra-orb">
             <svg width="100" height="100" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img"
-        aria-label="Nyra AI avatar">
-        <defs>
-            <!-- Palette -->
-            <radialGradient id="coreGrad" cx="50%" cy="38%" r="60%">
-                <stop offset="0%" stop-color="#B9EEFF" />
-                <stop offset="45%" stop-color="#5FA8FF" />
-                <stop offset="100%" stop-color="#2A3CFF" />
-            </radialGradient>
+              aria-label="Nyra AI avatar">
+              <defs>
+                <!-- Palette -->
+                <radialGradient id="coreGrad" cx="50%" cy="38%" r="60%">
+                  <stop offset="0%" stop-color="#B9EEFF" />
+                  <stop offset="45%" stop-color="#5FA8FF" />
+                  <stop offset="100%" stop-color="#2A3CFF" />
+                </radialGradient>
 
-            <radialGradient id="haloGrad" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stop-color="#76D4FF" stop-opacity="0.55" />
-                <stop offset="60%" stop-color="#8C7BFF" stop-opacity="0.28" />
-                <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-            </radialGradient>
+                <radialGradient id="haloGrad" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#76D4FF" stop-opacity="0.55" />
+                  <stop offset="60%" stop-color="#8C7BFF" stop-opacity="0.28" />
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+                </radialGradient>
 
-            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#9ED4FF" />
-                <stop offset="100%" stop-color="#A98FFF" />
-            </linearGradient>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#9ED4FF" />
+                  <stop offset="100%" stop-color="#A98FFF" />
+                </linearGradient>
 
-            <linearGradient id="trailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#9ED4FF" stop-opacity="0" />
-                <stop offset="45%" stop-color="#9ED4FF" stop-opacity="0.45" />
-                <stop offset="100%" stop-color="#A98FFF" stop-opacity="0" />
-            </linearGradient>
+                <linearGradient id="trailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#9ED4FF" stop-opacity="0" />
+                  <stop offset="45%" stop-color="#9ED4FF" stop-opacity="0.45" />
+                  <stop offset="100%" stop-color="#A98FFF" stop-opacity="0" />
+                </linearGradient>
 
-            <!-- Glows -->
-            <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="24" result="b1" />
-                <feColorMatrix in="b1" type="matrix" values="1 0 0 0 0
+                <!-- Glows -->
+                <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="24" result="b1" />
+                  <feColorMatrix in="b1" type="matrix" values="1 0 0 0 0
                 0 1 0 0 0
                 0 0 1 0 0
                 0 0 0 1 0" />
-            </filter>
+                </filter>
 
-            <filter id="tightGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="6" result="b2" />
-                <feMerge>
+                <filter id="tightGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="6" result="b2" />
+                  <feMerge>
                     <feMergeNode in="b2" />
                     <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
+                  </feMerge>
+                </filter>
 
-            <!-- Simple star for reuse -->
-            <circle id="star" r="4" fill="#C9E8FF" />
-        </defs>
-
-
+                <!-- Simple star for reuse -->
+                <circle id="star" r="4" fill="#C9E8FF" />
+              </defs>
 
 
-        <!-- Aurora trails (subtle, rotating) -->
-        <g transform="translate(256 240)">
-            <g opacity="0.45">
-                <path d="M-180 0 C-80 -100, 80 -100, 180 0" stroke="url(#trailGrad)" stroke-width="18"
+
+
+              <!-- Aurora trails (subtle, rotating) -->
+              <g transform="translate(256 240)">
+                <g opacity="0.45">
+                  <path d="M-180 0 C-80 -100, 80 -100, 180 0" stroke="url(#trailGrad)" stroke-width="18"
                     stroke-linecap="round" fill="none">
                     <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="22s"
-                        repeatCount="indefinite" />
-                </path>
-                <path d="M-160 40 C-40 -40, 40 -40, 160 40" stroke="url(#trailGrad)" stroke-width="12"
+                      repeatCount="indefinite" />
+                  </path>
+                  <path d="M-160 40 C-40 -40, 40 -40, 160 40" stroke="url(#trailGrad)" stroke-width="12"
                     stroke-linecap="round" fill="none" opacity="0.7">
                     <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="28s"
-                        repeatCount="indefinite" />
-                </path>
-            </g>
-        </g>
+                      repeatCount="indefinite" />
+                  </path>
+                </g>
+              </g>
 
-        <!-- Main halo -->
-        <circle cx="256" cy="240" r="120" fill="url(#haloGrad)" filter="url(#softGlow)" />
+              <!-- Main halo -->
+              <circle cx="256" cy="240" r="120" fill="url(#haloGrad)" filter="url(#softGlow)" />
 
-        <!-- Outer ring -->
-        <circle cx="256" cy="240" r="84" fill="none" stroke="url(#ringGrad)" stroke-width="2.2" opacity="0.8"
-            filter="url(#tightGlow)">
-            <animateTransform attributeName="transform" type="rotate" from="0 256 240" to="360 256 240" dur="18s"
-                repeatCount="indefinite" />
-        </circle>
+              <!-- Outer ring -->
+              <circle cx="256" cy="240" r="84" fill="none" stroke="url(#ringGrad)" stroke-width="2.2" opacity="0.8"
+                filter="url(#tightGlow)">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 240" to="360 256 240" dur="18s"
+                  repeatCount="indefinite" />
+              </circle>
 
-        <!-- Core -->
-        <circle cx="256" cy="240" r="16" fill="url(#coreGrad)" filter="url(#tightGlow)">
-            <animate attributeName="r" values="16;19;16" dur="3.4s" repeatCount="indefinite" />
-        </circle>
+              <!-- Core -->
+              <circle cx="256" cy="240" r="16" fill="url(#coreGrad)" filter="url(#tightGlow)">
+                <animate attributeName="r" values="16;19;16" dur="3.4s" repeatCount="indefinite" />
+              </circle>
 
-        <!-- Orbiting stars -->
-        <g transform="translate(256 240)">
-            <g>
-                <use href="#star" x="0" y="-64" />
-                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s"
+              <!-- Orbiting stars -->
+              <g transform="translate(256 240)">
+                <g>
+                  <use href="#star" x="0" y="-64" />
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s"
                     repeatCount="indefinite" />
-            </g>
-            <g opacity="0.8">
-                <use href="#star" x="0" y="-92" fill="#AFA4FF" />
-                <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="14s"
+                </g>
+                <g opacity="0.8">
+                  <use href="#star" x="0" y="-92" fill="#AFA4FF" />
+                  <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="14s"
                     repeatCount="indefinite" />
-            </g>
-            <g opacity="0.9">
-                <use href="#star" x="0" y="-120" fill="#8FF3FF" />
-                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s"
+                </g>
+                <g opacity="0.9">
+                  <use href="#star" x="0" y="-120" fill="#8FF3FF" />
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s"
                     repeatCount="indefinite" />
-            </g>
-        </g>
+                </g>
+              </g>
 
-        <!-- Bottom glow shelf -->
-        <ellipse cx="256" cy="430" rx="160" ry="28" fill="#0A0F1C">
-            <animate attributeName="opacity" values="0.18;0.28;0.18" dur="6s" repeatCount="indefinite" />
-        </ellipse>
+              <!-- Bottom glow shelf -->
+              <ellipse cx="256" cy="430" rx="160" ry="28" fill="#0A0F1C">
+                <animate attributeName="opacity" values="0.18;0.28;0.18" dur="6s" repeatCount="indefinite" />
+              </ellipse>
 
-    </svg>
+            </svg>
           </div>
 
           <div class="ai-tooltip">
@@ -380,7 +380,9 @@
           <div class="command-card">
             <h3>Dynamic Charts</h3>
             <p>Candlestick, intraday, and zoomable historical views for every symbol you simulate.</p>
-            <div class="mini-chart"><div class="mini-line"></div></div>
+            <div class="mini-chart">
+              <div class="mini-line"></div>
+            </div>
           </div>
 
           <div class="command-card">
@@ -415,7 +417,13 @@
               <p>Navigate historic drawdowns and violent reversals.</p>
             </div>
           </div>
-
+          <div class="scenario-node">
+            <div class="node-dot"></div>
+            <div class="node-label">
+              <h4>2024 · Oil Supply Crunch</h4>
+              <p>Trade energy, transport, and volatility in a supply shock.</p>
+            </div>
+          </div>
           <div class="scenario-node">
             <div class="node-dot"></div>
             <div class="node-label">
@@ -424,13 +432,7 @@
             </div>
           </div>
 
-          <div class="scenario-node">
-            <div class="node-dot"></div>
-            <div class="node-label">
-              <h4>2024 · Oil Supply Crunch</h4>
-              <p>Trade energy, transport, and volatility in a supply shock.</p>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -536,4 +538,5 @@
   </div> <!-- END mainContent -->
 
 </body>
+
 </html>
