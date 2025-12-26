@@ -42,8 +42,8 @@ module.exports.createStopLimitOrder = async function ({
     if (triggerPrice <= currentPrice) {
       throw new Error("BUY trigger must be ABOVE current price");
     }
-    if (limitPrice > triggerPrice) {
-      throw new Error("BUY limit must be ≤ trigger price");
+    if (limitPrice < triggerPrice) {
+      throw new Error("BUY limit must be > trigger price");
     }
 
     const estimatedCost = limitPrice * quantity;
