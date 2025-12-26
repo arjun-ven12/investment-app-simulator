@@ -221,9 +221,6 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
 
   if (!usage) return;
 
-  // ✅ Only block if THIS usage was already processed
-  if (usage.status === "SUCCESSFUL") return;
-
   const updatedReferral = await prisma.referral.update({
     where: { id: usage.referralId },
     data: {
@@ -243,8 +240,9 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
     },
   });
 
-  await prisma.referral.update({
-    where: { id: usage.referralId },
+  // ✅ CREDIT THE USER WALLET (THIS IS THE FIX)
+  await prisma.user.update({
+    where: { id: updatedReferral.userId },
     data: {
       wallet: { increment: creditsEarned },
     },
