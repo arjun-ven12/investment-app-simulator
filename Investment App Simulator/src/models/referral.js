@@ -210,33 +210,20 @@ module.exports.getReferralHistory = async function (userId) {
 };
 
 
-//////////////////////////////////////////////////////
-// FINALIZE REFERRAL (VERIFY + DEPOSIT CREDITS)
-//////////////////////////////////////////////////////
 module.exports.finalizeReferral = async function finalizeReferral(userId) {
-  // 1️⃣ Find pending referral usage
   const usage = await prisma.referralUsage.findFirst({
     where: {
       userId,
       status: "PENDING",
     },
-    include: {
-      referral: true,
-    },
+    include: { referral: true },
   });
 
-  if (!usage) return; // no referral to verify
+  if (!usage) return;
 
-  // 2️⃣ Prevent double verification
-  const alreadyVerified = await prisma.referralUsage.findFirst({
-    where: {
-      userId,
-      status: "SUCCESSFUL",
-    },
-  });
-  if (alreadyVerified) return;
+  // ✅ Only block if THIS usage was already processed
+  if (usage.status === "SUCCESSFUL") return;
 
-  // 3️⃣ Increment successful referrals
   const updatedReferral = await prisma.referral.update({
     where: { id: usage.referralId },
     data: {
@@ -244,12 +231,10 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
     },
   });
 
-  // 4️⃣ Calculate credits
   const creditsEarned = calculateCredits(
     updatedReferral.successfulReferrals
   );
 
-  // 5️⃣ Mark usage as VERIFIED
   await prisma.referralUsage.update({
     where: { id: usage.id },
     data: {
@@ -259,14 +244,12 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
   });
 
   await prisma.referral.update({
-  where: { id: usage.referralId },
-  data: {
-    wallet: { increment: creditsEarned },
-  },
-});
+    where: { id: usage.referralId },
+    data: {
+      wallet: { increment: creditsEarned },
+    },
+  });
 
-
-  // 7️⃣ Live socket updates
   broadcastReferralUpdate(updatedReferral.userId);
   broadcastReferralHistoryUpdate(updatedReferral.userId);
 };
