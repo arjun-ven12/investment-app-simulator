@@ -216,6 +216,7 @@ window.addEventListener('pageshow', (event) => {
 //         header.style.marginBottom = '8px';
 //         section.appendChild(header);
 
+
 //         // split into calls & puts
 //         const calls = contracts.filter(c => (c.type ?? c.type) && (c.type.toLowerCase() === 'call'));
 //         const puts  = contracts.filter(c => (c.type ?? c.type) && (c.type.toLowerCase() === 'put'));
