@@ -616,6 +616,7 @@ scrollWrapper.className = 'week-scroll-wrapper';
   return typeof num === 'number' ? num.toFixed(decimals) : 'N/A';
 }
 
+
   let currentPage = 1;
   const totalPages = Math.ceil(contracts.length / rowsPerPage);
 
@@ -736,9 +737,25 @@ function renderOptionContracts(grouped) {
       header.textContent = `Week of ${weekISO}`;
       header.style.marginBottom = '8px';
       section.appendChild(header);
+function toArray(value) {
+  if (Array.isArray(value)) return value;
 
-      const calls = contracts.filter(c => (c.type ?? '').toLowerCase() === 'call');
-      const puts = contracts.filter(c => (c.type ?? '').toLowerCase() === 'put');
+  if (value && typeof value === 'object') {
+    // object of arrays OR object of objects
+    return Object.values(value).flat();
+  }
+
+  return [];
+}
+const list = toArray(contracts);
+
+const calls = list.filter(
+  c => (c?.type ?? '').toLowerCase() === 'call'
+);
+
+const puts = list.filter(
+  c => (c?.type ?? '').toLowerCase() === 'put'
+);
 
       // Render Calls first
       if (calls.length > 0) section.appendChild(buildTable('Calls', calls));
@@ -801,9 +818,25 @@ function renderOptionContracts(grouped) {
         header.style.marginBottom = '8px';
         section.appendChild(header);
 
-        const calls = contracts.filter(c => (c.type ?? '').toLowerCase() === 'call');
-        const puts = contracts.filter(c => (c.type ?? '').toLowerCase() === 'put');
+function toArray(value) {
+  if (Array.isArray(value)) return value;
 
+  if (value && typeof value === 'object') {
+    // object of arrays OR object of objects
+    return Object.values(value).flat();
+  }
+
+  return [];
+}
+const list = toArray(contracts);
+
+const calls = list.filter(
+  c => (c?.type ?? '').toLowerCase() === 'call'
+);
+
+const puts = list.filter(
+  c => (c?.type ?? '').toLowerCase() === 'put'
+);
         const tablesRow = document.createElement('div');
         tablesRow.style.display = 'flex';
         tablesRow.style.flexDirection= 'column';
