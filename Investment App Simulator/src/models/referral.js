@@ -231,7 +231,7 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
   const alreadyVerified = await prisma.referralUsage.findFirst({
     where: {
       userId,
-      status: "VERIFIED",
+      status: "SUCCESSFUL",
     },
   });
   if (alreadyVerified) return;
