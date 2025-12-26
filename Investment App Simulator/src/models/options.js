@@ -4,7 +4,8 @@ const API_KEY= process.env.ALPACA_API_KEY;
 const API_SECRET= process.env.ALPACA_API_SECRET;
 
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
-const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
+// const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
+POLYGON_API_KEY = '6MfvDldYOniwkrACq6HAmmmx9Ee75PEC'
 const prisma = require('./prismaClient'); // import the Prisma instance
 const fetch = require('node-fetch');
 
