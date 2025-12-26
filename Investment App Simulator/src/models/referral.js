@@ -258,14 +258,13 @@ module.exports.finalizeReferral = async function finalizeReferral(userId) {
     },
   });
 
-  // 6️⃣ Deposit credits into wallet
   await prisma.referral.update({
-    where: { id: usage.referralId },
-    data: {
-      creditsEarned,
-      wallet: { increment: creditsEarned },
-    },
-  });
+  where: { id: usage.referralId },
+  data: {
+    wallet: { increment: creditsEarned },
+  },
+});
+
 
   // 7️⃣ Live socket updates
   broadcastReferralUpdate(updatedReferral.userId);
