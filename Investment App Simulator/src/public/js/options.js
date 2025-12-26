@@ -216,7 +216,6 @@ window.addEventListener('pageshow', (event) => {
 //         header.style.marginBottom = '8px';
 //         section.appendChild(header);
 
-
 //         // split into calls & puts
 //         const calls = contracts.filter(c => (c.type ?? c.type) && (c.type.toLowerCase() === 'call'));
 //         const puts  = contracts.filter(c => (c.type ?? c.type) && (c.type.toLowerCase() === 'put'));
@@ -613,7 +612,10 @@ scrollWrapper.className = 'week-scroll-wrapper';
   function normalizeOptionSymbol(symbol) {
     return (symbol ?? '').replace(/^O:/, '');
   }
-  
+  function fmt(num, decimals = 3) {
+  return typeof num === 'number' ? num.toFixed(decimals) : 'N/A';
+}
+
   let currentPage = 1;
   const totalPages = Math.ceil(contracts.length / rowsPerPage);
 
@@ -634,11 +636,11 @@ scrollWrapper.className = 'week-scroll-wrapper';
         <td>${c.expirationDate ? new Date(c.expirationDate).toLocaleDateString() : 'N/A'}</td>
         <td>${c.size ?? 'N/A'}</td>
         <td>${c.openInterest ?? 'N/A'}</td>
-        <td>${c.impliedVolatility.toFixed(3) ?? 'N/A'}</td>
-        <td>${c.delta.toFixed(3) ?? 'N/A'}</td>
-        <td>${c.gamma.toFixed(3) ?? 'N/A'}</td>
-        <td>${c.theta.toFixed(3) ?? 'N/A'}</td>
-        <td>${c.vega.toFixed(3) ?? 'N/A'}</td>
+        <td>${fmt(c.impliedVolatility)}</td>
+        <td>${fmt(c.delta)}</td>
+        <td>${fmt(c.gamma)}</td>
+        <td>${fmt(c.theta)}</td>
+        <td>${fmt(c.vega)}</td>
         <td>${c.day?.close ?? 'N/A'}</td>
       `;
       tr.addEventListener('click', () => {
