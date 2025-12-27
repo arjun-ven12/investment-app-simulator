@@ -2487,3 +2487,48 @@ display: flex !important;
     grid-template-columns: 1fr 1fr !important ;
 }
 }
+
+
+
+/* Related tickers list container */
+.related-tickers-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Each related ticker item */
+  .related-tickers-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(83, 89, 107, 0.5);
+    font-size: 1rem;
+    background-color: rgba(18, 18, 26, 0.75);
+    color: #fff;
+    width: auto;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  
+  /* Hover effect (same feel as stock list) */
+  .related-tickers-list li:hover {
+    background-color: rgba(30, 30, 45, 0.85);
+    border-color: rgba(120, 130, 160, 0.8);
+    transform: translateY(-1px);
+  }
+  
+  /* Loading / empty / error states */
+  .related-tickers-list li.loading,
+  .related-tickers-list li.empty,
+  .related-tickers-list li.error {
+    justify-content: center;
+    font-size: 0.9rem;
+    color: rgba(180, 180, 200, 0.8);
+    cursor: default;
+    transform: none;
+  }
+  

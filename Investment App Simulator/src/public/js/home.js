@@ -595,3 +595,104 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  const moversList = document.getElementById('market-movers-list');
+  const errorDiv = document.getElementById('movers-error');
+  const showGainersBtn = document.getElementById('show-gainers');
+  const showLosersBtn = document.getElementById('show-losers');
+
+  async function fetchMarketMovers(direction = 'gainers') {
+    moversList.innerHTML = '<li class="loading">Loading...</li>';
+    errorDiv.textContent = '';
+
+    try {
+      const res = await fetch(`/realtime/movers/${direction}`);
+      if (!res.ok) throw new Error('Failed to fetch movers');
+
+      const data = await res.json();
+      moversList.innerHTML = '';
+
+      if (!data.movers || data.movers.length === 0) {
+        moversList.innerHTML = '<li class="empty">No movers found</li>';
+        return;
+      }
+
+      data.movers.forEach(m => {
+        const li = document.createElement('li');
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'mover-info';
+
+        const symbolSpan = document.createElement('span');
+        symbolSpan.className = 'mover-symbol';
+        symbolSpan.textContent = m.symbol;
+
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'mover-price';
+        priceSpan.textContent = `$${m.price.toFixed(2)}`;
+
+        const changeSpan = document.createElement('span');
+        changeSpan.className = 'mover-change';
+        changeSpan.textContent = `${m.changePercent.toFixed(2)}%`;
+        changeSpan.style.color = m.changePercent >= 0 ? '#4caf50' : '#f44336';
+
+        infoDiv.appendChild(symbolSpan);
+        infoDiv.appendChild(priceSpan);
+        infoDiv.appendChild(changeSpan);
+
+        // Mini chart canvas
+        const chartCanvas = document.createElement('canvas');
+        chartCanvas.className = 'mini-chart';
+        chartCanvas.id = `chart-${m.symbol}`;
+
+        li.appendChild(infoDiv);
+        li.appendChild(chartCanvas);
+        moversList.appendChild(li);
+
+        // 🔁 Mini chart using dummy data (can replace with intraday later)
+        const ctx = chartCanvas.getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: Array.from({ length: 10 }, (_, i) => i + 1),
+            datasets: [{
+              data: generateRandomSparkline(m.price),
+              borderColor: m.changePercent >= 0 ? '#4caf50' : '#f44336',
+              borderWidth: 1.5,
+              pointRadius: 0,
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { display: false }, y: { display: false } }
+          }
+        });
+
+        // 🔁 Click redirects to investment.html and auto-generates chart
+        li.addEventListener('click', () => {
+          localStorage.setItem('autoChartSymbol', m.symbol); // store symbol to use on investment.html
+          window.location.href = 'investment';
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      moversList.innerHTML = '';
+      errorDiv.textContent = 'Failed to load market movers';
+    }
+  }
+
+  function generateRandomSparkline(base) {
+    return Array.from({ length: 10 }, () => +(base * (0.95 + Math.random() * 0.1)).toFixed(2));
+  }
+
+  showGainersBtn.addEventListener('click', () => fetchMarketMovers('gainers'));
+  showLosersBtn.addEventListener('click', () => fetchMarketMovers('losers'));
+
+  fetchMarketMovers('gainers');
+});

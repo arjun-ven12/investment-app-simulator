@@ -136,112 +136,283 @@ document.querySelectorAll('.tab-button').forEach(button => {
 ///////////////////////////////////////////////////
 
 
+// window.addEventListener('DOMContentLoaded', function () {
+//   const searchInput = document.getElementById('stock-search');
+//   const searchButton = document.getElementById('search-button');
+//   const stockList = document.getElementById('stock-list');
+//   const errorMessage = document.getElementById('error-message');
+
+//   const SEARCH_API_URL = '/stocks/search-stocks';
+//   const FAVORITE_API_URL = '/stocks/favorite-stock';
+
+//   function searchStocks() {
+//     const query = searchInput.value.trim();
+//     if (!query) {
+//     showToast(`Please enter a company name or stock symbol.`, 'error');
+//       return;
+//     }
+
+//     fetch(`/stocks/search-stocks?query=${encodeURIComponent(query)}`)
+//       .then(function (response) {
+//         if (response.ok) {
+//           return response.json();
+//         } else {
+//           return response.json().then(function (data) {
+//             throw new Error(data.message || 'Error searching for stocks.');
+//           });
+//         }
+//       })
+//       .then(function (data) {
+//         renderStocks(data.stocks);
+
+//       })
+//       .catch(function (error) {
+//         console.error('Error searching for stocks:', error);
+//           showToast(`No stocks found.`, 'error');
+//       });
+//   }
+
+//   function renderStocks(stocks) {
+//     stockList.innerHTML = '';
+//     errorMessage.textContent = '';
+
+//     if (!stocks || stocks.length === 0) {
+//           showToast(`No stocks found.`, 'error');
+
+//       return;
+//     }
+
+//     stocks.forEach(function (stock) {
+//       const listItem = document.createElement('li');
+//       listItem.className = 'stock-item';
+
+//       const stockInfo = document.createElement('span');
+//       stockInfo.textContent = `${stock.description} (${stock.displaySymbol})`;
+
+//       const favoriteButton = document.createElement('button');
+//       favoriteButton.textContent = 'Favorite';
+//       favoriteButton.addEventListener('click', function () {
+//         favoriteStock(1, stock.displaySymbol);
+//       });
+
+//       listItem.appendChild(stockInfo);
+//       listItem.appendChild(favoriteButton);
+//       stockList.appendChild(listItem);
+//     });
+//   }
+//         const userIdIn = localStorage.getItem('userId'); // Get user ID from localStorage
+
+//         const parsedUserId = parseInt(userIdIn)
+
+//   function favoriteStock(userId, stockSymbol) {
+//       // Construct the data to send in the body
+//       const data = {
+//         userId: parsedUserId,
+//         symbol: stockSymbol  // note: controller expects a property called "symbol"
+//       };
+    
+//       fetch(FAVORITE_API_URL, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(data)
+//       })
+//         .then(function (response) {
+//           if (response.ok) {
+//             return response.json();
+//           } else {
+//             return response.json().then(function (data) {
+//               throw new Error(data.message || 'Error updating favorite status.');
+//             });
+//           }
+//         })
+//         .then(function (result) {
+//           // alert(result.success ? 'Stock favorited!' : 'Failed to favorite stock.');
+//         })
+//         .catch(function (error) {
+//           console.error('Error updating favorite status:', error);
+//           alert('An error occurred while updating favorite status.');
+//         });
+//     }
+    
+
+//   // Attach event listener to the search button
+//   searchButton.addEventListener('click', function (e) {
+//     e.preventDefault();
+//     searchStocks();
+//     fetchRelatedTickers();
+
+//   });
+// });
+
+
 window.addEventListener('DOMContentLoaded', function () {
   const searchInput = document.getElementById('stock-search');
   const searchButton = document.getElementById('search-button');
+
   const stockList = document.getElementById('stock-list');
+  const relatedList = document.getElementById('related-tickers');
   const errorMessage = document.getElementById('error-message');
+
+  // 🔥 Chart form references
+  const chartForm = document.getElementById('chart-form-intraday');
+  const chartSymbolInput = chartForm?.querySelector('input[name="chartSymbol"]');
 
   const SEARCH_API_URL = '/stocks/search-stocks';
   const FAVORITE_API_URL = '/stocks/favorite-stock';
+  const RELATED_API_URL = '/realtime/related';
 
+  const userIdIn = localStorage.getItem('userId');
+  const parsedUserId = parseInt(userIdIn, 10);
+
+  /* =========================
+     LOAD CHART BY SYMBOL
+  ========================= */
+  function loadChartForSymbol(symbol) {
+    if (!chartForm || !chartSymbolInput) return;
+
+    chartSymbolInput.value = symbol.toUpperCase();
+
+    chartForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Triggers existing submit logic safely
+    chartForm.requestSubmit();
+  }
+
+  /* =========================
+     SEARCH STOCKS
+  ========================= */
   function searchStocks() {
     const query = searchInput.value.trim();
     if (!query) {
-    showToast(`Please enter a company name or stock symbol.`, 'error');
+      showToast('Please enter a stock symbol or name.', 'error');
       return;
     }
 
-    fetch(`/stocks/search-stocks?query=${encodeURIComponent(query)}`)
-      .then(function (response) {
-        if (response.ok) {
-          return response.json();
-        } else {
-          return response.json().then(function (data) {
-            throw new Error(data.message || 'Error searching for stocks.');
-          });
-        }
-      })
-      .then(function (data) {
-        renderStocks(data.stocks);
-      })
-      .catch(function (error) {
-        console.error('Error searching for stocks:', error);
-          showToast(`No stocks found.`, 'error');
-      });
+    fetch(`${SEARCH_API_URL}?query=${encodeURIComponent(query)}`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => renderStocks(data.stocks))
+      .catch(() => showToast('No stocks found.', 'error'));
   }
 
+  /* =========================
+     RENDER SEARCH RESULTS
+  ========================= */
   function renderStocks(stocks) {
     stockList.innerHTML = '';
+    relatedList.innerHTML = '';
     errorMessage.textContent = '';
 
     if (!stocks || stocks.length === 0) {
-          showToast(`No stocks found.`, 'error');
-
+      showToast('No stocks found.', 'error');
       return;
     }
 
-    stocks.forEach(function (stock) {
-      const listItem = document.createElement('li');
-      listItem.className = 'stock-item';
+    stocks.forEach(stock => {
+      const li = document.createElement('li');
+      li.className = 'stock-item';
 
-      const stockInfo = document.createElement('span');
-      stockInfo.textContent = `${stock.description} (${stock.displaySymbol})`;
+      const info = document.createElement('span');
+      info.textContent = `${stock.description} (${stock.displaySymbol})`;
+      info.style.cursor = 'pointer';
 
-      const favoriteButton = document.createElement('button');
-      favoriteButton.textContent = 'Favorite';
-      favoriteButton.addEventListener('click', function () {
-        favoriteStock(1, stock.displaySymbol);
+      // 🔥 Click → fetch related tickers
+      info.addEventListener('click', () => {
+        fetchRelatedTickers(stock.displaySymbol);
       });
 
-      listItem.appendChild(stockInfo);
-      listItem.appendChild(favoriteButton);
-      stockList.appendChild(listItem);
+      const favBtn = document.createElement('button');
+      favBtn.textContent = 'Favorite';
+      favBtn.addEventListener('click', () => {
+        favoriteStock(parsedUserId, stock.displaySymbol);
+      });
+
+      li.appendChild(info);
+      li.appendChild(favBtn);
+      stockList.appendChild(li);
     });
-  }
-        const userIdIn = localStorage.getItem('userId'); // Get user ID from localStorage
 
-        const parsedUserId = parseInt(userIdIn)
-
-  function favoriteStock(userId, stockSymbol) {
-      // Construct the data to send in the body
-      const data = {
-        userId: parsedUserId,
-        symbol: stockSymbol  // note: controller expects a property called "symbol"
-      };
-    
-      fetch(FAVORITE_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-        .then(function (response) {
-          if (response.ok) {
-            return response.json();
-          } else {
-            return response.json().then(function (data) {
-              throw new Error(data.message || 'Error updating favorite status.');
-            });
-          }
-        })
-        .then(function (result) {
-          // alert(result.success ? 'Stock favorited!' : 'Failed to favorite stock.');
-        })
-        .catch(function (error) {
-          console.error('Error updating favorite status:', error);
-          alert('An error occurred while updating favorite status.');
-        });
+    // ⭐ Auto-load related tickers if only one result
+    if (stocks.length === 1) {
+      fetchRelatedTickers(stocks[0].displaySymbol);
     }
-    
+  }
 
-  // Attach event listener to the search button
-  searchButton.addEventListener('click', function (e) {
+  /* =========================
+     FETCH RELATED TICKERS
+  ========================= */
+  async function fetchRelatedTickers(symbol) {
+    if (!symbol) return;
+
+    relatedList.innerHTML = '<li class="loading">Loading related tickers...</li>';
+
+    try {
+      const res = await fetch(`${RELATED_API_URL}/${symbol}`);
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+      relatedList.innerHTML = '';
+
+      if (!data.related || data.related.length === 0) {
+        relatedList.innerHTML = '<li class="empty">No related tickers found</li>';
+        return;
+      }
+
+      data.related.forEach(ticker => {
+        const li = document.createElement('li');
+        li.className = 'related-ticker';
+        li.textContent = ticker;
+        li.style.cursor = 'pointer';
+
+        // 🔥 Click → load chart immediately
+        li.addEventListener('click', () => {
+          loadChartForSymbol(ticker);
+        });
+
+        relatedList.appendChild(li);
+      });
+    } catch (err) {
+      console.error('Related ticker fetch failed:', err);
+      relatedList.innerHTML = '<li class="error">Failed to load related tickers</li>';
+    }
+  }
+
+  /* =========================
+     FAVORITE STOCK
+  ========================= */
+  function favoriteStock(userId, symbol) {
+    if (!userId) {
+      showToast('Please log in first.', 'error');
+      return;
+    }
+
+    fetch(FAVORITE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, symbol })
+    })
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(() => showToast(`${symbol} added to favorites`, 'success'))
+      .catch(() => showToast('Failed to favorite stock.', 'error'));
+  }
+
+  /* =========================
+     EVENT LISTENERS
+  ========================= */
+  searchButton.addEventListener('click', e => {
     e.preventDefault();
     searchStocks();
   });
+
+  searchInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchStocks();
+    }
+  });
 });
+
 //////////////////////////////////////////////////
 /////////// Comments Functionality
 //////////////////////////////////////////////////
@@ -820,104 +991,143 @@ percentageDiv.innerHTML = `
         // BUILD THE CHART
         let config;
         if (chartType === 'line') {
-            config = {
-                type: 'line',
-                data: {
-                    labels: formattedData.map(d => new Date(d.x)),
-                    datasets: [{
-                        label: `${symbolValue} Close Price`,
-                        data: formattedData.map(d => d.c),
-                        borderColor: '#E0EBFF',
-                        fill: true,
-                        tension: 0.1,
-                        backgroundColor: function (context) {
-                            const chart = context.chart;
-                            const { ctx, chartArea } = chart;
-
-                            if (!chartArea) return null;
-
-                            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                            gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
-                            gradient.addColorStop(1, 'rgba(143,173,253,0)');
-                            return gradient;
-                        }
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-                            ticks: { color: 'white' },
-                        },
-                        y: {
-                            ticks: { color: 'white' },
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: 'white' } },
-                        zoom: {
-                            pan: { enabled: true, mode: 'xy', modifierKey: 'ctrl' },
-                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
-                        }
-                    }
-                }
-            };
-          }
-            
-
-      else { // candlestick
-        config = {
-          type: 'candlestick',
-          data: {
-            datasets: [{
-              label: `${symbolValue} Candlestick`,
-              data: formattedData,
-              color: { up: '#00c853', down: '#d50000', unchanged: '#999' }
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                type: 'time',
-                time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
-                ticks: { color: 'white' },
-                grid: { color: 'rgba(255,255,255,0.2)' },
-                title: { display: true, text: 'Date', color: 'white' }
+          config = {
+              type: 'line',
+              data: {
+                  labels: formattedData.map(d => new Date(d.x)),
+                  datasets: [{
+                      label: `${symbolValue} Close Price`,
+                      data: formattedData.map(d => d.c),
+                      borderColor: '#8FADFD',
+                      backgroundColor: context => {
+                          const chart = context.chart;
+                          const { ctx, chartArea } = chart;
+                          if (!chartArea) return null;
+                          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                          gradient.addColorStop(0, 'rgba(143,173,253,0.4)');
+                          gradient.addColorStop(1, 'rgba(143,173,253,0)');
+                          return gradient;
+                      },
+                      fill: true,
+                      tension: 0.2,
+                      pointRadius: 3,
+                      pointHoverRadius: 6,
+                      pointBackgroundColor: '#fff'
+                  }]
               },
-              y: {
-                ticks: { color: 'white' },
-                grid: { color: 'rgba(255,255,255,0.2)' },
-                title: { display: true, text: 'Price', color: 'white' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: 'white' } },
-              zoom: {
-                pan: {
-                  enabled: true,
-                  mode: 'xy', // allow panning both X & Y
-                  modifierKey: 'ctrl' // optional: require Ctrl key
-                },
-                zoom: {
-                  wheel: {
-                    enabled: true
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  interaction: {
+                      mode: 'nearest',
+                      intersect: false,
                   },
-                  pinch: {
-                    enabled: true
+                  plugins: {
+                      legend: {
+                          display: true,
+                          position: 'top',
+                          labels: { color: '#fff', font: { size: 14 } }
+                      },
+                      tooltip: {
+                          enabled: true,
+                          mode: 'index',
+                          intersect: false,
+                          backgroundColor: 'rgba(0,0,0,0.7)',
+                          titleColor: '#fff',
+                          bodyColor: '#fff',
+                          callbacks: {
+                              label: context => `${context.dataset.label}: $${context.formattedValue}`
+                          }
+                      },
+                      zoom: {
+                          pan: {
+                              enabled: true,
+                              mode: 'xy',
+                              // desktop only: require ctrl key
+                              modifierKey: (navigator.maxTouchPoints > 1 ? undefined : 'ctrl')
+                          },
+                          zoom: {
+                              wheel: { enabled: true },
+                              pinch: { enabled: true }, // enable pinch on touch devices
+                              mode: 'xy'
+                          }
+                      }
                   },
-                  mode: 'xy'
-                }
+                  scales: {
+                      x: {
+                          type: 'time',
+                          time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+                          ticks: { color: '#fff', maxRotation: 0, autoSkip: true },
+                          grid: { color: 'rgba(255,255,255,0.1)' }
+                      },
+                      y: {
+                          ticks: { color: '#fff', callback: val => `$${val.toFixed(2)}` },
+                          grid: { color: 'rgba(255,255,255,0.1)' },
+                          beginAtZero: false
+                      }
+                  }
               }
-            }
-          }
-
-        };
+          };
+      } else { // candlestick
+          config = {
+              type: 'candlestick',
+              data: {
+                  datasets: [{
+                      label: `${symbolValue} Candlestick`,
+                      data: formattedData,
+                      color: { up: '#00c853', down: '#d50000', unchanged: '#999' }
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      legend: { labels: { color: '#fff', font: { size: 14 } } },
+                      tooltip: {
+                          enabled: true,
+                          callbacks: {
+                              label: context => {
+                                  const d = context.raw;
+                                  return `O: $${d.o} H: $${d.h} L: $${d.l} C: $${d.c} V: ${d.v}`;
+                              }
+                          },
+                          backgroundColor: 'rgba(0,0,0,0.7)',
+                          titleColor: '#fff',
+                          bodyColor: '#fff'
+                      },
+                      zoom: {
+                          pan: {
+                              enabled: true,
+                              mode: 'xy',
+                              modifierKey: (navigator.maxTouchPoints > 1 ? undefined : 'ctrl')
+                          },
+                          zoom: {
+                              wheel: { enabled: true },
+                              pinch: { enabled: true },
+                              mode: 'xy'
+                          }
+                      }
+                  },
+                  interaction: { mode: 'nearest', intersect: false },
+                  scales: {
+                      x: {
+                          type: 'time',
+                          time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy HH:mm' },
+                          ticks: { color: '#fff', maxRotation: 0 },
+                          grid: { color: 'rgba(255,255,255,0.1)' },
+                          title: { display: true, text: 'Date', color: '#fff' }
+                      },
+                      y: {
+                          ticks: { color: '#fff', callback: val => `$${val.toFixed(2)}` },
+                          grid: { color: 'rgba(255,255,255,0.1)' },
+                          title: { display: true, text: 'Price', color: '#fff' }
+                      }
+                  }
+              }
+          };
       }
+      
+      
 
       intradayChart = new Chart(ctx, config);
         loadingDiv.innerText = "";
@@ -2373,3 +2583,28 @@ async function updateWalletBalances() {
 
 
 document.addEventListener("DOMContentLoaded", updateWalletBalances);
+
+
+
+
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  const autoSymbol = localStorage.getItem('autoChartSymbol');
+  if (!autoSymbol) return;
+
+  // Wait for the chart form to exist in the DOM
+  const waitForForm = setInterval(() => {
+    const chartForm = document.querySelector('#chart-form-intraday');
+    if (chartForm && chartForm.chartSymbol) {
+      chartForm.chartSymbol.value = autoSymbol;
+
+      // Trigger form submit programmatically
+      chartForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+      localStorage.removeItem('autoChartSymbol'); // cleanup
+      clearInterval(waitForForm);
+    }
+  }, 50);
+});

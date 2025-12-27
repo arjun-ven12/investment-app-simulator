@@ -893,3 +893,63 @@ exports.cancelLimitOrderController = function (req, res) {
       return res.status(500).json({ message: "Error cancelling limit order", error });
     });
 };
+
+
+
+
+/////////////////////////////////////////
+// POLYGON RELATED STOCKS
+/////////////////////////////////////////
+
+
+module.exports.getRelatedTickers = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+
+    if (!ticker) {
+      return res.status(400).json({
+        error: 'Ticker parameter is required'
+      });
+    }
+
+    const result = await chartsModel.getRelatedTickers(
+      ticker.toUpperCase()
+    );
+
+    res.json(result);
+  } catch (err) {
+    console.error('Related tickers controller error:', err);
+    res.status(500).json({
+      error: 'Failed to fetch related tickers'
+    });
+  }
+};
+
+
+/////////////////////////////////////////
+// POLYGON TOP GAINER/LOSER STOCKS
+/////////////////////////////////////////
+
+
+
+module.exports.getMarketMovers = async function (req, res) {
+  try {
+    const direction = req.params.direction || 'gainers';
+
+    const data = await chartsModel.getTopMarketMovers(direction);
+
+    res.status(200).json({
+      success: true,
+      direction: data.direction,
+      count: data.count,
+      movers: data.movers
+    });
+  } catch (err) {
+    console.error('Market movers controller error:', err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Failed to fetch market movers'
+    });
+  }
+};

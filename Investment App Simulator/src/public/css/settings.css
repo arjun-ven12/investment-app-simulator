@@ -2993,4 +2993,112 @@ canvas#portfolioPieChart {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
 }
 
+@media (max-width: 768px) {
+    .market-movers-list {
+      display: flex !important;              /* switch to flex for horizontal scrolling */
+      flex-direction: row;        /* horizontal layout */
+      overflow-x: auto;           /* enable horizontal scroll */
+      gap: 12px;
+      padding: 0;
+      -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+    }
+  
+    .market-movers-list li {
+      flex: 0 0 auto;            /* prevent items from shrinking */
+      min-width: 260px;          /* same as your grid min width */
+    }
+  }
+.market-movers-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+  }
+  
+  .market-movers-list li {
+    display: flex;
+    flex-direction: row; /* rectangular layout */
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(83, 89, 107, 0.5);
+    background-color: rgba(18, 18, 26, 0.85);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    min-height: 80px;
+    gap: 12px;
+  }
+  
+  .market-movers-list li .stock-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+  }
+  
+  .market-movers-list li .ticker {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .market-movers-list li .price-change {
+    font-size: 0.9rem;
+    color: #0f0; /* green by default, update dynamically for losers */
+  }
+  
+  .market-movers-list li .mini-chart {
+    width: 120px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+  
 
+  .market-movers-list li:hover {
+    background-color: rgba(40, 40, 60, 0.9);
+  }
+  
+  .mover-info {
+    text-align: center;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .mover-symbol {
+    font-weight: bold;
+    font-size: 1.1rem;
+    /* padding: 5px; */
+
+  }
+  
+  .mover-price {
+    font-size: 0.95rem;
+    color: #ccc;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+  }
+  
+  .mover-change {
+    font-size: 0.95rem;
+    margin-top: 2px;
+    /* padding: 5px; */
+
+  }
+  
+  .mini-chart {
+    width: 120px;
+    height: 60px;
+  }
+  
+
+  .movers-container {
+    padding: 15px;
+    align-items: center;
+    justify-content: center;
+  }

@@ -63,6 +63,33 @@
 
 
     <!-- Wallet Section -->
+    <div class="sections">
+      <div class="trading-card">
+        <div class="movers-container">
+      <h1>Top Market Movers</h1>
+      <br>
+      <div class="movers-buttons">
+        <button id="show-gainers" class="tab-button active">Gainers</button>
+        <button id="show-losers" class="tab-button">Losers</button>
+      </div>
+      <br>
+      <br>
+      <ul id="market-movers-list" class="market-movers-list">
+        <!-- inside <ul id="market-movers-list" class="market-movers-list"></ul> -->
+<li>
+  <div class="stock-info">
+    <span class="ticker">AAPL</span>
+    <span class="price-change">+3.5%</span>
+  </div>
+  <canvas class="mini-chart"></canvas>
+</li>
+
+      </ul>
+      <div id="movers-error" class="error-message"></div>
+    </div>
+  </div>
+</div>
+
 
     <!-- ================= AI ADVICE SECTION ================= -->
     <div class="sections" id="ai-advice-section">
