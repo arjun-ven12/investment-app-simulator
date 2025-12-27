@@ -143,7 +143,7 @@ module.exports.getLatestPrice = async function (symbol) {
     const fromStr = from.toISOString().split('T')[0];
 
     // Multiplier = 1, timespan = day, sort desc to get latest bar first, limit = 1
-    const url = `https://api.massive.com/v2/aggs/ticker/${encodeURIComponent(symbol)}/range/1/day/${fromStr}/${toStr}?adjusted=true&sort=desc&limit=1&apiKey=${POLYGON_API_KEY}`;
+    const url = `https://api.massive.com/v2/aggs/ticker/${encodeURIComponent(symbol.toUpperCase())}/range/1/day/${fromStr}/${toStr}?adjusted=true&sort=desc&limit=1&apiKey=${POLYGON_API_KEY}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Massive API error: ${response.status}`);
