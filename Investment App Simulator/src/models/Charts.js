@@ -811,7 +811,7 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
 
 
   
-  const API_KEY = process.env.MARKETSTACK_API_KEY;
+  // const API_KEY = process.env.MARKETSTACK_API_KEY;
   
   const POLYGON_API_KEY = process.env.POLYGON_API_KEY
 

@@ -660,19 +660,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchScenarioData(symbol) {
         if (!symbol) return alert("Enter a stock symbol.");
+    
         try {
             const res = await fetch(`/scenarios/${scenarioId}/stocks/${symbol}/data`);
             const data = await res.json();
-            if (!res.ok)   {  showToast(`Invalid symbol entered or no data available.`, 'error') };
-;
-            if (!data.chartData?.length) {showToast(`Invalid symbol entered or no data available.`, 'error')};
-
-            allSymbolsData[symbol] = data.chartData.map(item => ({ x: new Date(item.date), c: item.closePrice }));
+    
+            if (!res.ok || !data.chartData?.ohlc?.length) {
+                showToast(`Invalid symbol entered or no data available.`, 'error');
+                return;
+            }
+    
+            // Map OHLC to the format used in chart
+            const mappedData = data.chartData.ohlc.map(item => ({
+                x: new Date(item.date),
+                o: item.openPrice,
+                h: item.highPrice,
+                l: item.lowPrice,
+                c: item.closePrice
+            }));
+    
+            allSymbolsData[symbol] = mappedData;
             fullData = allSymbolsData[symbol];
-
-
+    
+            // Initialize chart if not already
             if (!scenarioChart) initializeChart(currentChartType);
-
+    
+            // Add dataset if not already present
             if (!scenarioChart.data.datasets.find(ds => ds.label === symbol)) {
                 scenarioChart.data.datasets.push({
                     label: symbol,
@@ -683,10 +696,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     tension: 0.1
                 });
             }
-
+    
             currentSymbol = symbol;
             const ds = scenarioChart.data.datasets.find(ds => ds.label === symbol);
-
+    
+            // Handle first index
             if (currentIndex === 0 && fullData.length > 0) {
                 const first = fullData[0];
                 ds.data.push(first.c);
@@ -695,7 +709,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 priceInput.value = first.c.toFixed(2);
                 updateAmount();
             }
+    
             updateReplayProgress();
+    
+            // Handle ongoing index
             if (currentIndex > 0) {
                 ds.data = fullData.slice(0, currentIndex).map(item => item.c);
                 scenarioChart.update();
@@ -705,13 +722,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     updateAmount();
                 }
             }
+    
             populateTradeDropdown();
-
+    
         } catch (err) {
             console.error(err);
-            // alert(err.message);
+            showToast("Failed to fetch scenario data.", 'error');
         }
     }
+    
 
     function showPopupConfirmation(message, callback) {
     const popup = document.getElementById("cancel-popup");

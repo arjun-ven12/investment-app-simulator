@@ -1,6 +1,8 @@
 const prisma = require("./prismaClient");
 require('dotenv').config();
-const API_KEY = process.env.MARKETSTACK_API_KEY;
+// const API_KEY = process.env.MARKETSTACK_API_KEY;
+const POLYGON_API_KEY = process.env.POLYGON_API_KEY
+
 const { Prisma } = require("@prisma/client");
 const { ScenarioAttemptStatus } = require("@prisma/client");
 
@@ -639,6 +641,112 @@ module.exports.loadIntradayData = async (scenarioId, symbols) => {
   return data;
 };
 
+// module.exports.getScenarioIntradayDataFromAPI = async function (
+//   scenarioId,
+//   symbol,
+//   dateFrom,
+//   dateTo
+// ) {
+//   if (!symbol) throw new Error("Stock symbol is required.");
+//   if (!scenarioId) throw new Error("Scenario ID is required.");
+//   // Default to past 7 days if no dates provided
+//   const now = new Date();
+//   const defaultTo = now.toISOString().split("T")[0];
+//   const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+//     .toISOString()
+//     .split("T")[0];
+
+//   const params = new URLSearchParams({
+//     access_key: API_KEY,
+//     symbols: symbol,
+//     sort: "ASC",
+//     interval: "15min",
+//     limit: 1000,
+//     date_from: dateFrom || defaultFrom,
+//     date_to: dateTo || defaultTo,
+//   });
+
+//   const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
+
+//   try {
+//     const response = await fetch(url);
+//     if (!response.ok)
+//       throw new Error(`Marketstack API error: ${response.status}`);
+//     const data = await response.json();
+
+//     if (!data.data || data.data.length === 0) {
+//       throw new Error("No intraday data found for this symbol.");
+//     }
+
+//     // Upsert stock in DB
+//     const stock = await prisma.stock.upsert({
+//       where: { symbol: symbol },
+//       update: {},
+//       create: { symbol: symbol },
+//     });
+
+//     console.log(
+//       `Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`
+//     );
+
+//     // Upsert each intraday price into IntradayPrice3 table
+//     for (const item of data.data) {
+//       try {
+//         const dateObj = new Date(item.date);
+//         dateObj.setMilliseconds(0); // normalize milliseconds
+//         dateObj.setSeconds(0); // optional: normalize seconds
+
+//         await prisma.scenarioIntradayPrice.upsert({
+//           where: {
+//             scenarioId_symbol_date: {
+//               scenarioId: scenarioId,
+//               symbol: symbol,
+//               date: dateObj,
+//             },
+//           },
+//           update: {
+//             openPrice: item.open,
+//             highPrice: item.high,
+//             lowPrice: item.low,
+//             closePrice: item.close,
+//             volume: item.volume,
+//           },
+//           create: {
+//             scenarioId: scenarioId,
+//             symbol: symbol,
+//             date: dateObj,
+//             openPrice: item.open,
+//             highPrice: item.high,
+//             lowPrice: item.low,
+//             closePrice: item.close,
+//             volume: item.volume,
+//           },
+//         });
+//       } catch (err) {
+//         console.error(
+//           `Failed to upsert intraday price for ${symbol} at ${item.date}:`,
+//           err
+//         );
+//       }
+//     }
+
+//     // Return OHLC array for candlestick chart
+//     const ohlcData = data.data.map((item) => ({
+//       date: item.date,
+//       openPrice: item.open,
+//       highPrice: item.high,
+//       lowPrice: item.low,
+//       closePrice: item.close,
+//     }));
+
+//     return ohlcData;
+//   } catch (err) {
+//     console.error("Error fetching intraday data:", err);
+//     throw err;
+//   }
+// };
+
+
 module.exports.getScenarioIntradayDataFromAPI = async function (
   scenarioId,
   symbol,
@@ -647,99 +755,105 @@ module.exports.getScenarioIntradayDataFromAPI = async function (
 ) {
   if (!symbol) throw new Error("Stock symbol is required.");
   if (!scenarioId) throw new Error("Scenario ID is required.");
-  // Default to past 7 days if no dates provided
+
+  // Default to past 7 days
   const now = new Date();
-  const defaultTo = now.toISOString().split("T")[0];
-  const defaultFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
+  const defaultTo = dateTo || now.toISOString().split("T")[0];
+  const defaultFrom =
+    dateFrom ||
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-  const params = new URLSearchParams({
-    access_key: API_KEY,
-    symbols: symbol,
-    sort: "ASC",
-    interval: "15min",
-    limit: 1000,
-    date_from: dateFrom || defaultFrom,
-    date_to: dateTo || defaultTo,
-  });
-
-  const url = `https://api.marketstack.com/v1/intraday?${params.toString()}`;
+  const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}` +
+              `/range/15/minute/${defaultFrom}/${defaultTo}` +
+              `?adjusted=true&sort=asc&limit=5000&apiKey=${POLYGON_API_KEY}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok)
-      throw new Error(`Marketstack API error: ${response.status}`);
-    const data = await response.json();
-
-    if (!data.data || data.data.length === 0) {
-      throw new Error("No intraday data found for this symbol.");
+    if (!response.ok) {
+      throw new Error(`Polygon API error: ${response.status}`);
     }
 
-    // Upsert stock in DB
+    const data = await response.json();
+
+    if (!data.results || data.results.length === 0) {
+      throw new Error("No OHLC data found for this symbol.");
+    }
+
+    // Upsert stock (to get stock_id)
     const stock = await prisma.stock.upsert({
-      where: { symbol: symbol },
+      where: { symbol },
       update: {},
-      create: { symbol: symbol },
+      create: { symbol }
     });
 
     console.log(
-      `Processing ${data.data.length} intraday prices for stock: ${symbol} (ID: ${stock.stock_id})`
+      `Processing ${data.results.length} OHLC bars for ${symbol} (Stock ID: ${stock.stock_id})`
     );
 
-    // Upsert each intraday price into IntradayPrice3 table
-    for (const item of data.data) {
+    // Upsert each intraday price into scenarioIntradayPrice
+    for (const bar of data.results) {
       try {
-        const dateObj = new Date(item.date);
-        dateObj.setMilliseconds(0); // normalize milliseconds
-        dateObj.setSeconds(0); // optional: normalize seconds
+        const dateObj = new Date(bar.t); // unix ms timestamp
+        dateObj.setMilliseconds(0);
+        dateObj.setSeconds(0);
 
         await prisma.scenarioIntradayPrice.upsert({
           where: {
             scenarioId_symbol_date: {
-              scenarioId: scenarioId,
-              symbol: symbol,
-              date: dateObj,
-            },
+              scenarioId,
+              symbol,
+              date: dateObj
+            }
           },
           update: {
-            openPrice: item.open,
-            highPrice: item.high,
-            lowPrice: item.low,
-            closePrice: item.close,
-            volume: item.volume,
+            openPrice: bar.o,
+            highPrice: bar.h,
+            lowPrice: bar.l,
+            closePrice: bar.c,
+            volume: bar.v
           },
           create: {
-            scenarioId: scenarioId,
-            symbol: symbol,
+            scenarioId,
+            symbol,
             date: dateObj,
-            openPrice: item.open,
-            highPrice: item.high,
-            lowPrice: item.low,
-            closePrice: item.close,
-            volume: item.volume,
-          },
+            openPrice: bar.o,
+            highPrice: bar.h,
+            lowPrice: bar.l,
+            closePrice: bar.c,
+            volume: bar.v
+          }
         });
       } catch (err) {
-        console.error(
-          `Failed to upsert intraday price for ${symbol} at ${item.date}:`,
-          err
-        );
+        console.error(`Failed to upsert scenario intraday price for ${symbol} at ${bar.t}:`, err);
       }
     }
 
-    // Return OHLC array for candlestick chart
-    const ohlcData = data.data.map((item) => ({
-      date: item.date,
-      openPrice: item.open,
-      highPrice: item.high,
-      lowPrice: item.low,
-      closePrice: item.close,
+    // Format OHLC data for chart
+    const ohlcData = data.results.map(bar => ({
+      date: new Date(bar.t).toISOString(),
+      openPrice: bar.o,
+      highPrice: bar.h,
+      lowPrice: bar.l,
+      closePrice: bar.c
     }));
 
-    return ohlcData;
+    // Calculate price change
+    const first = data.results[0];
+    const last = data.results[data.results.length - 1];
+    const startPrice = first.c;
+    const endPrice = last.c;
+    const difference = endPrice - startPrice;
+    const percentageChange = (difference / startPrice) * 100;
+
+    return {
+      ohlc: ohlcData,
+      startPrice,
+      endPrice,
+      difference,
+      percentageChange
+    };
   } catch (err) {
-    console.error("Error fetching intraday data:", err);
+    console.error("Error fetching Polygon OHLC data:", err);
     throw err;
   }
 };
