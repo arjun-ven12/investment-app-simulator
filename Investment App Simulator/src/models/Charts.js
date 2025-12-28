@@ -1115,23 +1115,25 @@ module.exports.getTopMarketMovers = async function (direction = 'gainers') {
       throw new Error('No market movers data found.');
     }
 
-    // 🔥 Normalize response for frontend
-    const movers = data.tickers.map(t => ({
-      symbol: t.ticker,
-      price: t.day?.c ?? null,
-      open: t.day?.o ?? null,
-      high: t.day?.h ?? null,
-      low: t.day?.l ?? null,
-      volume: t.day?.v ?? null,
-      change: t.todaysChange ?? null,
-      changePercent: t.todaysChangePerc ?? null,
-      prevClose: t.prevDay?.c ?? null,
-      updated: t.updated
-    }));
+    // 🔥 Take top 10 only
+    const movers = data.tickers
+      .slice(0, 10)
+      .map(t => ({
+        symbol: t.ticker,
+        price: t.day?.c ?? null,
+        open: t.day?.o ?? null,
+        high: t.day?.h ?? null,
+        low: t.day?.l ?? null,
+        volume: t.day?.v ?? null,
+        change: t.todaysChange ?? null,
+        changePercent: t.todaysChangePerc ?? null,
+        prevClose: t.prevDay?.c ?? null,
+        updated: t.updated
+      }));
 
     return {
       direction,
-      count: movers.length,
+      count: movers.length, // now always ≤ 10
       movers
     };
   } catch (err) {
@@ -1139,8 +1141,6 @@ module.exports.getTopMarketMovers = async function (direction = 'gainers') {
     throw err;
   }
 };
-
-
 
 
 
