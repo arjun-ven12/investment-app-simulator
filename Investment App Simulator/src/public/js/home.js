@@ -116,71 +116,92 @@ async function renderUserInfo() {
   //   }
   // }
 
-
-
   async function renderLeaderboard() {
-  try {
-    const res = await fetch("/leaderboard");
-    const data = await res.json();
-    const leaderboard = data.leaderboard || [];
-
-    const podiumContainer = document.getElementById("leaderboard-podium");
-    const leaderboardBody = document.getElementById("leaderboard-body");
-
-    leaderboardBody.innerHTML = "";
-    podiumContainer.innerHTML = "";
-
-    // Top 3 podium
-    const top3 = leaderboard.slice(0, 3);
-    const others = leaderboard.slice(3, 10);
-
-    podiumContainer.innerHTML = `
-<div class="podium">
-  <div class="podium-spot2 second">
-      <div class=secondspot>
-
-    <div class="podium-rank">2</div>
-    <div class="podium-username">${top3[1]?.username || '-'}</div>
-    <div class="podium-score">${top3[1]?.profitLossPercent ?? '-'}%</div>
+    try {
+      const res = await fetch("/leaderboard");
+      const data = await res.json();
+      const leaderboard = data.leaderboard || [];
+  
+      const podiumContainer = document.getElementById("leaderboard-podium");
+      const leaderboardBody = document.getElementById("leaderboard-body");
+  
+      podiumContainer.innerHTML = "";
+      leaderboardBody.innerHTML = "";
+  
+      if (leaderboard.length === 0) {
+        podiumContainer.innerHTML = "<p>No leaderboard data</p>";
+        return;
+      }
+  
+      // -----------------------
+      // Top 3 podium
+      // -----------------------
+      const top3 = leaderboard.slice(0, 3);
+      const others = leaderboard.slice(3);
+  
+      podiumContainer.innerHTML = `
+        <div class="podium">
+          <div class="podium-spot2 second">
+            <div class="secondspot">
+              <div class="podium-rank">2</div>
+              <div class="podium-username">${top3[1]?.username ?? "-"}</div>
+              <div class="podium-score">
+                ${top3[1] ? top3[1].pnlPercent.toFixed(2) + "%" : "-"}
+              </div>
+            </div>
+          </div>
+  
+          <div class="podium-wrapper">
+            <div class="podium-spot1 first podium-container">
+              <div class="trophy">🏆</div>
+              <div class="podium-rank">1</div>
+              <div class="podium-username">${top3[0]?.username ?? "-"}</div>
+              <div class="podium-score">
+                ${top3[0] ? top3[0].pnlPercent.toFixed(2) + "%" : "-"}
+              </div>
+            </div>
+          </div>
+  
+          <div class="podium-spot3 third">
+            <div class="podium-rank">3</div>
+            <div class="podium-username">${top3[2]?.username ?? "-"}</div>
+            <div class="podium-score">
+              ${top3[2] ? top3[2].pnlPercent.toFixed(2) + "%" : "-"}
+            </div>
+          </div>
         </div>
-  </div>
-
-  <div class="podium-wrapper">
-    <div class="podium-spot1 first podium-container">
-      <div class="trophy">🏆</div>
-      <div class="podium-rank">1</div>
-      <div class="podium-username">${top3[0]?.username || '-'}</div>
-      <div class="podium-score">${top3[0]?.profitLossPercent ?? '-'}%</div>
-    </div>
-  </div>
-
-  <div class="podium-spot3 third">
-      <div class="podium-rank">3</div>
-      <div class="podium-username">${top3[2]?.username || '-'}</div>
-      <div class="podium-score">${top3[2]?.profitLossPercent ?? '-'}%</div>
-
-  </div>
-</div>
-
-    `;
-
-    // Table rows for 4th–10th
-    others.forEach(entry => {
-      const row = document.createElement("tr");
-      const profitLossClass = entry.profitLossPercent >= 0 ? "positive" : "negative";
-      row.innerHTML = `
-        <td>${entry.rank}</td>
-        <td>${entry.username}</td>
-        <td class="${profitLossClass}">${entry.profitLossPercent}%</td>
-        <td>${entry.lastTrade || "N/A"}</td>
       `;
-      leaderboardBody.appendChild(row);
-    });
-  } catch (err) {
-    console.error("Error fetching leaderboard:", err);
-    leaderboardBody.innerHTML = `<tr><td colspan="4">Error: ${err.message}</td></tr>`;
+  
+      // -----------------------
+      // Table rows (4+)
+      // -----------------------
+      others.forEach(entry => {
+        const row = document.createElement("tr");
+        const pnlClass = entry.pnlPercent >= 0 ? "positive" : "negative";
+  
+        row.innerHTML = `
+          <td>${entry.rank}</td>
+          <td>${entry.username}</td>
+          <td class="${pnlClass}">
+            ${entry.pnlPercent.toFixed(2)}%
+          </td>          
+          <td>${entry.lastTrade.toLocaleString()}</td>
+
+        `;
+  
+        leaderboardBody.appendChild(row);
+      });
+  
+    } catch (err) {
+      console.error("Error fetching leaderboard:", err);
+      leaderboardBody.innerHTML = `
+        <tr>
+          <td colspan="4">Failed to load leaderboard</td>
+        </tr>
+      `;
+    }
   }
-}
+  
 
   // -------------------------------
   // STOCKS PORTFOLIO

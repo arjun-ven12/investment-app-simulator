@@ -3,81 +3,70 @@ const prisma = require('./prismaClient');
 
 const fetch = require("node-fetch");
  const cron = require('node-cron');
-
-const STARTING_WALLET = 100000;
-
-exports.getLeaderboard = async function getLeaderboard(limit = 10) {
+ const STARTING_WALLET = 100000;
+ const chartsModel = require("./Charts");
+ 
+ exports.getLeaderboard = async function getLeaderboard(limit = 10) {
   try {
     const users = await prisma.user.findMany({
-      include: {
+      where: {
+        trading: { some: {} } // must have at least 1 trade
+      },
+      select: {
+        id: true,
+        username: true,
+        wallet: true,
         trading: {
           orderBy: { tradeDate: "desc" },
           take: 1,
-          include: { stock: true }
-        },
-        stockHoldings: {
-          include: {
+          select: {
+            tradeType: true,
             stock: {
-              include: {
-                intradayPrice3: {
-                  orderBy: { date: "desc" },
-                  take: 1
-                }
-              }
+              select: { symbol: true }
             }
           }
         }
       }
     });
 
-    const leaderboardData = users.map(user => {
-      // ================== OPEN POSITIONS VALUE ==================
-      const openPositionsValue = user.stockHoldings.reduce((sum, holding) => {
-        const latestPrice =
-          holding.stock?.intradayPrice3?.[0]?.closePrice;
+    const leaderboard = [];
 
-        if (!latestPrice) return sum;
+    for (const user of users) {
+      const portfolio = await chartsModel.getUserPortfolio(user.id);
 
-        return (
-          sum +
-          Number(latestPrice) * Number(holding.currentQuantity)
-        );
-      }, 0);
+      const openPositionsValue = portfolio.openPositions.reduce(
+        (sum, pos) => sum + Number(pos.currentValue),
+        0
+      );
 
-      // ================== TOTAL EQUITY ==================
       const wallet = Number(user.wallet);
       const totalEquity = wallet + openPositionsValue;
 
-      const profitLossPercent =
-        ((totalEquity - STARTING_WALLET) / STARTING_WALLET) * 100;
+      const pnlAbsolute = totalEquity - STARTING_WALLET;
+      const pnlPercent = (pnlAbsolute / STARTING_WALLET) * 100;
 
-      // ================== LAST TRADE ==================
       const lastTrade = user.trading[0]
-        ? `${user.trading[0].tradeType.toUpperCase()} ${
-            user.trading[0].stock?.symbol || "N/A"
-          }`
-        : "N/A";
+        ? `${user.trading[0].tradeType} ${user.trading[0].stock?.symbol ?? "N/A"}`
+        : null;
 
-      return {
+      leaderboard.push({
         userId: user.id,
         username: user.username,
         totalEquity: Number(totalEquity.toFixed(2)),
-        profitLossPercent: Number(profitLossPercent.toFixed(2)),
-        lastTrade
-      };
-    });
+        pnl: Number(pnlAbsolute.toFixed(2)),
+        pnlPercent: Number(pnlPercent.toFixed(2)),
+        lastTrade // ✅ simple string
+      });
+    }
 
-    // ================== SORT & RANK ==================
-    leaderboardData.sort(
-      (a, b) => b.profitLossPercent - a.profitLossPercent
-    );
+    leaderboard.sort((a, b) => b.pnlPercent - a.pnlPercent);
 
-    return leaderboardData.slice(0, limit).map((entry, index) => ({
-      rank: index + 1,
-      ...entry
+    return leaderboard.slice(0, limit).map((u, i) => ({
+      rank: i + 1,
+      ...u
     }));
   } catch (err) {
-    console.error("Error fetching leaderboard:", err);
-    throw new Error("Failed to fetch leaderboard");
+    console.error("Leaderboard error:", err);
+    throw new Error("Failed to compute leaderboard");
   }
 };
