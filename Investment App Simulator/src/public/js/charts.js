@@ -838,15 +838,30 @@ function renderChart(data) {
 
 
   // Load recommendations when symbol input changes
-  symbolInput.addEventListener('change', function () {
-    const symbol = symbolInput.value.trim();
-    if (!symbol) {
-      errorDisplay.textContent = "Please enter a stock symbol.";
-      return;
-    }
-    errorDisplay.textContent = "";
-    loadRecommendations(symbol);
-  });
+  // symbolInput.addEventListener('change', function () {
+  //   const symbol = symbolInput.value.trim();
+  //   if (!symbol) {
+  //     errorDisplay.textContent = "Please enter a stock symbol.";
+  //     return;
+  //   }
+  //   errorDisplay.textContent = "";
+  //   loadRecommendations(symbol);
+  // });
+
+  const chartForm = document.querySelector('#chart-form-intraday');
+
+chartForm.addEventListener('submit', function(e) {
+  e.preventDefault(); // prevent actual form submission
+
+  const symbol = symbolInput.value.trim();
+  if (!symbol) {
+    errorDisplay.textContent = "Please enter a stock symbol.";
+    return;
+  }
+  errorDisplay.textContent = "";
+  loadRecommendations(symbol);
+});
+
 });
 
 
