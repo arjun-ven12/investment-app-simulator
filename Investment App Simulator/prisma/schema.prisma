@@ -9,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Stock {
   stock_id        Int               @id @default(autoincrement())
   symbol          String            @unique @db.VarChar(10)
@@ -18,15 +17,15 @@ model Stock {
   change          Int?
   favoriteStock   FavoriteStock[]
   hist_prices     HistPrice[]
-  limitOrder      LimitOrder[]
-  company         Company?          @relation(fields: [company_id], references: [id])
-  trading         Trade[]
   intradayPrice2  IntradayPrice2[]
   intradayPrice3  IntradayPrice3[]
-  StopMarketOrder StopMarketOrder[]
-  StopLimitOrder  StopLimitOrder[]
+  limitOrder      LimitOrder[]
   contracts       OptionContract[]
+  company         Company?          @relation(fields: [company_id], references: [id])
   stockHoldings   StockHolding[]
+  StopLimitOrder  StopLimitOrder[]
+  StopMarketOrder StopMarketOrder[]
+  trading         Trade[]
 
   @@index([symbol])
 }
@@ -91,34 +90,33 @@ model News {
   url         String
   source      String?
   datetime    DateTime?
-  categoryId  Int? // new field for category
-  category    NewsCategory? @relation(fields: [categoryId], references: [id])
-  views       Int           @default(0) // <-- add this
+  categoryId  Int?
+  views       Int           @default(0)
   bookmarks   Bookmark[]
+  category    NewsCategory? @relation(fields: [categoryId], references: [id])
   NewsComment NewsComment[]
   NewsLike    NewsLike[]
 }
 
 model Bookmark {
   id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
   userId Int
-  news   News @relation(fields: [newsId], references: [id])
   newsId Int
+  news   News @relation(fields: [newsId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
 
-  @@unique([userId, newsId]) // Prevent duplicate bookmarks
+  @@unique([userId, newsId])
 }
 
 model BlogPost {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  title      String
-  content    String
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
-
-  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id          Int           @id @default(autoincrement())
+  user_id     Int
+  title       String
+  content     String
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now()) @updatedAt
   BlogComment BlogComment[]
+  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model BlogComment {
@@ -128,9 +126,8 @@ model BlogComment {
   comment    String
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
-
-  post BlogPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  user User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post       BlogPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -161,38 +158,39 @@ model User {
   lockUntil                   DateTime?
   termsAccepted               Boolean                       @default(false)
   termsAcceptedAt             DateTime?
+  startingWallet              Int?                          @default(100000)
+  AIAdvice                    AIAdvice[]
+  aisetting                   AISetting?
+  BlockchainTransaction       BlockchainTransaction[]
   BlogComment                 BlogComment[]
   BlogPost                    BlogPost[]
+  bookmarks                   Bookmark[]
+  ChatMessage                 ChatMessage[]
+  ChatSession                 ChatSession[]
   Comment                     Comment[]
   FavoriteApi                 FavoriteApi[]
   favoriteStocks              FavoriteStock[]
   Goal                        Goal[]
   limitOrders                 LimitOrder[]
+  loginActivities             LoginActivity[]
+  NewsComment                 NewsComment[]
+  NewsLike                    NewsLike[]
+  notificationSetting         NotificationSetting?
+  OptionBlockchainTransaction OptionBlockchainTransaction[]
+  OptionTrade                 OptionTrade[]
   RedeemBy                    RedeemBy[]
   referrals                   Referral[]                    @relation("UserReferrals")
   referralUsages              ReferralUsage[]
+  ScenarioAttempt             ScenarioAttempt[]
+  ScenarioAttemptAnalytics    ScenarioAttemptAnalytics[]
+  ScenarioParticipant         ScenarioParticipant[]
+  ScenarioPersonalBest        ScenarioPersonalBest[]
+  sessions                    Session[]
+  stockHoldings               StockHolding[]
+  StopLimitOrder              StopLimitOrder[]
+  StopMarketOrder             StopMarketOrder[]
   trading                     Trade[]
   referredBy                  Referral?                     @relation("UserReferredBy", fields: [referredById], references: [id], onDelete: Cascade)
-  bookmarks                   Bookmark[]
-  NewsComment                 NewsComment[]
-  NewsLike                    NewsLike[]
-  StopMarketOrder             StopMarketOrder[]
-  StopLimitOrder              StopLimitOrder[]
-  OptionTrade                 OptionTrade[]
-  ScenarioParticipant         ScenarioParticipant[]
-  ScenarioAttemptAnalytics    ScenarioAttemptAnalytics[]
-  ScenarioPersonalBest        ScenarioPersonalBest[]
-  ScenarioAttempt             ScenarioAttempt[]
-  AIAdvice                    AIAdvice[]
-  BlockchainTransaction       BlockchainTransaction[]
-  OptionBlockchainTransaction OptionBlockchainTransaction[]
-  ChatSession                 ChatSession[]
-  ChatMessage                 ChatMessage[]
-  aisetting                   AISetting?
-  sessions                    Session[]
-  notificationSetting         NotificationSetting?
-  loginActivities             LoginActivity[]
-  stockHoldings               StockHolding[]
 }
 
 model Referral {
@@ -207,22 +205,21 @@ model Referral {
   expiresAt           DateTime?
   userId              Int?
   user                User?           @relation("UserReferrals", fields: [userId], references: [id], onDelete: Cascade)
+  ReferralBadge       ReferralBadge[]
   referralUsages      ReferralUsage[]
   referredUsers       User[]          @relation("UserReferredBy")
-  ReferralBadge       ReferralBadge[]
 }
 
 model StockHolding {
   id              Int    @id @default(autoincrement())
   userId          Int
   stockId         Int
-  symbol          String // optional if you want quick access without joining Stock
+  symbol          String
   currentQuantity Int    @default(0)
+  stock           Stock  @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
-
-  @@unique([userId, stockId]) // one row per user per stock
+  @@unique([userId, stockId])
   @@index([userId])
   @@index([stockId])
 }
@@ -232,7 +229,7 @@ model ReferralUsage {
   userId        Int?
   referralId    Int?
   status        String    @default("PENDING")
-  creditsEarned Int       @default(0) // <-- ADD THIS
+  creditsEarned Int       @default(0)
   createdAt     DateTime  @default(now())
   referral      Referral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -247,7 +244,7 @@ model ReferralBadge {
   createdAt  DateTime @default(now())
   referral   Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
 
-  @@unique([referralId, badgeName]) // Prevent duplicate badges
+  @@unique([referralId, badgeName])
   @@index([referralId])
 }
 
@@ -277,9 +274,8 @@ model NewsComment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([newsId])
   @@index([userId])
@@ -330,11 +326,10 @@ model NewsLike {
   newsId    Int
   userId    Int
   createdAt DateTime @default(now())
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([newsId, userId]) // prevent duplicate likes
+  @@unique([newsId, userId])
   @@index([newsId])
   @@index([userId])
 }
@@ -342,7 +337,7 @@ model NewsLike {
 model NewsCategory {
   id   Int    @id @default(autoincrement())
   name String @unique
-  news News[] // one-to-many relation: a category can have multiple news articles
+  news News[]
 }
 
 model IntradayPrice2 {
@@ -355,8 +350,7 @@ model IntradayPrice2 {
   closePrice Decimal  @db.Decimal(10, 2)
   volume     BigInt?
   createdAt  DateTime @default(now())
-
-  stock Stock @relation(fields: [stockId], references: [stock_id])
+  stock      Stock    @relation(fields: [stockId], references: [stock_id])
 
   @@unique([stockId, date])
   @@index([stockId])
@@ -372,8 +366,7 @@ model IntradayPrice3 {
   closePrice Decimal  @db.Decimal(10, 2)
   volume     BigInt?
   createdAt  DateTime @default(now())
-
-  stock Stock @relation(fields: [stockId], references: [stock_id])
+  stock      Stock    @relation(fields: [stockId], references: [stock_id])
 
   @@unique([stockId, date], map: "stockId_date")
   @@index([stockId])
@@ -382,7 +375,7 @@ model IntradayPrice3 {
 model InvestmentGuide {
   id        Int      @id @default(autoincrement())
   title     String   @unique
-  content   Json // store the structured JSON we designed above
+  content   Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -393,14 +386,13 @@ model StopMarketOrder {
   stockId      Int
   quantity     Int
   triggerPrice Decimal  @db.Decimal(10, 2)
-  tradeType    String // <-- ADD THIS: "BUY" or "SELL"
-  limitPrice   Decimal? @db.Decimal(10, 2) // only used for STOP_LIMIT
-  status       String   @default("PENDING") // PENDING, EXECUTED, CANCELLED
+  tradeType    String
+  limitPrice   Decimal? @db.Decimal(10, 2)
+  status       String   @default("PENDING")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+  stock        Stock    @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([stockId])
 }
@@ -412,13 +404,12 @@ model StopLimitOrder {
   quantity     Int
   triggerPrice Decimal  @db.Decimal(10, 2)
   limitPrice   Decimal  @db.Decimal(10, 2)
-  tradeType    String // "BUY" or "SELL"
-  status       String   @default("PENDING") // "PENDING", "EXECUTED", "CANCELLED"
+  tradeType    String
+  status       String   @default("PENDING")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stock Stock @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+  stock        Stock    @relation(fields: [stockId], references: [stock_id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([stockId])
 }
@@ -439,138 +430,129 @@ model Company {
   logo                 String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime? @updatedAt
-  stock_id             Int? // <-- add this @unique @unique
-
-  stock Stock[]
+  stock_id             Int?
+  stock                Stock[]
 
   @@index([symbol])
 }
 
 model OptionContract {
-  id               Int       @id @default(autoincrement())
-  stockId          Int?
-  symbol           String    @unique
-  name             String
-  underlyingSymbol String
-  rootSymbol       String
-  type             String
-  style            String?
-  strikePrice      Float
-  expirationDate   DateTime
-  size             Int?
-  openInterest     Int?
-  openInterestDate DateTime?
-  closePrice       Float?
-  closePriceDate   DateTime?
-  breakEvenPrice      Float?
-  impliedVolatility   Float?
-  delta               Float?
-  gamma               Float?
-  theta               Float?
-  vega                Float?
-  fmv                 Float?
-  fmvLastUpdated      DateTime?
-
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime? @updatedAt
-
-  stock        Stock?            @relation(fields: [stockId], references: [stock_id])
-  optionTrades OptionTrade[]
-  histPrices   OptionHistPrice[]
+  id                Int               @id @default(autoincrement())
+  stockId           Int?
+  symbol            String            @unique
+  name              String
+  underlyingSymbol  String
+  rootSymbol        String
+  type              String
+  style             String?
+  strikePrice       Float
+  expirationDate    DateTime
+  size              Int?
+  openInterest      Int?
+  openInterestDate  DateTime?
+  closePrice        Float?
+  closePriceDate    DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime?         @updatedAt
+  breakEvenPrice    Float?
+  delta             Float?
+  fmv               Float?
+  fmvLastUpdated    DateTime?
+  gamma             Float?
+  impliedVolatility Float?
+  theta             Float?
+  vega              Float?
+  stock             Stock?            @relation(fields: [stockId], references: [stock_id])
+  histPrices        OptionHistPrice[]
+  optionTrades      OptionTrade[]
 }
+
 model OptionTrade {
-  id          Int      @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   userId      Int
   contractId  Int
-  tradeType   String // "BUY" or "SELL"
-  orderType   String // "MARKET" or "LIMIT"
+  tradeType   String
+  orderType   String
   quantity    Int
   price       Float
   totalAmount Float
-  tradeDate   DateTime @default(now())
-
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  contract OptionContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  tradeDate   DateTime       @default(now())
+  contract    OptionContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([contractId])
 }
 
 model OptionHistPrice {
-  id             Int      @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   contractId     Int
   date           DateTime
-  openPrice      Float? // o
-  highPrice      Float? // h
-  lowPrice       Float? // l
-  closePrice     Float // c
-  volume         Int? // v
-  numberOfTrades Int? // n
-  vwap           Float? // vw
-  createdAt      DateTime @default(now())
-
-  contract OptionContract @relation(fields: [contractId], references: [id])
+  openPrice      Float?
+  highPrice      Float?
+  lowPrice       Float?
+  closePrice     Float
+  volume         Int?
+  numberOfTrades Int?
+  vwap           Float?
+  createdAt      DateTime       @default(now())
+  contract       OptionContract @relation(fields: [contractId], references: [id])
 
   @@unique([contractId, date])
   @@index([contractId])
 }
 
 model Scenario {
-  id              Int                   @id @default(autoincrement())
-  title           String                @unique
-  description     String?
-  startDate       DateTime
-  endDate         DateTime
-  startingBalance Decimal               @db.Decimal(10, 2) // <-- two decimal places
-  region          String? // e.g., "Asia", "Europe", "US"
-  lat             Float?
-  lng             Float?
-  volatility      String? // "low" | "medium" | "high"
-  participants    ScenarioParticipant[]
-
+  id                       Int                        @id @default(autoincrement())
+  title                    String                     @unique
+  description              String?
+  startDate                DateTime
+  endDate                  DateTime
+  startingBalance          Decimal                    @db.Decimal(10, 2)
+  region                   String?
+  lat                      Float?
+  lng                      Float?
+  volatility               String?
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @default(now()) @updatedAt
-  ScenarioIntradayPrice    ScenarioIntradayPrice[]
-  ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
-  ScenarioPersonalBest     ScenarioPersonalBest[]
   ScenarioAttempt          ScenarioAttempt[]
+  ScenarioAttemptAnalytics ScenarioAttemptAnalytics[]
+  ScenarioIntradayPrice    ScenarioIntradayPrice[]
+  participants             ScenarioParticipant[]
+  ScenarioPersonalBest     ScenarioPersonalBest[]
 }
 
 model ScenarioParticipant {
-  id          Int      @id @default(autoincrement())
-  scenarioId  Int
-  userId      Int
-  joinedAt    DateTime @default(now())
-  finalRank   Int?
-  cashBalance Decimal  @default(0) @db.Decimal(10, 2)
-  ended       Boolean  @default(false)
-
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  ScenarioMarketOrder ScenarioMarketOrder[]
-  ScenarioLimitOrder  ScenarioLimitOrder[]
+  id                  Int                   @id @default(autoincrement())
+  scenarioId          Int
+  userId              Int
+  joinedAt            DateTime              @default(now())
+  finalRank           Int?
+  cashBalance         Decimal               @default(0) @db.Decimal(10, 2)
+  ended               Boolean               @default(false)
   ScenarioHolding     ScenarioHolding[]
+  ScenarioLimitOrder  ScenarioLimitOrder[]
+  ScenarioMarketOrder ScenarioMarketOrder[]
+  scenario            Scenario              @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ScenarioMarketOrder {
-  id            Int      @id @default(autoincrement())
+  id            Int                 @id @default(autoincrement())
   participantId Int
   side          String
   symbol        String
   quantity      Decimal
   executedPrice Decimal
-  status        String   @default("EXECUTED")
-  createdAt     DateTime @default(now())
+  status        String              @default("EXECUTED")
+  createdAt     DateTime            @default(now())
   currentIndex  Int?
-
-  participant ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  participant   ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 }
 
 model ScenarioLimitOrder {
   id            Int                 @id @default(autoincrement())
   participantId Int
-  participant   ScenarioParticipant @relation(fields: [participantId], references: [id])
   side          String
   symbol        String
   quantity      Int
@@ -579,8 +561,9 @@ model ScenarioLimitOrder {
   status        String
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
-  currentIndex  Int? // <-- the index when user placed the order
-  executedIndex Int? // <-- the index when order executed (if executed)
+  currentIndex  Int?
+  executedIndex Int?
+  participant   ScenarioParticipant @relation(fields: [participantId], references: [id])
 }
 
 model ScenarioReplayProgress {
@@ -607,23 +590,21 @@ model ScenarioIntradayPrice {
   closePrice Decimal  @db.Decimal(10, 2)
   volume     BigInt?
   createdAt  DateTime @default(now())
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-
-  @@unique([scenarioId, symbol, date]) // one row per symbol per date per scenario
+  @@unique([scenarioId, symbol, date])
   @@index([scenarioId])
   @@index([symbol])
 }
 
 model ScenarioHolding {
-  id            Int    @id @default(autoincrement())
+  id            Int                 @id @default(autoincrement())
   participantId Int
   symbol        String
-  quantity      Int    @default(0)
+  quantity      Int                 @default(0)
+  participant   ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
-  participant ScenarioParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-
-  @@unique([participantId, symbol]) // ensures one row per participant per stock
+  @@unique([participantId, symbol])
   @@index([participantId])
   @@index([symbol])
 }
@@ -633,12 +614,11 @@ model ScenarioAttemptAnalytics {
   userId        Int
   scenarioId    Int
   attemptNumber Int
-  summary       Json // {openShares, totalShares, invested, unrealizedPnL, realizedPnL, totalPnL}
-  positions     Json // array of position snapshots
+  summary       Json
+  positions     Json
   createdAt     DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenario      Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, scenarioId, attemptNumber])
   @@index([scenarioId])
@@ -649,20 +629,16 @@ model ScenarioPersonalBest {
   id                Int      @id @default(autoincrement())
   userId            Int
   scenarioId        Int
-  // which attempt achieved the PB (useful for debugging / replay links)
   bestAttemptNumber Int
-  // canonical metrics
-  bestTotalValue    Decimal  @db.Decimal(14, 2) // wallet + invested + realized + unrealized at finish
-  bestReturnPct     Decimal  @db.Decimal(7, 4) // (bestTotalValue - startingBalance) / startingBalance
+  bestTotalValue    Decimal  @db.Decimal(14, 2)
+  bestReturnPct     Decimal  @db.Decimal(7, 4)
   bestRealizedPnL   Decimal  @db.Decimal(14, 2)
   bestUnrealizedPnL Decimal  @db.Decimal(14, 2)
   achievedAt        DateTime @default(now())
+  scenario          Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // relations
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, scenarioId]) // one PB per (user, scenario)
+  @@unique([userId, scenarioId])
   @@index([scenarioId, userId])
 }
 
@@ -678,30 +654,22 @@ model ScenarioAttempt {
   unrealizedPnL Decimal?              @db.Decimal(14, 2)
   returnPct     Decimal?              @db.Decimal(7, 4)
   aiInsights    Json?
+  status        ScenarioAttemptStatus @default(NOT_STARTED)
   scenario      Scenario              @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status        ScenarioAttemptStatus @default(NOT_STARTED)
 
   @@unique([scenarioId, userId, attemptNumber])
   @@index([scenarioId])
   @@index([userId])
 }
 
-enum ScenarioAttemptStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
 model AIAdvice {
   id        Int      @id @default(autoincrement())
   userId    Int
-  category  String // "stocks" | "options"
+  category  String
   advice    String
   createdAt DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BlockchainTransaction {
@@ -720,56 +688,45 @@ model OptionBlockchainTransaction {
   id               Int      @id @default(autoincrement())
   userId           Int
   underlyingSymbol String
-  optionType       String // "CALL" or "PUT"
+  optionType       String
   strikePrice      Float
   expirationDate   DateTime
   contracts        Int
-  premium          Float // cost per contract × multiplier
+  premium          Float
   transactionHash  String
   blockNumber      Int
   tradeType        String
   gasUsed          Int
   symbol           String
   createdAt        DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-// ===========================================
-// NYRA Chat Persistence
-// ===========================================
 
 model ChatSession {
   id        Int           @id @default(autoincrement())
   userId    Int
   title     String?
-  active    Boolean       @default(true) // ✅ add this
-  endedAt   DateTime? // ✅ add this
+  active    Boolean       @default(true)
+  endedAt   DateTime?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   messages  ChatMessage[]
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ChatMessage {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   sessionId Int
   userId    Int
-  role      String // "user" | "assistant" | "system"
+  role      String
   content   String
-  createdAt DateTime @default(now())
-
-  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([sessionId])
 }
-
-// ===========================================
-// Fallback / Pexels Image Cache
-// ===========================================
 
 model FallbackImage {
   id              Int      @id @default(autoincrement())
@@ -787,13 +744,13 @@ model FallbackImage {
 model Session {
   id         Int      @id @default(autoincrement())
   userId     Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token      String   @unique
   ip         String?
   userAgent  String?
   createdAt  DateTime @default(now())
   lastActive DateTime @default(now())
   revoked    Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -807,8 +764,7 @@ model NotificationSetting {
   scenarioUpdates     Boolean @default(true)
   referralUpdates     Boolean @default(true)
   systemAnnouncements Boolean @default(true)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AISetting {
@@ -816,10 +772,15 @@ model AISetting {
   userId              Int      @unique
   riskTolerance       String   @default("moderate")
   aiTone              String   @default("professional")
+  explanationDepth    Int      @default(50)
+  includeRiskWarnings Boolean  @default(true)
+  stepByStep          Boolean  @default(false)
   updatedAt           DateTime @updatedAt
-  investmentHorizon   String   @default("long")         
-  objective            String   @default("growth")      
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  behavioralFocus     Boolean  @default(true)
+  investmentHorizon   String   @default("long")
+  objective           String   @default("growth")
+  experienceLevel     String   @default("beginner")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LoginActivity {
@@ -828,11 +789,17 @@ model LoginActivity {
   ip        String?
   userAgent String?
   device    String?
-  location  String? // optional: derive from IP if you want
+  location  String?
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+enum ScenarioAttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }

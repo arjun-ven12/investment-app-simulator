@@ -172,9 +172,12 @@ exports.resetUserPortfolio = async function resetUserPortfolio(userId, startingB
       // 1️⃣ Reset user's wallet
       const updatedUser = await tx.user.update({
         where: { id: Number(userId) },
-        data: { wallet: startingBalance },
+        data: {
+          wallet: startingBalance,
+          startingWallet: startingBalance
+        }
       });
-  
+      
       // 2️⃣ Delete all stock trades
       await tx.trade.deleteMany({ where: { userId: Number(userId) } });
   
