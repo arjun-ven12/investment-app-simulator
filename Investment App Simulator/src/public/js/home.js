@@ -1,5 +1,3 @@
-
-
 // home.js
 document.addEventListener("DOMContentLoaded", async () => {
   // -------------------------------
@@ -653,7 +651,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const priceSpan = document.createElement('span');
         priceSpan.className = 'mover-price';
-        priceSpan.textContent = `$${m.price.toFixed(2)}`;
+        priceSpan.textContent = `$${m.prevClose.toFixed(2)}`;
 
         const changeSpan = document.createElement('span');
         changeSpan.className = 'mover-change';
@@ -680,7 +678,7 @@ window.addEventListener('DOMContentLoaded', () => {
           data: {
             labels: Array.from({ length: 10 }, (_, i) => i + 1),
             datasets: [{
-              data: generateRandomSparkline(m.price),
+              data: generateRandomSparkline(m.prevClose),
               borderColor: m.changePercent >= 0 ? '#4caf50' : '#f44336',
               borderWidth: 1.5,
               pointRadius: 0,
