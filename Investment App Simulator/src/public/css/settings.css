@@ -722,7 +722,12 @@
     
     
     
-    
+    @media (max-width: 600px) {
+.portfolioTables {
+    overflow-x: scroll;
+
+
+}}
     
     
     /* --- History/Generic Table Styling (Modified to match Select Input Theme) --- */
