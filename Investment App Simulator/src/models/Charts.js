@@ -931,22 +931,40 @@ exports.getStockRecommendations = function getStockRecommendations(symbol) {
 /////////////////////////////////////////
 // POLYGON
 /////////////////////////////////////////
-
-module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
+module.exports.getIntradayData = async function (
+  symbol,
+  range = '1w',
+  dateFrom,
+  dateTo
+) {
   if (!symbol) throw new Error('Stock symbol is required.');
 
-  // Default to past 7 days
   const now = new Date();
-  const defaultTo = dateTo || now.toISOString().split('T')[0];
-  const defaultFrom =
+
+  const to =
+    dateTo ||
+    now.toISOString().split('T')[0];
+
+  const from =
     dateFrom ||
     new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0];
 
+  // ================================
+  // 📊 Select granularity by range
+  // ================================
+  let multiplier = 15;
+  let timespan = 'minute';
+
+  if (range === '6m' || range === '1y') {
+    multiplier = 1;
+    timespan = 'day';
+  }
+
   const url =
     `https://api.polygon.io/v2/aggs/ticker/${symbol}` +
-    `/range/15/minute/${defaultFrom}/${defaultTo}` +
+    `/range/${multiplier}/${timespan}/${from}/${to}` +
     `?adjusted=true&sort=asc&limit=5000&apiKey=${POLYGON_API_KEY}`;
 
   try {
@@ -961,7 +979,9 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
       throw new Error('No OHLC data found for this symbol.');
     }
 
-    // Upsert stock
+    // ================================
+    // 🧾 Upsert stock
+    // ================================
     const stock = await prisma.stock.upsert({
       where: { symbol },
       update: {},
@@ -969,13 +989,15 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
     });
 
     console.log(
-      `Processing ${data.results.length} OHLC bars for ${symbol} (ID: ${stock.stock_id})`
+      `Processing ${data.results.length} ${timespan} bars for ${symbol}`
     );
 
-    // === UPSERT bars ===
+    // ================================
+    // 💾 Upsert OHLC bars
+    // ================================
     for (const bar of data.results) {
       try {
-        const dateObj = new Date(bar.t); // unix ms
+        const dateObj = new Date(bar.t);
         dateObj.setMilliseconds(0);
         dateObj.setSeconds(0);
 
@@ -1011,7 +1033,9 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
       }
     }
 
-    // === Format OHLC for charts ===
+    // ================================
+    // 📈 Format chart data
+    // ================================
     const ohlcData = data.results.map(bar => ({
       date: new Date(bar.t).toISOString(),
       openPrice: bar.o,
@@ -1020,7 +1044,9 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
       closePrice: bar.c
     }));
 
-    // === Price change calculation ===
+    // ================================
+    // 📉 Price change
+    // ================================
     const first = data.results[0];
     const last = data.results[data.results.length - 1];
 
@@ -1041,7 +1067,6 @@ module.exports.getIntradayData = async function (symbol, dateFrom, dateTo) {
     throw err;
   }
 };
-
 
 
 
@@ -1111,11 +1136,13 @@ module.exports.getTopMarketMovers = async function (direction = 'gainers') {
 
     const data = await response.json();
 
+    // 🔥 Custom error if no movers
     if (!data.tickers || data.tickers.length === 0) {
-      throw new Error('No market movers data found.');
+      throw new Error(
+        `No ${direction === 'gainers' ? 'gainers' : 'losers'} were found yesterday.`
+      );
     }
 
-    // 🔥 Take top 10 only
     const movers = data.tickers
       .slice(0, 10)
       .map(t => ({
@@ -1133,7 +1160,7 @@ module.exports.getTopMarketMovers = async function (direction = 'gainers') {
 
     return {
       direction,
-      count: movers.length, // now always ≤ 10
+      count: movers.length,
       movers
     };
   } catch (err) {
@@ -1141,7 +1168,6 @@ module.exports.getTopMarketMovers = async function (direction = 'gainers') {
     throw err;
   }
 };
-
 
 
   

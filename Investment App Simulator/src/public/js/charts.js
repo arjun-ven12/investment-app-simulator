@@ -953,8 +953,12 @@ intradayForm.addEventListener('submit', async function (e) {
         default: dateFrom.setDate(now.getDate() - 7);
     }
 
-    const apiUrl = `/realtime/${encodeURIComponent(symbolValue)}?date_from=${dateFrom.toISOString().split('T')[0]}&date_to=${now.toISOString().split('T')[0]}`;
-
+    const apiUrl =
+    `/realtime/${encodeURIComponent(symbolValue)}` +
+    `?range=${rangeValue}` +
+    `&date_from=${dateFrom.toISOString().split('T')[0]}` +
+    `&date_to=${now.toISOString().split('T')[0]}`;
+    
     try {
         const result = await fetch(apiUrl).then(res => res.json());
 

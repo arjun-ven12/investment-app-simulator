@@ -629,13 +629,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
     try {
       const res = await fetch(`/realtime/movers/${direction}`);
-      if (!res.ok) throw new Error('Failed to fetch movers');
+
+      // ⛔ Handle backend errors with message
+      if (!res.ok) {
+        let message = 'Failed to load market movers';
+
+        try {
+          const errData = await res.json();
+          if (errData?.error) message = errData.error;
+        } catch (_) {}
+
+        throw new Error(message);
+      }
 
       const data = await res.json();
       moversList.innerHTML = '';
 
       if (!data.movers || data.movers.length === 0) {
-        moversList.innerHTML = '<li class="empty">No movers found</li>';
+        moversList.innerHTML = `
+          <li class="empty">
+            No ${direction === 'gainers' ? 'gainers' : 'losers'} were found yesterday.
+          </li>`;
         return;
       }
 
@@ -662,7 +676,6 @@ window.addEventListener('DOMContentLoaded', () => {
         infoDiv.appendChild(priceSpan);
         infoDiv.appendChild(changeSpan);
 
-        // Mini chart canvas
         const chartCanvas = document.createElement('canvas');
         chartCanvas.className = 'mini-chart';
         chartCanvas.id = `chart-${m.symbol}`;
@@ -671,7 +684,6 @@ window.addEventListener('DOMContentLoaded', () => {
         li.appendChild(chartCanvas);
         moversList.appendChild(li);
 
-        // 🔁 Mini chart using dummy data (can replace with intraday later)
         const ctx = chartCanvas.getContext('2d');
         new Chart(ctx, {
           type: 'line',
@@ -693,21 +705,22 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // 🔁 Click redirects to investment.html and auto-generates chart
         li.addEventListener('click', () => {
-          localStorage.setItem('autoChartSymbol', m.symbol); // store symbol to use on investment.html
+          localStorage.setItem('autoChartSymbol', m.symbol);
           window.location.href = 'investment';
         });
       });
     } catch (err) {
       console.error(err);
       moversList.innerHTML = '';
-      errorDiv.textContent = 'Failed to load market movers';
+      errorDiv.textContent = err.message;
     }
   }
 
   function generateRandomSparkline(base) {
-    return Array.from({ length: 10 }, () => +(base * (0.95 + Math.random() * 0.1)).toFixed(2));
+    return Array.from({ length: 10 }, () =>
+      +(base * (0.95 + Math.random() * 0.1)).toFixed(2)
+    );
   }
 
   showGainersBtn.addEventListener('click', () => fetchMarketMovers('gainers'));

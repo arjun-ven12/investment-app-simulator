@@ -856,20 +856,26 @@ exports.getLatestLimitOrderControllerSell = function (req, res) {
 
 
 module.exports.getStockChartRealData = async function (req, res) {
-    const symbol = req.params.symbol;
-    // const interval = req.query.interval;
-    const dateFrom = req.query.date_from;
-    const dateTo = req.query.date_to;
+  const symbol = req.params.symbol;
+  const range = req.query.range;
+  const dateFrom = req.query.date_from;
+  const dateTo = req.query.date_to;
 
-    try {
-        const chartData = await chartsModel.getIntradayData(symbol, dateFrom, dateTo);
-        return res.status(200).json(chartData);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: error.message });
-    }
+  try {
+    // ✅ FIXED PARAMETER ORDER
+    const chartData = await chartsModel.getIntradayData(
+      symbol,
+      range,
+      dateFrom,
+      dateTo
+    );
+
+    return res.status(200).json(chartData);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
 };
-
 
 
 exports.cancelLimitOrderController = function (req, res) {
@@ -947,9 +953,21 @@ module.exports.getMarketMovers = async function (req, res) {
   } catch (err) {
     console.error('Market movers controller error:', err);
 
+    // 🧠 No movers found (expected scenario, not server error)
+    if (
+      err.message?.includes('No gainers were found') ||
+      err.message?.includes('No losers were found')
+    ) {
+      return res.status(404).json({
+        success: false,
+        error: err.message
+      });
+    }
+
+    // 🔥 Actual server / API error
     res.status(500).json({
       success: false,
-      message: err.message || 'Failed to fetch market movers'
+      error: err.message || 'Failed to fetch market movers.'
     });
   }
 };
